@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "wca.compras.services/1.0.0": {
+        "runtime": {
+          "wca.compras.services.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "wca.compras.services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
