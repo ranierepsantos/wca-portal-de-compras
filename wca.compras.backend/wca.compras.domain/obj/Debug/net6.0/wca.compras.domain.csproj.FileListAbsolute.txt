@@ -1,0 +1,12 @@
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\bin\Debug\net6.0\wca.compras.domain.deps.json
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\bin\Debug\net6.0\wca.compras.domain.dll
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\bin\Debug\net6.0\wca.compras.domain.pdb
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.csproj.AssemblyReference.cache
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.GeneratedMSBuildEditorConfig.editorconfig
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.AssemblyInfoInputs.cache
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.AssemblyInfo.cs
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.csproj.CoreCompileInputs.cache
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.dll
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\refint\wca.compras.domain.dll
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\wca.compras.domain.pdb
+E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.domain\obj\Debug\net6.0\ref\wca.compras.domain.dll
