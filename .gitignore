@@ -102,3 +102,4 @@ dist
 
 # TernJS port file
 .tern-port
+/wca.compras.backend/.vs/wca.compras/FileContentIndex
