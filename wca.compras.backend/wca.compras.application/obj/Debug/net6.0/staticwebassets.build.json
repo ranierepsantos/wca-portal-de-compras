@@ -1,8 +1,8 @@
 {
   "Version": 1,
-  "Hash": "s6EZjefshp4IhKUchMmVqw5ngXugJr1G+93AwlUvB2w=",
-  "Source": "wca.compras.application",
-  "BasePath": "_content/wca.compras.application",
+  "Hash": "THT9ZTywGF27mx8LFnCtipL08flWS4jsFZS8C9rg8L4=",
+  "Source": "wca.compras.webapi",
+  "BasePath": "_content/wca.compras.webapi",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],

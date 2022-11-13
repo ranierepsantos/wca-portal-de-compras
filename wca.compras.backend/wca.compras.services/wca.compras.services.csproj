@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\wca.compras.domain\wca.compras.domain.csproj" />
+  </ItemGroup>
+
 </Project>
