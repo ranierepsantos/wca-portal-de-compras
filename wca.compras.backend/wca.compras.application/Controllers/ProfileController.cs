@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using wca.compras.domain.Interfaces.Services;
-using static wca.compras.domain.Dtos.ProfileDtos;
+using static wca.compras.domain.Dtos.PerfilDtos;
 
 namespace wca.compras.webapi.Controllers
 {

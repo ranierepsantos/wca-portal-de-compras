@@ -54,9 +54,9 @@
   </v-app>
 </template>
 <script setup>
-import { reactive } from "vue";
+import { ref } from "vue";
 
-const items = reactive([
+const items = ref([
   {
     title: "Home",
     value: 1,
@@ -69,7 +69,7 @@ const items = reactive([
   },
 ]);
 
-const listItems = reactive([
+const listItems = ref([
   { text: "Real-Time", icon: "mdi-clock" },
   { text: "Audience", icon: "mdi-account" },
   { text: "Conversions", icon: "mdi-flag" },

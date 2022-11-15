@@ -1,4 +1,4 @@
-﻿using static wca.compras.domain.Dtos.ProfileDtos;
+﻿using static wca.compras.domain.Dtos.PerfilDtos;
 
 namespace wca.compras.domain.Interfaces.Services
 {

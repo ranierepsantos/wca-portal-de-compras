@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
-using static wca.compras.domain.Dtos.PermissionDtos;
+using static wca.compras.domain.Dtos.PermissaoDtos;
 
 namespace wca.compras.webapi.Controllers
 {

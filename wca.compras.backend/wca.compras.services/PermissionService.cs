@@ -3,22 +3,22 @@ using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
-using static wca.compras.domain.Dtos.PermissionDtos;
+using static wca.compras.domain.Dtos.PermissaoDtos;
 
 namespace wca.compras.services
 {
     public class PermissionService : IPermissionService
     {
-        private readonly IRepository<Permission> _repository;
+        private readonly IRepository<Permissao> _repository;
         
-        public PermissionService(IRepository<Permission> permissionRepository)
+        public PermissionService(IRepository<Permissao> permissionRepository)
         {
             _repository = permissionRepository;
         }
 
         public async Task<PermissionDto> Create(CreatePermissionDto permission)
         {
-            var data = new Permission()
+            var data = new Permissao()
             {
                 Name = permission.Name,
                 Description = permission.Description,

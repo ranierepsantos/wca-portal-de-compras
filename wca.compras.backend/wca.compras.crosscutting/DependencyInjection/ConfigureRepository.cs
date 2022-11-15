@@ -10,8 +10,8 @@ namespace wca.compras.crosscutting.DependencyInjection
         {
             services.AddMongo();
             services.AddMongoProfileRepository("profiles");
-            services.AddMongoRepository<Permission>("permissions");
-            services.AddMongoRepository<ProfileHasPermission>("profile_has_permissions");
+            services.AddMongoRepository<Permissao>("permissions");
+            services.AddMongoRepository<PerfilRelPermissoes>("profile_has_permissions");
         }
     }
 }

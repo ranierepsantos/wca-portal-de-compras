@@ -6,7 +6,7 @@ using wca.compras.domain.Interfaces.Repositories;
 
 namespace wca.compras.data.Repositories
 {
-    public class ProfileRepository: MongoRepository<Profile>, IProfileRepository
+    public class ProfileRepository: MongoRepository<Perfil>, IProfileRepository
     {
 
         public ProfileRepository(IMongoDatabase database, string collectionName) : base(database, collectionName)

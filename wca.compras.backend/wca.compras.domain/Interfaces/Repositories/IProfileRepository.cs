@@ -2,7 +2,7 @@
 
 namespace wca.compras.domain.Interfaces.Repositories
 {
-    public interface IProfileRepository: IRepository<Profile>
+    public interface IProfileRepository: IRepository<Perfil>
     {
         public Task<ProfilePermissions> GetWithPermissionsById(string id);
         
