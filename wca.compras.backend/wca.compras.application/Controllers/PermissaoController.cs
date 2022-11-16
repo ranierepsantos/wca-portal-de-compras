@@ -2,7 +2,7 @@
 using System.Net;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
-using static wca.compras.domain.Dtos.PermissaoDtos;
+using wca.compras.domain.Dtos;
 
 namespace wca.compras.webapi.Controllers
 {
@@ -43,10 +43,19 @@ namespace wca.compras.webapi.Controllers
         [HttpPut]
         public async Task<ActionResult> Update([FromBody] UpdatePermissaoDto updatePermissaoDto)
         {
+            
             try
             {
-                await service.Update(updatePermissaoDto);
-                return NoContent();
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                var result = await service.Update(updatePermissaoDto);
+                if (result == null)
+                {
+                    return NotFound($"Permissão íd: {updatePermissaoDto.Id}, não localizado!"); 
+                }
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {

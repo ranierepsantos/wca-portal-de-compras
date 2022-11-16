@@ -1,10 +1,11 @@
-﻿using wca.compras.domain.Dtos;
+﻿using AutoMapper;
+using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 using wca.compras.domain.Interfaces.Repositories;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
-using static wca.compras.domain.Dtos.PerfilDtos;
+
 
 namespace wca.compras.services
 {
@@ -12,22 +13,19 @@ namespace wca.compras.services
     {
         private readonly IPerfilRepository _perfilRepo;
         private readonly IRepository<PerfilRelPermissoes> _perfilRelPermissaoRepo;
+        private IMapper _mapper;
 
-        public PerfilService(IPerfilRepository perfilRepository, IRepository<PerfilRelPermissoes> perfilPermissionRepository)
+        public PerfilService(IPerfilRepository perfilRepository, IRepository<PerfilRelPermissoes> perfilPermissionRepository, IMapper mapper)
         {
             _perfilRepo = perfilRepository;
             _perfilRelPermissaoRepo = perfilPermissionRepository;
+            _mapper = mapper;
         }
         
         public async Task<PerfilDto> Create(CreatePerfilDto perfil)
         {
 
-            var data = new Perfil()
-            {
-                Nome = perfil.Nome,
-                Descricao = perfil.Descricao,
-                Ativo = true
-            };
+            var data = _mapper.Map<Perfil>(perfil);
 
             await _perfilRepo.CreateAsync(data);
 
@@ -40,18 +38,14 @@ namespace wca.compras.services
                 });
             }
             
-            return data.asDto();
+            return _mapper.Map<PerfilDto>(data);
         }
 
         public async Task<IList<ListItem>> GetToList()
         {
             var itens = await _perfilRepo.GetAllAsync(p => p.Ativo == true);
-
-            var list = itens.OrderBy(p => p.Nome).Select((p) => {
-                return new ListItem() { Text = p.Nome, Value = p.Id.ToString() };
-            }).ToList();
-
-            return list;
+            
+            return _mapper.Map<IList<ListItem>>(itens.OrderBy(p => p.Nome).ToList()); 
         }
 
         public async Task<PerfilPermissoesDto> GetWithPermissoes(string id)
@@ -61,7 +55,7 @@ namespace wca.compras.services
 
             if (perfil == null) return null;
 
-            return perfil.asDto();
+            return _mapper.Map<PerfilPermissoesDto>(perfil);
         }
 
         public async Task<PerfilDto> Update(UpdatePerfilDto perfil)
@@ -98,17 +92,11 @@ namespace wca.compras.services
                 }
             });
 
-            var data = new Perfil()
-            {
-                Id = perfil.Id,
-                Nome = perfil.Nome,
-                Descricao = perfil.Descricao,
-                Ativo = perfil.Ativo
-            };
+            var data = _mapper.Map<Perfil>(perfil);
 
             await _perfilRepo.UpdateAsync(data);
 
-            return data.asDto();
+            return _mapper.Map<PerfilDto>(data);
 
         }
     }

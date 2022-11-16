@@ -2,7 +2,7 @@
 using System.Net;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
-using static wca.compras.domain.Dtos.PerfilDtos;
+using wca.compras.domain.Dtos;
 
 namespace wca.compras.webapi.Controllers
 {
@@ -75,7 +75,7 @@ namespace wca.compras.webapi.Controllers
         /// <returns>Perfil com permissões</returns>
         /// <param name="id"></param>
         [HttpGet]
-        [Route("GetWithPermissions/id")]
+        [Route("GetWithPermissions/{id}")]
         public async Task<ActionResult<PerfilPermissoesDto>> GetWithPermissions(string id)
         {
             try

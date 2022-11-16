@@ -1,5 +1,5 @@
 ﻿using wca.compras.domain.Util;
-using static wca.compras.domain.Dtos.PerfilDtos;
+using wca.compras.domain.Dtos;
 
 namespace wca.compras.domain.Interfaces.Services
 {

@@ -16,7 +16,7 @@ namespace wca.compras.domain.Entities
         public string Email { get; set; }
 
         [BsonElement("ativo"), BsonRepresentation(MongoDB.Bson.BsonType.Boolean)]
-        public string Ativo { get; set; }
+        public bool Ativo { get; set; }
 
         [BsonElement("password"), BsonRepresentation(MongoDB.Bson.BsonType.String)]
         public string Password { get; set; }

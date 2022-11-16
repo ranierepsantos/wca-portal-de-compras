@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "nZuYDPHeqvSxmUCfHSuBUTWVW2M9QkLi7FohaoYL7hmAr8EAm28E05oq/0Aj++PSAfl6dZpMzbRCyg4hV6BgSA==",
+  "dgSpecHash": "CAT6r+g82hLd4Nzc4MbEQPo1PMQpTmVO7bTVTWdR0tDB6LV0mfdgcCsBp80VIifm260efWFADAL0enWgQFtqEg==",
   "success": true,
   "projectFilePath": "E:\\Ivanildo\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.services\\wca.compras.services.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\User\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\automapper\\12.0.0\\automapper.12.0.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.identitymodel.abstractions\\6.25.0\\microsoft.identitymodel.abstractions.6.25.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.identitymodel.logging\\6.25.0\\microsoft.identitymodel.logging.6.25.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.identitymodel.tokens\\6.25.0\\microsoft.identitymodel.tokens.6.25.0.nupkg.sha512",

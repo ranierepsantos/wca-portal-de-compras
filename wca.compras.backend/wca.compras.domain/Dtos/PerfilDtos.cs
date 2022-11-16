@@ -1,17 +1,26 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static wca.compras.domain.Dtos.PermissaoDtos;
 
 namespace wca.compras.domain.Dtos
 {
-    public class PerfilDtos
-    {
-        public record PerfilDto (string Id, string Nome, string Descricao, bool Ativo);
+    public record PerfilDto (string Id, string Nome, string Descricao, bool Ativo);
         
-        public record PerfilPermissoesDto(string Id, string Nome, string Descricao, bool Ativo, IList<PermissoesDto> Permissoes);
+    public record PerfilPermissoesDto(string Id, string Nome, string Descricao, bool Ativo, IList<PermissoesDto> Permissoes);
 
-        public record CreatePerfilDto([Required] string Nome, string Descricao, [Required] IList<PermissoesDto> Permissoes);
+    public record CreatePerfilDto(
+        [Required(ErrorMessage = "O campo é obrigatório!")]
+        string Nome, 
+        string Descricao,
+        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")] IList<PermissoesDto> Permissoes
+    );
 
-        public record UpdatePerfilDto([Required] string Id, [Required] string Nome, string Descricao, bool Ativo, [Required] IList<PermissoesDto> Permissoes);
-
-    }
+    public record UpdatePerfilDto(
+        [Required(ErrorMessage = "O campo é obrigatório!")] 
+        string Id, 
+        [Required(ErrorMessage = "O campo é obrigatório!")] 
+        string Nome, 
+        string Descricao, 
+        bool Ativo, 
+        [Required(ErrorMessage="O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")] 
+        IList<PermissoesDto> Permissoes
+    );
 }
