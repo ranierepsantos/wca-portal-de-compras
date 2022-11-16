@@ -11,7 +11,7 @@ namespace wca.compras.domain.Dtos
 
         public record CreatePerfilDto([Required] string Nome, string Descricao, [Required] IList<PermissoesDto> Permissoes);
 
-        public record UpdatePerfilDto([Required] string Nome, string Descricao, bool Ativo, [Required] IList<PermissoesDto> Permissoes);
+        public record UpdatePerfilDto([Required] string Id, [Required] string Nome, string Descricao, bool Ativo, [Required] IList<PermissoesDto> Permissoes);
 
     }
 }

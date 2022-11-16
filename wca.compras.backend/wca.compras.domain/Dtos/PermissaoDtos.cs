@@ -10,6 +10,6 @@ namespace wca.compras.domain.Dtos
 
         public record CreatePermissaoDto([Required] string Nome, [Required] string Regra, string Descricao);
         
-        public record UpdatePermissaoDto([Required] string Nome, [Required] string Regra, string Descricao);
+        public record UpdatePermissaoDto([Required] string Id, [Required] string Nome, [Required] string Regra, string Descricao);
     }
 }

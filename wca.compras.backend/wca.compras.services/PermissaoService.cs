@@ -7,36 +7,36 @@ using static wca.compras.domain.Dtos.PermissaoDtos;
 
 namespace wca.compras.services
 {
-    public class PermissionService : IPermissionService
+    public class PermissaoService : IPermissaoService
     {
         private readonly IRepository<Permissao> _repository;
         
-        public PermissionService(IRepository<Permissao> permissionRepository)
+        public PermissaoService(IRepository<Permissao> permissionRepository)
         {
             _repository = permissionRepository;
         }
 
-        public async Task<PermissionDto> Create(CreatePermissionDto permission)
+        public async Task<PermissaoDto> Create(CreatePermissaoDto permissao)
         {
             var data = new Permissao()
             {
-                Name = permission.Name,
-                Description = permission.Description,
-                InternalName = permission.InternalName
+                Nome = permissao.Nome,
+                Descricao = permissao.Descricao,
+                Regra = permissao.Regra
             };
 
             await _repository.CreateAsync(data);
             return data.asDto();
         }
 
-        public async Task<IList<PermissionDto>> GetAll()
+        public async Task<IList<PermissaoDto>> GetAll()
         {
             var list = await _repository.GetAllAsync();
 
             return list.Select(p => p.asDto()).ToList();
         }
 
-        public Task<PermissionDto> GetById(Guid id)
+        public Task<PermissaoDto> GetById(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -45,16 +45,25 @@ namespace wca.compras.services
         {
             var itens = await _repository.GetAllAsync();
 
-            var list = itens.OrderBy(p => p.Name).Select((p) => {
-                return new ListItem() { Text = p.Name, Value = p.Id.ToString() };
+            var list = itens.OrderBy(p => p.Nome).Select((p) => {
+                return new ListItem() { Text = p.Nome, Value = p.Id.ToString() };
             }).ToList();
 
             return list;
         }
 
-        public Task Update(UpdatePermissionDto permisson)
+        public async Task Update(UpdatePermissaoDto permissao)
         {
-            throw new NotImplementedException();
+
+            var baseData = await _repository.GetAsync(permissao.Id);
+
+            if (baseData == null) return;
+
+            baseData.Nome = permissao.Nome;
+            baseData.Descricao = permissao.Descricao;
+            
+            await _repository.UpdateAsync(baseData);
+            
         }
     }
 }

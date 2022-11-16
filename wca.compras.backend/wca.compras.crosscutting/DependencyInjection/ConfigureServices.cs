@@ -8,8 +8,8 @@ namespace wca.compras.crosscutting.DependencyInjection
     {
         public static void ConfigureDependencyService(this IServiceCollection services)
         {
-            services.AddTransient<IProfileService, ProfileService>();
-            services.AddTransient<IPermissionService, PermissionService>();
+            services.AddTransient<IPerfilService, PerfilService>();
+            services.AddTransient<IPermissaoService, PermissaoService>();
         }
     }
 }

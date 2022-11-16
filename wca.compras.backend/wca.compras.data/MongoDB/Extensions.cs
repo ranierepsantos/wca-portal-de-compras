@@ -40,12 +40,12 @@ namespace wca.compras.data.MongoDB
             return services;
         }
 
-        public static IServiceCollection AddMongoProfileRepository(this IServiceCollection services, string collectionName)
+        public static IServiceCollection AddMongoPerfilRepository(this IServiceCollection services, string collectionName)
         {
-            services.AddSingleton<IProfileRepository>(serviceProvider =>
+            services.AddSingleton<IPerfilRepository>(serviceProvider =>
             {
                 var database = serviceProvider.GetService<IMongoDatabase>();
-                return new ProfileRepository(database, collectionName);
+                return new PerfilRepository(database, collectionName);
             });
             return services;
         }
