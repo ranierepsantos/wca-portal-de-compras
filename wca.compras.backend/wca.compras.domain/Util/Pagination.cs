@@ -14,26 +14,20 @@ namespace wca.compras.domain.Util
 
         public int TotalPages { get; private set; }
 
-        public IList<T> Items { get; private set; }
+        public List<T> Items { get; private set; }
 
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
 
 
-        public Pagination(List<T> items, int currentPage, int pageSize, int count)
+        public Pagination(List <T> items, int currentPage, int pageSize, int totalPages)
         {
             CurrentPage = currentPage;
             PageSize = pageSize;
-            TotalPages = (int) Math.Ceiling(count / (double)pageSize);
+            TotalPages = totalPages;
             Items = items;
         }
 
-        public static Pagination<T> toPageList(IQueryable<T> source, int page, int pageSize)
-        {
-            var count = source.Count();
-            var items = source.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            return new Pagination<T>(items, page, pageSize, count);
-        }
+        
     }
 }

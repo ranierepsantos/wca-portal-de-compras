@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MongoDB.Driver;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -97,6 +98,25 @@ namespace wca.compras.services
             await _perfilRepo.UpdateAsync(data);
 
             return _mapper.Map<PerfilDto>(data);
+
+        }
+
+        public async Task<Pagination<PerfilDto>> Paginate(int page, int pageSize = 10, string termo = "")
+        {
+            var builder = Builders<Perfil>.Filter;
+            FilterDefinition<Perfil> filter = builder.Empty;
+
+            if (!string.IsNullOrEmpty(termo))
+            {
+                filter = builder.Regex("nome", new MongoDB.Bson.BsonRegularExpression(termo, "i"));
+            }
+
+           var (totalPages, data) =  await _perfilRepo.Paginate(page, pageSize, filter , Builders<Perfil>.Sort.Ascending(p =>p.Nome));
+
+            var listData = _mapper.Map<List<PerfilDto>>(data.ToList());
+
+            return new Pagination<PerfilDto>(listData, page, pageSize, totalPages);
+            
 
         }
     }

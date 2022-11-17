@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using wca.compras.domain.Dtos;
+using wca.compras.domain.Util;
 
 namespace wca.compras.domain.Interfaces.Services
 {
@@ -14,5 +15,6 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<bool> Remove(string id);
         public Task<IList<UsuarioDto>> GetAll();
         public Task<UsuarioDto> GetById(string id);
+        public Task<Pagination<UsuarioDto>> Paginate(int page = 1, int pageSize = 10, string termo = "");
     }
 }

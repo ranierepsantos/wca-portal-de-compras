@@ -9,7 +9,7 @@ namespace wca.compras.crosscutting.Mapping
     {
         public PerfilProfile()
         {
-            CreateMap<PerfilDto, Perfil>();
+            CreateMap<PerfilDto, Perfil>().ReverseMap();
             CreateMap<CreatePerfilDto, Perfil>();
             CreateMap<UpdatePerfilDto,Perfil>();
             CreateMap<PerfilPermissoes, PerfilPermissoesDto>();

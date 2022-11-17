@@ -6,7 +6,8 @@ namespace wca.compras.domain.Dtos
 
         public record PermissoesDto(
                 [Required(ErrorMessage = "O campo é obrigatório!")] string Id, 
-                [Required(ErrorMessage = "O campo é obrigatório!")] string Nome
+                string Nome,
+                string Regra
         );
 
         public record CreatePermissaoDto(

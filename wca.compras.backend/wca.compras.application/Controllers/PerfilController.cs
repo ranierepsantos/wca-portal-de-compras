@@ -108,5 +108,17 @@ namespace wca.compras.webapi.Controllers
             var items = await _service.GetToList();
             return Ok(items);
         }
+
+        /// <summary>
+        /// Retorna Perfil por paginação
+        /// </summary>
+        /// <returns>Perfil</returns>
+        [HttpGet]
+        [Route("Paginate/{pageSize}/{page}")]
+        public async Task<ActionResult<Pagination<PerfilDto>>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        {
+            var items = await _service.Paginate(page, pageSize, termo);
+            return Ok(items);
+        }
     }
 }

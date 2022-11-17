@@ -7,9 +7,9 @@ namespace wca.compras.domain.Dtos
         string Nome,
         string Email,
         bool Ativo,
-        string cliente_id,
-        string filial_id,
-        string perfil_id
+        string Clienteid,
+        string Filialid,
+        string Perfilid
     );
 
     public record CreateUsuarioDto (
@@ -19,11 +19,11 @@ namespace wca.compras.domain.Dtos
         [EmailAddress(ErrorMessage ="Infome um e-mail válido")]
         string Email,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string cliente_id,
+        string Clienteid,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string filial_id,
+        string Filialid,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string perfil_id
+        string Perfilid
     );
 
     public record UpdateUsuarioDto(
@@ -36,10 +36,10 @@ namespace wca.compras.domain.Dtos
         string Email,
         bool Ativo,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string cliente_id,
+        string Clienteid,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string filial_id,
+        string Filialid,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string perfil_id
+        string PerfilId
     );
 }

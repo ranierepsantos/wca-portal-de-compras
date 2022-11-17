@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace wca.compras.domain.Interfaces
 {
@@ -11,5 +12,6 @@ namespace wca.compras.domain.Interfaces
         Task<IReadOnlyCollection<T>> GetAllAsync(Expression<Func<T, bool>> filter);
         Task RemoveAsync(string id);
         Task UpdateAsync(T entity);
+        Task<(int totalPages, IReadOnlyList<T> data)> Paginate(int page, int pageSize, FilterDefinition<T> filter, SortDefinition<T> sort);
     }
 }

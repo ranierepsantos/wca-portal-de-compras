@@ -33,6 +33,7 @@ namespace wca.compras.webapi.Controllers
             return Ok(items);
         }
 
+
         [HttpPost]
         public async Task<ActionResult<PermissaoDto>> Create(CreatePermissaoDto createPermissao)
         {

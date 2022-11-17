@@ -49,6 +49,11 @@ namespace wca.compras.services
             return list;
         }
 
+        public Task<Pagination<PermissaoDto>> Paginate(int page, int pageSise)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<PermissaoDto?> Update(UpdatePermissaoDto permissao)
         {
 

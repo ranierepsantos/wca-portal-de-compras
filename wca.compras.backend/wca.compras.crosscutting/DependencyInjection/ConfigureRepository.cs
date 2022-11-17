@@ -13,6 +13,7 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddMongoRepository<Permissao>("permissoes");
             services.AddMongoRepository<PerfilRelPermissoes>("perfil_rel_permissoes");
             services.AddMongoRepository<Usuario>("usuarios");
+            services.AddMongoRepository<ResetPassword>("reset_password");
         }
     }
 }

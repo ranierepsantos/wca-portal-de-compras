@@ -10,5 +10,6 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<IList<PermissaoDto>> GetAll();
         public Task<PermissaoDto> GetById(string id);
         public Task<IList<ListItem>> GetToList();
+        public Task<Pagination<PermissaoDto>> Paginate(int page, int pageSise);
     }
 }

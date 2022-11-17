@@ -63,5 +63,11 @@ namespace wca.compras.data.MongoDB
             FilterDefinition<T> filter = filterBuilder.Eq(entity => entity.Id, id);
             await dbCollection.DeleteOneAsync(filter);
         }
+
+        public async Task<(int totalPages, IReadOnlyList<T> data)> Paginate(int page, int pageSize, FilterDefinition<T> filter, SortDefinition<T> sort)
+        {
+            return await dbCollection.AggregateByPage(filter, sort, page, pageSize);
+        }
+            
     }
 }

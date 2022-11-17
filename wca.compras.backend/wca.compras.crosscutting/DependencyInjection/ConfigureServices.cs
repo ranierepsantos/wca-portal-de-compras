@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using wca.compras.crosscutting.Mapping;
+using wca.compras.domain.Email;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.services;
 
@@ -14,6 +16,7 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddTransient<IPermissaoService, PermissaoService>();
             services.AddTransient<IAuthenticationService, AuthenticationService>();
             services.AddTransient<IUsuarioService, UsuarioService>();
+            services.AddTransient<IEmailService, EmailService>();
 
 
             var autoMapperConfig = new MapperConfiguration(
@@ -26,6 +29,14 @@ namespace wca.compras.crosscutting.DependencyInjection
              );
             IMapper mapper = autoMapperConfig.CreateMapper();
             services.AddSingleton(mapper);
+
+            //Configuração do e-mail
+            services.AddSingleton(serviceProvider =>
+            {
+                var configuration = serviceProvider.GetService<IConfiguration>();
+                var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+                return emailConfig;
+            });
         }
     }
 }

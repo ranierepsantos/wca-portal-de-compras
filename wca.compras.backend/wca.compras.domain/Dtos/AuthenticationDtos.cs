@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using wca.compras.domain.Entities;
 
 namespace wca.compras.domain.Dtos
 {
     public record LoginRequest ([Required(ErrorMessage = "O campo é obrigatório"), EmailAddress(ErrorMessage = "Informe um e-mail válido!")] string Email, [Required(ErrorMessage = "O campo é obrigatório")]  string Password);
 
-    public record LoginResponse (
+    public record LoginResponse(
         bool Authenticated,
         string Message,
         string Created,
@@ -14,7 +15,7 @@ namespace wca.compras.domain.Dtos
         string UsuarioNome,
         PerfilPermissoesDto Perfil
     );
-
+    
     public record ForgotPasswordRequest (
         [Required(ErrorMessage = "O campo é obrigatório!")]
         [EmailAddress(ErrorMessage = "Informe um e-mail válido!")]
