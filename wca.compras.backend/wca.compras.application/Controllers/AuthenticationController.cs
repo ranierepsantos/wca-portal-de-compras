@@ -8,10 +8,10 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AutheticationController : Controller
+    public class AuthenticationController : Controller
     {
         private readonly IAuthenticationService _service;
-        public AutheticationController(IAuthenticationService service)
+        public AuthenticationController(IAuthenticationService service)
         {
             _service = service;
         }

@@ -24,6 +24,7 @@ new ConfigureFromConfigurationOptions<TokenConfiguration>
 
 builder.Services.AddSingleton(tokenConfiguration);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 //Serviços de autenticação
 builder.Services.AddAuthentication(options =>
@@ -97,6 +98,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors(option => option.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.MapControllers();
 
