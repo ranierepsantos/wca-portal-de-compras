@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-
+import { useAuthStore} from '@/store/auth.store'
 const routes = [
   {
     path: "/",
@@ -10,11 +10,13 @@ const routes = [
       {
         path: 'app',
         name: 'home',
-        component: HomeView
+        component: HomeView,
+        beforeEnter: protectRoute,
       },
       {
         path: 'app/about',
         name: 'about',
+        beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -23,6 +25,7 @@ const routes = [
       {
         path: 'app/usuarios',
         name: 'usuarios',
+        beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -31,24 +34,25 @@ const routes = [
     ]
   },
   {
-    path: "/app/sessions",
-    component: () => import("../views/sessoes"),
-    redirect: "/app/sessions/login",
-    children: [
-      {
-        path: "login",
-        name: "login",
-        component: () => import("../views/sessoes/login")
-      },
-      {
-        path: "recuperarSenha",
-        name: "recuperarSenha",
-        component: () => import("../views/sessoes/recuperarSenha")
-      }
-    ]
+    path: "/login",
+    name: "login",
+    component: () => import("../views/sessoes/login")
   },
-  
+  {
+    path: "/recuperar-senha",
+    name: "recuperarSenha",
+    component: () => import("../views/sessoes/recuperarSenha")
+  }
 ]
+
+
+function protectRoute(to, from, next)
+{
+  let authStore = useAuthStore();
+  if (!authStore.isAuthenticated()) next({ name: 'login' })
+  else next()
+}
+
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

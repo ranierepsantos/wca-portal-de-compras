@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Interfaces.Services;
@@ -8,6 +9,7 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize("Bearer")]
     public class UsuarioController : Controller
     {
         private readonly IUsuarioService _usuarioService;
@@ -37,7 +39,7 @@ namespace wca.compras.webapi.Controllers
                 var result = await _usuarioService.Create(createUsuario);
 
                 //await _authenticationService.ForgotPassword(new ForgotPasswordRequest(createUsuario.Email), Request.Headers["origin"]);
-
+                
                 return Created("", result);
             }
             catch (Exception ex)
@@ -77,7 +79,7 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <param name="id"></param>
         [HttpDelete]
-        public async Task<ActionResult> Remove([FromBody] string id)
+        public async Task<ActionResult> Remove(string id)
         {
             try
             {

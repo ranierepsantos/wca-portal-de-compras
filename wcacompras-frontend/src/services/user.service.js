@@ -7,13 +7,20 @@ export default {
         return api.post(route.usuarioCreate, data);
     },
 
-    update(data)
+    remove(id)
     {
-        return api.put(route.usuarioUpdate, data);
+        return api.delete(route.usuarioRemove, { params: {"id": id } });
     },
+
     paginate(pageSize, page, termo ="")
     {
         let url = route.usuarioPaginate.replace("{pageSize}", pageSize).replace("{page}", page)
         return api.get(url, {params: { termo: termo}} );
-    }
+    },
+
+    update(data)
+    {
+        return api.put(route.usuarioUpdate, data);
+    },
+    
 }

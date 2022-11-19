@@ -15,7 +15,7 @@
       <br />
       <v-list class="text-left" density="compact">
         <v-list-item
-          v-for="item in items"
+          v-for="item in menuItems"
           :key="item.title"
           :value="item"
           active-color="info"
@@ -33,8 +33,24 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
 
-      <v-btn icon>
-        <v-icon>mdi-export</v-icon>
+      <v-btn variant="text" class="text-capitalize" color="primary">
+        <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
+        {{ usuario.nome }}
+        <v-menu activator="parent">
+          <v-list
+          :lines="false"
+          density="compact"
+          nav
+        >
+          <v-list-item class="text-primary" @click="logout()">
+            <template v-slot:prepend>
+              <v-icon icon="mdi-export" size="small"></v-icon>
+            </template>
+
+            <v-list-item-title v-text="'Sair'"></v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       </v-btn>
     </v-app-bar>
 
@@ -54,9 +70,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useAuthStore } from "@/store/auth.store";
+import { useRouter } from "vue-router";
+//VARIABLES
 const drawer = ref(true);
-const items = ref([
+const menuItems = ref([
   {
     title: "Home",
     value: 1,
@@ -73,12 +92,19 @@ const items = ref([
     route: "/app/usuarios",
   },
 ]);
+const authStore = useAuthStore();
+const router = useRouter();
+const usuario = computed(() => {
+  return authStore.user;
+})
 
-const listItems = ref([
-  { text: "Real-Time", icon: "mdi-clock" },
-  { text: "Audience", icon: "mdi-account" },
-  { text: "Conversions", icon: "mdi-flag" },
-]);
+
+//FUNCTIONS
+function logout()
+{
+  authStore.finishSession()
+  router.push({name: "login"})
+}
 </script>
 
 <style>

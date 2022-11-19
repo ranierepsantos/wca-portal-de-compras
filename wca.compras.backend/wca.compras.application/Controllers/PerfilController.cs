@@ -3,11 +3,13 @@ using System.Net;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
 using wca.compras.domain.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize("Bearer")]
     public class PerfilController : Controller
     {
         private readonly IPerfilService _service;

@@ -39,7 +39,7 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Usuario.Create.Error" + ex.ToString);
+                Console.WriteLine("Usuario.Create.Error" + ex.Message);
                 throw new Exception (ex.ToString());
             }            
             

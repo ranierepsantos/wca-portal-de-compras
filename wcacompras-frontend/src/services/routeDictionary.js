@@ -4,7 +4,7 @@ export const route = {
     alterarSenha: "Authentication/AlterarSenha",
     
     usuarioCreate: "Usuario",
-    usuarioRemove: "Usuario/{id}",
+    usuarioRemove: "Usuario",
     usuarioUpdate: "Usuario",
     usuarioPaginate: "Usuario/Paginate/{pageSize}/{page}",
 

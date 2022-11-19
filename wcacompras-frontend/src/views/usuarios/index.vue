@@ -10,13 +10,18 @@
       <v-btn color="primary" variant="outlined" class="text-capitalize">
         <b>Novo</b>
 
-        <v-dialog v-model="dialog" activator="parent" max-width="700">
+        <v-dialog
+          v-model="dialog"
+          activator="parent"
+          max-width="700"
+          :absolute="false"
+        >
           <v-card>
             <v-card-title class="text-primary text-h5">
               {{ dialogTitle }}
             </v-card-title>
             <v-card-text>
-              <v-form @submit.prevent="salvar()">
+              <v-form @submit.prevent="salvar()" ref="userForm">
                 <v-row>
                   <v-col>
                     <v-text-field
@@ -26,6 +31,7 @@
                       required
                       variant="outlined"
                       color="primary"
+                      :rules="[(v) => !!v || 'Nome é obrigatório']"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -38,6 +44,7 @@
                       required
                       variant="outlined"
                       color="primary"
+                      :rules="emailRules"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -51,6 +58,7 @@
                       item-value="value"
                       variant="outlined"
                       color="primary"
+                      :rules="[(v) => !!v || 'Perfil é obrigatório']"
                     ></v-select>
                   </v-col>
                   <v-col>
@@ -67,6 +75,8 @@
                       variant="outlined"
                       color="primary"
                       disabled
+                      v-model="usuario.filialid"
+                      :rules="[(v) => !!v || 'Filial é obrigatório']"
                     ></v-select>
                   </v-col>
                 </v-row>
@@ -75,6 +85,7 @@
                     <v-select
                       label="Cliente"
                       disabled
+                      v-model="usuario.clienteid"
                       :items="[
                         'California',
                         'Colorado',
@@ -85,6 +96,7 @@
                       ]"
                       variant="outlined"
                       color="primary"
+                      :rules="[(v) => !!v || 'Cliente é obrigatório']"
                     ></v-select>
                   </v-col>
                   <v-col cols="6">
@@ -171,7 +183,12 @@
               color="primary"
               @click="editar(user)"
             ></v-btn>
-            <v-btn icon="mdi-delete" variant="plain" color="error"></v-btn>
+            <v-btn
+              icon="mdi-delete"
+              variant="plain"
+              color="error"
+              @click="remove(user)"
+            ></v-btn>
           </td>
         </tr>
       </tbody>
@@ -191,19 +208,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, inject } from "vue";
 import userService from "../../services/user.service";
 import perfilService from "../../services/perfil.service";
+import handleErrors from "../../helpers/HandleErrors"
 
 //DATA
 const page = ref(1);
-const pageSize = 2;
+const pageSize = 5;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const users = ref([]);
 const listPerfil = ref([]);
 const dialogTitle = ref("Novo Usuário");
 const dialog = ref(false);
+const swal = inject("$swal");
 const usuario = ref({
   id: "",
   nome: "",
@@ -213,6 +232,11 @@ const usuario = ref({
   filialid: "",
   perfilid: "",
 });
+const emailRules = ref([
+  (v) => !!v || "E-mail é obrigatório",
+  (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
+]);
+const userForm = ref(null)
 
 //VUE METHODS
 onMounted(async () => {
@@ -225,6 +249,46 @@ watch(page, () => {
 });
 
 //METHODS
+async function remove(item) {
+  try {
+    let options = {
+      title: "Confirma Exclusão?",
+      text: "Deseja realmente excluir o usuário: " + item.nome + "?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    }
+
+    let response = await swal.fire(options);
+    if (response.isConfirmed)
+    {
+      await userService.remove(item.id);
+      debugger
+      if (users.value.length == 1)
+      {
+        page.value --;
+      } else
+      {
+        await this.getItems()  
+      }
+      
+      swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        title: "Sucesso!",
+        text: "Exclusão realizada!",
+        showConfirmButton: false,
+        timer: 2000,
+      })
+    }
+  } catch (error) {
+    console.log("usuários.error:",error);
+    handleErrors(error)
+  }
+  
+}
 function editar(item) {
   usuario.value = { ...item };
   dialogTitle.value = "Edição de Usuário";
@@ -233,24 +297,34 @@ function editar(item) {
 
 function closeDialog() {
   dialog.value = false;
+  userForm.value.reset()
   clearData();
 }
 
 async function salvar() {
-  try {
-    let data = usuario.value;
-    data.clienteid = data.perfilid;
-    data.filialid = data.perfilid;
-    let response = null;
-    if (data.id.trim() == "") {
-      await userService.create(data);
-    } else {
-      await userService.update(data);
+  try
+  {
+   let { valid } = await userForm.value.validate();
+    if (valid)
+    {
+      let data = usuario.value;
+      data.clienteid = data.perfilid;
+      data.filialid = data.perfilid;
+      let response = null;
+      if (data.id.trim() == "")
+      {
+        await userService.create(data);
+      } else
+      {
+        await userService.update(data);
+      }
+      await getItems();
+      closeDialog();
     }
-    await getItems();
-    closeDialog();
-  } catch (error) {
-    console.log(error);
+  } catch (error)
+  {
+    console.log("usuários.error:",error);
+    handleErrors(error)
   }
 }
 
@@ -277,7 +351,8 @@ async function getListPerfil() {
     let response = await perfilService.toList();
     listPerfil.value = response.data;
   } catch (error) {
-    console.log(error);
+    console.log("usuários.error:",error);
+    handleErrors(error)
   }
 }
 
@@ -288,7 +363,8 @@ async function getItems() {
     users.value = response.data.items;
     totalPages.value = response.data.totalPages;
   } catch (error) {
-    console.log(error);
+    console.log("usuários.error:", error.response);
+    handleErrors(error)
   } finally {
     isBusy.value = false;
   }

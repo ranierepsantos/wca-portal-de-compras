@@ -103,7 +103,7 @@ namespace wca.compras.services
 
                 
 
-                var link = $"{urlOrigin}/reset-password/{resetPassword.Token}";
+                var link = $"{urlOrigin}/recuperar-senha/{resetPassword.Token}";
 
                 string mensagem = $"<p>Olá {usuario.Nome} </p>";
                 mensagem += $"Clique <a href='{link}'>aqui</a> para alterar sua senha!";

@@ -26,9 +26,21 @@
             required
           ></v-text-field>
 
-          <v-btn type="submit" block color="primary" size="large" class="mt-10">
+          <v-btn
+            type="submit"
+            block
+            color="primary"
+            size="large"
+            class="mt-10"
+            v-if="!isBusy"
+          >
             Login
           </v-btn>
+          <v-progress-circular
+            indeterminate
+            :size="40"
+            v-else
+          ></v-progress-circular>
         </v-form>
       </v-col>
     </v-col>
@@ -65,9 +77,13 @@
   </div> -->
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth.store";
+import handleErrors from "@/helpers/HandleErrors";
+
+// VARIABLES
+let isBusy = ref(false);
 const logoWCA = ref(require("../../assets/images/logoWCA.png"));
 const formData = ref({
   email: "",
@@ -80,15 +96,35 @@ const emailRules = ref([
   (v) => !!v || "E-mail é obrigatório",
   (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
 ]);
+const swal = inject("$swal");
 
+//VUE FUNCTIONS
+
+//FUNCTIONS
 async function authenticate() {
-  let { isValid } = await form.value.validate();
-  if (isValid) {
-    let response = await authStore.authenticate(formData.value);
-    if (response.authenticated == true) {
-      router.push({ name: "home" });
+  try {
+    isBusy.value = true;
+    let { valid } = await form.value.validate();
+    if (valid) {
+      let response = await authStore.authenticate(formData.value);
+      if (response.authenticated == true) {
+        router.push({ name: "home" });
+      } else {
+        swal({
+          toast: true,
+          icon: "warning",
+          position: "top-end",
+          text: "E-mail e/ou senha inválidos!",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      }
     }
-    console.log("Esta autenticado", authStore.isAuthenticated);
+  } catch (error) {
+    console.log("login.error:", error);
+    handleErrors(error)
+  } finally {
+    isBusy.value = false;
   }
 }
 </script>
