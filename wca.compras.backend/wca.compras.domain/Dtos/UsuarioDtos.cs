@@ -19,11 +19,11 @@ namespace wca.compras.domain.Dtos
         [EmailAddress(ErrorMessage ="Infome um e-mail válido")]
         string Email,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string Clienteid,
+        string ClienteId,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string Filialid,
+        string FilialId,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string Perfilid
+        string PerfilId
     );
 
     public record UpdateUsuarioDto(
@@ -36,9 +36,9 @@ namespace wca.compras.domain.Dtos
         string Email,
         bool Ativo,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string Clienteid,
+        string ClienteId,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        string Filialid,
+        string FilialId,
         [Required(ErrorMessage ="O campo é obrigatório")]
         string PerfilId
     );

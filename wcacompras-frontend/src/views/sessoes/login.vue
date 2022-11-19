@@ -5,7 +5,7 @@
     </v-col>
     <v-col cols="6">
       <v-col cols="10">
-        <v-form @submit.prevent="authenticate()">
+        <v-form ref="form" @submit.prevent="authenticate()">
           <div class="text-h4 mb-10 mt-16 pt-16" style="color: #000066">
             Login
           </div>
@@ -14,12 +14,16 @@
             label="Email"
             type="email"
             v-model="formData.email"
+            :rules="emailRules"
+            required
           ></v-text-field>
 
           <v-text-field
-            label="password"
+            label="Senha"
             type="password"
             v-model="formData.password"
+            :rules="[(v) => !!v || 'Senha é obrigatório']"
+            required
           ></v-text-field>
 
           <v-btn type="submit" block color="primary" size="large" class="mt-10">
@@ -62,19 +66,30 @@
 </template>
 <script setup>
 import { ref } from "vue";
-import authService from "../../services/auth.service";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/store/auth.store";
 const logoWCA = ref(require("../../assets/images/logoWCA.png"));
 const formData = ref({
   email: "",
   password: "",
 });
+const authStore = useAuthStore();
+const router = useRouter();
+const form = ref(null);
+const emailRules = ref([
+  (v) => !!v || "E-mail é obrigatório",
+  (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
+]);
 
 async function authenticate() {
-  console.log(
-    `Email: ${formData.value.email}, password: ${formData.value.password}`
-  );
-  let response = await authService.login(formData.value);
-  console.log(response);
+  let { isValid } = await form.value.validate();
+  if (isValid) {
+    let response = await authStore.authenticate(formData.value);
+    if (response.authenticated == true) {
+      router.push({ name: "home" });
+    }
+    console.log("Esta autenticado", authStore.isAuthenticated);
+  }
 }
 </script>
 

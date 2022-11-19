@@ -67,6 +67,11 @@ const items = ref([
     value: 2,
     route: "/app/about",
   },
+  {
+    title: "Usuários",
+    value: 2,
+    route: "/app/usuarios",
+  },
 ]);
 
 const listItems = ref([
