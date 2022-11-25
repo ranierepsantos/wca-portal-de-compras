@@ -12,12 +12,11 @@ namespace wca.compras.crosscutting.DependencyInjection
     {
         public static void ConfigureDependencyService(this IServiceCollection services)
         {
-            services.AddTransient<IPerfilService, PerfilService>();
             services.AddTransient<IPermissaoService, PermissaoService>();
-            services.AddTransient<IAuthenticationService, AuthenticationService>();
+            services.AddTransient<IPerfilService, PerfilService>();
             services.AddTransient<IUsuarioService, UsuarioService>();
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
             services.AddTransient<IEmailService, EmailService>();
-
 
             var autoMapperConfig = new MapperConfiguration(
                 config =>

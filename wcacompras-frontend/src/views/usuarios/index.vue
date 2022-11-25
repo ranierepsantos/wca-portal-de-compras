@@ -75,7 +75,7 @@
                       variant="outlined"
                       color="primary"
                       disabled
-                      v-model="usuario.filialid"
+                      
                       :rules="[(v) => !!v || 'Filial é obrigatório']"
                     ></v-select>
                   </v-col>
@@ -85,7 +85,7 @@
                     <v-select
                       label="Cliente"
                       disabled
-                      v-model="usuario.clienteid"
+                      
                       :items="[
                         'California',
                         'Colorado',
@@ -101,7 +101,7 @@
                   </v-col>
                   <v-col cols="6">
                     <v-checkbox
-                      v-show="usuario.id.trim() != ''"
+                      v-show="usuario.id > 0"
                       v-model="usuario.ativo"
                       label="Ativo"
                       color="primary"
@@ -224,13 +224,13 @@ const dialogTitle = ref("Novo Usuário");
 const dialog = ref(false);
 const swal = inject("$swal");
 const usuario = ref({
-  id: "",
+  id: 0,
   nome: "",
   email: "",
   ativo: true,
-  clienteid: "",
-  filialid: "",
-  perfilid: "",
+  clienteid: null,
+  filialid: null,
+  perfilid: null,
 });
 const emailRules = ref([
   (v) => !!v || "E-mail é obrigatório",
@@ -310,8 +310,7 @@ async function salvar() {
       let data = usuario.value;
       data.clienteid = data.perfilid;
       data.filialid = data.perfilid;
-      let response = null;
-      if (data.id.trim() == "")
+      if (data.id == 0)
       {
         await userService.create(data);
       } else
@@ -331,13 +330,13 @@ async function salvar() {
 function clearData() {
   dialogTitle.value = "Novo Usuário";
   usuario.value = {
-    id: "",
+    id: 0,
     nome: "",
     email: "",
     ativo: true,
     clienteid: null,
     filialid: null,
-    perfilid: "",
+    perfilid: null,
   };
 }
 

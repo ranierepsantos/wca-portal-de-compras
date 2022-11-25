@@ -9,13 +9,13 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize("Bearer")]
+    //[Authorize("Bearer")]
     public class PerfilController : Controller
     {
-        private readonly IPerfilService _service;
-        public PerfilController(IPerfilService profileService)
+        private readonly IPerfilService service;
+        public PerfilController(IPerfilService perfilService)
         {
-            _service = profileService;
+            service = perfilService;
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                var result = await _service.Create(perfilDto);
+                var result = await service.Create(perfilDto);
                 return Created("", result);
             }
             catch (ArgumentException ex)
@@ -58,7 +58,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                var result = await _service.Update(perfilDto);
+                var result = await service.Update(perfilDto);
                 if (result == null)
                 {
                     return NotFound($"Perfil íd: {perfilDto.Id}, não localizado!");
@@ -86,7 +86,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                var result = await _service.GetWithPermissoes(id);
+                var result = await service.GetWithPermissoes(id);
                 if (result == null)
                 {
                     return NotFound($"Perfil íd: {id}, não localizado!");
@@ -107,7 +107,7 @@ namespace wca.compras.webapi.Controllers
         [Route("ToList")]
         public async Task<ActionResult<IList<ListItem>>> List()
         {
-            var items = await _service.GetToList();
+            var items = await service.GetToList();
             return Ok(items);
         }
 
@@ -119,7 +119,7 @@ namespace wca.compras.webapi.Controllers
         [Route("Paginate/{pageSize}/{page}")]
         public async Task<ActionResult<Pagination<PerfilDto>>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
         {
-            var items = await _service.Paginate(page, pageSize, termo);
+            var items = await service.Paginate(page, pageSize, termo);
             return Ok(items);
         }
     }

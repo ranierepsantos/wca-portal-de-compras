@@ -12,7 +12,7 @@ namespace wca.compras.crosscutting.Mapping
             CreateMap<PermissaoDto, Permissao>().ReverseMap();
             CreateMap<CreatePermissaoDto, Permissao>();
             CreateMap<UpdatePermissaoDto, Permissao>();
-            CreateMap<Permissao, PermissoesDto>();
+            CreateMap<Permissao, PermissoesDto>().ReverseMap();
             CreateMap<Permissao, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));

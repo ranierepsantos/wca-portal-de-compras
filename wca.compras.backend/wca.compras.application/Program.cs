@@ -9,7 +9,7 @@ using wca.compras.domain.Security;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.ConfigureDependencyRepository();
+builder.Services.ConfigureDependencyRepository(builder.Configuration);
 builder.Services.ConfigureDependencyService();
 
 //Configuração para utilização de token JWT

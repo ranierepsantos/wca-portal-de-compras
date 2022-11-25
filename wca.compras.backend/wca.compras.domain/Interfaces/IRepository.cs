@@ -1,17 +1,14 @@
-﻿using MongoDB.Driver;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace wca.compras.domain.Interfaces
 {
-    public interface IRepository<T> where T : IEntity
+    public interface IRepository<T> where T : class
     {
-        Task<T> CreateAsync(T entity);
-        Task<T> GetAsync(string id);
-        Task<T> GetAsync(Expression<Func<T, bool>> filter);
-        Task<IReadOnlyCollection<T>> GetAllAsync();
-        Task<IReadOnlyCollection<T>> GetAllAsync(Expression<Func<T, bool>> filter);
-        Task RemoveAsync(string id);
-        Task UpdateAsync(T entity);
-        Task<(int totalPages, IReadOnlyList<T> data)> Paginate(int page, int pageSize, FilterDefinition<T> filter, SortDefinition<T> sort);
+        void Create(T entity);
+        void Update(T entity);
+        void Delete(T entity);
+        IQueryable<T> SelectAll();
+        IQueryable<T> SelectByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false);
+        public void Attach(T entity);
     }
 }

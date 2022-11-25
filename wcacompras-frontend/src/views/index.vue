@@ -81,11 +81,11 @@ const menuItems = ref([
     value: 1,
     route: "/app",
   },
-  {
-    title: "About",
-    value: 2,
-    route: "/app/about",
-  },
+  // {
+  //   title: "About",
+  //   value: 2,
+  //   route: "/app/about",
+  // },
   {
     title: "Usuários",
     value: 2,

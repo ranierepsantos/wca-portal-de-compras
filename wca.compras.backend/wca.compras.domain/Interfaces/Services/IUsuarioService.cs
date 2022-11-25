@@ -12,9 +12,9 @@ namespace wca.compras.domain.Interfaces.Services
     {
         public Task<UsuarioDto> Create(CreateUsuarioDto usuario);
         public Task<UsuarioDto> Update(UpdateUsuarioDto usuario);
-        public Task<bool> Remove(string id);
+        public Task<bool> Remove(int id);
         public Task<IList<UsuarioDto>> GetAll();
-        public Task<UsuarioDto> GetById(string id);
+        public Task<UsuarioDto> GetById(int id);
         public Task<Pagination<UsuarioDto>> Paginate(int page = 1, int pageSize = 10, string termo = "");
     }
 }

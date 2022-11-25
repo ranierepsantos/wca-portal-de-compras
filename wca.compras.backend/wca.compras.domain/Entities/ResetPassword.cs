@@ -1,34 +1,44 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using wca.compras.domain.Interfaces;
 
 namespace wca.compras.domain.Entities
 {
-    [Serializable]
     public class ResetPassword: IEntity
     {
-        [BsonId, BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string Id { get; set; }
-
-        [BsonElement("usuario_id"), BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string UsuarioId { get; set; }
-
-        [BsonElement("token")]
+        [Column("id")]
+        public int Id { get; set; }
+        
+        [Required, MaxLength(100)]
+        [Column("token", TypeName = "varchar(100)")]
         public string Token { get; set; }
 
-        [BsonElement("data_criacao")]
-        public DateTimeOffset DataCriacao { get; set; } = DateTimeOffset.UtcNow;
-        
-        [BsonElement("data_expiracao")]
-        public DateTimeOffset DataExpiracao { get; set; } = DateTimeOffset.UtcNow.AddDays(1);
+        [Required]
+        [Column("data_criacao", TypeName = "smalldatetime")]
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("data_revogacao")]
-        public DateTimeOffset? DataRevogacao { get; set; }
+        [Required]
+        [Column("data_expiracao", TypeName = "smalldatetime")]
+        public DateTime DataExpiracao { get; set; } = DateTime.UtcNow.AddDays(1);
 
-        [BsonIgnore]
+        [Column("data_revogacao", TypeName = "smalldatetime")]
+        public DateTime? DataRevogacao { get; set; }
+
+        public Usuario Usuarios { get; set; }
+
+        [Column("usuario_id")]
+        public int UsuarioId { get; set; }
+
+        [JsonIgnore, NotMapped]
         public bool Expirado => DateTimeOffset.UtcNow > DataExpiracao;
-        
-        [BsonIgnore]
-        public bool Ativo => !Expirado && DataRevogacao == null;
 
+        [JsonIgnore, NotMapped]
+        public bool Ativo => !Expirado && DataRevogacao == null;
     }
 }

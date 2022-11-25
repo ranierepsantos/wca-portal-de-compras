@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
-using wca.compras.domain.Interfaces.Repositories;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
 
@@ -12,56 +11,55 @@ namespace wca.compras.services
 {
     public class PerfilService : IPerfilService
     {
-        private readonly IPerfilRepository _perfilRepo;
-        private readonly IRepository<PerfilRelPermissoes> _perfilRelPermissaoRepo;
+        private readonly IRepositoryManager _rm;
         private IMapper _mapper;
 
-        public PerfilService(IPerfilRepository perfilRepository, IRepository<PerfilRelPermissoes> perfilPermissionRepository, IMapper mapper)
+        public PerfilService(IRepositoryManager repositoryManager, IMapper mapper)
         {
-            _perfilRepo = perfilRepository;
-            _perfilRelPermissaoRepo = perfilPermissionRepository;
+            _rm = repositoryManager;
             _mapper = mapper;
         }
         
         public async Task<PerfilDto> Create(CreatePerfilDto perfil)
         {
-
             var data = _mapper.Map<Perfil>(perfil);
-
-            await _perfilRepo.CreateAsync(data);
-
-            foreach(var permissao in perfil.Permissoes)
-            {
-                await _perfilRelPermissaoRepo.CreateAsync(new PerfilRelPermissoes()
-                {
-                    PerfilId = data.Id,
-                    PermissaoId = permissao.Id,
-                });
-            }
             
+            _rm.PerfilRepository.Attach(data);
+            foreach (var permissao in perfil.Permissoes)
+            {
+                var perm = _mapper.Map<Permissao>(permissao);
+                _rm.PermissaoRepository.Attach(perm);
+                data.Permissao.Add(perm);
+            }
+            await _rm.SaveAsync();
+
             return _mapper.Map<PerfilDto>(data);
         }
 
         public async Task<IList<ListItem>> GetToList()
         {
-            var itens = await _perfilRepo.GetAllAsync(p => p.Ativo == true);
-            
-            return _mapper.Map<IList<ListItem>>(itens.OrderBy(p => p.Nome).ToList()); 
+            var itens = await _rm.PerfilRepository.SelectByCondition(p => p.Ativo == true)
+                .OrderBy(p => p.Nome)
+                .ToListAsync();
+
+            return _mapper.Map<IList<ListItem>>(itens); 
         }
 
         public async Task<PerfilPermissoesDto> GetWithPermissoes(string id)
         {
+            var data = await _rm.PerfilRepository.SelectByCondition(p => p.Id == int.Parse(id))
+                .Include(pm => pm.Permissao).FirstOrDefaultAsync();
 
-            var perfil = await _perfilRepo.GetWithPermissoesByIdAsync(id);
-
-            if (perfil == null) return null;
-
-            return _mapper.Map<PerfilPermissoesDto>(perfil);
+            return _mapper.Map<PerfilPermissoesDto>(data);
         }
 
         public async Task<PerfilDto> Update(UpdatePerfilDto perfil)
         {
-            var baseData = await _perfilRepo.GetWithPermissoesByIdAsync(perfil.Id);
+
+            var baseData = await _rm.PerfilRepository
+                            .SelectByCondition(p => p.Id == perfil.Id, true)
+                            .Include("Permissao")
+                            .FirstOrDefaultAsync();
 
             if (baseData == null)
             {
@@ -69,54 +67,50 @@ namespace wca.compras.services
             }
 
             //Remover permissões caso tenha alterado
-            baseData.Permissoes.ForEach(async permissao =>
+            baseData.Permissao.ToList().ForEach(async permissao =>
             {
-                var perm = perfil.Permissoes.Where(p => p.Id == permissao.Id).FirstOrDefault();
+                var perm = perfil.Permissao.Where(p => p.Id == permissao.Id).FirstOrDefault();
                 if (perm == null)
                 {
-                    var perfilRelPermissao = await _perfilRelPermissaoRepo.GetAsync(pp => pp.PermissaoId == permissao.Id && pp.PerfilId == perfil.Id);
-
-                    if (perfilRelPermissao != null)
-                        await _perfilRelPermissaoRepo.RemoveAsync(perfilRelPermissao.Id);
+                    var pm = baseData.Permissao.FirstOrDefault(p => p.Id == permissao.Id);
+                    baseData.Permissao.Remove(pm);
                 }
             });
 
             //Adicionar permissões caso tenha novas
-            perfil.Permissoes.ToList().ForEach(async permissao =>
+            perfil.Permissao.ToList().ForEach(permissao =>
             {
-                if (baseData.Permissoes.Where(p => p.Id == permissao.Id).FirstOrDefault() == null)
+                if (baseData.Permissao.Where(p => p.Id == permissao.Id).FirstOrDefault() == null)
                 {
-                    await _perfilRelPermissaoRepo.CreateAsync(new PerfilRelPermissoes() { 
-                            PerfilId = perfil.Id,
-                            PermissaoId = permissao.Id
-                        });
+                    var mPerm = _mapper.Map<Permissao>(permissao);
+                    _rm.PermissaoRepository.Attach(mPerm);
+                    baseData.Permissao.Add(mPerm);
                 }
             });
 
-            var data = _mapper.Map<Perfil>(perfil);
+            baseData.Nome = perfil.Nome;
+            baseData.Descricao = perfil.Descricao;
+            baseData.Ativo = perfil.Ativo;
 
-            await _perfilRepo.UpdateAsync(data);
+            await _rm.SaveAsync();
 
-            return _mapper.Map<PerfilDto>(data);
+            return _mapper.Map<PerfilDto>(baseData);
 
         }
 
         public async Task<Pagination<PerfilDto>> Paginate(int page, int pageSize = 10, string termo = "")
         {
-            var builder = Builders<Perfil>.Filter;
-            FilterDefinition<Perfil> filter = builder.Empty;
+            var query = _rm.PerfilRepository.SelectAll();
 
             if (!string.IsNullOrEmpty(termo))
             {
-                filter = builder.Regex("nome", new MongoDB.Bson.BsonRegularExpression(termo, "i"));
+                query = query.Where(q => q.Nome.Contains(termo));
             }
+            query = query.OrderBy(p => p.Nome);
 
-           var (totalPages, data) =  await _perfilRepo.Paginate(page, pageSize, filter , Builders<Perfil>.Sort.Ascending(p =>p.Nome));
+            var pagination = Pagination<PerfilDto>.ToPagedList(query, page, pageSize);
 
-            var listData = _mapper.Map<List<PerfilDto>>(data.ToList());
-
-            return new Pagination<PerfilDto>(listData, page, pageSize, totalPages);
-            
+            return pagination;
 
         }
     }

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -10,13 +10,12 @@ namespace wca.compras.services
 {
     public class UsuarioService : IUsuarioService
     {
-        private readonly IRepository<Usuario> _repository;
+        private readonly IRepositoryManager _rm;
         private IMapper _mapper;
         
-        public UsuarioService(IRepository<Usuario> repository, 
-                              IMapper mapper)
+        public UsuarioService(IRepositoryManager repositoryManager, IMapper mapper)
         {
-            _repository = repository;
+            _rm = repositoryManager;
             _mapper = mapper;
         }
 
@@ -33,7 +32,8 @@ namespace wca.compras.services
                 var data = _mapper.Map<Usuario>(usuario);
                 data.Ativo = true;
 
-                await _repository.CreateAsync(data);
+                _rm.UsuarioRepository.Create(data); 
+                await _rm.SaveAsync();
 
                 return _mapper.Map<UsuarioDto>(data);
             }
@@ -47,34 +47,53 @@ namespace wca.compras.services
 
         public async Task<IList<UsuarioDto>> GetAll()
         {
-            var list = await _repository.GetAllAsync();
+            var list = await _rm.UsuarioRepository.SelectAll().OrderBy(u => u.Nome).ToListAsync();
 
-            return _mapper.Map<IList<UsuarioDto>>(list.OrderBy(u => u.Nome));
+            return _mapper.Map<IList<UsuarioDto>>(list);
         }
 
-        public async Task<UsuarioDto> GetById(string id)
-        {
-            var data = await _repository.GetAsync(id);
-
-            return _mapper.Map<UsuarioDto>(data);
-        }
-
-        public async Task<bool> Remove(string id)
+        public async Task<UsuarioDto> GetById(int id)
         {
             try
             {
-                var baseData = await _repository.GetAsync(id);
+                var data = await _rm.UsuarioRepository.SelectByCondition(u => u.Id == id)
+                                        .FirstOrDefaultAsync();
+
+                if (data == null)
+                {
+                    return null;
+                }
+
+                return _mapper.Map<UsuarioDto>(data);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Usuario.GetById.Error" + ex.Message);
+                throw new Exception(ex.ToString());
+            }
+
+        }
+
+        public async Task<bool> Remove(int id)
+        {
+            try
+            {
+                var baseData = await _rm.UsuarioRepository.SelectByCondition(u => u.Id == id).FirstOrDefaultAsync();
 
                 if (baseData == null)
                 {
                     return false;
                 }
-                await _repository.RemoveAsync(id);
+                _rm.UsuarioRepository.Delete(baseData);
+                
+                await _rm.SaveAsync();
+
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Usuario.Remove.Error" + ex.ToString);
+                Console.WriteLine("Usuario.Remove.Error" + ex.Message);
                 throw new Exception(ex.ToString());
             }
             
@@ -84,8 +103,9 @@ namespace wca.compras.services
         {
             try
             {
-                var baseData = await _repository.GetAsync(usuario.Id);
-
+                var baseData = await _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id)
+                                    .FirstOrDefaultAsync();
+                
                 if (baseData == null)
                 {
                     return null;
@@ -102,13 +122,15 @@ namespace wca.compras.services
                 
                 var data = _mapper.Map<Usuario>(usuario);
                 
-                await _repository.UpdateAsync(data);
+                _rm.UsuarioRepository.Update(data);
+
+                await _rm.SaveAsync();
 
                 return _mapper.Map<UsuarioDto>(data);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Usuario.Update.Error" + ex.ToString);
+                Console.WriteLine("Usuario.Update.Error" + ex.Message);
                 throw new Exception(ex.ToString());
             }
         }
@@ -117,23 +139,21 @@ namespace wca.compras.services
         {
             try
             {
-                var builder = Builders<Usuario>.Filter;
-                FilterDefinition<Usuario> filter = builder.Empty;
+                var query = _rm.UsuarioRepository.SelectAll();
 
                 if (!string.IsNullOrEmpty(termo))
                 {
-                    filter = builder.Regex("nome", new MongoDB.Bson.BsonRegularExpression(termo, "i"));
+                    query = query.Where(q => q.Nome.Contains(termo));
                 }
+                query = query.OrderBy(p => p.Nome);
 
-                var (totalPages, data) = await _repository.Paginate(page, pageSize, filter, Builders<Usuario>.Sort.Ascending(p => p.Nome));
+                var pagination = Pagination<UsuarioDto>.ToPagedList(query, page, pageSize);
 
-                var listData = _mapper.Map<List<UsuarioDto>>(data.ToList());
-
-                return new Pagination<UsuarioDto>(listData, page, pageSize, totalPages);
+                return pagination;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Usuario.Paginate.Error" + ex.ToString);
+                Console.WriteLine("Usuario.Paginate.Error" + ex.Message);
                 throw new Exception(ex.ToString());
             }
             
@@ -143,7 +163,9 @@ namespace wca.compras.services
 
         private async Task<bool> IsEmailExists(string email)
         {
-            if ((await _repository.GetAsync(u => u.Email == email)) != null)
+            var data = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == email)
+                                        .FirstOrDefaultAsync();
+            if ( data != null)
             {
                 return true;
             }

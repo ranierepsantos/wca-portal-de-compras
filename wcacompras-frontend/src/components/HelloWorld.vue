@@ -2,7 +2,7 @@
   <div class="hello">
     <img src="../assets/images/logoWCA.png" alt="" />
 
-    <h1>{{ props.msg }}</h1>
+    <!-- <h1>{{ props.msg }}</h1>
     <p><v-icon icon="mdi:mdi-home" /> Teste</p>
     <p>Buttons</p>
     <v-btn color="primary">Primary</v-btn>
@@ -17,7 +17,7 @@
     <v-btn color="info" variant="outlined">Info</v-btn>
     <v-btn color="success" variant="outlined">Success</v-btn>
     <v-btn color="warning" variant="outlined">Warning</v-btn>
-    <v-btn color="error" variant="outlined">Error</v-btn>
+    <v-btn color="error" variant="outlined">Error</v-btn> -->
   </div>
 </template>
 

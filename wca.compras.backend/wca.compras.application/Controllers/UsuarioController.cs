@@ -9,7 +9,7 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize("Bearer")]
+    //[Authorize("Bearer")]
     public class UsuarioController : Controller
     {
         private readonly IUsuarioService _usuarioService;
@@ -79,7 +79,7 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <param name="id"></param>
         [HttpDelete]
-        public async Task<ActionResult> Remove(string id)
+        public async Task<ActionResult> Remove(int id)
         {
             try
             {

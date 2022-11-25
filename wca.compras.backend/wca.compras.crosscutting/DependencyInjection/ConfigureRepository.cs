@@ -1,19 +1,21 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using wca.compras.data.MongoDB;
-using wca.compras.domain.Entities;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using wca.compras.data.DataAccess;
+using wca.compras.data.Repositories;
+using wca.compras.domain.Interfaces;
 
 namespace wca.compras.crosscutting.DependencyInjection
 {
     public static class ConfigureRepository
     {
-        public static void ConfigureDependencyRepository(this IServiceCollection services)
+        public static void ConfigureDependencyRepository(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddMongo();
-            services.AddMongoPerfilRepository("perfil");
-            services.AddMongoRepository<Permissao>("permissoes");
-            services.AddMongoRepository<PerfilRelPermissoes>("perfil_rel_permissoes");
-            services.AddMongoRepository<Usuario>("usuarios");
-            services.AddMongoRepository<ResetPassword>("reset_password");
+            services.AddDbContext<WcaContext>(
+                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+            );
+
+            services.AddScoped<IRepositoryManager, RepositoryManager>();
         }
     }
 }

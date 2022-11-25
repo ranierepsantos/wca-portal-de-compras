@@ -13,8 +13,7 @@ namespace wca.compras.domain.Interfaces.Services
 
         public Task<IList<ListItem>> GetToList();
 
-        public Task<Pagination<PerfilDto>> Paginate(int page =1, int pageSize = 10, string termo ="");
-
+        public Task<Pagination<PerfilDto>> Paginate(int page = 1, int pageSize = 10, string termo = "");
 
     }
 }

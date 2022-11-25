@@ -11,8 +11,8 @@ namespace wca.compras.crosscutting.Mapping
         {
             CreateMap<PerfilDto, Perfil>().ReverseMap();
             CreateMap<CreatePerfilDto, Perfil>();
-            CreateMap<UpdatePerfilDto,Perfil>();
-            CreateMap<PerfilPermissoes, PerfilPermissoesDto>();
+            CreateMap<UpdatePerfilDto, Perfil>();
+            CreateMap<Perfil, PerfilPermissoesDto>();
             CreateMap<Perfil, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));

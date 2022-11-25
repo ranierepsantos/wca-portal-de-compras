@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Org.BouncyCastle.Asn1.X509;
+using System.ComponentModel.DataAnnotations;
 using wca.compras.domain.Entities;
 
 namespace wca.compras.domain.Dtos
@@ -11,7 +12,9 @@ namespace wca.compras.domain.Dtos
         string Created,
         string Expiration,
         string AccessToken,
-        string UsuarioId,
+        int UsuarioId,
+        int FilialId,
+        int ClienteId,
         string UsuarioNome,
         PerfilPermissoesDto Perfil
     );

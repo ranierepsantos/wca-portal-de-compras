@@ -10,11 +10,6 @@ E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.crosscutting\obj\Debug\net6.0\wca.
 E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.crosscutting\obj\Debug\net6.0\refint\wca.compras.crosscutting.dll
 E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.pdb
 E:\Ivanildo\NorgeLabs\wca.compras\wca.compras.crosscutting\obj\Debug\net6.0\ref\wca.compras.crosscutting.dll
-E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.csproj.AssemblyReference.cache
-E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.GeneratedMSBuildEditorConfig.editorconfig
-E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.AssemblyInfoInputs.cache
-E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.AssemblyInfo.cs
-E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.csproj.CoreCompileInputs.cache
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\bin\Debug\net6.0\wca.compras.crosscutting.deps.json
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\bin\Debug\net6.0\wca.compras.crosscutting.dll
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\bin\Debug\net6.0\wca.compras.crosscutting.pdb
@@ -24,6 +19,11 @@ E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.cros
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\bin\Debug\net6.0\wca.compras.data.pdb
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\bin\Debug\net6.0\wca.compras.services.pdb
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\bin\Debug\net6.0\wca.compras.domain.pdb
+E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.csproj.AssemblyReference.cache
+E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.GeneratedMSBuildEditorConfig.editorconfig
+E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.AssemblyInfoInputs.cache
+E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.AssemblyInfo.cs
+E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.csproj.CoreCompileInputs.cache
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.csproj.CopyComplete
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\wca.compras.crosscutting.dll
 E:\Ivanildo\NorgeLabs\wca-portal-de-compras\wca.compras.backend\wca.compras.crosscutting\obj\Debug\net6.0\refint\wca.compras.crosscutting.dll

@@ -1,22 +1,36 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using wca.compras.domain.Interfaces;
 
 namespace wca.compras.domain.Entities
 {
-    [Serializable]
-    public class Permissao : IEntity
+    [Table("Permissao")]
+    public class Permissao: IEntity
     {
-        [BsonId, BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string Id { get; set; }
-
-        [BsonElement("nome")]
+        [Column("id")]
+        public int Id { get; set; }
+        
+        [Required, MaxLength(50)]
+        [Column("nome", TypeName = "varchar(50)")]
         public string Nome { get; set; }
-
-        [BsonElement("regra")]
+        
+        
+        [Required, MaxLength(50)]
+        [Column("regra", TypeName = "varchar(50)")]
         public string Regra { get; set; }
+        
+        [MaxLength(250)]
+        [Column("descricao", TypeName = "varchar(250)")]
+        public string Descricao { get; set; } = string.Empty;
 
-        [BsonElement("descricao")]
-        public string Descricao { get; set; }
+        [JsonIgnore]
+        public IList<Perfil> Perfil { get; set; }
 
     }
 }

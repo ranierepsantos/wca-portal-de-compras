@@ -9,7 +9,7 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize("Bearer")]
+    //[Authorize("Bearer")]
     public class PermissaoController : Controller
     {
         private IPermissaoService service;
@@ -64,6 +64,14 @@ namespace wca.compras.webapi.Controllers
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
+        }
+
+        [HttpGet]
+        [Route("Paginate/{pageSize}/{page}")]
+        public ActionResult<Pagination<PermissaoDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        {
+            var items =  service.Paginate(page, pageSize,termo);
+            return Ok(items);
         }
 
     }

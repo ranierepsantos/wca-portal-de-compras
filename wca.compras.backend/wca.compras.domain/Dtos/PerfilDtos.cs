@@ -2,9 +2,9 @@
 
 namespace wca.compras.domain.Dtos
 {
-    public record PerfilDto (string Id, string Nome, string Descricao, bool Ativo);
+    public record PerfilDto (int Id, string Nome, string Descricao, bool Ativo);
         
-    public record PerfilPermissoesDto(string Id, string Nome, string Descricao, bool Ativo, IList<PermissoesDto> Permissoes);
+    public record PerfilPermissoesDto(int Id, string Nome, string Descricao, bool Ativo, IList<PermissoesDto> Permissao);
 
     public record CreatePerfilDto(
         [Required(ErrorMessage = "O campo é obrigatório!")]
@@ -15,12 +15,12 @@ namespace wca.compras.domain.Dtos
 
     public record UpdatePerfilDto(
         [Required(ErrorMessage = "O campo é obrigatório!")] 
-        string Id, 
+        int Id, 
         [Required(ErrorMessage = "O campo é obrigatório!")] 
         string Nome, 
         string Descricao, 
         bool Ativo, 
         [Required(ErrorMessage="O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")] 
-        IList<PermissoesDto> Permissoes
+        IList<PermissoesDto> Permissao
     );
 }
