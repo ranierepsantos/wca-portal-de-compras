@@ -9,7 +9,7 @@ namespace wca.compras.domain.Interfaces.Services
 
         public Task<PerfilDto> Update(UpdatePerfilDto perfil);
 
-        public Task<PerfilPermissoesDto> GetWithPermissoes(string id);
+        public Task<PerfilPermissoesDto> GetWithPermissoes(int id);
 
         public Task<IList<ListItem>> GetToList();
 

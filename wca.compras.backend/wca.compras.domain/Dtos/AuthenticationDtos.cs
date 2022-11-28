@@ -13,8 +13,8 @@ namespace wca.compras.domain.Dtos
         string Expiration,
         string AccessToken,
         int UsuarioId,
-        int FilialId,
-        int ClienteId,
+        int? FilialId,
+        int? ClienteId,
         string UsuarioNome,
         PerfilPermissoesDto Perfil
     );

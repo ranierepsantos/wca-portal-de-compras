@@ -10,7 +10,8 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")]
         string Nome, 
         string Descricao,
-        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")] IList<PermissoesDto> Permissoes
+        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")] 
+        IList<PermissoesDto> Permissao
     );
 
     public record UpdatePerfilDto(

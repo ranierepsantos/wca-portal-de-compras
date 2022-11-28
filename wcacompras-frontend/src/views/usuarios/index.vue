@@ -163,18 +163,11 @@
           </td>
           <td class="text-left">{{ getPerfilName(user.perfilid) }}</td>
           <td class="text-center">
-            <v-btn
-              icon="mdi-check"
+            <v-icon
+              :icon="user.ativo ? 'mdi-check':'mdi-close'"
               variant="plain"
-              color="success"
-              v-if="user.ativo"
-            ></v-btn>
-            <v-btn
-              icon="mdi-close"
-              variant="plain"
-              color="error"
-              v-else
-            ></v-btn>
+              :color="user.ativo ? 'success':'error'"
+            ></v-icon>
           </td>
           <td class="text-right">
             <v-btn

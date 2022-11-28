@@ -25,7 +25,7 @@ namespace wca.compras.services
             var data = _mapper.Map<Perfil>(perfil);
             
             _rm.PerfilRepository.Attach(data);
-            foreach (var permissao in perfil.Permissoes)
+            foreach (var permissao in perfil.Permissao)
             {
                 var perm = _mapper.Map<Permissao>(permissao);
                 _rm.PermissaoRepository.Attach(perm);
@@ -45,9 +45,9 @@ namespace wca.compras.services
             return _mapper.Map<IList<ListItem>>(itens); 
         }
 
-        public async Task<PerfilPermissoesDto> GetWithPermissoes(string id)
+        public async Task<PerfilPermissoesDto> GetWithPermissoes(int id)
         {
-            var data = await _rm.PerfilRepository.SelectByCondition(p => p.Id == int.Parse(id))
+            var data = await _rm.PerfilRepository.SelectByCondition(p => p.Id ==id)
                 .Include(pm => pm.Permissao).FirstOrDefaultAsync();
 
             return _mapper.Map<PerfilPermissoesDto>(data);

@@ -20,11 +20,16 @@ namespace wca.compras.data.Repositories
 
         public IQueryable<T> SelectAll()=> _context.Set<T>().AsNoTracking();
 
-        public IQueryable<T> SelectByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false) => 
-            trackChanges? 
-                _context.Set<T>().Where(expression): 
-                _context.Set<T>().Where(expression).AsNoTracking();
-        
+        public IQueryable<T> SelectByCondition(Expression<Func<T, bool>> expression, bool trackChanges = false)
+        {
+            Console.WriteLine("track", trackChanges);
+            if (trackChanges)
+                return _context.Set<T>().Where(expression);
+            else
+              return  _context.Set<T>().Where(expression).AsNoTracking();
+
+        }
+
         public void Delete(T entity) => _context.Set<T>().Remove(entity);
 
         public void Update(T entity) => _context.Set<T>().Update(entity);

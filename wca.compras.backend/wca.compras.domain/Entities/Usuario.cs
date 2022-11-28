@@ -34,19 +34,19 @@ namespace wca.compras.domain.Entities
         public Cliente Cliente { get; set; }
 
         [Column("cliente_id")]
-        public int ClienteId { get; set; }
+        public int? ClienteId { get; set; }
 
         [JsonIgnore]
         public Perfil Perfil { get; set; }
 
         [Column("perfil_id")]
-        public int PerfilId { get; set; }
+        public int? PerfilId { get; set; }
 
         [JsonIgnore]
         public Filial Filial { get; set; }
 
         [Column("filial_id")]
-        public int FilialId { get; set; }
+        public int? FilialId { get; set; }
 
 
     }

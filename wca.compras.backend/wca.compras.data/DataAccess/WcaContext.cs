@@ -14,6 +14,10 @@ namespace wca.compras.data.DataAccess
         public DbSet<Permissao> Permissoes { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<ResetPassword> ResetPassword { get; set; }
+        public DbSet<ClienteContato> ClienteContatos { get; set; }
+        public DbSet<ClienteOrcamentoConfiguracao> ClienteOrcamentoConfiguracaos { get; set; }
+
+
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

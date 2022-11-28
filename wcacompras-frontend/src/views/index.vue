@@ -1,11 +1,7 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-model="drawer"
-      app
-      color="primary"
-      style="padding-top: 30px; padding-left: 2px; padding-right: 2px"
-    >
+    <v-navigation-drawer v-model="drawer" app color="primary"
+      style="padding-top: 30px; padding-left: 2px; padding-right: 2px">
       <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
@@ -14,12 +10,7 @@
       </v-btn>
       <br />
       <v-list class="text-left" density="compact">
-        <v-list-item
-          v-for="item in menuItems"
-          :key="item.title"
-          :value="item"
-          active-color="info"
-        >
+        <v-list-item v-for="item in menuItems" :key="item.title" :value="item" active-color="info">
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
               {{ item.title }}
@@ -37,20 +28,16 @@
         <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
         {{ usuario.nome }}
         <v-menu activator="parent">
-          <v-list
-          :lines="false"
-          density="compact"
-          nav
-        >
-          <v-list-item class="text-primary" @click="logout()">
-            <template v-slot:prepend>
-              <v-icon icon="mdi-export" size="small"></v-icon>
-            </template>
+          <v-list :lines="false" density="compact" nav>
+            <v-list-item class="text-primary" @click="logout()">
+              <template v-slot:prepend>
+                <v-icon icon="mdi-export" size="small"></v-icon>
+              </template>
 
-            <v-list-item-title v-text="'Sair'"></v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+              <v-list-item-title v-text="'Sair'"></v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-btn>
     </v-app-bar>
 
@@ -81,20 +68,21 @@ const menuItems = ref([
     value: 1,
     route: "/app",
   },
-  // {
-  //   title: "About",
-  //   value: 2,
-  //   route: "/app/about",
-  // },
+  {
+    title: "Perfil",
+    value: 2,
+    route: "/app/perfil",
+  },
   {
     title: "Usuários",
-    value: 2,
+    value: 3,
     route: "/app/usuarios",
   },
 ]);
 const authStore = useAuthStore();
 const router = useRouter();
-const usuario = computed(() => {
+const usuario = computed(() =>
+{
   return authStore.user;
 })
 
@@ -103,7 +91,7 @@ const usuario = computed(() => {
 function logout()
 {
   authStore.finishSession()
-  router.push({name: "login"})
+  router.push({ name: "login" })
 }
 </script>
 

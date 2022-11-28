@@ -23,14 +23,34 @@ const routes = [
         component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
       },
       {
+        path: 'app/perfil',
+        name: 'perfil',
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/perfil')
+      },
+      {
+        path: 'app/perfil/cadastro',
+        name: 'perfilCadastro',
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/perfil/cadastro.vue'),
+        props: route => ({ query: route.query.id })
+      },
+      {
         path: 'app/usuarios',
         name: 'usuarios',
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios/index.vue')
-      }
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios')
+      },
+      
     ]
   },
   {
