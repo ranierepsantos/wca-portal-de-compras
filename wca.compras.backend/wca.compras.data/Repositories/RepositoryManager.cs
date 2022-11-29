@@ -11,6 +11,7 @@ namespace wca.compras.data.Repositories
         private IRepository<Permissao> _permissaoRepo;
         private IRepository<Usuario> _usuarioRepo;
         private IRepository<ResetPassword> _resetPassRepo;
+        private IRepository<Cliente> _clienteRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -61,6 +62,18 @@ namespace wca.compras.data.Repositories
                     _resetPassRepo = new BaseRepository<ResetPassword>(_context);
                 }
                 return _resetPassRepo;
+            }
+        }
+
+        public IRepository<Cliente> ClienteRepository
+        {
+            get
+            {
+                if (_clienteRepo == null)
+                {
+                    _clienteRepo = new BaseRepository<Cliente>(_context);
+                }
+                return _clienteRepo;
             }
         }
         public async Task SaveAsync()

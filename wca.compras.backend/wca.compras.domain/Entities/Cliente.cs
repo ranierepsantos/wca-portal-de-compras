@@ -51,8 +51,8 @@ namespace wca.compras.domain.Entities
         [Column("filial_id")]
         public int FilialId { get; set; }
 
-        public IList<ClienteContato> ClienteContatos { get; set; }
-        public IList<ClienteOrcamentoConfiguracao> ClienteOrcamentoConfiguracao { get; set; }
+        public IList<ClienteContato> ClienteContatos { get; set; } = new List<ClienteContato>();
+        public IList<ClienteOrcamentoConfiguracao> ClienteOrcamentoConfiguracao { get; set; } = new List<ClienteOrcamentoConfiguracao>();
 
     }
 }

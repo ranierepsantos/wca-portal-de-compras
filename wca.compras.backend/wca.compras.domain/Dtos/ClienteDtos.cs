@@ -15,7 +15,7 @@ namespace wca.compras.domain.Dtos
         string UF,
         bool Ativo,
         int FilialId,
-        IList<ClienteContatoDto> ClienteContato,
+        IList<ClienteContatoDto> ClienteContatos,
         IList<ClienteOrcamentoConfiguracaoDto> ClienteOrcamentoConfiguracao
     );
 
@@ -36,7 +36,7 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
-        IList<ClienteContatoDto> ClienteContato,
+        IList<ClienteContatoDto> ClienteContatos,
         IList<ClienteOrcamentoConfiguracaoDto> ClienteOrcamentoConfiguracao
     );
 
@@ -56,7 +56,7 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")] 
         int FilialId,
-        IList<ClienteContatoDto> ClienteContato,
+        IList<ClienteContatoDto> ClienteContatos,
         IList<ClienteOrcamentoConfiguracaoDto> ClienteOrcamentoConfiguracao
     );
 

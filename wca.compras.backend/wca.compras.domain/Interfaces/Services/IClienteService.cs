@@ -10,11 +10,11 @@ namespace wca.compras.domain.Interfaces.Services
 {
     public interface IClienteService
     {
-        public Task<UsuarioDto> Create(CreateUsuarioDto usuario);
-        public Task<UsuarioDto> Update(UpdateUsuarioDto usuario);
+        public Task<ClienteDto> Create(CreateClienteDto cliente);
+        public Task<ClienteDto> Update(UpdateClienteDto cliente);
         public Task<bool> Remove(int id);
-        public Task<IList<UsuarioDto>> GetAll();
-        public Task<UsuarioDto> GetById(int id);
-        public Task<Pagination<UsuarioDto>> Paginate(int page = 1, int pageSize = 10, string termo = "");
+        public Task<IList<ClienteDto>> GetAll();
+        public Task<ClienteDto> GetById(int id);
+        public Task<Pagination<ClienteDto>> Paginate(int page = 1, int pageSize = 10, string termo = "");
     }
 }
