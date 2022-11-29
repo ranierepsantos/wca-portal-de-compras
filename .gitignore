@@ -103,3 +103,19 @@ dist
 # TernJS port file
 .tern-port
 wca.compras.backend/.vs/
+/wca.compras.backend/wca.compras.crosscutting/obj/Debug/net6.0/ref/wca.compras.crosscutting.dll
+/wca.compras.backend/wca.compras.crosscutting/obj/Debug/net6.0/refint/wca.compras.crosscutting.dll
+/wca.compras.backend/wca.compras.crosscutting/obj/Debug/net6.0/wca.compras.crosscutting.csproj.AssemblyReference.cache
+/wca.compras.backend/wca.compras.crosscutting/obj/Debug/net6.0/wca.compras.crosscutting.dll
+/wca.compras.backend/wca.compras.crosscutting/obj/Debug/net6.0/wca.compras.crosscutting.pdb
+/wca.compras.backend/wca.compras.data/bin/Debug/net6.0/wca.compras.data.dll
+/wca.compras.backend/wca.compras.data/bin/Debug/net6.0/wca.compras.data.pdb
+/wca.compras.backend/wca.compras.data/bin/Debug/net6.0/wca.compras.domain.pdb
+/wca.compras.backend/wca.compras.data/bin/Debug/net6.0/wca.compras.domain.dll
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/ref/wca.compras.services.dll
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/refint/wca.compras.services.dll
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/wca.compras.services.csproj.AssemblyReference.cache
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/wca.compras.services.csproj.CoreCompileInputs.cache
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/wca.compras.services.csproj.FileListAbsolute.txt
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/wca.compras.services.dll
+/wca.compras.backend/wca.compras.services/obj/Debug/net6.0/wca.compras.services.pdb
