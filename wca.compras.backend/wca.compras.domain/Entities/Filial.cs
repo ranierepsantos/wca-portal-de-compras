@@ -12,5 +12,8 @@ namespace wca.compras.domain.Entities
         [Required, MaxLength(150)]
         [Column("nome",TypeName = "varchar(150)")]
         public string Nome { get; set; }
+
+        [Column("ativo")]
+        public bool Ativo { get; set; } = true;
     }
 }

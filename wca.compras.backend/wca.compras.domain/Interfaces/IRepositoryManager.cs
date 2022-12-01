@@ -9,6 +9,7 @@ namespace wca.compras.domain.Interfaces
         public IRepository<ResetPassword> ResetPasswordRepository { get; }
         public IRepository<Usuario> UsuarioRepository { get; }
         public IRepository<Cliente> ClienteRepository { get; }
+        public IRepository<Filial> FilialRepository { get; }
         Task SaveAsync();
     }
 }

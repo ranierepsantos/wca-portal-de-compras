@@ -56,7 +56,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                var result = await service.Update(clienteDto);
+                var result = await service.Update(1,clienteDto);
                 if (result == null)
                 {
                     return NotFound($"Perfil íd: {clienteDto.Id}, não localizado!");
@@ -84,7 +84,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                var result = await service.GetById(id);
+                var result = await service.GetById(1, id);
                 if (result == null)
                 {
                     return NotFound($"Cliente íd: {id}, não localizado!");
@@ -96,6 +96,15 @@ namespace wca.compras.webapi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        [HttpGet]
+        [Route("all")]
+        public async Task<ActionResult<IList<ClienteDto>>> GetAll()
+        {
+            var items = await service.GetAll(1);
+            return Ok(items);
+        }
+
 
     }
 }

@@ -49,19 +49,40 @@ namespace wca.compras.services
             }
         }
 
-        public Task<IList<ClienteDto>> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<ClienteDto> GetById(int id)
+        public async Task<IList<ClienteDto>> GetAll(int filialId)
         {
             try
             {
-                var data = await _rm.ClienteRepository.SelectByCondition(p => p.Id == id)
-                .Include(cc => cc.ClienteContatos)
-                .Include(co => co.ClienteOrcamentoConfiguracao)
-                .FirstOrDefaultAsync();
+                IList<Cliente> clientes;
+                var query = _rm.ClienteRepository.SelectAll();
+
+                if (filialId > 1)
+                    query = query.Where(c => c.FilialId == filialId);
+
+                clientes = await query.OrderBy(c => c.Nome).ToArrayAsync();
+
+                return _mapper.Map<IList<ClienteDto>>(clientes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ClienteService.Create.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        public async Task<ClienteDto> GetById(int filialId, int id)
+        {
+            try
+            {
+                var query = _rm.ClienteRepository.SelectByCondition(p => p.Id == id);
+
+                if (filialId > 1)
+                    query = query.Where(c => c.FilialId == filialId);
+
+                query = query.Include(cc => cc.ClienteContatos)
+                             .Include(co => co.ClienteOrcamentoConfiguracao);
+
+                var data = await query.FirstOrDefaultAsync();
 
                 return _mapper.Map<ClienteDto>(data);
             }
@@ -73,23 +94,29 @@ namespace wca.compras.services
             
         }
 
-        public Task<Pagination<ClienteDto>> Paginate(int page = 1, int pageSize = 10, string termo = "")
+        public Task<Pagination<ClienteDto>> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "")
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Remove(int id)
+        public Task<bool> Remove(int filialId, int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<ClienteDto> Update(UpdateClienteDto cliente)
+        public async Task<ClienteDto> Update(int filialId, UpdateClienteDto cliente)
         {
             try
             {
-                var baseData = await _rm.ClienteRepository.SelectByCondition(c => c.Id == cliente.Id, false)
-                    .Include(c => c.ClienteContatos)
-                    .Include(c => c.ClienteOrcamentoConfiguracao).FirstOrDefaultAsync();
+                var query = _rm.ClienteRepository.SelectByCondition(p => p.Id == cliente.Id);
+
+                if (filialId > 1)
+                    query = query.Where(c => c.FilialId == filialId);
+
+                query = query.Include(cc => cc.ClienteContatos)
+                             .Include(co => co.ClienteOrcamentoConfiguracao);
+
+                var baseData = await query.FirstOrDefaultAsync();
                 
                 if (baseData == null)
                 {

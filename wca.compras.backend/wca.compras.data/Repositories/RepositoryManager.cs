@@ -12,6 +12,7 @@ namespace wca.compras.data.Repositories
         private IRepository<Usuario> _usuarioRepo;
         private IRepository<ResetPassword> _resetPassRepo;
         private IRepository<Cliente> _clienteRepo;
+        private IRepository<Filial> _filialRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -76,6 +77,19 @@ namespace wca.compras.data.Repositories
                 return _clienteRepo;
             }
         }
+
+        public IRepository<Filial> FilialRepository
+        {
+            get
+            {
+                if (_filialRepo == null)
+                {
+                    _filialRepo = new BaseRepository<Filial>(_context);
+                }
+                return _filialRepo;
+            }
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

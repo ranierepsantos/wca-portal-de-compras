@@ -45,20 +45,29 @@ namespace wca.compras.services
             
         }
 
-        public async Task<IList<UsuarioDto>> GetAll()
+        public async Task<IList<UsuarioDto>> GetAll(int filialId)
         {
-            var list = await _rm.UsuarioRepository.SelectAll().OrderBy(u => u.Nome).ToListAsync();
+            List<Usuario> usuarios;
+            if (filialId == 1)
+                usuarios = await _rm.UsuarioRepository.SelectAll().OrderBy(u => u.Nome).ToListAsync();
+            else 
+               usuarios =  await _rm.UsuarioRepository.SelectByCondition(u => u.FilialId == filialId).OrderBy(u => u.Nome).ToListAsync();
 
-            return _mapper.Map<IList<UsuarioDto>>(list);
+            return _mapper.Map<IList<UsuarioDto>>(usuarios);
         }
 
-        public async Task<UsuarioDto> GetById(int id)
+        public async Task<UsuarioDto> GetById(int filialId, int id)
         {
             try
             {
-                var data = await _rm.UsuarioRepository.SelectByCondition(u => u.Id == id)
-                                        .FirstOrDefaultAsync();
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id);
 
+                if (filialId > 1)
+                {
+                    query = query.Where(u => u.FilialId == filialId);
+                }
+                var data = await query.FirstOrDefaultAsync();
+                
                 if (data == null)
                 {
                     return null;
@@ -75,11 +84,17 @@ namespace wca.compras.services
 
         }
 
-        public async Task<bool> Remove(int id)
+        public async Task<bool> Remove(int filialId, int id)
         {
             try
             {
-                var baseData = await _rm.UsuarioRepository.SelectByCondition(u => u.Id == id).FirstOrDefaultAsync();
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id);
+
+                if (filialId > 1)
+                {
+                    query = query.Where(u => u.FilialId == filialId);
+                }
+                var baseData = await query.FirstOrDefaultAsync();
 
                 if (baseData == null)
                 {
@@ -99,12 +114,17 @@ namespace wca.compras.services
             
         }
 
-        public async Task<UsuarioDto> Update(UpdateUsuarioDto usuario)
+        public async Task<UsuarioDto> Update(int filialId, UpdateUsuarioDto usuario)
         {
             try
             {
-                var baseData = await _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id)
-                                    .FirstOrDefaultAsync();
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id);
+
+                if (filialId > 1)
+                {
+                    query = query.Where(u => u.FilialId == filialId);
+                }
+                var baseData = await query.FirstOrDefaultAsync();
                 
                 if (baseData == null)
                 {
@@ -135,16 +155,22 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<Pagination<UsuarioDto>> Paginate(int page, int pageSize = 10, string termo = "")
+        public async Task<Pagination<UsuarioDto>> Paginate(int filialId, int page, int pageSize = 10, string termo = "")
         {
             try
             {
                 var query = _rm.UsuarioRepository.SelectAll();
+                
+                if (filialId > 1)
+                {
+                    query = query.Where(u => u.FilialId == filialId);
+                }
 
                 if (!string.IsNullOrEmpty(termo))
                 {
                     query = query.Where(q => q.Nome.Contains(termo));
                 }
+                
                 query = query.OrderBy(p => p.Nome);
 
                 var pagination = Pagination<UsuarioDto>.ToPagedList(query, page, pageSize);

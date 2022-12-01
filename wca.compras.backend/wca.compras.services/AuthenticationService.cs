@@ -60,7 +60,8 @@ namespace wca.compras.services
                     new GenericIdentity(authUser.Email),
                     new[] {
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.UniqueName, authUser.Id.ToString())
+                    new Claim(JwtRegisteredClaimNames.UniqueName, authUser.Id.ToString()),
+                    new Claim("Filial",authUser.FilialId.ToString())
                     }
                 );
 

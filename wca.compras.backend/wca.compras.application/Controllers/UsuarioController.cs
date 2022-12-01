@@ -9,7 +9,7 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize("Bearer")]
+    [Authorize("Bearer")]
     public class UsuarioController : Controller
     {
         private readonly IUsuarioService _usuarioService;
@@ -63,8 +63,8 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-
-                var result = await _usuarioService.Update(updateUsuario);
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                var result = await _usuarioService.Update(filial, updateUsuario);
                 if (result == null) return NotFound();
                 return NoContent();
             }
@@ -87,8 +87,8 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-
-                var result = await _usuarioService.Remove(id);
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                var result = await _usuarioService.Remove(filial, id);
                 
                 if (!result) return NotFound();
 
@@ -108,9 +108,11 @@ namespace wca.compras.webapi.Controllers
         [Route("Paginate/{pageSize}/{page}")]
         public async Task<ActionResult<Pagination<UsuarioDto>>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
         {
+            
             try
             {
-                var items = await _usuarioService.Paginate(page, pageSize, termo);
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                var items = await _usuarioService.Paginate(filial, page, pageSize, termo);
                 return Ok(items);
             }
             catch (Exception ex)
