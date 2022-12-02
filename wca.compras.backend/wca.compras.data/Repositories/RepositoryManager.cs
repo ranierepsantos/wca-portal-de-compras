@@ -13,6 +13,7 @@ namespace wca.compras.data.Repositories
         private IRepository<ResetPassword> _resetPassRepo;
         private IRepository<Cliente> _clienteRepo;
         private IRepository<Filial> _filialRepo;
+        private IRepository<TipoFornecimento> _tipoFornecimentoRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -87,6 +88,18 @@ namespace wca.compras.data.Repositories
                     _filialRepo = new BaseRepository<Filial>(_context);
                 }
                 return _filialRepo;
+            }
+        }
+
+        public IRepository<TipoFornecimento> TipoFornecimentoRepository
+        {
+            get
+            {
+                if (_tipoFornecimentoRepo == null)
+                {
+                    _tipoFornecimentoRepo = new BaseRepository<TipoFornecimento>(_context);
+                }
+                return _tipoFornecimentoRepo;
             }
         }
 

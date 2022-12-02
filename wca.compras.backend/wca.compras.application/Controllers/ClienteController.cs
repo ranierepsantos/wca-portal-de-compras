@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Interfaces.Services;
@@ -7,7 +8,7 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize("Bearer")]
+    [Authorize("Bearer")]
     public class ClienteController : Controller
     {
         private IClienteService service;
@@ -31,7 +32,6 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-
                 var result = await service.Create(clienteDto);
                 return Created("", result);
             }
@@ -55,8 +55,9 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
+                int filial = int.Parse(User.FindFirst("Filial").Value);
 
-                var result = await service.Update(1,clienteDto);
+                var result = await service.Update(filial,clienteDto);
                 if (result == null)
                 {
                     return NotFound($"Perfil íd: {clienteDto.Id}, não localizado!");
@@ -84,7 +85,10 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                var result = await service.GetById(1, id);
+
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+
+                var result = await service.GetById(filial, id);
                 if (result == null)
                 {
                     return NotFound($"Cliente íd: {id}, não localizado!");
@@ -101,7 +105,8 @@ namespace wca.compras.webapi.Controllers
         [Route("all")]
         public async Task<ActionResult<IList<ClienteDto>>> GetAll()
         {
-            var items = await service.GetAll(1);
+            int filial = int.Parse(User.FindFirst("Filial").Value);
+            var items = await service.GetAll(filial);
             return Ok(items);
         }
 

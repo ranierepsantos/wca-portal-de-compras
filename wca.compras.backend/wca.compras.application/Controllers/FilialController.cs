@@ -9,7 +9,7 @@ namespace wca.compras.webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize("Bearer")]
+    [Authorize("Bearer")]
     public class FilialController : Controller
     {
         private IFilialService service;
@@ -19,28 +19,33 @@ namespace wca.compras.webapi.Controllers
             this.service = service;
         }
 
-        [HttpGet]
-        [Route("all")]
-        public async Task<ActionResult<IList<FilialDto>>> GetAll()
-        {
-            try
-            {
-                var items = await service.GetAll();
-                return Ok(items);
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
+        //[HttpGet]
+        //[Route("all")]
+        //public async Task<ActionResult<IList<FilialDto>>> GetAll()
+        //{
+        //    try
+        //    {
+        //        var items = await service.GetAll();
+        //        return Ok(items);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        //    }
+        //}
 
+        /// <summary>
+        /// Retorna lista de filiais ativas para preenchimento de Listas e Combos
+        /// </summary>
+        /// <returns>items</returns>
         [HttpGet]
         [Route("ToList")]
         public async Task<ActionResult<IList<ListItem>>> List()
         {
             try
             {
-                var items = await service.GetToList();
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                var items = await service.GetToList(filial);
                 return Ok(items);
             }
             catch (ArgumentException ex)
@@ -50,9 +55,13 @@ namespace wca.compras.webapi.Controllers
             
         }
 
-
+        /// <summary>
+        /// Cria uma nova filial
+        /// </summary>
+        /// <returns>Filial</returns>
+        /// <param name="createFilial"></param>
         [HttpPost]
-        public async Task<ActionResult<PermissaoDto>> Create(CreateFilialDto createFilial)
+        public async Task<ActionResult<FilialDto>> Create(CreateFilialDto createFilial)
         {
             try
             {
@@ -66,6 +75,11 @@ namespace wca.compras.webapi.Controllers
             
         }
 
+        /// <summary>
+        /// Atualiza dados da filial
+        /// </summary>
+        /// <returns>Filial</returns>
+        /// <param name="updateFilialDto"></param>
         [HttpPut]
         public async Task<ActionResult> Update([FromBody] FilialDto updateFilialDto)
         {
@@ -89,6 +103,10 @@ namespace wca.compras.webapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Retorna lista de filial por paginação
+        /// </summary>
+        /// <returns>FilialDto</returns>
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
         public ActionResult<Pagination<FilialDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")

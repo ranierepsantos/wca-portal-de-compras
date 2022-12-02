@@ -6,7 +6,7 @@
       </template>
       <div class="text-h4 text-primary">Usuários</div>
       <v-spacer></v-spacer>
-
+      
       <v-btn color="primary" variant="outlined" class="text-capitalize">
         <b>Novo</b>
 
@@ -64,18 +64,13 @@
                   <v-col>
                     <v-select
                       label="Filial"
-                      :items="[
-                        'California',
-                        'Colorado',
-                        'Florida',
-                        'Georgia',
-                        'Texas',
-                        'Wyoming',
-                      ]"
+                      :items="filiais"
                       variant="outlined"
                       color="primary"
-                      disabled
-                      
+                      item-title="text"
+                      item-value="value"
+                      v-model="usuario.filialid"
+                      :disabled="(authStore.user.filial != 1)"
                       :rules="[(v) => !!v || 'Filial é obrigatório']"
                     ></v-select>
                   </v-col>
@@ -202,9 +197,11 @@
 
 <script setup>
 import { ref, onMounted, watch, inject } from "vue";
-import userService from "../../services/user.service";
-import perfilService from "../../services/perfil.service";
-import handleErrors from "../../helpers/HandleErrors"
+import userService from "@/services/user.service";
+import perfilService from "@/services/perfil.service";
+import filialService from "@/services/filial.service";
+import handleErrors from "@/helpers/HandleErrors"
+import { useAuthStore } from "@/store/auth.store";
 
 //DATA
 const page = ref(1);
@@ -213,6 +210,7 @@ const isBusy = ref(false);
 const totalPages = ref(1);
 const users = ref([]);
 const listPerfil = ref([]);
+const filiais = ref([]);
 const dialogTitle = ref("Novo Usuário");
 const dialog = ref(false);
 const swal = inject("$swal");
@@ -225,6 +223,7 @@ const usuario = ref({
   filialid: null,
   perfilid: null,
 });
+const authStore = useAuthStore();
 const emailRules = ref([
   (v) => !!v || "E-mail é obrigatório",
   (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
@@ -233,6 +232,8 @@ const userForm = ref(null)
 
 //VUE METHODS
 onMounted(async () => {
+  clearData();
+  await getListFilial();
   await getListPerfil();
   await getItems();
 });
@@ -312,6 +313,16 @@ async function salvar() {
       }
       await getItems();
       closeDialog();
+      swal.fire({
+          toast: true,
+          icon: "success",
+          position: "top-end",
+          title: "Sucesso!",
+          text: "Dados salvos com sucesso!",
+          showConfirmButton: false,
+          timer: 2000,
+      })
+      
     }
   } catch (error)
   {
@@ -328,7 +339,7 @@ function clearData() {
     email: "",
     ativo: true,
     clienteid: null,
-    filialid: null,
+    filialid: authStore.user.filial,
     perfilid: null,
   };
 }
@@ -343,7 +354,17 @@ async function getListPerfil() {
     let response = await perfilService.toList();
     listPerfil.value = response.data;
   } catch (error) {
-    console.log("usuários.error:",error);
+    console.log("getListPerfil.error:",error);
+    handleErrors(error)
+  }
+}
+
+async function getListFilial() {
+  try {
+    let response = await filialService.toList();
+    filiais.value = response.data;
+  } catch (error) {
+    console.log("getListFilial.error:",error);
     handleErrors(error)
   }
 }

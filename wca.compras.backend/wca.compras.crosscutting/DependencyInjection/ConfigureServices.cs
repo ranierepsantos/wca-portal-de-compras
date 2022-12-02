@@ -19,6 +19,7 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<IClienteService, ClienteService>();
             services.AddTransient<IFilialService, FilialService>();
+            services.AddTransient<ITipoFornecimentoService, TipoFornecimentoService>();
 
             var autoMapperConfig = new MapperConfiguration(
                 config =>
@@ -28,6 +29,7 @@ namespace wca.compras.crosscutting.DependencyInjection
                     config.AddProfile(new UsuarioProfile());
                     config.AddProfile(new ClienteProfile());
                     config.AddProfile(new FilialProfile());
+                    config.AddProfile(new TipoFornecimentoProfile());
                 }
              );
             IMapper mapper = autoMapperConfig.CreateMapper();

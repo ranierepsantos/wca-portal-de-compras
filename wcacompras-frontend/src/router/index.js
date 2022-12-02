@@ -23,34 +23,57 @@ const routes = [
         component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
       },
       {
-        path: 'app/perfil',
-        name: 'perfil',
+        path: 'app/filiais',
+        name: 'filiais',
         beforeEnter: protectRoute,
+        meta: {permissao: "filial"},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "usuarios" */ '../views/perfil')
+        component: () => import(/* webpackChunkName: "filial" */ '../views/filiais'),
+        
+      },
+      {
+        path: 'app/perfil',
+        name: 'perfil',
+        beforeEnter: protectRoute,
+        meta: {permissao: "perfil"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "perfil" */ '../views/perfil'),
+        
       },
       {
         path: 'app/perfil/cadastro',
         name: 'perfilCadastro',
+        meta: {permissao: "perfil"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "usuarios" */ '../views/perfil/cadastro.vue'),
+        component: () => import(/* webpackChunkName: "perfil" */ '../views/perfil/cadastro.vue'),
         props: route => ({ query: route.query.id })
       },
       {
         path: 'app/usuarios',
         name: 'usuarios',
+        meta: {permissao: "usuario"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios')
       },
-      
+      {
+        path: 'app/acessonegado',
+        name: 'acessonegado',
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "pages" */ '../views/pages/acessoNegado.vue')
+      },
     ]
   },
   {
@@ -62,6 +85,10 @@ const routes = [
     path: "/recuperar-senha",
     name: "recuperarSenha",
     component: () => import("../views/sessoes/recuperarSenha")
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: () => import(/* webpackChunkName: "pages" */ '../views/pages/notFound')
   }
 ]
 
@@ -70,6 +97,8 @@ function protectRoute(to, from, next)
 {
   let authStore = useAuthStore();
   if (!authStore.isAuthenticated()) next({ name: 'login' })
+  if (to.meta.permissao != undefined && !authStore.hasPermissao(to.meta.permissao)) 
+    next({name: "acessonegado"})
   else next()
 }
 

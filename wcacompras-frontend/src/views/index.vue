@@ -10,7 +10,9 @@
       </v-btn>
       <br />
       <v-list class="text-left" density="compact">
-        <v-list-item v-for="item in menuItems" :key="item.title" :value="item" active-color="info">
+        <v-list-item v-for="item in menuItems" :key="item.title" :value="item" active-color="info"
+        v-show = "checkPermissao(item.permissao)"
+        >
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
               {{ item.title }}
@@ -67,16 +69,25 @@ const menuItems = ref([
     title: "Home",
     value: 1,
     route: "/app",
+    permissao: "livre"
+  },
+  {
+    title: "Filiais",
+    value: 2,
+    route: "/app/filiais",
+    permissao: "filial"
   },
   {
     title: "Perfil",
     value: 2,
     route: "/app/perfil",
+    permissao: "perfil"
   },
   {
     title: "Usuários",
     value: 3,
     route: "/app/usuarios",
+    permissao: "usuario"
   },
 ]);
 const authStore = useAuthStore();
@@ -92,6 +103,10 @@ function logout()
 {
   authStore.finishSession()
   router.push({ name: "login" })
+}
+
+function checkPermissao(permissao) {
+  return authStore.hasPermissao(permissao)
 }
 </script>
 

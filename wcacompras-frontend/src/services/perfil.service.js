@@ -10,7 +10,7 @@ export default {
 
     update(perfil)
     {
-        return api.put(route.perfilCreate, perfil);
+        return api.put(route.perfilUpdate, perfil);
     },
 
     toList()

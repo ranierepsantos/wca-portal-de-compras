@@ -69,12 +69,17 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ListItem>> GetToList()
+        public async Task<IList<ListItem>> GetToList(int filialId)
         {
             try
             {
-                var itens = await _rm.FilialRepository.SelectByCondition(c => c.Ativo == true)
-               .OrderBy(p => p.Nome).ToListAsync(); ;
+                var query = _rm.FilialRepository.SelectByCondition(c => c.Ativo == true);
+
+                if (filialId > 1)
+                {
+                    query= query.Where(c => c.Id == filialId);
+                }
+                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 
                 return _mapper.Map<IList<ListItem>>(itens);
             }
@@ -89,7 +94,8 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.FilialRepository.SelectAll();
+                //Não trazer a MATRIZ
+                var query = _rm.FilialRepository.SelectAll().Where(c => c.Id > 1);
 
                 if (!string.IsNullOrEmpty(termo))
                 {

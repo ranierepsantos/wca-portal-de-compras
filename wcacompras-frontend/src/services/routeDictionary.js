@@ -3,6 +3,11 @@ export const route = {
     recuperarSenha: "Authentication/RecuperarSenha",
     alterarSenha: "Authentication/AlterarSenha",
     
+    filialCreate: "Filial",
+    filialUpdate: "Filial",
+    filialToList: "Filial/ToList",
+    filialPaginate: "Filial/Paginate/{pageSize}/{page}",
+
     usuarioCreate: "Usuario",
     usuarioRemove: "Usuario",
     usuarioUpdate: "Usuario",
