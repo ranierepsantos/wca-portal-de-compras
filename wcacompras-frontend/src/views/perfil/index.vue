@@ -1,15 +1,6 @@
 <template>
   <div>
-    <v-breadcrumbs>
-      <template v-slot:prepend>
-        <v-icon size="large" icon="mdi-arrow-left" color="primary"></v-icon>
-      </template>
-      <div class="text-h4 text-primary">Perfil</div>
-      <v-spacer></v-spacer>
-      <v-btn color="primary" variant="outlined" class="text-capitalize" @click="editar('novo')">
-        <b>Novo</b>
-      </v-btn>
-    </v-breadcrumbs>
+    <Breadcrumbs title="Perfil" @novoClick="editar('novo')"/>
     <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
     <v-table class="elevation-2">
       <thead>
@@ -58,7 +49,7 @@ import { ref, onMounted, watch, inject } from "vue";
 import perfilService from "../../services/perfil.service";
 import handleErrors from "../../helpers/HandleErrors"
 import { useRouter } from "vue-router";
-
+import Breadcrumbs from "@/components/breadcrumbs.vue";
 //DATA
 const router = useRouter()
 const page = ref(1);

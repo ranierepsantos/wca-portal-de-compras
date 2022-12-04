@@ -1,14 +1,9 @@
 <template>
     <div>
-        <v-breadcrumbs>
-            <template v-slot:prepend>
-                <v-icon size="large" icon="mdi-arrow-left" color="primary"></v-icon>
-            </template>
-            <div class="text-h4 text-primary">Perfil</div>
-        </v-breadcrumbs>
+        <bread-crumbs  title="Perfil" :show-button="false"/>
         <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
         <v-container class="justify-center">
-            <v-card lass="mx-auto" max-width="980">
+            <v-card class="mx-auto" max-width="980">
                 <v-card-text>
                     <v-form ref="form" v-model="valid" lazy-validation>
                         <v-text-field density="compact" variant="outlined" v-model="perfil.nome" :counter="50"
@@ -60,8 +55,9 @@
 import { onMounted, ref, inject } from "vue"
 import perfilService from "@/services/perfil.service";
 import handleErrors from "../../helpers/HandleErrors"
-import { useRoute, useRouter } from "vue-router";
-import router from "@/router";
+import { useRoute } from "vue-router";
+import breadCrumbs from '@/components/breadcrumbs.vue';
+import router from "@/router"
 
 // VARIABLES
 let route = useRoute();
@@ -132,7 +128,6 @@ async function salvar()
 {
     try
     {
-        debugger
         isBusy.value = true
         isPermissaoValid.value = perfil.value.permissao.length > 0
         const { valid } = await form.value.validate()

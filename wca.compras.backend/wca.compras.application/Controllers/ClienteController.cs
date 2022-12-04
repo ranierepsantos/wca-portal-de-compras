@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Interfaces.Services;
+using wca.compras.domain.Util;
 
 namespace wca.compras.webapi.Controllers
 {
@@ -101,15 +102,45 @@ namespace wca.compras.webapi.Controllers
             }
         }
 
+        /// <summary>
+        /// Retorna lista de Clientes ativos para preenchimento de Listas e Combos
+        /// </summary>
+        /// <returns>items</returns>
+        /// <param name="filial"></param>
         [HttpGet]
-        [Route("all")]
-        public async Task<ActionResult<IList<ClienteDto>>> GetAll()
+        [Route("ToList/{filial}")]
+        public async Task<ActionResult<IList<ListItem>>> List(int filial)
         {
-            int filial = int.Parse(User.FindFirst("Filial").Value);
-            var items = await service.GetAll(filial);
-            return Ok(items);
+            try
+            {
+                var items = await service.GetToList(filial);
+                return Ok(items);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
 
+        /// <summary>
+        /// Retorna lista de Clientes por paginação
+        /// </summary>
+        /// <returns>ClienteDto</returns>
+        [HttpGet]
+        [Route("Paginate/{pageSize}/{page}")]
+        public ActionResult<Pagination<ClienteDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        {
+            try
+            {
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                var items = service.Paginate(filial, page, pageSize, termo);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
 
+        }
     }
 }

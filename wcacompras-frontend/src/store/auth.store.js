@@ -22,7 +22,6 @@ export const useAuthStore = defineStore('auth', {
         async authenticate(credenciais)
         {
             let response = await authService.login(credenciais);
-            console.log('response.data', response.data);
             if (response.data.authenticated == true)
                 this.startSession(response.data);
             
@@ -62,7 +61,6 @@ export const useAuthStore = defineStore('auth', {
 
         startSession(auth)
         {
-            console.log("Auth", auth)
             this.user.id = auth.usuarioId;
             this.user.nome = auth.usuarioNome;
             this.user.filial = auth.filialId

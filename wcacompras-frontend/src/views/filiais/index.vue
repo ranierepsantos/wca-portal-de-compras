@@ -1,71 +1,59 @@
 <template>
     <div>
-      <v-breadcrumbs>
-        <template v-slot:prepend>
-          <v-icon size="large" icon="mdi-arrow-left" color="primary"></v-icon>
-        </template>
-        <div class="text-h4 text-primary">Filiais</div>
-        <v-spacer></v-spacer>
-        
-        <v-btn color="primary" variant="outlined" class="text-capitalize">
-          <b>Novo</b>
-  
-          <v-dialog
+      <Breadcrumbs title="Filial" @novoClick="dialog = true"/>
+      <v-dialog
             v-model="dialog"
-            activator="parent"
             max-width="700"
             :absolute="false"
-          >
-            <v-card>
-              <v-card-title class="text-primary text-h5">
-                {{ dialogTitle }}
-              </v-card-title>
-              <v-card-text>
-                <v-form @submit.prevent="salvar()" ref="filialForm">
-                  <v-row>
-                    <v-col>
-                      <v-text-field
-                        label="Nome"
-                        v-model="filial.nome"
-                        type="text"
-                        required
-                        variant="outlined"
-                        color="primary"
-                        :rules="[(v) => !!v || 'Nome é obrigatório']"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="6">
-                      <v-checkbox
-                        v-show="filial.id > 0"
-                        v-model="filial.ativo"
-                        label="Ativo"
-                        color="primary"
-                      ></v-checkbox>
-                    </v-col>
-                  </v-row>
-                  
-                  <v-row>
-                    <v-col class="text-right">
-                      <v-btn
-                        variant="outlined"
-                        color="primary"
-                        @click="closeDialog()"
-                        >Cancelar</v-btn
-                      >
-                      <v-btn color="primary" type="submit" class="ml-3"
-                        >Salvar</v-btn
-                      >
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </v-card-text>
-              <v-card-actions> </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-btn>
-      </v-breadcrumbs>
+      >
+        <v-card>
+          <v-card-title class="text-primary text-h5">
+            {{ dialogTitle }}
+          </v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="salvar()" ref="filialForm">
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Nome"
+                    v-model="filial.nome"
+                    type="text"
+                    required
+                    variant="outlined"
+                    color="primary"
+                    :rules="[(v) => !!v || 'Nome é obrigatório']"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="6">
+                  <v-checkbox
+                    v-show="filial.id > 0"
+                    v-model="filial.ativo"
+                    label="Ativo"
+                    color="primary"
+                  ></v-checkbox>
+                </v-col>
+              </v-row>
+              
+              <v-row>
+                <v-col class="text-right">
+                  <v-btn
+                    variant="outlined"
+                    color="primary"
+                    @click="closeDialog()"
+                    >Cancelar</v-btn
+                  >
+                  <v-btn color="primary" type="submit" class="ml-3"
+                    >Salvar</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-text>
+          <v-card-actions> </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-progress-linear
         color="primary"
         indeterminate
@@ -138,6 +126,7 @@
   import filialService from "@/services/filial.service";
   import handleErrors from "@/helpers/HandleErrors"
   import { useAuthStore } from "@/store/auth.store";
+  import Breadcrumbs from "@/components/breadcrumbs.vue";
   
   //DATA
   const page = ref(1);

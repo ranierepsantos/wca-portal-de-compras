@@ -65,7 +65,7 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ClienteService.Create.Error: {ex.Message}");
+                Console.WriteLine($"ClienteService.GetAll.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
@@ -88,15 +88,54 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ClienteService.Create.Error: {ex.Message}");
+                Console.WriteLine($"ClienteService.GetById.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
             
         }
 
-        public Task<Pagination<ClienteDto>> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "")
+        public async Task<IList<ListItem>> GetToList(int filialId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query = _rm.ClienteRepository.SelectByCondition(c => c.Ativo == true && c.FilialId == filialId) ;
+                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
+
+                return _mapper.Map<IList<ListItem>>(itens);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ClienteService.GetToList.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        public Pagination<ClienteDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "")
+        {
+            try
+            {
+                var query = _rm.ClienteRepository.SelectAll();
+                //Matriz (id: 1) retorna todos os dados
+                if (filialId > 1)
+                {
+                    query = query.Where(c => c.FilialId ==filialId);
+                }
+
+                if (!string.IsNullOrEmpty(termo))
+                {
+                    query = query.Where(q => q.Nome.Contains(termo));
+                }
+                query = query.OrderBy(p => p.Nome);
+
+                var pagination = Pagination<ClienteDto>.ToPagedList(query, page, pageSize);
+
+                return pagination;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ClienteService.Paginate.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
         }
 
         public Task<bool> Remove(int filialId, int id)
@@ -123,6 +162,17 @@ namespace wca.compras.services
                     return null;
                 }
 
+                //Remover permissões caso tenha alterado
+                baseData.ClienteContatos.ToList().ForEach(async contato =>
+                {
+                    var c = cliente.ClienteContatos.Where(p => p.Id == contato.Id).FirstOrDefault();
+                    if (c == null)
+                    {
+                        var ct = baseData.ClienteContatos.FirstOrDefault(p => p.Id == contato.Id);
+                        baseData.ClienteContatos.Remove(ct);
+                    }
+                });
+                await _rm.SaveAsync();
                 _mapper.Map(cliente, baseData);
                 _rm.ClienteRepository.Update(baseData);
                 await _rm.SaveAsync();
@@ -131,7 +181,7 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ClienteService.Create.Error: {ex.Message}");
+                Console.WriteLine($"ClienteService.Update.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }

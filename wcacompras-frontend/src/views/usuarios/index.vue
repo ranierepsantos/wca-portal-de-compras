@@ -1,18 +1,65 @@
 <template>
   <div>
-    <v-breadcrumbs>
-      <template v-slot:prepend>
-        <v-icon size="large" icon="mdi-arrow-left" color="primary"></v-icon>
-      </template>
-      <div class="text-h4 text-primary">Usuários</div>
-      <v-spacer></v-spacer>
-      
-      <v-btn color="primary" variant="outlined" class="text-capitalize">
-        <b>Novo</b>
-
-        <v-dialog
+    <Breadcrumbs title="Usuários" @novoClick="dialog = true;"/>
+    <v-progress-linear
+      color="primary"
+      indeterminate
+      :height="5"
+      v-show="isBusy"
+    ></v-progress-linear>
+    <v-table class="elevation-2">
+      <thead>
+        <tr>
+          <th class="text-left text-grey">NOME</th>
+          <th class="text-left text-grey">PERFIL</th>
+          <th class="text-center text-grey">ATIVO</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="user in users" :key="user.id">
+          <td class="text-left">
+            <v-icon icon="mdi-account-circle-outline"></v-icon>
+            &nbsp;{{ user.nome }}
+          </td>
+          <td class="text-left">{{ getPerfilName(user.perfilid) }}</td>
+          <td class="text-center">
+            <v-icon
+              :icon="user.ativo ? 'mdi-check':'mdi-close'"
+              variant="plain"
+              :color="user.ativo ? 'success':'error'"
+            ></v-icon>
+          </td>
+          <td class="text-right">
+            <v-btn
+              icon="mdi-lead-pencil"
+              variant="plain"
+              color="primary"
+              @click="editar(user)"
+            ></v-btn>
+            <v-btn
+              icon="mdi-delete"
+              variant="plain"
+              color="error"
+              @click="remove(user)"
+            ></v-btn>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">
+            <v-pagination
+              v-model="page"
+              :length="totalPages"
+              :total-visible="4"
+            ></v-pagination>
+          </td>
+        </tr>
+      </tfoot>
+    </v-table>
+    <v-dialog
           v-model="dialog"
-          activator="parent"
           max-width="700"
           :absolute="false"
         >
@@ -79,16 +126,9 @@
                   <v-col cols="6">
                     <v-select
                       label="Cliente"
-                      disabled
-                      
-                      :items="[
-                        'California',
-                        'Colorado',
-                        'Florida',
-                        'Georgia',
-                        'Texas',
-                        'Wyoming',
-                      ]"
+                      :items="clientes"
+                      item-title="text"
+                      item-value="value"
                       variant="outlined"
                       color="primary"
                       :rules="[(v) => !!v || 'Cliente é obrigatório']"
@@ -120,78 +160,7 @@
             </v-card-text>
             <v-card-actions> </v-card-actions>
           </v-card>
-        </v-dialog>
-      </v-btn>
-    </v-breadcrumbs>
-    <v-progress-linear
-      color="primary"
-      indeterminate
-      :height="5"
-      v-show="isBusy"
-    ></v-progress-linear>
-    <v-table class="elevation-2">
-      <thead>
-        <tr>
-          <th class="text-left text-grey">NOME</th>
-          <th class="text-left text-grey">PERFIL</th>
-          <th class="text-center text-grey">ATIVO</th>
-          <th></th>
-        </tr>
-      </thead>
-      <!-- <tbody v-if="isBusy">
-        <tr class="text-center">
-          <td colspan="4">
-            <v-progress-circular
-              color="primary"
-              indeterminate
-              :size="40"
-            ></v-progress-circular>
-          </td>
-        </tr>
-      </tbody> -->
-
-      <tbody>
-        <tr v-for="user in users" :key="user.id">
-          <td class="text-left">
-            <v-icon icon="mdi-account-circle-outline"></v-icon>
-            &nbsp;{{ user.nome }}
-          </td>
-          <td class="text-left">{{ getPerfilName(user.perfilid) }}</td>
-          <td class="text-center">
-            <v-icon
-              :icon="user.ativo ? 'mdi-check':'mdi-close'"
-              variant="plain"
-              :color="user.ativo ? 'success':'error'"
-            ></v-icon>
-          </td>
-          <td class="text-right">
-            <v-btn
-              icon="mdi-lead-pencil"
-              variant="plain"
-              color="primary"
-              @click="editar(user)"
-            ></v-btn>
-            <v-btn
-              icon="mdi-delete"
-              variant="plain"
-              color="error"
-              @click="remove(user)"
-            ></v-btn>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="4">
-            <v-pagination
-              v-model="page"
-              :length="totalPages"
-              :total-visible="4"
-            ></v-pagination>
-          </td>
-        </tr>
-      </tfoot>
-    </v-table>
+    </v-dialog>
   </div>
 </template>
 
@@ -200,8 +169,10 @@ import { ref, onMounted, watch, inject } from "vue";
 import userService from "@/services/user.service";
 import perfilService from "@/services/perfil.service";
 import filialService from "@/services/filial.service";
+import clienteService from "@/services/cliente.service";
 import handleErrors from "@/helpers/HandleErrors"
 import { useAuthStore } from "@/store/auth.store";
+import Breadcrumbs from "@/components/breadcrumbs.vue";
 
 //DATA
 const page = ref(1);
@@ -211,6 +182,7 @@ const totalPages = ref(1);
 const users = ref([]);
 const listPerfil = ref([]);
 const filiais = ref([]);
+const clientes = ref([]);
 const dialogTitle = ref("Novo Usuário");
 const dialog = ref(false);
 const swal = inject("$swal");
@@ -233,14 +205,20 @@ const userForm = ref(null)
 //VUE METHODS
 onMounted(async () => {
   clearData();
-  await getListFilial();
-  await getListPerfil();
+  await getFilialToList();
+  await getPerfilToList();
   await getItems();
 });
 
-watch(page, () => {
-  getItems();
+watch(page, async () => {
+  await getItems();
 });
+
+watch(() => usuario.value.filialid, async (filialid) => {
+  clientes.value = [];
+  await getClienteToList(filialid)
+  
+})
 
 //METHODS
 async function remove(item) {
@@ -349,22 +327,32 @@ function getPerfilName(perfilId) {
   return perfil.text;
 }
 
-async function getListPerfil() {
+async function getClienteToList(filial) {
   try {
-    let response = await perfilService.toList();
-    listPerfil.value = response.data;
+    let response = await clienteService.toList(filial);
+    clientes.value = response.data;
   } catch (error) {
-    console.log("getListPerfil.error:",error);
+    console.log("getClienteToList.error:",error);
     handleErrors(error)
   }
 }
 
-async function getListFilial() {
+async function getPerfilToList() {
+  try {
+    let response = await perfilService.toList();
+    listPerfil.value = response.data;
+  } catch (error) {
+    console.log("getPerfilToList.error:",error);
+    handleErrors(error)
+  }
+}
+
+async function getFilialToList() {
   try {
     let response = await filialService.toList();
     filiais.value = response.data;
   } catch (error) {
-    console.log("getListFilial.error:",error);
+    console.log("getFilialToList.error:",error);
     handleErrors(error)
   }
 }

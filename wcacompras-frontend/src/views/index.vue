@@ -11,8 +11,7 @@
       <br />
       <v-list class="text-left" density="compact">
         <v-list-item v-for="item in menuItems" :key="item.title" :value="item" active-color="info"
-        v-show = "checkPermissao(item.permissao)"
-        >
+          v-show="checkPermissao(item.permissao)">
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
               {{ item.title }}
@@ -72,6 +71,12 @@ const menuItems = ref([
     permissao: "livre"
   },
   {
+    title: "Clientes",
+    value: 2,
+    route: "/app/clientes",
+    permissao: "cliente"
+  },
+  {
     title: "Filiais",
     value: 2,
     route: "/app/filiais",
@@ -105,7 +110,8 @@ function logout()
   router.push({ name: "login" })
 }
 
-function checkPermissao(permissao) {
+function checkPermissao(permissao)
+{
   return authStore.hasPermissao(permissao)
 }
 </script>
