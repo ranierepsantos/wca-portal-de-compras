@@ -119,3 +119,4 @@ dist
 /wca.compras.backend/wca.compras.services/obj/
 /wca.compras.backend/wca.compras.services/obj/
 /wca.compras.backend/wca.compras.services/obj/
+/wca.compras.backend/wca.compras.application/appsettings.Development.json
