@@ -147,7 +147,7 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.ClienteRepository.SelectByCondition(p => p.Id == cliente.Id);
+                var query = _rm.ClienteRepository.SelectByCondition(p => p.Id == cliente.Id,false);
 
                 if (filialId > 1)
                     query = query.Where(c => c.FilialId == filialId);
@@ -163,18 +163,19 @@ namespace wca.compras.services
                 }
 
                 //Remover permissões caso tenha alterado
-                baseData.ClienteContatos.ToList().ForEach(async contato =>
+                baseData.ClienteContatos.ToList().ForEach(contato =>
                 {
                     var c = cliente.ClienteContatos.Where(p => p.Id == contato.Id).FirstOrDefault();
                     if (c == null)
                     {
-                        var ct = baseData.ClienteContatos.FirstOrDefault(p => p.Id == contato.Id);
-                        baseData.ClienteContatos.Remove(ct);
+                        var ct = _rm.ClienteContatoRepository.SelectByCondition(p => p.Id == contato.Id).FirstOrDefault();
+                        if (ct != null) _rm.ClienteContatoRepository.Delete(ct);
                     }
                 });
-                await _rm.SaveAsync();
+
                 _mapper.Map(cliente, baseData);
                 _rm.ClienteRepository.Update(baseData);
+                
                 await _rm.SaveAsync();
 
                 return _mapper.Map<ClienteDto>(baseData);

@@ -43,7 +43,6 @@
 <script setup>
 import { ref, onMounted, watch, inject } from "vue";
 import clienteService from "@/services/cliente.service";
-import filialService from "@/services/filial.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
@@ -60,7 +59,6 @@ const swal = inject("$swal");
 //VUE METHODS
 onMounted(async () =>
 {
-    await getFilialToList();
     await getItems();
 });
 
@@ -113,19 +111,6 @@ async function remove(item)
     } catch (error)
     {
         console.log("clientes.remove.error:", error);
-        handleErrors(error)
-    }
-}
-
-async function getFilialToList()
-{
-    try
-    {
-        let response = await filialService.toList();
-        filiais.value = response.data;
-    } catch (error)
-    {
-        console.log("getFilialToList.error:", error);
         handleErrors(error)
     }
 }

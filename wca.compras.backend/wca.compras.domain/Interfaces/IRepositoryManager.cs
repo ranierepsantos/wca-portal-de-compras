@@ -11,6 +11,7 @@ namespace wca.compras.domain.Interfaces
         public IRepository<Cliente> ClienteRepository { get; }
         public IRepository<Filial> FilialRepository { get; }
         public IRepository<TipoFornecimento> TipoFornecimentoRepository { get; }
+        public IRepository<ClienteContato> ClienteContatoRepository { get; }
 
         Task SaveAsync();
     }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumbs title="Perfil" @novoClick="editar('novo')"/>
+    <Breadcrumbs title="Perfil" @novoClick="editar('novo')" />
     <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
     <v-table class="elevation-2">
       <thead>
@@ -14,7 +14,7 @@
       <tbody>
         <tr v-for="item in perfis" :key="item.id">
           <td class="text-left">
-            <v-icon icon="mdi-account-circle-outline"></v-icon>
+            <v-icon icon="mdi-account-details-outline"></v-icon>
             &nbsp;{{ item.nome }}
           </td>
 

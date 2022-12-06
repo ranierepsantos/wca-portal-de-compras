@@ -38,7 +38,7 @@ namespace wca.compras.webapi.Controllers
 
                 var result = await _usuarioService.Create(createUsuario);
 
-                //await _authenticationService.ForgotPassword(new ForgotPasswordRequest(createUsuario.Email), Request.Headers["origin"]);
+                await _authenticationService.ForgotPassword(new ForgotPasswordRequest(createUsuario.Email), Request.Headers["origin"]);
                 
                 return Created("", result);
             }

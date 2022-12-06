@@ -31,46 +31,46 @@ namespace wca.compras.webapi.Controllers
             return Ok(items);
         }
 
-        /// <summary>
-        /// Cadastra um novo tipo de fornecimento
-        /// </summary>
-        /// <returns>Tipo de Fornecimento</returns>
-        /// <param name="createTipoFornecimentoDto"></param>
-        [HttpPost]
-        public async Task<ActionResult<TipoFornecimentoDto>> Create(CreateTipoFornecimentoDto createTipoFornecimentoDto)
-        {
-            var tipo = await service.Create(createTipoFornecimentoDto);
-            return Ok(tipo);
-        }
+        ///// <summary>
+        ///// Cadastra um novo tipo de fornecimento
+        ///// </summary>
+        ///// <returns>Tipo de Fornecimento</returns>
+        ///// <param name="createTipoFornecimentoDto"></param>
+        //[HttpPost]
+        //public async Task<ActionResult<TipoFornecimentoDto>> Create(CreateTipoFornecimentoDto createTipoFornecimentoDto)
+        //{
+        //    var tipo = await service.Create(createTipoFornecimentoDto);
+        //    return Ok(tipo);
+        //}
 
 
-        /// <summary>
-        /// Atualiza dados do tipo de fornecimento
-        /// </summary>
-        /// <returns>Tipo de Fornecimento</returns>
-        /// <param name="updateTipoFornecimentoDto"></param>
-        [HttpPut]
-        public async Task<ActionResult> Update([FromBody] TipoFornecimentoDto updateTipoFornecimentoDto)
-        {
+        ///// <summary>
+        ///// Atualiza dados do tipo de fornecimento
+        ///// </summary>
+        ///// <returns>Tipo de Fornecimento</returns>
+        ///// <param name="updateTipoFornecimentoDto"></param>
+        //[HttpPut]
+        //public async Task<ActionResult> Update([FromBody] TipoFornecimentoDto updateTipoFornecimentoDto)
+        //{
 
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest();
-                }
-                var result = await service.Update(updateTipoFornecimentoDto);
-                if (result == null)
-                {
-                    return NotFound($"Tipo Fornecimento íd: {updateTipoFornecimentoDto.Id}, não localizado!");
-                }
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
+        //    try
+        //    {
+        //        if (!ModelState.IsValid)
+        //        {
+        //            return BadRequest();
+        //        }
+        //        var result = await service.Update(updateTipoFornecimentoDto);
+        //        if (result == null)
+        //        {
+        //            return NotFound($"Tipo Fornecimento íd: {updateTipoFornecimentoDto.Id}, não localizado!");
+        //        }
+        //        return Ok(result);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        //    }
+        //}
 
     }
 }
