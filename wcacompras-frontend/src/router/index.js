@@ -26,7 +26,7 @@ const routes = [
         path: 'app/clientes',
         name: 'clientes',
         beforeEnter: protectRoute,
-        //meta: {permissao: "cliente"},
+        meta: {permissao: "cliente"},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -37,7 +37,7 @@ const routes = [
         path: 'app/clientes/cadastro',
         name: 'clienteCadastro',
         beforeEnter: protectRoute,
-        //meta: {permissao: "cliente"},
+        meta: {permissao: "cliente"},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -53,6 +53,50 @@ const routes = [
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "filial" */ '../views/filiais'),
+        
+      },
+      {
+        path: 'app/fornecedores',
+        name: 'fornecedores',
+        beforeEnter: protectRoute,
+        meta: {permissao: "fornecedor"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores'),
+        
+      },
+      {
+        path: 'app/fornecedores/cadastro',
+        name: 'fornecedorCadastro',
+        beforeEnter: protectRoute,
+        meta: {permissao: "fornecedor"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores/cadastro.vue'),
+        
+      },
+      {
+        path: 'app/fornecedores/produtos',
+        name: 'fornecedorProdutos',
+        beforeEnter: protectRoute,
+        meta: {permissao: "fornecedor"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores/produtosindex.vue'),
+        
+      },
+      {
+        path: 'app/produtos/cadastro',
+        name: 'fornecedorProdutosCadastro',
+        beforeEnter: protectRoute,
+        
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores/produtoscadastro.vue'),
         
       },
       {
@@ -107,6 +151,11 @@ const routes = [
     path: "/recuperar-senha",
     name: "recuperarSenha",
     component: () => import("../views/sessoes/recuperarSenha")
+  },
+  {
+    path: "/recuperar-senha/:token",
+    name: "resetSenha",
+    component: () => import("../views/sessoes/resetSenha")
   },
   {
     path: "/:pathMatch(.*)*",

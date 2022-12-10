@@ -58,8 +58,9 @@ namespace wca.compras.webapi.Controllers
 
             try
             {
-                await _service.ForgotPassword(model, Request.Headers["origin"]);
-                return Ok();
+                var result = await _service.ForgotPassword(model, Request.Headers["origin"]);
+                if (!result) return NotFound($"Email {model.Email} não localizado!");
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {

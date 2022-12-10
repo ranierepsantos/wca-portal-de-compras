@@ -1,6 +1,13 @@
 <template>
   <div>
     <Breadcrumbs title="Perfil" @novoClick="editar('novo')" />
+    <v-row>
+      <v-col cols="6">
+        <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact" variant="outlined"
+          color="info">
+        </v-text-field>
+      </v-col>
+    </v-row>
     <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
     <v-table class="elevation-2">
       <thead>
@@ -24,12 +31,10 @@
           </td>
           <td class="text-right">
             <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item.id)"></v-btn>
-            <!-- <v-btn
-                icon="mdi-delete"
-                variant="plain"
-                color="error"
-                @click="remove(item)"
-              ></v-btn> -->
+            <v-btn variant="plain" :color="item.ativo ? 'error' : 'success'"
+              :title="item.ativo ? 'Desativar' : 'Ativar'"
+              :icon="item.ativo ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline'" @click="enableDisable(item)">
+            </v-btn>
           </td>
         </tr>
       </tbody>
@@ -57,8 +62,8 @@ const pageSize = 5;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const perfis = ref([]);
-const dialog = ref(false);
 const swal = inject("$swal");
+const filter = ref("");
 
 //VUE METHODS
 onMounted(async () =>
@@ -66,19 +71,24 @@ onMounted(async () =>
   await getItems();
 });
 
-watch(page, () =>
-{
-  getItems();
-});
+watch(page, () => getItems());
+watch(filter, () => getItems());
 
 //METHODS
-async function remove(item)
+function editar(id)
+{
+  router.push({ name: "perfilCadastro", query: { id: id } })
+}
+
+async function enableDisable(item)
 {
   try
   {
+    let text = item.ativo ? "Desativar" : "Ativar"
+
     let options = {
-      title: "Confirma Exclusão?",
-      text: "Deseja realmente excluir o usuário: " + item.nome + "?",
+      title: text,
+      text: `Deseja realmente ${text.toLowerCase()} o perfil: ${item.nome}?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Sim",
@@ -88,80 +98,35 @@ async function remove(item)
     let response = await swal.fire(options);
     if (response.isConfirmed)
     {
-      await userService.remove(item.id);
-      debugger
-      if (users.value.length == 1)
-      {
-        page.value--;
-      } else
-      {
-        await this.getItems()
-      }
+      let response = await perfilService.getWithPermissions(item.id)
+      let data = response.data
+      data.ativo = !data.ativo
+      await perfilService.update(data);
+      await this.getItems()
 
       swal.fire({
         toast: true,
         icon: "success",
         position: "top-end",
         title: "Sucesso!",
-        text: "Exclusão realizada!",
+        text: "Alteração realizada!",
         showConfirmButton: false,
         timer: 2000,
       })
     }
   } catch (error)
   {
-    console.log("usuários.error:", error);
-    handleErrors(error)
-  }
-
-}
-
-function editar(id)
-{
-  router.push({ name: "perfilCadastro", query: { id: id } })
-}
-
-function closeDialog()
-{
-  dialog.value = false;
-  userForm.value.reset()
-  clearData();
-}
-
-async function salvar()
-{
-  try
-  {
-    let { valid } = await userForm.value.validate();
-    if (valid)
-    {
-      let data = usuario.value;
-      data.clienteid = data.perfilid;
-      data.filialid = data.perfilid;
-      if (data.id == 0)
-      {
-        await userService.create(data);
-      } else
-      {
-        await userService.update(data);
-      }
-      await getItems();
-      closeDialog();
-    }
-  } catch (error)
-  {
-    console.log("usuários.error:", error);
+    console.log("perfil.enableDisable.error:", error);
     handleErrors(error)
   }
 }
-
 
 async function getItems()
 {
   try
   {
     isBusy.value = true;
-    let response = await perfilService.paginate(pageSize, page.value, "");
+    let response = await perfilService.paginate(pageSize, page.value, filter.value);
     perfis.value = response.data.items;
     totalPages.value = response.data.totalPages;
   } catch (error)

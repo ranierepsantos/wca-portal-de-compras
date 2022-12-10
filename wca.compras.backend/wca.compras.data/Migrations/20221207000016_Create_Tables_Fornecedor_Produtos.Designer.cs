@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20221207000016_Create_Tables_Fornecedor_Produtos")]
+    partial class Create_Tables_Fornecedor_Produtos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,8 +54,8 @@ namespace wca.compras.data.Migrations
 
                     b.Property<string>("CNPJ")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(14)
+                        .HasColumnType("varchar(14)")
                         .HasColumnName("cnpj");
 
                     b.Property<string>("Cep")
@@ -76,8 +78,8 @@ namespace wca.compras.data.Migrations
                         .HasColumnName("filial_id");
 
                     b.Property<string>("InscricaoEstadual")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(12)
+                        .HasColumnType("varchar(12)")
                         .HasColumnName("inscricao_estadual");
 
                     b.Property<string>("Nome")
@@ -229,8 +231,8 @@ namespace wca.compras.data.Migrations
 
                     b.Property<string>("CNPJ")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(14)
+                        .HasColumnType("varchar(14)")
                         .HasColumnName("cnpj");
 
                     b.Property<string>("Cep")
@@ -253,8 +255,8 @@ namespace wca.compras.data.Migrations
                         .HasColumnName("filial_id");
 
                     b.Property<string>("InscricaoEstadual")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(12)
+                        .HasColumnType("varchar(12)")
                         .HasColumnName("inscricao_estadual");
 
                     b.Property<string>("Nome")
@@ -268,6 +270,10 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(10)")
                         .HasColumnName("numero");
 
+                    b.Property<int>("TipoFornecimentoId")
+                        .HasColumnType("int")
+                        .HasColumnName("tipofornecimento_id");
+
                     b.Property<string>("UF")
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)")
@@ -276,6 +282,8 @@ namespace wca.compras.data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FilialId");
+
+                    b.HasIndex("TipoFornecimentoId");
 
                     b.ToTable("Fornecedores");
                 });
@@ -365,10 +373,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("money")
                         .HasColumnName("taxa_gestao");
 
-                    b.Property<int>("TipoFornecimentoId")
-                        .HasColumnType("int")
-                        .HasColumnName("tipofornecimento_id");
-
                     b.Property<string>("UnidadeMedida")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -382,8 +386,6 @@ namespace wca.compras.data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FornecedorId");
-
-                    b.HasIndex("TipoFornecimentoId");
 
                     b.ToTable("Produtos");
                 });
@@ -565,7 +567,15 @@ namespace wca.compras.data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("wca.compras.domain.Entities.TipoFornecimento", "TipoFornecimento")
+                        .WithMany()
+                        .HasForeignKey("TipoFornecimentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Filial");
+
+                    b.Navigation("TipoFornecimento");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Produto", b =>
@@ -574,15 +584,7 @@ namespace wca.compras.data.Migrations
                         .WithMany("Produtos")
                         .HasForeignKey("FornecedorId");
 
-                    b.HasOne("wca.compras.domain.Entities.TipoFornecimento", "TipoFornecimento")
-                        .WithMany()
-                        .HasForeignKey("TipoFornecimentoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Fornecedor");
-
-                    b.Navigation("TipoFornecimento");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.ResetPassword", b =>

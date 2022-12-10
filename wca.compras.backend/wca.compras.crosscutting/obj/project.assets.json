@@ -578,6 +578,15 @@
           }
         }
       },
+      "MiniExcel/1.29.0": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/MiniExcel.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/MiniExcel.dll": {}
+        }
+      },
       "NETCore.MailKit/2.1.0": {
         "type": "package",
         "dependencies": {
@@ -999,6 +1008,7 @@
           "AutoMapper": "12.0.0",
           "BCrypt.Net-Next": "4.0.3",
           "MimeKit": "3.2.0",
+          "MiniExcel": "1.29.0",
           "wca.compras.data": "1.0.0",
           "wca.compras.domain": "1.0.0"
         },
@@ -1888,6 +1898,21 @@
         "lib/netstandard2.1/MimeKit.xml",
         "mimekit.3.2.0.nupkg.sha512",
         "mimekit.nuspec"
+      ]
+    },
+    "MiniExcel/1.29.0": {
+      "sha512": "/KD0qyqxsEeMDj+yrV44YZZ9k0ik6eLHxj3wVutSS8+3MNvJ9YaXaw/QHbDcA+UEdIbnBCkpOB9wUjaz/oDd+g==",
+      "type": "package",
+      "path": "miniexcel/1.29.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net45/MiniExcel.dll",
+        "lib/net5.0/MiniExcel.dll",
+        "lib/netstandard2.0/MiniExcel.dll",
+        "miniexcel.1.29.0.nupkg.sha512",
+        "miniexcel.nuspec"
       ]
     },
     "NETCore.MailKit/2.1.0": {

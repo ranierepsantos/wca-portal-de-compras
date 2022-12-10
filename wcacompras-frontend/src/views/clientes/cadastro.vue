@@ -99,22 +99,9 @@
                             <v-col class="text-left" cols="3">
                                 {{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}
                             </v-col>
-                            <v-col class="text-left" cols="2">
-                                <div class="v-input__control">
-                                    <div class="v-field v-field--active v-field--no-label v-field--variant-outlined "
-                                        role="textbox">
-                                        <div class="v-field__field" data-no-activator="">
-                                            <money3 v-model.number="item.valorPedido" v-bind="moneyConfig"
-                                                class="v-field__input"
-                                                style="padding-top:4px;min-height: 40px !important;" />
-                                        </div>
-                                        <!----><!---->
-                                        <div class="v-field__outline">
-                                            <div class="v-field__outline__start"></div><!---->
-                                            <div class="v-field__outline__end"></div><!---->
-                                        </div>
-                                    </div>
-                                </div>
+                            <v-col cols="2">
+                                <v-text-field-money label-text="" v-model="item.valorPedido" color="primary"
+                                    :number-decimal="2"></v-text-field-money>
                             </v-col>
                             <v-col class="text-left" cols="2">
                                 <v-text-field v-model="item.quantidadeMes" density="compact" variant="outlined"
@@ -252,7 +239,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import clienteService from '@/services/cliente.service';
 import filialService from "@/services/filial.service";
 import { mask } from "maska"
-
+import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 
 // VARIABLES
 //const mask = new Mask({ mask: [, "(##) ####-####"] })
@@ -294,20 +281,6 @@ const aprovadorList = [
     { text: "WCA", value: 0 },
     { text: "Cliente", value: 1 }
 ]
-const moneyConfig = {
-    masked: false,
-    prefix: '',
-    suffix: '',
-    thousands: '',
-    decimal: '.',
-    precision: 2,
-    disableNegative: true,
-    disabled: false,
-    min: 0.00,
-    max: null,
-    allowBlank: false,
-    minimumNumberOfCharacters: 3,
-}
 const emailRules = ref([
     (v) => !!v || "Campo é obrigatório",
     (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
@@ -476,7 +449,7 @@ async function salvar()
 
     } catch (error)
     {
-        console.log("perfil.cadastro.salvar.erro", error)
+        console.log("cliente.cadastro.salvar.erro", error)
         handleErrors(error)
     } finally
     {

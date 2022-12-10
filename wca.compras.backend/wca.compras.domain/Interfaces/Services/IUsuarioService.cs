@@ -15,6 +15,6 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<bool> Remove(int filialId, int id);
         public Task<IList<UsuarioDto>> GetAll(int filialId);
         public Task<UsuarioDto> GetById(int filialId, int id);
-        public Task<Pagination<UsuarioDto>> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "");
+        public Pagination<UsuarioDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "");
     }
 }

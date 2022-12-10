@@ -80,7 +80,7 @@ namespace wca.compras.services
 
         }
 
-        public async Task ForgotPassword(ForgotPasswordRequest forgotPasswordRequest, string urlOrigin)
+        public async Task<bool>  ForgotPassword(ForgotPasswordRequest forgotPasswordRequest, string urlOrigin)
         {
             
             try
@@ -90,7 +90,7 @@ namespace wca.compras.services
                                     .FirstOrDefaultAsync();
                 if (usuario == null || usuario.Ativo == false)
                 {
-                    throw new Exception($"E-mail {forgotPasswordRequest.Email} não cadastrado ou usuário inativo!");
+                    return false;
                 }
 
                 var resetPassword = new ResetPassword()
@@ -109,6 +109,7 @@ namespace wca.compras.services
                 var message = new Message(new string[] { usuario.Email }, "Alterar senha de acesso", mensagem);
 
                 _emailService.SendEmail(message);
+                return true;
 
             }
             catch (Exception ex)

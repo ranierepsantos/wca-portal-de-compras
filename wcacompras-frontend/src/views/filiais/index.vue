@@ -1,6 +1,13 @@
 <template>
   <div>
     <Breadcrumbs title="Filial" @novoClick="dialog = true" />
+    <v-row>
+      <v-col cols="6">
+        <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact" variant="outlined"
+          color="info">
+        </v-text-field>
+      </v-col>
+    </v-row>
     <v-dialog v-model="dialog" max-width="700" :absolute="false">
       <v-card>
         <v-card-title class="text-primary text-h5">
@@ -40,18 +47,6 @@
           <th></th>
         </tr>
       </thead>
-      <!-- <tbody v-if="isBusy">
-        <tr class="text-center">
-          <td colspan="4">
-            <v-progress-circular
-              color="primary"
-              indeterminate
-              :size="40"
-            ></v-progress-circular>
-          </td>
-        </tr>
-      </tbody> -->
-
       <tbody>
         <tr v-for="item in filiais" :key="item.id">
           <td class="text-left">
@@ -64,12 +59,10 @@
           </td>
           <td class="text-right">
             <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"></v-btn>
-            <!-- <v-btn
-              icon="mdi-delete"
-              variant="plain"
-              color="error"
-              @click="remove(user)"
-            ></v-btn> -->
+            <v-btn variant="plain" :color="item.ativo ? 'error' : 'success'"
+              :title="item.ativo ? 'Desativar' : 'Ativar'"
+              :icon="item.ativo ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline'" @click="enableDisable(item)">
+            </v-btn>
           </td>
         </tr>
       </tbody>
@@ -97,6 +90,7 @@ const pageSize = 5;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const filiais = ref([]);
+const filter = ref("");
 const dialogTitle = ref("Nova Filial");
 const dialog = ref(false);
 const swal = inject("$swal");
@@ -116,12 +110,28 @@ onMounted(async () =>
   await getItems();
 });
 
-watch(page, () =>
-{
-  getItems();
-});
+watch(page, () => getItems());
+watch(filter, () => getItems());
+
 
 //METHODS
+
+function clearData()
+{
+  dialogTitle.value = "Nova Filial";
+  filial.value = {
+    id: 0,
+    nome: "",
+    ativo: true
+  };
+}
+
+function closeDialog()
+{
+  dialog.value = false;
+  filialForm.value.reset()
+  clearData();
+}
 
 function editar(item)
 {
@@ -130,11 +140,62 @@ function editar(item)
   dialog.value = true;
 }
 
-function closeDialog()
+async function enableDisable(item)
 {
-  dialog.value = false;
-  filialForm.value.reset()
-  clearData();
+  try
+  {
+    let text = item.ativo ? "Desativar" : "Ativar"
+
+    let options = {
+      title: text,
+      text: `Deseja realmente ${text.toLowerCase()} a filial: ${item.nome}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    }
+
+    let response = await swal.fire(options);
+    if (response.isConfirmed)
+    {
+      let data = { ...item }
+      data.ativo = !data.ativo
+      await filialService.update(data);
+      await this.getItems()
+
+      swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        title: "Sucesso!",
+        text: "Alteração realizada!",
+        showConfirmButton: false,
+        timer: 2000,
+      })
+    }
+  } catch (error)
+  {
+    console.log("filiais.enableDisable.error:", error);
+    handleErrors(error)
+  }
+}
+
+async function getItems()
+{
+  try
+  {
+    isBusy.value = true;
+    let response = await filialService.paginate(pageSize, page.value, filter.value);
+    filiais.value = response.data.items;
+    totalPages.value = response.data.totalPages;
+  } catch (error)
+  {
+    console.log("filiais.error:", error.response);
+    handleErrors(error)
+  } finally
+  {
+    isBusy.value = false;
+  }
 }
 
 async function salvar()
@@ -171,34 +232,6 @@ async function salvar()
   }
 }
 
-function clearData()
-{
-  dialogTitle.value = "Nova Filial";
-  filial.value = {
-    id: 0,
-    nome: "",
-    ativo: true
-  };
-}
-
-
-async function getItems()
-{
-  try
-  {
-    isBusy.value = true;
-    let response = await filialService.paginate(pageSize, page.value, "");
-    filiais.value = response.data.items;
-    totalPages.value = response.data.totalPages;
-  } catch (error)
-  {
-    console.log("filiais.error:", error.response);
-    handleErrors(error)
-  } finally
-  {
-    isBusy.value = false;
-  }
-}
 </script>
   
   

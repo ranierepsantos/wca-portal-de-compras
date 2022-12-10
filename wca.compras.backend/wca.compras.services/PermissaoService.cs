@@ -68,7 +68,7 @@ namespace wca.compras.services
             return pagination;
         }
 
-        public async Task<PermissaoDto?> Update(UpdatePermissaoDto permissao)
+        public async Task<PermissaoDto> Update(UpdatePermissaoDto permissao)
         {
 
             var baseData = _rm.PermissaoRepository.SelectByCondition(p => p.Id == permissao.Id)

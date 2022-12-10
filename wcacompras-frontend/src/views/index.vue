@@ -83,6 +83,12 @@ const menuItems = ref([
     permissao: "filial"
   },
   {
+    title: "Fornecedores",
+    value: 2,
+    route: "/app/fornecedores",
+    permissao: "fornecedor"
+  },
+  {
     title: "Perfil",
     value: 2,
     route: "/app/perfil",

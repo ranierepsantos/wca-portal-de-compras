@@ -24,8 +24,6 @@ new ConfigureFromConfigurationOptions<TokenConfiguration>
 
 builder.Services.AddSingleton(tokenConfiguration);
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
 //Serviços de autenticação
 builder.Services.AddAuthentication(options =>
 {

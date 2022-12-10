@@ -10,71 +10,21 @@
             Login
           </div>
 
-          <v-text-field
-            label="Email"
-            type="email"
-            v-model="formData.email"
-            :rules="emailRules"
-            required
-          ></v-text-field>
+          <v-text-field label="Email" type="email" v-model="formData.email" :rules="emailRules" required></v-text-field>
 
-          <v-text-field
-            label="Senha"
-            type="password"
-            v-model="formData.password"
-            :rules="[(v) => !!v || 'Senha é obrigatório']"
-            required
-          ></v-text-field>
+          <v-text-field label="Senha" type="password" v-model="formData.password"
+            :rules="[(v) => !!v || 'Senha é obrigatório']" required></v-text-field>
 
-          <v-btn
-            type="submit"
-            block
-            color="primary"
-            size="large"
-            class="mt-10"
-            v-if="!isBusy"
-          >
+          <v-btn type="submit" block color="primary" size="large" class="mt-10" v-if="!isBusy">
             Login
           </v-btn>
-          <v-progress-circular
-            indeterminate
-            :size="40"
-            v-else
-          ></v-progress-circular>
+          <div class="text-center" v-else>
+            <v-progress-circular indeterminate :size="40"></v-progress-circular>
+          </div>
         </v-form>
       </v-col>
     </v-col>
   </v-row>
-
-  <!-- <div>
-    <div id="background" class="d-flex flex-row">
-      <v-sheet>
-        <img :src="logoWCA" alt="" />
-      </v-sheet>
-    </div>
-    <div class="d-flex flex-row mt-10 ml-5">
-      <v-sheet class="ma-2 pa-2">
-        <v-form ref="form">
-          <v-text-field
-            label="Email address"
-            placeholder="johndoe@gmail.com"
-            type="email"
-          ></v-text-field>
-
-          <v-text-field
-            label="password"
-            placeholder="password"
-            type="password"
-          ></v-text-field>
-        </v-form>
-      </v-sheet>
-    </div>
-
-    <div id="background">
-      <img :src="logoWCA" alt="" />
-    </div> 
-    <div></div>
-  </div> -->
 </template>
 <script setup>
 import { ref, inject } from "vue";
@@ -101,15 +51,20 @@ const swal = inject("$swal");
 //VUE FUNCTIONS
 
 //FUNCTIONS
-async function authenticate() {
-  try {
+async function authenticate()
+{
+  try
+  {
     isBusy.value = true;
     let { valid } = await form.value.validate();
-    if (valid) {
+    if (valid)
+    {
       let response = await authStore.authenticate(formData.value);
-      if (response.authenticated == true) {
+      if (response.authenticated == true)
+      {
         router.push({ name: "home" });
-      } else {
+      } else
+      {
         swal({
           toast: true,
           icon: "warning",
@@ -120,10 +75,12 @@ async function authenticate() {
         });
       }
     }
-  } catch (error) {
+  } catch (error)
+  {
     console.log("login.error:", error);
     handleErrors(error)
-  } finally {
+  } finally
+  {
     isBusy.value = false;
   }
 }

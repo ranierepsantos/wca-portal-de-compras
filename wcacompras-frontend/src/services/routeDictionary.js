@@ -15,6 +15,14 @@ export const route = {
     filialToList: "Filial/ToList",
     filialPaginate: "Filial/Paginate/{pageSize}/{page}",
 
+    fornecedorCreate: "Fornecedor",
+    fornecedorUpdate: "Fornecedor",
+    fornecedorRemove: "Fornecedor",
+    fornecedorGetById: "Fornecedor/{id}",
+    fornecedorToList: "Fornecedor/ToList/{filial}",
+    fornecedorPaginate: "Fornecedor/Paginate/{pageSize}/{page}",
+
+
     perfilCreate: "Perfil",
     perfilUpdate: "Perfil",
     perfilPaginate: "Perfil/Paginate/{pageSize}/{page}",
@@ -22,6 +30,12 @@ export const route = {
     perfilGetWithPermissions: "Perfil/{id}",
     permissaoToList: "Permissao/ToList",
     permissaoAll: "Permissao/all",
+
+    produtoCreate: "Fornecedor/Produto",
+    produtoUpdate: "Fornecedor/Produto",
+    produtoRemove: "Fornecedor/Produto",
+    produtoGetById: "Fornecedor/{fornecedorId}/Fornecedor/{id}",
+    produtoPaginate: "Fornecedor/{fornecedorId}/Produtos/Paginate/{pageSize}/{page}",
 
     tipoFornecimentoToList: "TipoFornecimento/ToList",
 

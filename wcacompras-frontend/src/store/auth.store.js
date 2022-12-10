@@ -45,6 +45,9 @@ export const useAuthStore = defineStore('auth', {
             if (permissao =="filial") {
                 return perm != undefined && this.user.filial == 1;
             }
+            if (permissao =="perfil") {
+                return perm != undefined && this.user.filial == 1;
+            }
             return perm != undefined
         },
 

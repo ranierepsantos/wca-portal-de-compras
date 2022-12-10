@@ -16,6 +16,8 @@ namespace wca.compras.data.DataAccess
         public DbSet<ResetPassword> ResetPassword { get; set; }
         public DbSet<ClienteContato> ClienteContatos { get; set; }
         public DbSet<ClienteOrcamentoConfiguracao> ClienteOrcamentoConfiguracaos { get; set; }
+        public DbSet<Fornecedor> Fornecedores { get; set; }
+        public DbSet<Produto> Produtos { get; set; }
 
 
         

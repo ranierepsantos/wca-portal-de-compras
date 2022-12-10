@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Engines;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -141,6 +142,7 @@ namespace wca.compras.services
                 }
                 
                 var data = _mapper.Map<Usuario>(usuario);
+                data.Password = baseData.Password;
                 
                 _rm.UsuarioRepository.Update(data);
 
@@ -155,7 +157,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<Pagination<UsuarioDto>> Paginate(int filialId, int page, int pageSize = 10, string termo = "")
+        public Pagination<UsuarioDto> Paginate(int filialId, int page, int pageSize = 10, string termo = "")
         {
             try
             {

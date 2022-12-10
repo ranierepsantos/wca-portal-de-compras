@@ -1,6 +1,13 @@
 <template>
   <div>
     <Breadcrumbs title="Usuários" @novoClick="dialog = true;" />
+    <v-row>
+      <v-col cols="6">
+        <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact" variant="outlined"
+          color="info">
+        </v-text-field>
+      </v-col>
+    </v-row>
     <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
     <v-table class="elevation-2">
       <thead>
@@ -24,7 +31,10 @@
           </td>
           <td class="text-right">
             <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(user)"></v-btn>
-            <v-btn icon="mdi-delete" variant="plain" color="error" @click="remove(user)"></v-btn>
+            <v-btn variant="plain" :color="user.ativo ? 'error' : 'success'"
+              :title="user.ativo ? 'Desativar' : 'Ativar'"
+              :icon="user.ativo ? 'mdi-close-circle-outline' : 'mdi-check-circle-outline'" @click="enableDisable(user)">
+            </v-btn>
           </td>
         </tr>
       </tbody>
@@ -36,7 +46,7 @@
         </tr>
       </tfoot>
     </v-table>
-    <v-dialog v-model="dialog" max-width="700" :absolute="false">
+    <v-dialog v-model="dialog" max-width="700" :absolute="false" persistent>
       <v-card>
         <v-card-title class="text-primary text-h5">
           {{ dialogTitle }}
@@ -70,7 +80,8 @@
             <v-row>
               <v-col cols="6">
                 <v-select label="Cliente" :items="clientes" item-title="text" item-value="value" variant="outlined"
-                  color="primary" :rules="[(v) => !!v || 'Cliente é obrigatório']" density="compact"></v-select>
+                  color="primary" :rules="[(v) => !!v || 'Cliente é obrigatório']" density="compact"
+                  v-model="usuario.clienteid"></v-select>
               </v-col>
               <v-col cols="6">
                 <v-checkbox v-show="usuario.id > 0" v-model="usuario.ativo" label="Ativo" color="primary"></v-checkbox>
@@ -127,6 +138,7 @@ const emailRules = ref([
   (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
 ]);
 const userForm = ref(null)
+const filter = ref("");
 
 //VUE METHODS
 onMounted(async () =>
@@ -137,10 +149,8 @@ onMounted(async () =>
   await getItems();
 });
 
-watch(page, async () =>
-{
-  await getItems();
-});
+watch(page, async () => await getItems());
+watch(filter, async () => await getItems());
 
 watch(() => usuario.value.filialid, async (filialid) =>
 {
@@ -150,13 +160,22 @@ watch(() => usuario.value.filialid, async (filialid) =>
 })
 
 //METHODS
-async function remove(item)
+function closeDialog()
+{
+  dialog.value = false;
+  userForm.value.reset()
+  clearData();
+}
+
+async function enableDisable(item)
 {
   try
   {
+    let text = item.ativo ? "Desativar" : "Ativar"
+
     let options = {
-      title: "Confirma Exclusão?",
-      text: "Deseja realmente excluir o usuário: " + item.nome + "?",
+      title: text,
+      text: `Deseja realmente ${text.toLowerCase()} o usuário: ${item.nome}?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Sim",
@@ -166,33 +185,28 @@ async function remove(item)
     let response = await swal.fire(options);
     if (response.isConfirmed)
     {
-      await userService.remove(item.id);
-      debugger
-      if (users.value.length == 1)
-      {
-        page.value--;
-      } else
-      {
-        await this.getItems()
-      }
+      let data = { ...item }
+      data.ativo = !data.ativo
+      await userService.update(data);
+      await this.getItems()
 
       swal.fire({
         toast: true,
         icon: "success",
         position: "top-end",
         title: "Sucesso!",
-        text: "Exclusão realizada!",
+        text: "Alteração realizada!",
         showConfirmButton: false,
         timer: 2000,
       })
     }
   } catch (error)
   {
-    console.log("usuários.error:", error);
+    console.log("usuarios.enableDisable.error:", error);
     handleErrors(error)
   }
-
 }
+
 function editar(item)
 {
   usuario.value = { ...item };
@@ -200,12 +214,6 @@ function editar(item)
   dialog.value = true;
 }
 
-function closeDialog()
-{
-  dialog.value = false;
-  userForm.value.reset()
-  clearData();
-}
 
 async function salvar()
 {
@@ -215,8 +223,6 @@ async function salvar()
     if (valid)
     {
       let data = usuario.value;
-      data.clienteid = data.perfilid;
-      data.filialid = data.perfilid;
       if (data.id == 0)
       {
         await userService.create(data);
@@ -308,7 +314,7 @@ async function getItems()
   try
   {
     isBusy.value = true;
-    let response = await userService.paginate(pageSize, page.value, "");
+    let response = await userService.paginate(pageSize, page.value, filter.value)
     users.value = response.data.items;
     totalPages.value = response.data.totalPages;
   } catch (error)

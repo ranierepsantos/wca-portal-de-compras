@@ -15,6 +15,8 @@ namespace wca.compras.data.Repositories
         private IRepository<Filial> _filialRepo;
         private IRepository<TipoFornecimento> _tipoFornecimentoRepo;
         private IRepository<ClienteContato> _clienteContatoRepo;
+        private IRepository<Fornecedor> _fornecedorRepo;
+        private IRepository<Produto> _produtoRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -115,6 +117,30 @@ namespace wca.compras.data.Repositories
                 return _clienteContatoRepo;
             }
             
+        }
+
+        public IRepository<Fornecedor> FornecedorRepository
+        {
+            get
+            {
+                if (_fornecedorRepo == null)
+                {
+                    _fornecedorRepo = new BaseRepository<Fornecedor>(_context);
+                }
+                return _fornecedorRepo;
+            }
+        }
+
+        public IRepository<Produto> ProdutoRepository
+        {
+            get
+            {
+                if (_produtoRepo == null)
+                {
+                    _produtoRepo = new BaseRepository<Produto>(_context);
+                }
+                return _produtoRepo;
+            }
         }
 
         public async Task SaveAsync()

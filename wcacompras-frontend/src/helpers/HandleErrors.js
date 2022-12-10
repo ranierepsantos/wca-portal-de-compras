@@ -10,6 +10,8 @@ const handleErrors = (error) =>
         message = error.response.status + ", " + (error.response.data.message || error.response.data.title);
         if (error.response.status === 404) {
             message = "O registro não foi localizado!";
+            if (error.response.data.trim() != '')
+                message =error.response.data;
             messageType = "info";
         } else if (error.response.status === 403) {
             
@@ -18,7 +20,8 @@ const handleErrors = (error) =>
             router.push({ name: "login" })
             return
         } else if (error.response.status === 500) {
-            message = error.response.data.toString().split("\r\n")[0].replace("System.Exception: ","");
+            message = error.response.data.toString().split("\r\n")[0].replace("System.Exception: ", "")
+                .replace("System.Exception: ","");
         } else if (message.indexOf("Cannot delete or update a parent row") > -1) {
             message = "Este dado esta relacionado à outro(s) cadastro(s) e não pode ser excluído!";
         }

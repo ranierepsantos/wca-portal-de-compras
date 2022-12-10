@@ -67,7 +67,7 @@ namespace wca.compras.services
             }
 
             //Remover permissões caso tenha alterado
-            baseData.Permissao.ToList().ForEach(async permissao =>
+            baseData.Permissao.ToList().ForEach(permissao =>
             {
                 var perm = perfil.Permissao.Where(p => p.Id == permissao.Id).FirstOrDefault();
                 if (perm == null)

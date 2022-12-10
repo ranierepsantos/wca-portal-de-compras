@@ -112,7 +112,7 @@ namespace wca.compras.webapi.Controllers
             try
             {
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = await _usuarioService.Paginate(filial, page, pageSize, termo);
+                var items = _usuarioService.Paginate(filial, page, pageSize, termo);
                 return Ok(items);
             }
             catch (Exception ex)

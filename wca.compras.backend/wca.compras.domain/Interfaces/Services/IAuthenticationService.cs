@@ -11,7 +11,7 @@ namespace wca.compras.domain.Interfaces.Services
     {
         public Task<LoginResponse> Authenticate(LoginRequest login);
 
-        public Task ForgotPassword(ForgotPasswordRequest email, string urlOrigin);
+        public Task<bool> ForgotPassword(ForgotPasswordRequest email, string urlOrigin);
 
         public Task ResetPassword(ResetPasswordRequest resetPassword);
     }
