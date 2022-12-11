@@ -10,17 +10,24 @@
             Login
           </div>
 
-          <v-text-field label="Email" type="email" v-model="formData.email" :rules="emailRules" required></v-text-field>
+          <v-text-field variant="outlined" density="compact" label="Email" type="email" v-model="formData.email"
+            :rules="emailRules" required></v-text-field>
 
-          <v-text-field label="Senha" type="password" v-model="formData.password"
+          <v-text-field variant="outlined" density="compact" label="Senha" type="password" v-model="formData.password"
             :rules="[(v) => !!v || 'Senha é obrigatório']" required></v-text-field>
 
-          <v-btn type="submit" block color="primary" size="large" class="mt-10" v-if="!isBusy">
-            Login
+          <v-btn type="submit" block color="primary" size="large" class="mt-5" v-if="!isBusy">
+            Entrar
           </v-btn>
           <div class="text-center" v-else>
             <v-progress-circular indeterminate :size="40"></v-progress-circular>
           </div>
+          <div class="text-center mt-5">
+            <router-link to="/recuperar-senha" class="text-grey text-decoration-none">
+              Esqueci minha senha
+            </router-link>
+          </div>
+
         </v-form>
       </v-col>
     </v-col>
