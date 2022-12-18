@@ -152,7 +152,7 @@ namespace wca.compras.services
                 }
                 query = query.OrderBy(p => p.Nome);
 
-                var pagination = Pagination<FornecedorDto>.ToPagedList(query, page, pageSize);
+                var pagination = Pagination<FornecedorDto>.ToPagedList(_mapper, query, page, pageSize);
 
                 return pagination;
             }
@@ -177,11 +177,11 @@ namespace wca.compras.services
 
                 if (!string.IsNullOrEmpty(termo))
                 {
-                    query = query.Where(q => q.Nome.Contains(termo));
+                    query = query.Where(q => q.Nome.Contains(termo) || q.Codigo.Contains(termo));
                 }
                 query = query.OrderBy(p => p.Nome);
 
-                var pagination = Pagination<ProdutoDto>.ToPagedList(query, page, pageSize);
+                var pagination = Pagination<ProdutoDto>.ToPagedList(_mapper, query, page, pageSize);
 
                 return pagination;
             }

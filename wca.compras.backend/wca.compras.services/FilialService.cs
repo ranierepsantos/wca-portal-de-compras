@@ -103,7 +103,7 @@ namespace wca.compras.services
                 }
                 query = query.OrderBy(p => p.Nome);
 
-                var pagination = Pagination<FilialDto>.ToPagedList(query, page, pageSize);
+                var pagination = Pagination<FilialDto>.ToPagedList(_mapper, query, page, pageSize);
 
                 return pagination;
             }

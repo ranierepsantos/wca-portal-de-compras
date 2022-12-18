@@ -17,6 +17,9 @@ namespace wca.compras.data.Repositories
         private IRepository<ClienteContato> _clienteContatoRepo;
         private IRepository<Fornecedor> _fornecedorRepo;
         private IRepository<Produto> _produtoRepo;
+        private IRepository<Requisicao> _requisicaoRepo;
+        private IRepository<RequisicaoItem> _requisicaoItemRepo;
+        private IRepository<RequisicaoHistorico> _requisicaoHistoricoRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -143,6 +146,35 @@ namespace wca.compras.data.Repositories
             }
         }
 
+        public IRepository<Requisicao> RequisicaoRepository
+        {
+            get
+            {
+                if (_requisicaoRepo == null) 
+                    _requisicaoRepo = new BaseRepository<Requisicao>(_context);
+                return _requisicaoRepo;
+            }
+        }
+
+        public IRepository<RequisicaoHistorico> RequisicaoHistoricoRepository
+        {
+            get
+            {
+                if (_requisicaoHistoricoRepo == null)
+                    _requisicaoHistoricoRepo = new BaseRepository<RequisicaoHistorico>(_context);
+                return _requisicaoHistoricoRepo;
+            }
+        }
+
+        public IRepository<RequisicaoItem> RequisicaoItemRepository
+        {
+            get
+            {
+                if (_requisicaoItemRepo == null)
+                    _requisicaoItemRepo = new BaseRepository<RequisicaoItem>(_context);
+                return _requisicaoItemRepo;
+            }
+        }
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

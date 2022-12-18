@@ -39,8 +39,23 @@ export const useAuthStore = defineStore('auth', {
 
         hasPermissao(permissao) 
         {
+            
             if (permissao == 'livre') return true;
-            let perm = this.user.perfil.permissao.filter(p => p.regra.toLowerCase() == permissao.toLowerCase())[0]
+
+            let perm = undefined;
+            if (permissao.indexOf("|") > -1)
+            {
+                let permissoes = permissao.split('|')
+                for (let index = 0; index < permissoes.length; index++)
+                {
+                    perm = this.user.perfil.permissao.filter(p => p.regra.toLowerCase() == permissoes[index].toLowerCase())[0]
+                    if (perm != undefined) break;
+                }
+
+            } else
+            {
+                perm = this.user.perfil.permissao.filter(p => p.regra.toLowerCase() == permissao.toLowerCase())[0]
+            }
 
             if (permissao =="filial") {
                 return perm != undefined && this.user.filial == 1;

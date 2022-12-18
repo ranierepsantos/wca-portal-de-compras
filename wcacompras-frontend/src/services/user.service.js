@@ -22,5 +22,10 @@ export default {
     {
         return api.put(route.usuarioUpdate, data);
     },
+
+    toList()
+    {
+        return api.get(route.usuarioToList);
+    },
     
 }

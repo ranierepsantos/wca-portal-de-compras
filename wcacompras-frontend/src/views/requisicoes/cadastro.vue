@@ -1,0 +1,266 @@
+<template>
+    <div>
+        <bread-crumbs title="Nova Requisição" :show-button="false" :custom-button-show="true"
+            custom-button-text="Salvar" @customClick="salvar()" />
+        <v-row>
+            <v-col cols="4">
+                <v-select label="Clientes" v-model="requisicao.clienteId" :items="clientes" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+            </v-col>
+            <v-col cols="4">
+                <v-select label="Fornecedor" v-model="requisicao.fornecedorId" :items="fornecedores" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+            </v-col>
+            <v-col cols="4">
+                <v-text-field label="Pesquisar Produto" v-model="filter" placeholder="Nome ou Código" density="compact"
+                    variant="outlined" color="info">
+                </v-text-field>
+            </v-col>
+        </v-row>
+        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
+        <v-table class="elevation-2">
+            <thead>
+                <tr>
+                    <th class="text-center text-grey">CÓDIGO</th>
+                    <th class="text-center text-grey">PRODUTO</th>
+                    <th class="text-center text-grey">VALOR</th>
+                    <th class="text-center text-grey">QUANTIDADE</th>
+                    <th class="text-center text-grey">U. M.</th>
+                    <th class="text-center text-grey">VALOR TOTAL</th>
+                    <th class="text-center text-grey">REMOVER</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in requisicao.requisicaoItens" :key="item.id">
+                    <td class="text-left">{{ item.codigo }}</td>
+                    <td class="text-left">{{ item.nome }}</td>
+                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
+                    <td class="text-left">
+                        <v-text-field density="compact" variant="outlined" type="number" color="primary"
+                            :hide-details="true" class="ml-12" v-model="item.quantidade" min="0"
+                            @change="adicionarRemoverProduto(item)">
+                        </v-text-field>
+                    </td>
+                    <td class="text-center">{{ item.unidadeMedida }}</td>
+                    <td class="text-right">{{ (item.valor * item.quantidade).toFixed(2) }}
+                    </td>
+                    <td class="text-center">
+                        <v-btn icon="mdi-package-variant-minus" variant="plain" color="red" title="Remover Produto"
+                            @click="removeProdutoRequisicao(item)"></v-btn>
+                    </td>
+                </tr>
+
+                <tr v-for="item in produtos" :key="item.id" class="text-grey">
+                    <td class="text-left">{{ item.codigo }}</td>
+                    <td class="text-left">{{ item.nome }}</td>
+                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
+                    <td class="text-left">
+                        <v-text-field density="compact" variant="outlined" type="number" color="primary"
+                            :hide-details="true" class="sm ml-12" v-model="item.quantidade" min="0"
+                            @change="adicionarRemoverProduto(item)">
+                        </v-text-field>
+                    </td>
+                    <td class="text-center">{{ item.unidadeMedida }}</td>
+                    <td class="text-right">{{ (item.valor * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2)
+                    }}</td>
+                    <td class="text-center">
+                        <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
+                            :disabled="(isNaN(item.quantidade) ? 0 : item.quantidade) == 0"
+                            @click="adicionarProdutoRequisicao(item)" title="Incluir Produto"></v-btn> -->
+                    </td>
+                </tr>
+            </tbody>
+        </v-table>
+    </div>
+</template>
+  
+<script setup>
+import { ref, onMounted, watch, inject } from "vue";
+import requisicaoService from "@/services/requisicao.service";
+import handleErrors from "@/helpers/HandleErrors"
+import BreadCrumbs from "@/components/breadcrumbs.vue";
+import { useAuthStore } from "@/store/auth.store";
+import clienteService from "@/services/cliente.service";
+import fornecedorService from "@/services/fornecedor.service";
+import { compararValor } from "@/helpers/functions"
+import router from "@/router";
+
+//DATA
+const authStore = useAuthStore();
+const isBusy = ref(false);
+const requisicao = ref({
+    filialId: authStore.user.filial,
+    clienteId: null,
+    fornecedorId: null,
+    valorTotal: 0,
+    taxaGestao: 0,
+    destino: 0,
+    requisicaoItens: []
+});
+const clientes = ref([]);
+const fornecedores = ref([]);
+const produtos = ref([]);
+
+const swal = inject("$swal");
+const filter = ref("");
+
+//VUE METHODS
+onMounted(async () =>
+{
+    await getClienteToList(authStore.user.filial)
+    await getFornecedorToList(authStore.user.filial)
+});
+
+watch(() => requisicao.value.fornecedorId, async (fornecedorId) =>
+{
+    requisicao.value.requisicaoItens = []
+    await getProdutosToList(fornecedorId)
+
+})
+
+
+watch(filter, async () =>
+{
+    if (requisicao.value.fornecedorId != null && requisicao.value.fornecedorId > 0)
+    {
+        await getProdutosToList(requisicao.value.fornecedorId)
+    }
+})
+
+//METHODS
+
+function adicionarProdutoRequisicao(item)
+{
+    let index = requisicao.value.requisicaoItens.findIndex(p => p.id == item.id)
+    if (index == -1)
+    {
+        let produto = { ...item }
+        requisicao.value.requisicaoItens.push(produto)
+        produtoRemoveFromList(item)
+        ordenarRequisicaoItens()
+    }
+}
+
+function adicionarRemoverProduto(item)
+{
+    if (item.quantidade > 0)
+    {
+        adicionarProdutoRequisicao(item)
+    } else
+    {
+        removeProdutoRequisicao(item)
+    }
+}
+async function getClienteToList(filial)
+{
+    try
+    {
+        let response = await clienteService.toList(filial);
+        clientes.value = response.data;
+    } catch (error)
+    {
+        console.log("getClienteToList.error:", error);
+        handleErrors(error)
+    }
+}
+
+async function getFornecedorToList(filial)
+{
+    try
+    {
+        let response = await fornecedorService.toList(filial);
+        fornecedores.value = response.data;
+    } catch (error)
+    {
+        console.log("getUsuarioToList.error:", error);
+        handleErrors(error)
+    }
+}
+
+async function getProdutosToList(fornecedorId)
+{
+    try
+    {
+        isBusy.value = true;
+        let response = await fornecedorService.produtoPaginate(fornecedorId, 99999, 1, filter.value);
+        produtos.value = response.data.items;
+
+        for (let index = 0; index < requisicao.value.requisicaoItens.length; index++)
+        {
+            let item = requisicao.value.requisicaoItens[index];
+            produtoRemoveFromList(item)
+        }
+    } catch (error)
+    {
+        console.log("getUsuarioToList.error:", error);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false
+    }
+}
+
+function ordenarRequisicaoItens() 
+{
+    if (requisicao.value.requisicaoItens.length > 0)
+        requisicao.value.requisicaoItens.sort(compararValor("nome"))
+}
+
+function produtoRemoveFromList(item)
+{
+    let index = produtos.value.findIndex(p => p.id == item.id)
+    if (index != -1)
+        produtos.value.splice(index, 1)
+}
+
+async function removeProdutoRequisicao(item)
+{
+    let index = requisicao.value.requisicaoItens.findIndex(p => p.id == item.id)
+    if (index != -1)
+    {
+        requisicao.value.requisicaoItens.splice(index, 1)
+        await getProdutosToList(requisicao.value.fornecedorId)
+        ordenarRequisicaoItens()
+    }
+}
+
+async function salvar()
+{
+    try
+    {
+        isBusy.value = true;
+        //remover o campo id da requisicaoItens
+        requisicao.value.requisicaoItens.forEach(produto =>
+        {
+            delete produto.id
+            produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
+            produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
+
+            requisicao.value.taxaGestao += produto.taxaGestao
+            requisicao.value.valorTotal += produto.valorTotal
+
+            produto.valorTotal = produto.valorTotal.toFixed(2)
+            produto.taxaGestao = produto.taxaGestao.toFixed(2)
+
+        })
+        requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
+        requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
+        requisicaoService.create(requisicao.value)
+        router.push({ name: "requisicoes" })
+    } catch (error)
+    {
+        console.log("salvar.error:", error);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false
+    }
+}
+
+</script>
+
+<style scoped>
+table .v-text-field {
+    width: 80px;
+}
+</style>

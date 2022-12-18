@@ -54,6 +54,7 @@ namespace wca.compras.domain.Dtos
 
     public record ProdutoDto (
         int Id,
+        string Codigo,
         string Nome,
         string UnidadeMedida,
         decimal Valor,
@@ -63,6 +64,7 @@ namespace wca.compras.domain.Dtos
     );
 
     public record CreateProdutoDto(
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Codigo,
         [Required(ErrorMessage = "O campo é obrigatório!")] string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")] string UnidadeMedida,
         [Required(ErrorMessage = "O campo é obrigatório!")] decimal Valor,
@@ -73,6 +75,7 @@ namespace wca.compras.domain.Dtos
 
     public record UpdateProdutoDto(
         [Required(ErrorMessage = "O campo é obrigatório!")] int Id,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Codigo,
         [Required(ErrorMessage = "O campo é obrigatório!")] string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")] string UnidadeMedida,
         [Required(ErrorMessage = "O campo é obrigatório!")] decimal Valor,

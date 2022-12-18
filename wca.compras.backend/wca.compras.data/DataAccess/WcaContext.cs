@@ -18,7 +18,9 @@ namespace wca.compras.data.DataAccess
         public DbSet<ClienteOrcamentoConfiguracao> ClienteOrcamentoConfiguracaos { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
         public DbSet<Produto> Produtos { get; set; }
-
+        public DbSet<Requisicao> Requisicoes { get; set; }
+        public DbSet<RequisicaoItem> RequisicaoItens { get; set; }
+        public DbSet<RequisicaoHistorico> RequisicaoHistoricos { get; set; }
 
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)

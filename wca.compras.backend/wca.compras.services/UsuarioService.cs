@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Crypto.Engines;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -175,7 +174,7 @@ namespace wca.compras.services
                 
                 query = query.OrderBy(p => p.Nome);
 
-                var pagination = Pagination<UsuarioDto>.ToPagedList(query, page, pageSize);
+                var pagination = Pagination<UsuarioDto>.ToPagedList(_mapper, query, page, pageSize);
 
                 return pagination;
             }
@@ -184,9 +183,27 @@ namespace wca.compras.services
                 Console.WriteLine("Usuario.Paginate.Error" + ex.Message);
                 throw new Exception(ex.ToString());
             }
-            
+        }
 
+        public async Task<IList<ListItem>> GetToList(int filialId)
+        {
+            try
+            {
+                var query = _rm.UsuarioRepository.SelectByCondition(c => c.Ativo == true);
 
+                if (filialId > 1)
+                {
+                    query = query.Where(c => c.Id == filialId);
+                }
+                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
+
+                return _mapper.Map<IList<ListItem>>(itens);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.GetToList.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
         }
 
         private async Task<bool> IsEmailExists(string email)
@@ -199,5 +216,7 @@ namespace wca.compras.services
             }
             return false;
         }
+
+        
     }
 }

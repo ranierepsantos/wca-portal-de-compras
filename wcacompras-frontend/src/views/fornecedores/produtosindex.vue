@@ -13,6 +13,7 @@
         <v-table class="elevation-2">
             <thead>
                 <tr>
+                    <th class="text-left text-grey">CÓDIGO</th>
                     <th class="text-left text-grey">PRODUTO</th>
                     <th class="text-left text-grey">VALOR</th>
                     <th class="text-center text-grey">U.M.</th>
@@ -23,6 +24,7 @@
             </thead>
             <tbody>
                 <tr v-for="item in produtos" :key="item.id">
+                    <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-left">{{ item.valor.toFixed(2) }}</td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
@@ -43,7 +45,7 @@
                 </tr>
             </tfoot>
         </v-table>
-        <v-dialog v-model="openProdutoForm" max-width="700" :absolute="false" persistent>
+        <v-dialog v-model="openProdutoForm" max-width="900" :absolute="false" persistent>
             <v-form ref="produtoForm" @submit.prevent="salvar()">
                 <v-card>
                     <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
@@ -51,32 +53,42 @@
                     </v-card-title>
                     <v-card-text>
                         <v-row>
+                            <v-col cols="4">
+                                <v-text-field label="Código" v-model="produto.codigo" type="text" required
+                                    variant="outlined" color="primary" :rules="[(v) => !!v || 'Código é obrigatório']"
+                                    density="compact">
+                                </v-text-field>
+                            </v-col>
                             <v-col cols="8">
                                 <v-text-field label="Nome" v-model="produto.nome" type="text" required
                                     variant="outlined" color="primary" :rules="[(v) => !!v || 'Nome é obrigatório']"
                                     density="compact">
                                 </v-text-field>
                             </v-col>
-                            <v-col>
-                                <v-select label="Categoria" v-model="produto.tipoFornecimentoId" :items="categorias"
-                                    density="compact" item-title="text" item-value="value" variant="outlined"
-                                    color="primary" :rules="[(v) => !!v || 'Categoria é obrigatória']"></v-select>
-                            </v-col>
+
                         </v-row>
                         <v-row>
                             <v-col>
                                 <v-text-field-money label-text="Valor" v-model="produto.valor" color="primary"
                                     :number-decimal="2" :field-rules="produtoValorRules"></v-text-field-money>
                             </v-col>
+
+                            <v-col>
+                                <v-text-field-money label-text="Taxa Gestão" v-model="produto.taxaGestao"
+                                    color="primary" :number-decimal="2"></v-text-field-money>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-select label="Categoria" v-model="produto.tipoFornecimentoId" :items="categorias"
+                                    density="compact" item-title="text" item-value="value" variant="outlined"
+                                    color="primary" :rules="[(v) => !!v || 'Categoria é obrigatória']"></v-select>
+                            </v-col>
                             <v-col>
                                 <v-text-field label="Unidade Medida" v-model="produto.unidadeMedida" type="text"
                                     required variant="outlined" color="primary"
                                     :rules="[(v) => !!v || 'U.M. é obrigatório']" density="compact">
                                 </v-text-field>
-                            </v-col>
-                            <v-col>
-                                <v-text-field-money label-text="Taxa Gestão" v-model="produto.taxaGestao"
-                                    color="primary" :number-decimal="2"></v-text-field-money>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -118,6 +130,7 @@ const route = useRoute();
 const produto = ref({
     id: 0,
     fornecedorId: null,
+    codigo: null,
     nome: null,
     valor: 0,
     taxaGestao: 0,
@@ -158,6 +171,7 @@ function clearFormData()
     produto.value = {
         id: 0,
         fornecedorId: idFornecedor,
+        codigo: null,
         nome: null,
         valor: 0,
         taxaGestao: 0,

@@ -21,6 +21,7 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddTransient<IFilialService, FilialService>();
             services.AddTransient<ITipoFornecimentoService, TipoFornecimentoService>();
             services.AddTransient<IFornecedorService, FornecedorService>();
+            services.AddTransient<IRequisicaoService, RequisicaoService>();
 
             var autoMapperConfig = new MapperConfiguration(
                 config =>
@@ -32,6 +33,7 @@ namespace wca.compras.crosscutting.DependencyInjection
                     config.AddProfile(new FilialProfile());
                     config.AddProfile(new TipoFornecimentoProfile());
                     config.AddProfile(new FornecedorProfile());
+                    config.AddProfile(new RequisicaoProfile());
 
                 }
              );

@@ -127,7 +127,7 @@ namespace wca.compras.services
                 }
                 query = query.OrderBy(p => p.Nome);
 
-                var pagination = Pagination<ClienteDto>.ToPagedList(query, page, pageSize);
+                var pagination = Pagination<ClienteDto>.ToPagedList(_mapper, query, page, pageSize);
 
                 return pagination;
             }
@@ -162,7 +162,7 @@ namespace wca.compras.services
                     return null;
                 }
 
-                //Remover permissões caso tenha alterado
+                //Remover contatos caso tenha alterado
                 baseData.ClienteContatos.ToList().ForEach(contato =>
                 {
                     var c = cliente.ClienteContatos.Where(p => p.Id == contato.Id).FirstOrDefault();

@@ -28,14 +28,8 @@ namespace wca.compras.domain.Util
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             Items = items;
         }
-        public static Pagination<T> ToPagedList<TSource>(IQueryable<TSource> source, int page, int pageSize)
+        public static Pagination<T> ToPagedList<TSource>(IMapper _mapper, IQueryable<TSource> source, int page, int pageSize)
         {
-            var config = new MapperConfiguration(cfg => {
-                cfg.CreateMap<TSource, T>();
-
-            });
-            var _mapper = config.CreateMapper();
-
             var count = source.Count();
             var items = source.Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -44,9 +38,9 @@ namespace wca.compras.domain.Util
             return new Pagination<T>(items, count, page, pageSize);
         }
 
-        public static Pagination<T> ToPagedList(IQueryable<T> source, int page, int pageSize)
+        public static Pagination<T> ToPagedList(IMapper _mapper, IQueryable<T> source, int page, int pageSize)
         {
-            return ToPagedList<T>(source, page, pageSize);
+            return ToPagedList<T>(_mapper, source, page, pageSize);
         }
 
     }

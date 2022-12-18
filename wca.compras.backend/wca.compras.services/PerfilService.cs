@@ -108,7 +108,7 @@ namespace wca.compras.services
             }
             query = query.OrderBy(p => p.Nome);
 
-            var pagination = Pagination<PerfilDto>.ToPagedList(query, page, pageSize);
+            var pagination = Pagination<PerfilDto>.ToPagedList(_mapper, query, page, pageSize);
 
             return pagination;
 

@@ -89,17 +89,6 @@ const routes = [
         
       },
       {
-        path: 'app/produtos/cadastro',
-        name: 'fornecedorProdutosCadastro',
-        beforeEnter: protectRoute,
-        
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores/produtoscadastro.vue'),
-        
-      },
-      {
         path: 'app/perfil',
         name: 'perfil',
         beforeEnter: protectRoute,
@@ -120,6 +109,26 @@ const routes = [
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "perfil" */ '../views/perfil/cadastro.vue'),
         props: route => ({ query: route.query.id })
+      },
+      {
+        path: 'app/requisicoes',
+        name: 'requisicoes',
+        meta: {permissao:"requisicao|requisicao_all_users"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes')
+      },
+      {
+        path: 'app/requisicoes/cadastro',
+        name: 'requisicaoCadastro',
+        meta: {permissao:"requisicao|requisicao_all_users"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes/cadastro')
       },
       {
         path: 'app/usuarios',
@@ -166,6 +175,7 @@ const routes = [
 
 function protectRoute(to, from, next)
 {
+  console.log(to.meta.permissao)
   let authStore = useAuthStore();
   if (!authStore.isAuthenticated()) next({ name: 'login' })
   if (to.meta.permissao != undefined && !authStore.hasPermissao(to.meta.permissao)) 
