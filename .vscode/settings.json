@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/388bbe05-ba67-432d-a4b0-520b180bb219/AppServices/subscriptions/388bbe05-ba67-432d-a4b0-520b180bb219/resourceGroups/appsvc_windows_centralus/providers/Microsoft.Web/sites/App-wca-compras",
+    "appService.deploySubpath": "wca.compras.backend"
+}
