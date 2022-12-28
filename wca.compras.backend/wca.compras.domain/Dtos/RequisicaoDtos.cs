@@ -17,7 +17,7 @@ namespace wca.compras.domain.Dtos
         ListItem Cliente,
         ListItem Usuario,
         ListItem Fornecedor,
-        IList<RequisicaoHistoricoUsuarioDto> RequisicaoHistorico,
+        IList<RequisicaoHistoricoDto> RequisicaoHistorico,
         IList<RequisicaoItemDto> RequisicaoItens
     );
 
@@ -28,6 +28,8 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] decimal ValorTotal,
         decimal TaxaGestao,
         EnumDestinoRequisicao Destino,
+        [Required(ErrorMessage = "O campo é obrigatório!")] int UsuarioId,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string NomeUsuario,
         [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RequisicaoItemDto> RequisicaoItens
 
     );
@@ -41,6 +43,7 @@ namespace wca.compras.domain.Dtos
         decimal TaxaGestao,
         EnumStatusRequisicao Status,
         EnumDestinoRequisicao Destino,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string NomeUsuario,
         IList<RequisicaoItemDto> RequisicaoItens,
         IList<RequisicaoHistoricoDto> RequisicaoHistorico
     );
@@ -56,14 +59,6 @@ namespace wca.compras.domain.Dtos
         int Quantidade,
         decimal ValorTotal,
         int TipoFornecimentoId
-    );
-
-    public record RequisicaoHistoricoUsuarioDto(
-        int Id,
-        int RequisicaoId,
-        ListItem Usuario,
-        DateTime DataHora, 
-        string Evento
     );
 
     public record RequisicaoHistoricoDto(

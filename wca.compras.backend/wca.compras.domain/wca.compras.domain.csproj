@@ -16,6 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Entities\ClienteUsuario.cs" />
+    <Compile Remove="Entities\PerfilPermissao.cs" />
     <Compile Remove="Interfaces\Repositories\IPerfilRepository.cs" />
   </ItemGroup>
 

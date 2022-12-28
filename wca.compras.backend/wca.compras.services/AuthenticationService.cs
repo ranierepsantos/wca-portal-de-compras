@@ -11,6 +11,7 @@ using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Security;
+using wca.compras.domain.Util;
 using BC = BCrypt.Net.BCrypt;
 
 namespace wca.compras.services
@@ -41,10 +42,10 @@ namespace wca.compras.services
         {
             try
             {
-                var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true).FirstOrDefaultAsync();
+                var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true).Include("Cliente").FirstOrDefaultAsync();
                 if (authUser == null || !BC.Verify(login.Password, authUser.Password))
                 {
-                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, 0, 0, "", null);
+                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, 0, "", null, null);
                 }
 
                 var perfilUser = await _rm.PerfilRepository
@@ -53,7 +54,7 @@ namespace wca.compras.services
                     .FirstOrDefaultAsync();
                 if (perfilUser == null || perfilUser.Ativo == false)
                 {
-                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0,0,0, "", null);
+                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0,0, "", null, null);
                 }
 
                 ClaimsIdentity identity = new ClaimsIdentity(
@@ -70,7 +71,7 @@ namespace wca.compras.services
 
                 var handler = new JwtSecurityTokenHandler();
                 var token = CreateToken(identity, createDate, expirationDate, handler);
-                return await SuccessObject(createDate, expirationDate, token, authUser, _mapper.Map<PerfilPermissoesDto>(perfilUser));
+                return await SuccessObject(createDate, expirationDate, token, authUser, _mapper.Map<PerfilPermissoesDto>(perfilUser), _mapper.Map<IList<ListItem>>(authUser.Cliente));
             }
             catch (Exception ex)
             {
@@ -184,7 +185,7 @@ namespace wca.compras.services
             return token;
         }
 
-        private async Task<LoginResponse> SuccessObject(DateTime createDate, DateTime expirationDate, string token, Usuario usuario, PerfilPermissoesDto perfil)
+        private async Task<LoginResponse> SuccessObject(DateTime createDate, DateTime expirationDate, string token, Usuario usuario, PerfilPermissoesDto perfil, IList<ListItem> clientes)
         {
             return new LoginResponse(
                 Authenticated: true,
@@ -194,9 +195,9 @@ namespace wca.compras.services
                 token,
                 usuario.Id,
                 usuario.FilialId,
-                usuario.ClienteId,
                 usuario.Nome,
-                perfil
+                perfil,
+                clientes
             );
         }
     }

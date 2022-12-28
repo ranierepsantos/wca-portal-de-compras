@@ -21,11 +21,9 @@ namespace wca.compras.data.DataAccess
         public DbSet<Requisicao> Requisicoes { get; set; }
         public DbSet<RequisicaoItem> RequisicaoItens { get; set; }
         public DbSet<RequisicaoHistorico> RequisicaoHistoricos { get; set; }
-
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
         }
     }
 }

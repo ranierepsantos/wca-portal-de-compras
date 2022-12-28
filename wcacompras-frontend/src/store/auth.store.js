@@ -9,7 +9,8 @@ const modelUser = {
         id: 0,
         nome: '',
         permissao: []
-    }
+    },
+    cliente: []
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -85,6 +86,7 @@ export const useAuthStore = defineStore('auth', {
             this.user.perfil.id = auth.perfil.id
             this.user.perfil.nome = auth.perfil.nome
             this.user.perfil.permissao = auth.perfil.permissao
+            this.user.cliente = auth.cliente
             let expiration = (new Date(auth.expiration)).getTime()
             this.token = auth.accessToken
             this.expireIn = expiration

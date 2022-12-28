@@ -7,9 +7,13 @@ export default {
         return api.post(route.usuarioCreate, data);
     },
 
+    getById(id)
+    {
+        return api.get(route.usuarioGetById.replace('{id}', id));
+    },
     remove(id)
     {
-        return api.delete(route.usuarioRemove, { params: {"id": id } });
+        return api.get(route.usuarioGetById.replace("{id}", id));
     },
 
     paginate(pageSize, page, termo ="")

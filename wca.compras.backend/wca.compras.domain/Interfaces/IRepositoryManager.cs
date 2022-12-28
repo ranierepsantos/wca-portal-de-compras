@@ -17,7 +17,6 @@ namespace wca.compras.domain.Interfaces
         public IRepository<Requisicao> RequisicaoRepository { get; }
         public IRepository<RequisicaoHistorico> RequisicaoHistoricoRepository { get; }
         public IRepository<RequisicaoItem> RequisicaoItemRepository { get; }
-
         Task SaveAsync();
     }
 }

@@ -142,5 +142,37 @@ namespace wca.compras.webapi.Controllers
             }
 
         }
+
+        /// <summary>
+        /// Busca cliente pelo Id
+        /// </summary>
+        /// <returns>Cliente</returns>
+        /// <param name="id"></param>
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<UsuarioDto>> Get(int id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                int filial = 1; // int.Parse(User.FindFirst("Filial").Value);
+
+                var result = await _usuarioService.GetById(filial, id);
+                if (result == null)
+                {
+                    return NotFound($"Usuário íd: {id}, não localizado!");
+                }
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
     }
 }

@@ -20,6 +20,7 @@ namespace wca.compras.data.Repositories
         private IRepository<Requisicao> _requisicaoRepo;
         private IRepository<RequisicaoItem> _requisicaoItemRepo;
         private IRepository<RequisicaoHistorico> _requisicaoHistoricoRepo;
+        
 
         public RepositoryManager(WcaContext context)
         {
@@ -175,6 +176,7 @@ namespace wca.compras.data.Repositories
                 return _requisicaoItemRepo;
             }
         }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

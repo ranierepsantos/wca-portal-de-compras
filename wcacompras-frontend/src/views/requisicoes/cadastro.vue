@@ -3,15 +3,25 @@
         <bread-crumbs title="Nova Requisição" :show-button="false" :custom-button-show="true"
             custom-button-text="Salvar" @customClick="salvar()" />
         <v-row>
-            <v-col cols="4">
+            <v-col cols="5">
                 <v-select label="Clientes" v-model="requisicao.clienteId" :items="clientes" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="5">
                 <v-select label="Fornecedor" v-model="requisicao.fornecedorId" :items="fornecedores" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+                    item-title="text" item-value="value" variant="outlined" color="primary" :hide-details="true"
+                    :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="2">
+                <v-select label="Destino" v-model="requisicao.destino" :items="destinos" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
+            </v-col>
+
+        </v-row>
+        <v-row>
+            <v-col cols="5">
                 <v-text-field label="Pesquisar Produto" v-model="filter" placeholder="Nome ou Código" density="compact"
                     variant="outlined" color="info">
                 </v-text-field>
@@ -80,7 +90,6 @@ import requisicaoService from "@/services/requisicao.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import { useAuthStore } from "@/store/auth.store";
-import clienteService from "@/services/cliente.service";
 import fornecedorService from "@/services/fornecedor.service";
 import { compararValor } from "@/helpers/functions"
 import router from "@/router";
@@ -95,10 +104,16 @@ const requisicao = ref({
     valorTotal: 0,
     taxaGestao: 0,
     destino: 0,
+    UsuarioId: null,
+    NomeUsuario: null,
     requisicaoItens: []
 });
 const clientes = ref([]);
 const fornecedores = ref([]);
+const destinos = ref([
+    { value: 0, text: "Outros" },
+    { value: 1, text: "Diretoria" },
+])
 const produtos = ref([]);
 
 const swal = inject("$swal");
@@ -107,7 +122,9 @@ const filter = ref("");
 //VUE METHODS
 onMounted(async () =>
 {
-    await getClienteToList(authStore.user.filial)
+    clientes.value = authStore.user.cliente;
+    requisicao.value.NomeUsuario = authStore.user.nome;
+    requisicao.value.UsuarioId = authStore.user.id;
     await getFornecedorToList(authStore.user.filial)
 });
 
@@ -149,18 +166,6 @@ function adicionarRemoverProduto(item)
     } else
     {
         removeProdutoRequisicao(item)
-    }
-}
-async function getClienteToList(filial)
-{
-    try
-    {
-        let response = await clienteService.toList(filial);
-        clientes.value = response.data;
-    } catch (error)
-    {
-        console.log("getClienteToList.error:", error);
-        handleErrors(error)
     }
 }
 
@@ -241,11 +246,10 @@ async function salvar()
 
             produto.valorTotal = produto.valorTotal.toFixed(2)
             produto.taxaGestao = produto.taxaGestao.toFixed(2)
-
         })
         requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
         requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
-        requisicaoService.create(requisicao.value)
+        await requisicaoService.create(requisicao.value)
         router.push({ name: "requisicoes" })
     } catch (error)
     {

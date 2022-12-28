@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -11,23 +12,25 @@ namespace wca.compras.services
     public class RequisicaoService: IRequisicaoService
     {
         private readonly IRepositoryManager _rm;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
 
-        public RequisicaoService(IMapper mapper, IRepositoryManager repositoryManager)
+        public RequisicaoService(IMapper mapper, 
+            IRepositoryManager repositoryManager,
+            IEmailService emailService)
         {
             _mapper = mapper;
             _rm = repositoryManager;
+            _emailService = emailService;
         }
 
         
-        public async Task<RequisicaoDto> Create(int usuarioId, CreateRequisicaoDto createRequisicaoDto)
+        public async Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto)
         {
             try
             {
                 var data = _mapper.Map<Requisicao>(createRequisicaoDto);
                 
-                data.UsuarioId = usuarioId;
-
                 _rm.RequisicaoRepository.Attach(data);
 
                 foreach (var item in createRequisicaoDto.RequisicaoItens)
@@ -41,12 +44,16 @@ namespace wca.compras.services
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = data.Id,
-                    UsuarioId = usuarioId,
-                    Evento = "Requisição criada",
+                    Evento = $"Requisição criada por {createRequisicaoDto.NomeUsuario}",
                     DataHora= DateTime.Now
                 };
 
                 await CreateRequisicaoHistorico(reqH);
+
+                /* checar se houve "estouro do limite de compra por categoria
+                 * sim => enviar e-mail para adm ou cliente aprovar
+                 * não => enviar e-mail para o fornecedor
+                */ 
 
                 return _mapper.Map<RequisicaoDto>(data);
             }
@@ -61,6 +68,8 @@ namespace wca.compras.services
         {
             try
             {
+                //_emailService.SendRequisicaoFornecedorEmail();
+
                 var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id);
 
                 if (filialId > 1)
@@ -70,8 +79,8 @@ namespace wca.compras.services
                              .Include("Cliente")
                              .Include("Fornecedor")
                              .Include("RequisicaoItens")
-                             .Include(r => r.RequisicaoHistorico)
-                                .ThenInclude(rh => rh.Usuario);
+                             .Include(r => r.RequisicaoHistorico);
+                               
 
                 var data = await query.FirstOrDefaultAsync();
 
@@ -127,7 +136,7 @@ namespace wca.compras.services
             throw new NotImplementedException();
         }
 
-        public async Task<RequisicaoDto> Update(int filialId, int usuarioId, UpdateRequisicaoDto updateRequisicaoDto)
+        public async Task<RequisicaoDto> Update(int filialId, UpdateRequisicaoDto updateRequisicaoDto)
         {
             try
             {
@@ -161,8 +170,7 @@ namespace wca.compras.services
 
                 await CreateRequisicaoHistorico(new RequisicaoHistorico() {
                     DataHora = DateTime.Now,
-                    Evento = "Requisição alterada",
-                    UsuarioId = usuarioId,
+                    Evento = $"Requisição alterada por ${updateRequisicaoDto.NomeUsuario}",
                     RequisicaoId = data.Id
                 });
 
@@ -174,7 +182,6 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
-
 
         private async Task CreateRequisicaoHistorico(RequisicaoHistorico historico)
         {
@@ -188,6 +195,16 @@ namespace wca.compras.services
                 Console.WriteLine($"{this.GetType().Name}.CreateRequisicaoHistorico.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
+        }
+
+        private string randomTokenString()
+        {
+            var randomBytes = new byte[40];
+            using (var rngCsp = new RNGCryptoServiceProvider())
+            {
+                rngCsp.GetBytes(randomBytes);
+            }
+            return BitConverter.ToString(randomBytes).Replace("-", "");
         }
     }
 }

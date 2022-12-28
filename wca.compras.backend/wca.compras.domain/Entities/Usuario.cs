@@ -31,12 +31,6 @@ namespace wca.compras.domain.Entities
         public bool Ativo { get; set; }
         
         [JsonIgnore]
-        public Cliente Cliente { get; set; }
-
-        [Column("cliente_id")]
-        public int? ClienteId { get; set; }
-
-        [JsonIgnore]
         public Perfil Perfil { get; set; }
 
         [Column("perfil_id")]
@@ -48,6 +42,7 @@ namespace wca.compras.domain.Entities
         [Column("filial_id")]
         public int? FilialId { get; set; }
 
+        public IList<Cliente> Cliente { get; set; } = new List<Cliente>();
 
     }
 }

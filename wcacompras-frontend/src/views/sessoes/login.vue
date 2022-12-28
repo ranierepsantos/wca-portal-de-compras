@@ -23,7 +23,7 @@
             <v-progress-circular indeterminate :size="40"></v-progress-circular>
           </div>
           <div class="text-center mt-5">
-            <router-link to="/recuperar-senha" class="text-grey text-decoration-none">
+            <router-link to="/recuperar-senha" class="text-grey text-decoration-none" v-show="!isBusy">
               Esqueci minha senha
             </router-link>
           </div>

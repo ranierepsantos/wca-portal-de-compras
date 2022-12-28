@@ -14,6 +14,7 @@
         <tr>
           <th class="text-left text-grey">NOME</th>
           <th class="text-left text-grey">PERFIL</th>
+          <th class="text-left text-grey" v-show="authStore.user.filial == 1">FILIAL</th>
           <th class="text-center text-grey">ATIVO</th>
           <th></th>
         </tr>
@@ -25,6 +26,7 @@
             &nbsp;{{ user.nome }}
           </td>
           <td class="text-left">{{ getPerfilName(user.perfilid) }}</td>
+          <td class="text-left" v-show="authStore.user.filial == 1">{{ user.filial?.nome }}</td>
           <td class="text-center">
             <v-icon :icon="user.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="user.ativo ? 'success' : 'error'"></v-icon>
@@ -40,7 +42,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="4">
+          <td :colspan="authStore.user.filial == 1 ? 5 : 4">
             <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>
@@ -64,6 +66,9 @@
                 <v-text-field label="Email" v-model="usuario.email" type="email" required variant="outlined"
                   color="primary" :rules="emailRules" density="compact"></v-text-field>
               </v-col>
+              <v-col cols="2" v-show="usuario.id > 0">
+                <v-checkbox v-model="usuario.ativo" label="Ativo" color="primary"></v-checkbox>
+              </v-col>
             </v-row>
             <v-row>
               <v-col>
@@ -77,14 +82,45 @@
                   :rules="[(v) => !!v || 'Filial é obrigatório']" density="compact"></v-select>
               </v-col>
             </v-row>
+            <!-- <v-row>
+              <v-col cols="6">
+                
+              </v-col>
+            </v-row> -->
             <v-row>
               <v-col cols="6">
-                <v-select label="Cliente" :items="clientes" item-title="text" item-value="value" variant="outlined"
-                  color="primary" :rules="[(v) => !!v || 'Cliente é obrigatório']" density="compact"
-                  v-model="usuario.clienteid"></v-select>
+                <v-card :elevation="2" subtitle="Selecione os clientes">
+                  <v-card-text>
+                    <v-list density="compact" select-strategy="multiple" color="primary">
+                      <v-list-item v-for="item in clientes" :key="item.text" @click="item.selected = !item.selected"
+                        :active="item.selected">
+                        <v-list-item-title>{{ item.text }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-card-text>
+                </v-card>
               </v-col>
-              <v-col cols="6">
-                <v-checkbox v-show="usuario.id > 0" v-model="usuario.ativo" label="Ativo" color="primary"></v-checkbox>
+              <v-col cols="1">
+                <v-icon icon="mdi-chevron-double-right" color="success" size="x-large"
+                  @click="usuarioClienteAdicionarTodos()"></v-icon><br />
+                <v-icon icon="mdi-chevron-right" color="success" size="x-large"
+                  @click="usuarioClienteAdicionar()"></v-icon><br />
+                <v-icon icon="mdi-chevron-double-left" color="success" size="x-large"
+                  @click="usuarioClienteRemoverTodos()"></v-icon><br />
+                <v-icon icon="mdi-chevron-left" color="success" size="x-large"
+                  @click="usuarioClienteRemover()"></v-icon>
+              </v-col>
+              <v-col cols="5">
+                <v-card :elevation="2" subtitle="Clientes do usúario">
+                  <v-card-text>
+                    <v-list density="compact" select-strategy="multiple" color="primary">
+                      <v-list-item v-for="item in usuario.cliente" :key="item.text" :active="item.selected"
+                        @click="item.selected = !item.selected">
+                        <v-list-item-title>{{ item.text }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-card-text>
+                </v-card>
               </v-col>
             </v-row>
             <v-row>
@@ -95,7 +131,7 @@
             </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions> </v-card-actions>
+
       </v-card>
     </v-dialog>
   </div>
@@ -110,6 +146,7 @@ import clienteService from "@/services/cliente.service";
 import handleErrors from "@/helpers/HandleErrors"
 import { useAuthStore } from "@/store/auth.store";
 import Breadcrumbs from "@/components/breadcrumbs.vue";
+import { compararValor } from "@/helpers/functions";
 
 //DATA
 const page = ref(1);
@@ -128,10 +165,11 @@ const usuario = ref({
   nome: "",
   email: "",
   ativo: true,
-  clienteid: null,
-  filialid: null,
+  filialid: 1,
   perfilid: null,
+  cliente: []
 });
+let filialUsuario = 0;
 const authStore = useAuthStore();
 const emailRules = ref([
   (v) => !!v || "E-mail é obrigatório",
@@ -139,6 +177,7 @@ const emailRules = ref([
 ]);
 const userForm = ref(null)
 const filter = ref("");
+
 
 //VUE METHODS
 onMounted(async () =>
@@ -152,14 +191,34 @@ onMounted(async () =>
 watch(page, async () => await getItems());
 watch(filter, async () => await getItems());
 
-watch(() => usuario.value.filialid, async (filialid) =>
+watch(() => usuario.value.filialid, async (filialid, oldValue) =>
 {
   clientes.value = [];
   await getClienteToList(filialid)
-
+  clientesListRemove();
+  if (filialid != filialUsuario)
+  {
+    usuario.value.cliente = []
+    filialUsuario = filialid
+  }
 })
 
 //METHODS
+function clientesListRemove(removerTodos = false)
+{
+  if (removerTodos == true)
+    clientes.value.splice(0, clientes.value.length)
+  else
+  {
+
+    usuario.value.cliente.forEach(cliente =>
+    {
+      let index = clientes.value.findIndex(c => c.value == cliente.value)
+      if (index > -1) clientes.value.splice(index, 1)
+
+    })
+  }
+}
 function closeDialog()
 {
   dialog.value = false;
@@ -207,11 +266,27 @@ async function enableDisable(item)
   }
 }
 
-function editar(item)
+async function editar(item)
 {
-  usuario.value = { ...item };
-  dialogTitle.value = "Edição de Usuário";
-  dialog.value = true;
+  try
+  {
+    isBusy.value = true
+    let response = await userService.getById(item.id)
+    usuario.value = response.data;
+    filialUsuario = usuario.value.filialid;
+    await getClienteToList(filialUsuario)
+    clientesListRemove();
+    dialogTitle.value = "Edição de Usuário";
+    dialog.value = true;
+  } catch (error)
+  {
+    console.log("editar.error:", error);
+    handleErrors(error)
+  } finally
+  {
+    isBusy.value = false
+  }
+
 }
 
 
@@ -250,7 +325,7 @@ async function salvar()
   }
 }
 
-function clearData()
+async function clearData()
 {
   dialogTitle.value = "Novo Usuário";
   usuario.value = {
@@ -258,10 +333,12 @@ function clearData()
     nome: "",
     email: "",
     ativo: true,
-    clienteid: null,
     filialid: authStore.user.filial,
     perfilid: null,
+    cliente: []
   };
+  filialUsuario = authStore.user.filial;
+  await getClienteToList(filialUsuario)
 }
 
 function getPerfilName(perfilId)
@@ -326,5 +403,66 @@ async function getItems()
     isBusy.value = false;
   }
 }
+
+function usuarioClienteAdicionar()
+{
+  let list = clientes.value.slice()
+  list.forEach((cliente) =>
+  {
+    if (cliente.selected != undefined && cliente.selected == true)
+    {
+      cliente.selected = false
+      usuario.value.cliente.push(cliente)
+    }
+  })
+  clientesListRemove();
+}
+
+function usuarioClienteAdicionarTodos()
+{
+  usuario.value.cliente.push(...clientes.value)
+  clientes.value.splice(0, clientes.value.length)
+  ordernarLista(usuario.value.cliente, "text")
+}
+
+function usuarioClienteRemover()
+{
+  let list = usuario.value.cliente.slice()
+  list.forEach((cliente) =>
+  {
+    if (cliente.selected != undefined && cliente.selected == true)
+    {
+      cliente.selected = false
+      clientes.value.push(cliente)
+      let index = usuario.value.cliente.findIndex(c => c.value == cliente.value)
+      if (index > -1) usuario.value.cliente.splice(index, 1)
+    }
+  })
+}
+
+function usuarioClienteRemoverTodos()
+{
+  clientes.value.push(...usuario.value.cliente)
+  usuario.value.cliente.splice(0, usuario.value.cliente.length)
+  ordernarLista(clientes.value, "text")
+}
+
+function ordernarLista(lista, campo)
+{
+  lista.sort(compararValor(campo))
+}
+
+
 </script>
 
+<style scoped>
+.v-list {
+  height: 145px;
+  /* or any height you want */
+  overflow-y: auto;
+}
+
+.v-icon:hover {
+  cursor: pointer;
+}
+</style>

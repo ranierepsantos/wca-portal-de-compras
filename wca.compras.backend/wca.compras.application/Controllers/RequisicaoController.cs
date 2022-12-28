@@ -34,9 +34,8 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int userId = int.Parse(User.FindFirst("CodigoUsuario").Value);
-
-                var result = await service.Create(userId, createRequisicaoDto);
+                
+                var result = await service.Create(createRequisicaoDto);
 
                 return Created("", result);
             }
@@ -63,9 +62,8 @@ namespace wca.compras.webapi.Controllers
                 }
 
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                int userId = int.Parse(User.FindFirst("CodigoUsuario").Value);
-
-                var result = await service.Update(filial, userId, updateRequisicaoDto);
+                
+                var result = await service.Update(filial, updateRequisicaoDto);
                 if (result == null)
                 {
                     return NotFound($"Requisição íd: {updateRequisicaoDto.Id}, não localizado!");
@@ -95,7 +93,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial =int.Parse(User.FindFirst("Filial").Value);
+                int filial = int.Parse(User.FindFirst("Filial").Value);
 
                 var result = await service.GetById(filial, id);
                 if (result == null)

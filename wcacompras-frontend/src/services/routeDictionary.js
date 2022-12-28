@@ -45,6 +45,7 @@ export const route = {
     tipoFornecimentoToList: "TipoFornecimento/ToList",
 
     usuarioCreate: "Usuario",
+    usuarioGetById: "Usuario/{id}",
     usuarioRemove: "Usuario",
     usuarioUpdate: "Usuario",
     usuarioPaginate: "Usuario/Paginate/{pageSize}/{page}",

@@ -25,10 +25,5 @@ namespace wca.compras.domain.Entities
         [Column("evento", TypeName = "varchar(500)")]
         public string Evento { get; set; } = "";
 
-        [Column("usuario_id")]
-        public int? UsuarioId { get; set; }
-
-        [JsonIgnore]
-        public Usuario? Usuario { get; set; }
     }
 }

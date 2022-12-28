@@ -54,5 +54,7 @@ namespace wca.compras.domain.Entities
         public IList<ClienteContato> ClienteContatos { get; set; } = new List<ClienteContato>();
         public IList<ClienteOrcamentoConfiguracao> ClienteOrcamentoConfiguracao { get; set; } = new List<ClienteOrcamentoConfiguracao>();
 
+        [JsonIgnore]
+        public IList<Usuario> Usuario { get; set; } = new List<Usuario>();
     }
 }

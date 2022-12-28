@@ -5,8 +5,8 @@ module.exports = defineConfig({
     port: 2808,
     proxy: {
       '^/api': {
-        target: 'http://localhost:5031/',
-        //target:  'http://smb.cliqx.com.br:27118/',
+        //target: 'https://wca-backend.azurewebsites.net/',
+        target: 'http://localhost:5031',
         changeOrigin: true,
         secure: true,
         logLevel: 'error'

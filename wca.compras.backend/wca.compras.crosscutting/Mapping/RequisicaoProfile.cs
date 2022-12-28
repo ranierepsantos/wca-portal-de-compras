@@ -27,8 +27,6 @@ namespace wca.compras.crosscutting.Mapping
             CreateMap<RequisicaoHistorico, RequisicaoHistoricoDto>()
                 .ReverseMap();
 
-            CreateMap<RequisicaoHistorico, RequisicaoHistoricoUsuarioDto>();
-
         }
     }
 }

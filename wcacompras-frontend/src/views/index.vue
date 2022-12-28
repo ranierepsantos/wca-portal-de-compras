@@ -95,6 +95,12 @@ const menuItems = ref([
     permissao: "perfil"
   },
   {
+    title: "Requisições",
+    value: 3,
+    route: "/app/requisicoes",
+    permissao: "requisicao|requisicao_all_users"
+  },
+  {
     title: "Usuários",
     value: 3,
     route: "/app/usuarios",

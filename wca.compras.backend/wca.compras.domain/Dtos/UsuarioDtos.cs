@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using wca.compras.domain.Util;
 
 namespace wca.compras.domain.Dtos
 {
@@ -7,9 +8,10 @@ namespace wca.compras.domain.Dtos
         string Nome,
         string Email,
         bool Ativo,
-        int Clienteid,
         int Filialid,
-        int Perfilid
+        int Perfilid,
+        FilialDto Filial,
+        IList<ListItem> Cliente
     );
 
     public record CreateUsuarioDto (
@@ -19,11 +21,10 @@ namespace wca.compras.domain.Dtos
         [EmailAddress(ErrorMessage ="Infome um e-mail válido")]
         string Email,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        int ClienteId,
-        [Required(ErrorMessage ="O campo é obrigatório")]
         int FilialId,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        int PerfilId
+        int PerfilId,
+        IList<ListItem> Cliente
     );
 
     public record UpdateUsuarioDto(
@@ -36,10 +37,9 @@ namespace wca.compras.domain.Dtos
         string Email,
         bool Ativo,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        int ClienteId,
-        [Required(ErrorMessage ="O campo é obrigatório")]
         int FilialId,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        int PerfilId
+        int PerfilId,
+        IList<ListItem> Cliente
     );
 }

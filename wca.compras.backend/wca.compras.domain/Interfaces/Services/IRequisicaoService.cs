@@ -11,8 +11,8 @@ namespace wca.compras.domain.Interfaces.Services
 {
     public interface IRequisicaoService
     {
-        Task<RequisicaoDto> Create(int usuarioId,CreateRequisicaoDto createRequisicaoDto);
-        Task<RequisicaoDto> Update(int filialId, int usuarioId, UpdateRequisicaoDto updateRequisicaoDto);
+        Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto);
+        Task<RequisicaoDto> Update(int filialId, UpdateRequisicaoDto updateRequisicaoDto);
         Task<bool> Remove(int filialId, int id);
         Task<RequisicaoDto> GetById(int filialId, int id);
         Pagination<RequisicaoDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS);

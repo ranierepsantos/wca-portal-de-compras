@@ -10,7 +10,8 @@ namespace wca.compras.crosscutting.Mapping
         public UsuarioProfile()
         {
             CreateMap<UsuarioDto, Usuario>().ReverseMap();
-            CreateMap<CreateUsuarioDto, Usuario>();
+            CreateMap<CreateUsuarioDto, Usuario>()
+                .ForMember(source => source.Cliente, opt => opt.Ignore()); ;
             CreateMap<UpdateUsuarioDto, Usuario>();
             CreateMap<Usuario, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))

@@ -1,31 +1,45 @@
 <template>
     <div>
         <bread-crumbs :title="(hasRequisicaoAllUsersPermission ? 'Requisições' : 'Minhas Requisições')"
-            @novoClick="editar('novo')" custom-button-text="Exportar Dados" @customClick="editar('novo')"
-            :custom-button-show="true" />
+            @novoClick="router.push({ name: 'requisicaoCadastro' })" custom-button-text="Exportar Dados"
+            @customClick="editar('novo')" :custom-button-show="true" />
         <v-row>
             <v-col cols="3">
                 <v-select label="Clientes" v-model="filter.clienteId" :items="clientes" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="4">
                 <v-select label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
             </v-col>
             <v-col cols="3" v-show="hasRequisicaoAllUsersPermission">
                 <v-select label="Usuário" v-model="filter.usuarioId" :items="usuarios" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="2">
                 <v-select label="Status" v-model="filter.status" :items="status" density="compact" item-title="text"
-                    item-value="value" variant="outlined" color="primary"></v-select>
+                    item-value="value" variant="outlined" color="primary" :hide-details="true"></v-select>
             </v-col>
         </v-row>
+        <v-row>
+            <v-col cols="12" class="text-right">
+                <v-btn color="info" variant="outlined" class="text-capitalize" @click="clearFilters()">
+                    <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
+                    <b>Limpar Filtros</b>
+                </v-btn>
+            </v-col>
+
+        </v-row>
+        <br>
         <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
         <v-table class="elevation-2">
             <thead>
                 <tr>
                     <th class="text-center text-grey">PEDIDO</th>
+                    <th class="text-left text-grey">USUÁRIO</th>
                     <th class="text-center text-grey">DATA</th>
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">FORNECEDOR</th>
@@ -37,6 +51,7 @@
             <tbody>
                 <tr v-for="item in requisicoes" :key="item.id">
                     <td class="text-center"> # {{ item.id }}</td>
+                    <th class="text-left text-grey">{{ item.usuario.text }}</th>
                     <td class="text-center">{{ new Date(item.dataCriacao).toLocaleDateString() }}</td>
                     <td class="text-left">{{ item.cliente.text }}</td>
                     <td class="text-left">{{ item.fornecedor.text }}</td>
@@ -52,7 +67,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -102,12 +117,18 @@ let status = [
 onMounted(async () =>
 {
     hasRequisicaoAllUsersPermission.value = authStore.hasPermissao('requisicao_all_users')
+    let filial = 0
     if (!hasRequisicaoAllUsersPermission.value)
     {
         filter.value.usuarioId = authStore.user.id;
+        filial = authStore.user.filial;
+        clientes.value = authStore.user.cliente
     }
-    await getClienteToList(authStore.user.filial)
-    await getFornecedorToList(authStore.user.filial)
+    if (hasRequisicaoAllUsersPermission.value)
+    {
+        await getClienteToList(filial)
+    } 
+    await getFornecedorToList(filial)
     await getUsuarioToList();
     await getItems();
 });
@@ -116,15 +137,20 @@ watch(page, () => getItems());
 watch(filter.value, () => getItems());
 
 //METHODS
+function clearFilters()
+{
+    filter.value.clienteId = null
+    filter.value.fornecedorId = null
+    filter.value.usuarioId = hasRequisicaoAllUsersPermission.value ? null : authStore.user.id
+    filter.value.status = -1
+}
 async function enableDisable(item)
 {
     try
     {
-        let text = item.ativo ? "Desativar" : "Ativar"
-
         let options = {
             title: text,
-            text: `Deseja realmente ${text.toLowerCase()} o fornecedor: ${item.nome}?`,
+            text: `Deseja realmente excluir o requisição: #${item.id}?`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Sim",
@@ -134,9 +160,7 @@ async function enableDisable(item)
         let response = await swal.fire(options);
         if (response.isConfirmed)
         {
-            let data = { ...item }
-            data.ativo = !data.ativo
-            await fornecedorService.update(data);
+            await requisicaoService.remove(item.id);
             await this.getItems()
 
             swal.fire({
@@ -144,7 +168,7 @@ async function enableDisable(item)
                 icon: "success",
                 position: "top-end",
                 title: "Sucesso!",
-                text: "Alteração realizada!",
+                text: "Exclusão realizada!",
                 showConfirmButton: false,
                 timer: 2000,
             })
@@ -154,12 +178,6 @@ async function enableDisable(item)
         console.log("fornecedores.enableDisable.error:", error);
         handleErrors(error)
     }
-}
-
-
-function editar(id)
-{
-    router.push({ name: "requisicaoCadastro", query: { id: id } })
 }
 
 async function getClienteToList(filial)
@@ -223,4 +241,6 @@ async function getFornecedorToList(filial)
         handleErrors(error)
     }
 }
+
+
 </script>

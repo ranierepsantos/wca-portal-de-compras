@@ -1,6 +1,7 @@
 ﻿using Org.BouncyCastle.Asn1.X509;
 using System.ComponentModel.DataAnnotations;
 using wca.compras.domain.Entities;
+using wca.compras.domain.Util;
 
 namespace wca.compras.domain.Dtos
 {
@@ -14,9 +15,9 @@ namespace wca.compras.domain.Dtos
         string AccessToken,
         int UsuarioId,
         int? FilialId,
-        int? ClienteId,
         string UsuarioNome,
-        PerfilPermissoesDto Perfil
+        PerfilPermissoesDto Perfil,
+        IList<ListItem> Cliente
     );
     
     public record ForgotPasswordRequest (

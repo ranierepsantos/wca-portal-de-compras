@@ -100,7 +100,13 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.FornecedorRepository.SelectByCondition(c => c.Ativo == true && c.FilialId == filialId) ;
+                var query = _rm.FornecedorRepository.SelectByCondition(c => c.Ativo == true);
+
+                if (filialId > 0)
+                {
+                    query = query.Where(c => c.FilialId == filialId);
+                }
+
                 var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 
                 return _mapper.Map<IList<ListItem>>(itens);

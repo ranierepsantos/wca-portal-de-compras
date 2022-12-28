@@ -32,7 +32,14 @@ namespace wca.compras.services
                 var data = _mapper.Map<Usuario>(usuario);
                 data.Ativo = true;
 
-                _rm.UsuarioRepository.Create(data); 
+                _rm.UsuarioRepository.Attach(data);
+                
+                foreach(var item in usuario.Cliente)
+                {
+                    var cli = _mapper.Map<Cliente>(item);
+                    _rm.ClienteRepository.Attach(cli);
+                    data.Cliente.Add(cli);
+                }
                 await _rm.SaveAsync();
 
                 return _mapper.Map<UsuarioDto>(data);
@@ -118,12 +125,14 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id);
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id,true);
 
                 if (filialId > 1)
                 {
                     query = query.Where(u => u.FilialId == filialId);
                 }
+                query = query.Include("Cliente");
+
                 var baseData = await query.FirstOrDefaultAsync();
                 
                 if (baseData == null)
@@ -139,15 +148,38 @@ namespace wca.compras.services
                         throw new Exception("Email já cadastrado");
                     }
                 }
-                
-                var data = _mapper.Map<Usuario>(usuario);
-                data.Password = baseData.Password;
-                
-                _rm.UsuarioRepository.Update(data);
+
+                //Remover Cliente que foram retirados do relacionamento
+                baseData.Cliente.ToList().ForEach(cli =>
+                {
+                    
+                    if (usuario.Cliente.Where(p => p.Value == cli.Id).FirstOrDefault() == null)
+                    {
+                        var cliente = baseData.Cliente.FirstOrDefault(p => p.Id == cli.Id);
+                        baseData.Cliente.Remove(cliente);
+                    }
+                });
+
+                //Adicionar permissões caso tenha novas
+                usuario.Cliente.ToList().ForEach(cli =>
+                {
+                    if (baseData.Cliente.Where(p => p.Id == cli.Value).FirstOrDefault() == null)
+                    {
+                        var cliente = _mapper.Map<Cliente>(cli);
+                        _rm.ClienteRepository.Attach(cliente);
+                        baseData.Cliente.Add(cliente);
+                    }
+                });
+
+                baseData.Ativo = usuario.Ativo;
+                baseData.Email = usuario.Email;
+                baseData.FilialId = usuario.FilialId;
+                baseData.Nome = usuario.Nome;
+                baseData.PerfilId = usuario.PerfilId;
 
                 await _rm.SaveAsync();
 
-                return _mapper.Map<UsuarioDto>(data);
+                return _mapper.Map<UsuarioDto>(baseData);
             }
             catch (Exception ex)
             {
@@ -171,7 +203,11 @@ namespace wca.compras.services
                 {
                     query = query.Where(q => q.Nome.Contains(termo));
                 }
-                
+                query = query.Include("Cliente");
+                if (filialId == 1)
+                {
+                    query = query.Include("Filial");
+                }
                 query = query.OrderBy(p => p.Nome);
 
                 var pagination = Pagination<UsuarioDto>.ToPagedList(_mapper, query, page, pageSize);
