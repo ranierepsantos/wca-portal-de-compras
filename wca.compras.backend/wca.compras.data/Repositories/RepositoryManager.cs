@@ -20,6 +20,8 @@ namespace wca.compras.data.Repositories
         private IRepository<Requisicao> _requisicaoRepo;
         private IRepository<RequisicaoItem> _requisicaoItemRepo;
         private IRepository<RequisicaoHistorico> _requisicaoHistoricoRepo;
+        private IRepository<FornecedorContato> _fornecedorContatoRepo;
+        private IRepository<RequisicaoAprovacao> _requisicaoAprovacaoRepo;
         
 
         public RepositoryManager(WcaContext context)
@@ -174,6 +176,28 @@ namespace wca.compras.data.Repositories
                 if (_requisicaoItemRepo == null)
                     _requisicaoItemRepo = new BaseRepository<RequisicaoItem>(_context);
                 return _requisicaoItemRepo;
+            }
+        }
+
+        public IRepository<FornecedorContato> FornecedorContatoRepository
+        {
+            get
+            {
+                if (_fornecedorContatoRepo == null)
+                    _fornecedorContatoRepo = new BaseRepository<FornecedorContato>(_context);
+
+                return _fornecedorContatoRepo;
+            }
+        }
+
+        public IRepository<RequisicaoAprovacao> RequisicaoAprovacaoRepository
+        {
+            get
+            {
+                if (_requisicaoAprovacaoRepo == null)
+                    _requisicaoAprovacaoRepo = new BaseRepository<RequisicaoAprovacao>(_context);
+
+                return _requisicaoAprovacaoRepo;
             }
         }
 

@@ -37,8 +37,10 @@ export const route = {
     produtoGetById: "Fornecedor/{fornecedorId}/Fornecedor/{id}",
     produtoPaginate: "Fornecedor/{fornecedorId}/Produtos/Paginate/{pageSize}/{page}",
 
+    requisicaoAprovar: "Requisicao/AprovarReprovar",
     requisicaoCreate: "Requisicao",
     requisicaoGetById: "Requisicao/{id}",
+    requisicaoGetByToken: "Requisicao/GetByToken/{token}",
     requisicaoUpdate: "Requisicao",
     requisicaoPaginate: "Requisicao/Paginate/{pageSize}/{page}",
 

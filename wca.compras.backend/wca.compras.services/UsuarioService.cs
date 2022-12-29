@@ -73,7 +73,7 @@ namespace wca.compras.services
                 {
                     query = query.Where(u => u.FilialId == filialId);
                 }
-                var data = await query.FirstOrDefaultAsync();
+                var data = await query.Include("Cliente").FirstOrDefaultAsync();
                 
                 if (data == null)
                 {
@@ -229,7 +229,7 @@ namespace wca.compras.services
 
                 if (filialId > 1)
                 {
-                    query = query.Where(c => c.Id == filialId);
+                    query = query.Where(c => c.FilialId == filialId);
                 }
                 var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 

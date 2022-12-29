@@ -328,6 +328,7 @@ function clearContato()
         aprovaPedido: false
     }
 }
+
 function closeContatoDialog()
 {
     contatoDialog.value = false
@@ -457,20 +458,24 @@ async function salvar()
     }
 }
 
-function salvarContato()
+async function salvarContato()
 {
-    if (clienteContato.value.id > 0)
+    const { valid } = await contatoForm.value.validate()
+    if (valid)
     {
-        let index = cliente.value.clienteContatos.findIndex(c => { return c.id == clienteContato.value.id })
-        if (index > -1)
+        let index = -1;
+        if (clienteContato.value.id > 0)
         {
-            cliente.value.clienteContatos[index] = { ...clienteContato.value }
+            index = cliente.value.clienteContatos.findIndex(c => { return c.id == clienteContato.value.id })
+            if (index > -1)
+            {
+                cliente.value.clienteContatos[index] = { ...clienteContato.value }
+            }
         }
-    } else
-    {
-        cliente.value.clienteContatos.push({ ...clienteContato.value })
+        if (index == -1)
+            cliente.value.clienteContatos.push({ ...clienteContato.value })
+        closeContatoDialog()
     }
-    closeContatoDialog()
 }
 
 </script>

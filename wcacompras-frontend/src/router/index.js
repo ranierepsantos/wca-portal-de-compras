@@ -152,6 +152,11 @@ const routes = [
     ]
   },
   {
+    path: "/app/requisicoes/aprovar/:token",
+    name: "aprovar",
+    component: () => import('../views/requisicoes/aprovar')
+  },
+  {
     path: "/login",
     name: "login",
     component: () => import("../views/sessoes/login")
@@ -175,7 +180,6 @@ const routes = [
 
 function protectRoute(to, from, next)
 {
-  console.log(to.meta.permissao)
   let authStore = useAuthStore();
   if (!authStore.isAuthenticated()) next({ name: 'login' })
   if (to.meta.permissao != undefined && !authStore.hasPermissao(to.meta.permissao)) 

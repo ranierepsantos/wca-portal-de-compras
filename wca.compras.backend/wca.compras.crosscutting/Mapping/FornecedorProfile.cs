@@ -10,8 +10,13 @@ namespace wca.compras.crosscutting.Mapping
         public FornecedorProfile()
         {
             CreateMap<Fornecedor, FornecedorDto>().ReverseMap();
-            CreateMap<CreateFornecedorDto, Fornecedor>();
-            CreateMap<UpdateFornecedorDto, Fornecedor>();
+            
+            CreateMap<CreateFornecedorDto, Fornecedor>()
+                .ForMember(src => src.FornecedorContatos, dest => dest.Ignore());
+            
+            CreateMap<UpdateFornecedorDto, Fornecedor>()
+                .ForMember(src => src.FornecedorContatos, dest => dest.MapFrom(opt => opt.FornecedorContatos)); ;
+            
             CreateMap<Fornecedor, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
@@ -19,6 +24,8 @@ namespace wca.compras.crosscutting.Mapping
             CreateMap<Produto, ProdutoDto>().ReverseMap();
             CreateMap<CreateProdutoDto, Produto>();
             CreateMap<UpdateProdutoDto, Produto>().ReverseMap();
+
+            CreateMap<FornecedorContato, FornecedorContatoDto>().ReverseMap();
         }
     }
 }

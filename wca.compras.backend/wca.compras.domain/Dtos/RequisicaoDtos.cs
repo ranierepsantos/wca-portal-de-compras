@@ -14,12 +14,31 @@ namespace wca.compras.domain.Dtos
         decimal TaxaGestao,
         EnumStatusRequisicao Status,
         EnumDestinoRequisicao Destino,
-        ListItem Cliente,
+        Cliente Cliente,
         ListItem Usuario,
         ListItem Fornecedor,
         IList<RequisicaoHistoricoDto> RequisicaoHistorico,
         IList<RequisicaoItemDto> RequisicaoItens
     );
+
+    public record RequisicaoAprovacaoDto(
+        int Id,
+        decimal ValorTotal,
+        decimal TaxaGestao,
+        EnumDestinoRequisicao Destino,
+        Cliente Cliente,
+        ListItem Usuario,
+        IList<RequisicaoItemDto> RequisicaoItens,
+        string NomeAprovador = ""
+    );
+
+    public record AprovarRequisicaoDto(
+        int Id,
+        bool Aprovado,
+        string Comentario,
+        string Token
+    );
+
 
     public record CreateRequisicaoDto (
         [Required(ErrorMessage = "O campo é obrigatório!")] int FilialId,
@@ -30,8 +49,9 @@ namespace wca.compras.domain.Dtos
         EnumDestinoRequisicao Destino,
         [Required(ErrorMessage = "O campo é obrigatório!")] int UsuarioId,
         [Required(ErrorMessage = "O campo é obrigatório!")] string NomeUsuario,
-        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RequisicaoItemDto> RequisicaoItens
-
+        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RequisicaoItemDto> RequisicaoItens,
+        bool RequerAutorizacaoWCA = false,
+        bool RequerAutorizacaoCliente = false
     );
 
     public record UpdateRequisicaoDto(

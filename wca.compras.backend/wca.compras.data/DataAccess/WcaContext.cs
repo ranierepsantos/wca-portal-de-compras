@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 using wca.compras.domain.Entities;
 
 namespace wca.compras.data.DataAccess
@@ -21,7 +20,10 @@ namespace wca.compras.data.DataAccess
         public DbSet<Requisicao> Requisicoes { get; set; }
         public DbSet<RequisicaoItem> RequisicaoItens { get; set; }
         public DbSet<RequisicaoHistorico> RequisicaoHistoricos { get; set; }
-        
+        public DbSet<FornecedorContato> FornecedorContatos { get; set; }
+        public DbSet<RequisicaoAprovacao> RequisicaoAprovacoes { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
         }

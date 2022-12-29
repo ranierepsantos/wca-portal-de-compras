@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20221228235720_CreateTable_FornecedorContato")]
+    partial class CreateTable_FornecedorContato
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -512,59 +514,6 @@ namespace wca.compras.data.Migrations
                     b.ToTable("Requisicoes");
                 });
 
-            modelBuilder.Entity("wca.compras.domain.Entities.RequisicaoAprovacao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("AlteraStatus")
-                        .HasColumnType("bit")
-                        .HasColumnName("altera_status");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("smalldatetime")
-                        .HasColumnName("data_criacao");
-
-                    b.Property<DateTime>("DataExpiracao")
-                        .HasColumnType("smalldatetime")
-                        .HasColumnName("data_expiracao");
-
-                    b.Property<DateTime?>("DataRevogacao")
-                        .HasColumnType("smalldatetime")
-                        .HasColumnName("data_revogacao");
-
-                    b.Property<string>("NomeAprovador")
-                        .IsRequired()
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("nome_aprovador");
-
-                    b.Property<int>("RequisicaoId")
-                        .HasColumnType("int")
-                        .HasColumnName("requisicao_id");
-
-                    b.Property<string>("TokenAprovador")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("token_aprovador");
-
-                    b.Property<string>("TokenRequisicao")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("token");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequisicaoId");
-
-                    b.ToTable("RequisicaoAprovacoes");
-                });
-
             modelBuilder.Entity("wca.compras.domain.Entities.RequisicaoHistorico", b =>
                 {
                     b.Property<int>("Id")
@@ -894,17 +843,6 @@ namespace wca.compras.data.Migrations
                     b.Navigation("Fornecedor");
 
                     b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.RequisicaoAprovacao", b =>
-                {
-                    b.HasOne("wca.compras.domain.Entities.Requisicao", "Requisicao")
-                        .WithMany()
-                        .HasForeignKey("RequisicaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Requisicao");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.RequisicaoHistorico", b =>

@@ -25,7 +25,14 @@ namespace wca.compras.services
             try
             {
                 var data = _mapper.Map<Fornecedor>(createFornecedorDto);
-                _rm.FornecedorRepository.Create(data);
+                _rm.FornecedorRepository.Attach(data);
+
+                foreach (var item in createFornecedorDto.FornecedorContatos)
+                {
+                    var contato = _mapper.Map<FornecedorContato>(item);
+                    data.FornecedorContatos.Add(contato);
+                }
+
                 await _rm.SaveAsync(); 
 
                 return _mapper.Map<FornecedorDto>(data);
@@ -62,6 +69,8 @@ namespace wca.compras.services
 
                 if (filialId > 1)
                     query = query.Where(c => c.FilialId == filialId);
+
+                query = query.Include("FornecedorContatos");
 
                 var data = await query.FirstOrDefaultAsync();
 
@@ -239,7 +248,7 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.FornecedorRepository.SelectByCondition(p => p.Id == updateFornecedorDto.Id,false);
+                var query = _rm.FornecedorRepository.SelectByCondition(p => p.Id == updateFornecedorDto.Id);
 
                 if (filialId > 1)
                     query = query.Where(c => c.FilialId == filialId);
@@ -250,7 +259,17 @@ namespace wca.compras.services
                 {
                     return null;
                 }
-                
+                //Remover contatos caso tenha alterado
+                baseData.FornecedorContatos.ToList().ForEach(contato =>
+                {
+                    var c = updateFornecedorDto.FornecedorContatos.Where(p => p.Id == contato.Id).FirstOrDefault();
+                    if (c == null)
+                    {
+                        var ct = _rm.FornecedorContatoRepository.SelectByCondition(p => p.Id == contato.Id).FirstOrDefault();
+                        if (ct != null) _rm.FornecedorContatoRepository.Delete(ct);
+                    }
+                });
+
                 _mapper.Map(updateFornecedorDto, baseData);
                 _rm.FornecedorRepository.Update(baseData);
                 

@@ -42,7 +42,10 @@ namespace wca.compras.services
         {
             try
             {
-                var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true).Include("Cliente").FirstOrDefaultAsync();
+                var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true)
+                                        .Include(u => u.Cliente)
+                                        .ThenInclude(c => c.ClienteOrcamentoConfiguracao)
+                                        .FirstOrDefaultAsync();
                 if (authUser == null || !BC.Verify(login.Password, authUser.Password))
                 {
                     return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, 0, "", null, null);
@@ -71,7 +74,7 @@ namespace wca.compras.services
 
                 var handler = new JwtSecurityTokenHandler();
                 var token = CreateToken(identity, createDate, expirationDate, handler);
-                return await SuccessObject(createDate, expirationDate, token, authUser, _mapper.Map<PerfilPermissoesDto>(perfilUser), _mapper.Map<IList<ListItem>>(authUser.Cliente));
+                return await SuccessObject(createDate, expirationDate, token, authUser, _mapper.Map<PerfilPermissoesDto>(perfilUser), _mapper.Map<IList<ClienteDto>>(authUser.Cliente));
             }
             catch (Exception ex)
             {
@@ -185,7 +188,7 @@ namespace wca.compras.services
             return token;
         }
 
-        private async Task<LoginResponse> SuccessObject(DateTime createDate, DateTime expirationDate, string token, Usuario usuario, PerfilPermissoesDto perfil, IList<ListItem> clientes)
+        private async Task<LoginResponse> SuccessObject(DateTime createDate, DateTime expirationDate, string token, Usuario usuario, PerfilPermissoesDto perfil, IList<ClienteDto> clientes)
         {
             return new LoginResponse(
                 Authenticated: true,

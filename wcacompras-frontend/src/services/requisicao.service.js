@@ -3,6 +3,10 @@ import { route } from "./routeDictionary";
 
 export default {
 
+    aprovar(data)
+    {
+        return api.post(route.requisicaoAprovar, data);
+    },
     create(requisicao)
     {
         return api.post(route.requisicaoCreate, requisicao);
@@ -15,6 +19,11 @@ export default {
     {
         return api.get(route.requisicaoGetById.replace("{id}", id));
     },
+    getByToken (token) 
+    {
+        return api.get(route.requisicaoGetByToken.replace("{token}", token));
+    },
+    
     update(requisicao)
     {
         return api.put(route.requisicaoUpdate, requisicao);

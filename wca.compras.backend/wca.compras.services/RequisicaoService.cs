@@ -25,7 +25,7 @@ namespace wca.compras.services
         }
 
         
-        public async Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto)
+        public async Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto, string urlOrigin = "")
         {
             try
             {
@@ -53,7 +53,8 @@ namespace wca.compras.services
                 /* checar se houve "estouro do limite de compra por categoria
                  * sim => enviar e-mail para adm ou cliente aprovar
                  * não => enviar e-mail para o fornecedor
-                */ 
+                */
+                await solicitarAprovacaoFornecedor(urlOrigin, data);
 
                 return _mapper.Map<RequisicaoDto>(data);
             }
@@ -89,6 +90,99 @@ namespace wca.compras.services
             catch (Exception ex)
             {
                 Console.WriteLine($"{this.GetType().Name}.GetById.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        public async Task<RequisicaoAprovacaoDto> GetByAprovacaoToken(string tokenAprovacao)
+        {
+            try
+            {
+
+               var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
+                    .SelectByCondition(c => c.TokenAprovador == tokenAprovacao)
+                    .FirstOrDefaultAsync();
+
+                if (requisicaoAprovacao == null || !requisicaoAprovacao.Ativo)
+                    throw new Exception("Token inválido e/ou expirado!");
+
+                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == requisicaoAprovacao.RequisicaoId);
+                query = query.Include("Usuario")
+                             .Include("Cliente")
+                             .Include("RequisicaoItens");
+
+                var data = await query.FirstOrDefaultAsync();
+
+                if (data == null)
+                {
+                    return null;
+                }
+
+                var ra = _mapper.Map<RequisicaoAprovacaoDto>(data);
+
+                var dto = new RequisicaoAprovacaoDto(
+                        ra.Id, ra.ValorTotal, ra.TaxaGestao, ra.Destino,
+                        ra.Cliente, ra.Usuario, 
+                        ra.RequisicaoItens, requisicaoAprovacao.NomeAprovador
+                    );
+                return dto;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.GetByAprovacaoToken.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        public async Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto) 
+        {
+            try
+            {
+                var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
+                     .SelectByCondition(c => c.TokenAprovador == aprovarRequisicaoDto.Token)
+                     .FirstOrDefaultAsync();
+
+                if (requisicaoAprovacao == null || !requisicaoAprovacao.Ativo)
+                    throw new Exception("Token inválido e/ou expirado!");
+
+                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == requisicaoAprovacao.RequisicaoId);
+                var data = await query.FirstOrDefaultAsync();
+
+                if (data == null)
+                    return false;
+
+                if (aprovarRequisicaoDto.Aprovado == false)
+                    data.Status = EnumStatusRequisicao.REJEITADO;
+                else
+                    data.Status = requisicaoAprovacao.AlteraStatus? EnumStatusRequisicao.APROVADO: data.Status;
+
+                _rm.RequisicaoRepository.Update(data);
+                
+                //invalidar token da requisicao
+                var requisicaoAprovacoes = await _rm.RequisicaoAprovacaoRepository.SelectByCondition(c => c.TokenRequisicao == requisicaoAprovacao.TokenRequisicao).ToListAsync();
+
+                foreach(var item in requisicaoAprovacoes)
+                {
+                    item.DataRevogacao = DateTime.UtcNow;
+                    _rm.RequisicaoAprovacaoRepository.Update(item);
+                }
+
+                await _rm.SaveAsync();
+
+                RequisicaoHistorico reqH = new RequisicaoHistorico()
+                {
+                    RequisicaoId = requisicaoAprovacao.RequisicaoId,
+                    Evento = $"Requisição aprovada por {requisicaoAprovacao.NomeAprovador}\nComentário: {aprovarRequisicaoDto.Comentario}",
+                    DataHora = DateTime.Now
+                };
+
+                await CreateRequisicaoHistorico(reqH);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.GetByAprovacaoToken.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
@@ -136,7 +230,7 @@ namespace wca.compras.services
             throw new NotImplementedException();
         }
 
-        public async Task<RequisicaoDto> Update(int filialId, UpdateRequisicaoDto updateRequisicaoDto)
+        public async Task<RequisicaoDto> Update(int filialId, UpdateRequisicaoDto updateRequisicaoDto, string urlOrigin = "")
         {
             try
             {
@@ -196,6 +290,49 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
+
+        private async Task solicitarAprovacaoFornecedor (string urlOrigin, Requisicao requisicao)
+        {
+            try
+            {
+                IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId).ToListAsync();
+
+                var requisicaoToken = randomTokenString();
+
+                foreach (var contato in contatos)
+                {
+                    RequisicaoAprovacao req = new RequisicaoAprovacao()
+                    {
+                        NomeAprovador = contato.Nome,
+                        RequisicaoId = requisicao.Id,
+                        TokenRequisicao = requisicaoToken,
+                        TokenAprovador = randomTokenString(),
+                        AlteraStatus = true
+                    };
+                    _rm.RequisicaoAprovacaoRepository.Create(req);
+                    await _rm.SaveAsync();
+
+                    var link = $"{urlOrigin}/app/requisicoes/aprovar/{req.TokenAprovador}";
+                    _emailService.SendRequisicaoFornecedorEmail(new string[] { contato.Email }, link);
+                }
+
+                RequisicaoHistorico reqH = new RequisicaoHistorico()
+                {
+                    RequisicaoId = requisicao.Id,
+                    Evento = $"Solicitação de aprovação enviada ao fornecedor!",
+                    DataHora = DateTime.Now
+                };
+
+                await CreateRequisicaoHistorico(reqH);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.solicitarAprovacaoFornecedor.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
 
         private string randomTokenString()
         {

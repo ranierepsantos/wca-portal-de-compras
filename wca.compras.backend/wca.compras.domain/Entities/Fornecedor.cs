@@ -52,5 +52,7 @@ namespace wca.compras.domain.Entities
         public int FilialId { get; set; }
 
         public IList<Produto> Produtos { get; set; } = new List<Produto>();
+
+        public IList<FornecedorContato> FornecedorContatos { get; set; } = new List<FornecedorContato>();
     }
 }

@@ -18,7 +18,11 @@ namespace wca.compras.domain.Entities
 
         [Required, MaxLength(100)]
         [Column("token", TypeName = "varchar(100)")]
-        public string Token { get; set; }
+        public string TokenRequisicao { get; set; }
+
+        [Required, MaxLength(100)]
+        [Column("token_aprovador", TypeName = "varchar(100)")]
+        public string TokenAprovador { get; set; }
 
         [Required]
         [Column("data_criacao", TypeName = "smalldatetime")]
@@ -30,6 +34,12 @@ namespace wca.compras.domain.Entities
 
         [Column("data_revogacao", TypeName = "smalldatetime")]
         public DateTime? DataRevogacao { get; set; }
+
+        [Column("nome_aprovador", TypeName = "varchar(150)")]
+        public string NomeAprovador { get; set; }
+
+        [Column("altera_status")]
+        public bool AlteraStatus { get; set; }
 
         [JsonIgnore, NotMapped]
         public bool Expirado => DateTimeOffset.UtcNow > DataExpiracao;

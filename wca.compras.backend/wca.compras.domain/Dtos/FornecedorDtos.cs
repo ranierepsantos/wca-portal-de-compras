@@ -13,7 +13,8 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
-        int FilialId
+        int FilialId,
+        IList<FornecedorContatoDto> FornecedorContatos
     );
 
     public record CreateFornecedorDto(
@@ -30,7 +31,9 @@ namespace wca.compras.domain.Dtos
         string UF,
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
-        int FilialId
+        int FilialId,
+        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
+        IList<FornecedorContatoDto> FornecedorContatos
     );
 
     public record UpdateFornecedorDto(
@@ -49,7 +52,9 @@ namespace wca.compras.domain.Dtos
         string UF,
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
-        int FilialId
+        int FilialId,
+        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
+        IList<FornecedorContatoDto> FornecedorContatos
     );
 
     public record ProdutoDto (
@@ -88,5 +93,17 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] int FornecedorId,
         [Required(ErrorMessage = "O campo é obrigatório!")] string NomeArquivo,
         [Required(ErrorMessage = "O campo é obrigatório!")] string Arquivo
+    );
+
+    public record FornecedorContatoDto(
+        int Id,
+        int FornecedorId,
+        [Required(ErrorMessage = "O campo é obrigatório!")]
+        string Nome,
+        [Required(ErrorMessage = "O campo é obrigatório!")]
+        string Email,
+        string Telefone,
+        string Celular,
+        bool AprovaPedido
     );
 }

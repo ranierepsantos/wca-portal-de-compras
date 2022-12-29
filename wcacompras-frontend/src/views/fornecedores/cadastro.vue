@@ -74,6 +74,53 @@
                                 </v-text-field>
                             </v-col>
                         </v-row>
+                        <!-- CONTATOS -->
+                        <v-row>
+                            <v-col>
+                                <h3 class="text-left text-grey">Contatos</h3>
+                                <small class="text-error" v-show="!isContatoValido">Deve haver pelo menos 1 contato que
+                                    aprova requisição</small>
+                                <v-divider class="mt-3"></v-divider>
+                            </v-col>
+                        </v-row>
+                        <v-table class="elevation-2">
+                            <thead>
+                                <tr>
+                                    <th class="text-left text-grey">NOME</th>
+                                    <th class="text-left text-grey">E-MAIL</th>
+                                    <th class="text-center text-grey">TELEFONE</th>
+                                    <th class="text-center text-grey">CELULAR</th>
+                                    <th class="text-center text-grey">APROVA?</th>
+                                    <th class="text-right"> <v-btn density="compact" variant="outlined" color="primary"
+                                            class="text-capitalize" @click="editarContato(null)">Novo</v-btn>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in fornecedor.fornecedorContatos" :key="item.id">
+                                    <td class="text-left">
+                                        {{ item.nome }}
+                                    </td>
+                                    <td class="text-left">{{ item.email }}</td>
+                                    <td class="text-right">
+                                        {{ mask(item.telefone, '["(##) #####-####", "(##) ####-####"]') }}
+                                    </td>
+                                    <td class="text-right">
+                                        {{ mask(item.celular, '["(##) #####-####", "(##) ####-####"]') }}
+                                    </td>
+                                    <td class="text-center">
+                                        <v-icon :icon="item.aprovaPedido ? 'mdi-check' : 'mdi-close'" variant="plain"
+                                            :color="item.aprovaPedido ? 'success' : 'error'"></v-icon>
+                                    </td>
+                                    <td class="text-right">
+                                        <v-btn icon="mdi-lead-pencil" variant="plain" color="primary"
+                                            @click="editarContato(item)"></v-btn>
+                                        <v-btn icon="mdi-delete" variant="plain" color="error"
+                                            @click="removerContato(item)"></v-btn>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
                     </v-form>
                 </v-card-text>
                 <v-card-text class="text-right">
@@ -86,6 +133,57 @@
                 </v-card-text>
             </v-card>
         </v-container>
+        <v-dialog v-model="contatoDialog" max-width="700" :absolute="false">
+            <v-card>
+                <v-card-title class="text-primary text-h5">
+                    {{ dialogTitle }}
+                </v-card-title>
+                <v-card-text>
+                    <v-form @submit.prevent="salvarContato()" ref="contatoForm">
+                        <v-row>
+                            <v-col>
+                                <v-text-field label="Nome" v-model="fornecedorContato.nome" type="text" required
+                                    density="compact" variant="outlined" color="primary"
+                                    :rules="[(v) => !!v || 'Campo é obrigatório']">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-text-field label="Email" v-model="fornecedorContato.email" type="email" required
+                                    density="compact" variant="outlined" color="primary" :rules="emailRules">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col>
+                                <v-text-field label="Telefone" v-model="fornecedorContato.telefone" type="text" required
+                                    density="compact" variant="outlined" color="primary"
+                                    v-maska="['(##) #####-####', '(##) ####-####']">
+                                </v-text-field>
+                            </v-col>
+                            <v-col>
+                                <v-text-field label="Celular" v-model="fornecedorContato.celular" type="text" required
+                                    density="compact" variant="outlined" color="primary"
+                                    v-maska="['(##) #####-####', '(##) ####-####']">
+                                </v-text-field>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox v-model="fornecedorContato.aprovaPedido" label="Aprova Pedido?"
+                                    color="primary"></v-checkbox>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-btn variant="outlined" color="primary" @click="closeContatoDialog()">Cancelar</v-btn>
+                                <v-btn color="primary" type="submit" class="ml-3">Salvar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-card-text>
+                <v-card-actions> </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -99,7 +197,7 @@ import router from "@/router"
 import handleErrors from "@/helpers/HandleErrors"
 import fornecedorService from '@/services/fornecedor.service';
 import filialService from "@/services/filial.service";
-
+import { mask } from "maska"
 
 // VARIABLES
 const authStore = useAuthStore()
@@ -107,6 +205,9 @@ const swal = inject("$swal")
 const route = useRoute()
 const isBusy = ref(false)
 const fornecedorForm = ref(null)
+const contatoForm = ref(null)
+const contatoDialog = ref(false)
+const dialogTitle = "Novo Contato"
 const fornecedor = ref({
     id: 0,
     nome: "",
@@ -119,10 +220,25 @@ const fornecedor = ref({
     uf: "",
     ativo: true,
     filialId: null,
-    tipoFornecimentoId: 1
+    fornecedorContatos: []
+});
+const fornecedorContato = ref({
+    id: 0,
+    fornecedorId: null,
+    nome: "",
+    email: "",
+    telefone: "",
+    celular: "",
+    aprovaPedido: false
 });
 const filiais = ref([]);
 const fornecimentos = ref([]);
+const emailRules = ref([
+    (v) => !!v || "Campo é obrigatório",
+    (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
+]);
+
+const isContatoValido = ref(true);
 
 //VUE FUNCTIONS
 
@@ -139,6 +255,35 @@ onMounted(async () =>
 });
 
 //METHODS
+function clearContato()
+{
+    fornecedorContato.value = {
+        id: 0,
+        fornecedorId: fornecedor.value.id,
+        nome: "",
+        email: "",
+        telefone: "",
+        celular: "",
+        aprovaPedido: false
+    }
+}
+
+function closeContatoDialog()
+{
+    contatoDialog.value = false
+    clearContato();
+}
+
+function editarContato(contato)
+{
+    clearContato();
+    if (contato != null)
+    {
+        fornecedorContato.value = { ...contato }
+    }
+    contatoDialog.value = true
+}
+
 async function getfornecedor(fornecedorId)
 {
     try
@@ -182,14 +327,36 @@ async function getTipoFornecimentoToList()
     }
 }
 
+async function removerContato(contato)
+{
+    let options = {
+        title: "Confirma Exclusão?",
+        text: "Deseja realmente excluir o contato: " + contato.nome + "?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
+    }
+
+    let response = await swal.fire(options);
+    if (response.isConfirmed)
+    {
+        let index = fornecedor.value.fornecedorContatos.findIndex(c => { return c.id == contato.id })
+        if (index > -1)
+        {
+            fornecedor.value.fornecedorContatos.splice(index, 1);
+        }
+    }
+}
 
 async function salvar()
 {
     try
     {
         isBusy.value = true
+        isContatoValido.value = fornecedor.value.fornecedorContatos.find(c => c.aprovaPedido == true) != undefined;
         const { valid } = await fornecedorForm.value.validate()
-        if (valid)
+        if (valid && isContatoValido.value)
         {
             if (fornecedor.value.id == 0)
             {
@@ -218,5 +385,26 @@ async function salvar()
     {
         isBusy.value = false
     }
+}
+
+async function salvarContato()
+{
+    const { valid } = await contatoForm.value.validate()
+    if (valid)
+    {
+        let index = -1;
+        if (fornecedor.value.id > 0)
+        {
+            index = fornecedor.value.fornecedorContatos.findIndex(c => { return c.id == fornecedorContato.value.id })
+            if (index > -1)
+            {
+                fornecedor.value.fornecedorContatos[index] = { ...fornecedorContato.value }
+            }
+        }
+        if (index < 0)
+            fornecedor.value.fornecedorContatos.push({ ...fornecedorContato.value })
+        closeContatoDialog()
+    }
+
 }
 </script>

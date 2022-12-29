@@ -46,6 +46,37 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
+        /// Aprova/Rejeita uma Requisição
+        /// </summary>
+        /// <returns>NoContent</returns>
+        /// <param name="aprovarRequisicaoDto"></param>
+        [HttpPost]
+        [Route("AprovarReprovar")]
+        public async Task<ActionResult> AprovarReprovar([FromBody] AprovarRequisicaoDto aprovarRequisicaoDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await service.aprovarRequisicao(aprovarRequisicaoDto);
+
+                if (result == false)
+                    return NotFound();
+
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+
+        /// <summary>
         /// Atualiza dados da Requisição
         /// </summary>
         /// <returns>NoContent</returns>
@@ -107,6 +138,36 @@ namespace wca.compras.webapi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        /// <summary>
+        /// Busca Requisição pelo token para aprovação/rejeição
+        /// </summary>
+        /// <returns>RequisicaoDto</returns>
+        /// <param name="token"></param>
+        [HttpGet]
+        [Route("GetByToken/{token}")]
+        public async Task<ActionResult<RequisicaoDto>> GetByToken(string token)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await service.GetByAprovacaoToken(token);
+                if (result == null)
+                {
+                    return NotFound($"Requisição, não localizado!");
+                }
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
 
         /// <summary>
         /// Retorna lista de Requisição por paginação

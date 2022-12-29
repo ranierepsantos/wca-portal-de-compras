@@ -114,7 +114,7 @@
                 <v-card :elevation="2" subtitle="Clientes do usúario">
                   <v-card-text>
                     <v-list density="compact" select-strategy="multiple" color="primary">
-                      <v-list-item v-for="item in usuario.cliente" :key="item.text" :active="item.selected"
+                      <v-list-item v-for="item in usuario.cliente" :key="item.value" :active="item.selected"
                         @click="item.selected = !item.selected">
                         <v-list-item-title>{{ item.text }}</v-list-item-title>
                       </v-list-item>
@@ -273,6 +273,7 @@ async function editar(item)
     isBusy.value = true
     let response = await userService.getById(item.id)
     usuario.value = response.data;
+    console.log(usuario.value)
     filialUsuario = usuario.value.filialid;
     await getClienteToList(filialUsuario)
     clientesListRemove();

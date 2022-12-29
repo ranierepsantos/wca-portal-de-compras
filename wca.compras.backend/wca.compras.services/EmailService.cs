@@ -36,7 +36,7 @@ namespace wca.compras.services
       return emailMessage;
     }
 
-    public void SendRequisicaoFornecedorEmail()
+    public void SendRequisicaoFornecedorEmail(string[] sentTo, string url)
     {
       var currentDirectory = Directory.GetCurrentDirectory();
       var parentDirectory = Directory.GetParent(currentDirectory).FullName;
@@ -52,13 +52,13 @@ namespace wca.compras.services
       var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido da WCA.<br/>";
         bodyHtml += "Clique no botão abaixo para acessar o <br/>";
         bodyHtml += "pedido<p><br/>";
-        bodyHtml += "<p style='text-align: center;'><a href='https://www.google.com.br' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
+        bodyHtml += $"<p style='text-align: center;'><a href='{url}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
       
 
       builder.HtmlBody = string.Format(@"<p style='text-align:center;'><img src='cid:{0}' width='250px'; height='172.25px';></p>{1}", image.ContentId, bodyHtml);
       
 
-      var message = new Message(new string[] { "ivanildo.bacelar@outlook.com.br" }, "Novo pedido WCA", "");
+      var message = new Message(sentTo, "Novo pedido WCA", "");
       var emailMessage = new MimeMessage();
       emailMessage.From.Add(new MailboxAddress("WCA Gestão Compras", _emailConfig.From));
       emailMessage.To.AddRange(message.To);
