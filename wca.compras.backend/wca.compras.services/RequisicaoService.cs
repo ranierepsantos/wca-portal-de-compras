@@ -77,7 +77,8 @@ namespace wca.compras.services
                     query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include("Usuario")
-                             .Include("Cliente")
+                             .Include(r => r.Cliente)
+                             .ThenInclude(c =>  c.ClienteOrcamentoConfiguracao)
                              .Include("Fornecedor")
                              .Include("RequisicaoItens")
                              .Include(r => r.RequisicaoHistorico);

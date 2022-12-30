@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <img src="../assets/images/logoWCA.png" alt="" />
+    <img src="../assets/images/logoWCA.png" alt="" class="mt-10" />
 
     <!-- <h1>{{ props.msg }}</h1>
     <p><v-icon icon="mdi:mdi-home" /> Teste</p>
@@ -30,14 +30,17 @@ const props = defineProps(["msg"]);
 h3 {
   margin: 40px 0 0;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
 }
+
 li {
   display: inline-block;
   margin: 0 10px;
 }
+
 a {
   color: #42b983;
 }

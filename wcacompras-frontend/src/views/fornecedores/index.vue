@@ -40,7 +40,7 @@
 
                         <v-btn icon="mdi-archive-settings-outline" variant="plain" color="primary"
                             title="Itens do Fornecedor"
-                            @click="router.push({ name: 'fornecedorProdutos', query: { fornecedor: item.id } })"></v-btn>
+                            @click="router.push({ name: 'fornecedorProdutos', params: { nome: item.nome }, query: { fornecedor: item.id } })"></v-btn>
                     </td>
                 </tr>
             </tbody>

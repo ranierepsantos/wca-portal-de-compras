@@ -14,15 +14,6 @@ const routes = [
         beforeEnter: protectRoute,
       },
       {
-        path: 'app/about',
-        name: 'about',
-        beforeEnter: protectRoute,
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-      },
-      {
         path: 'app/clientes',
         name: 'clientes',
         beforeEnter: protectRoute,
@@ -130,6 +121,17 @@ const routes = [
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes/cadastro')
       },
+      {
+        path: 'app/requisicoes/edicao/:requisicao',
+        name: 'requisicaoEdicao',
+        meta: {permissao:"requisicao|requisicao_all_users"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes/edicao')
+      },
+      
       {
         path: 'app/usuarios',
         name: 'usuarios',

@@ -41,6 +41,7 @@ export const route = {
     requisicaoCreate: "Requisicao",
     requisicaoGetById: "Requisicao/{id}",
     requisicaoGetByToken: "Requisicao/GetByToken/{token}",
+    requisicaoRemove: "Requisicao",
     requisicaoUpdate: "Requisicao",
     requisicaoPaginate: "Requisicao/Paginate/{pageSize}/{page}",
 

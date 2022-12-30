@@ -5,7 +5,8 @@
       <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
-      <v-btn block color="orange" rounded="lg" class="text-capitalize" disabled>
+      <v-btn block color="orange" rounded="lg" class="text-capitalize"
+        @click="router.push({ name: 'requisicaoCadastro' })">
         <b>Requisição de compra</b>
       </v-btn>
       <br />

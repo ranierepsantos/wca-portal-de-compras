@@ -39,7 +39,7 @@
             <thead>
                 <tr>
                     <th class="text-center text-grey">PEDIDO</th>
-                    <th class="text-left text-grey">USUÁRIO</th>
+                    <th class="text-left text-grey" v-show="hasRequisicaoAllUsersPermission">USUÁRIO</th>
                     <th class="text-center text-grey">DATA</th>
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">FORNECEDOR</th>
@@ -51,17 +51,23 @@
             <tbody>
                 <tr v-for="item in requisicoes" :key="item.id">
                     <td class="text-center"> # {{ item.id }}</td>
-                    <th class="text-left text-grey">{{ item.usuario.text }}</th>
+                    <th class="text-left text-grey" v-show="hasRequisicaoAllUsersPermission">{{ item.usuario.text }}
+                    </th>
                     <td class="text-center">{{ new Date(item.dataCriacao).toLocaleDateString() }}</td>
-                    <td class="text-left">{{ item.cliente.text }}</td>
+                    <td class="text-left">{{ item.cliente.nome }}</td>
                     <td class="text-left">{{ item.fornecedor.text }}</td>
                     <td class="text-right">{{ item.valorTotal.toFixed(2) }}</td>
                     <td class="text-center"><v-btn :color="getStatus(item.status).color" variant="tonal"
                             density="compact" class="text-center"> {{
-                                    getStatus(item.status).text
-                            }}</v-btn></td>
+        getStatus(item.status).text
+}}</v-btn></td>
                     <td class="text-right">
-                        <v-btn icon="mdi-dots-vertical" variant="plain" color="primary" disabled title="Editar"></v-btn>
+                        <v-btn icon="mdi-content-copy" size="smaller" variant="plain" color="info"
+                            title="Duplicar"></v-btn>
+                        <v-btn icon="mdi-lead-pencil" size="smaller" variant="plain" color="primary"
+                            @click="editar(item.id)" title="Editar"></v-btn>
+                        <v-btn icon="mdi-trash-can-outline" size="smaller" variant="plain" color="error"
+                            @click="remove(item)" title="Excluir"></v-btn>
                     </td>
                 </tr>
             </tbody>
@@ -110,7 +116,8 @@ let status = [
     { value: -1, text: "Todos" },
     { value: 0, text: "Aguardando", color: "warning" },
     { value: 1, text: "Aprovado", color: "success" },
-    { value: 2, text: "Rejeitado", color: "error" }
+    { value: 2, text: "Rejeitado", color: "error" },
+    { value: 3, text: "Finalizado", color: "success" }
 ]
 
 //VUE METHODS
@@ -127,7 +134,7 @@ onMounted(async () =>
     if (hasRequisicaoAllUsersPermission.value)
     {
         await getClienteToList(filial)
-    } 
+    }
     await getFornecedorToList(filial)
     await getUsuarioToList();
     await getItems();
@@ -144,42 +151,10 @@ function clearFilters()
     filter.value.usuarioId = hasRequisicaoAllUsersPermission.value ? null : authStore.user.id
     filter.value.status = -1
 }
-async function enableDisable(item)
+function editar(id)
 {
-    try
-    {
-        let options = {
-            title: text,
-            text: `Deseja realmente excluir o requisição: #${item.id}?`,
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim",
-            cancelButtonText: "Não",
-        }
-
-        let response = await swal.fire(options);
-        if (response.isConfirmed)
-        {
-            await requisicaoService.remove(item.id);
-            await this.getItems()
-
-            swal.fire({
-                toast: true,
-                icon: "success",
-                position: "top-end",
-                title: "Sucesso!",
-                text: "Exclusão realizada!",
-                showConfirmButton: false,
-                timer: 2000,
-            })
-        }
-    } catch (error)
-    {
-        console.log("fornecedores.enableDisable.error:", error);
-        handleErrors(error)
-    }
+    router.push({ name: "requisicaoEdicao", params: { requisicao: id } })
 }
-
 async function getClienteToList(filial)
 {
     try
@@ -242,5 +217,40 @@ async function getFornecedorToList(filial)
     }
 }
 
+async function remove(item)
+{
+    try
+    {
+        let options = {
+            title: "Confirmar Exclusão",
+            text: `Deseja realmente excluir o requisição: #${item.id}?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sim",
+            cancelButtonText: "Não",
+        }
+
+        let response = await swal.fire(options);
+        if (response.isConfirmed)
+        {
+            await requisicaoService.remove(item.id);
+            await this.getItems()
+
+            swal.fire({
+                toast: true,
+                icon: "success",
+                position: "top-end",
+                title: "Sucesso!",
+                text: "Exclusão realizada!",
+                showConfirmButton: false,
+                timer: 2000,
+            })
+        }
+    } catch (error)
+    {
+        console.log("requisicoes.remove.error:", error);
+        handleErrors(error)
+    }
+}
 
 </script>

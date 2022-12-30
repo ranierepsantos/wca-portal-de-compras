@@ -1,8 +1,8 @@
 <template>
     <div>
         <bread-crumbs title="Fornecedores" :show-button="false" />
-        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
-        <v-container class="justify-center">
+        <v-progress-linear color="primary" indeterminate :height="5" v-if="isBusy"></v-progress-linear>
+        <v-container class="justify-center" v-else>
             <v-card class="mx-auto">
                 <v-card-text>
                     <v-form ref="fornecedorForm" lazy-validation>
@@ -203,7 +203,7 @@ import { mask } from "maska"
 const authStore = useAuthStore()
 const swal = inject("$swal")
 const route = useRoute()
-const isBusy = ref(false)
+const isBusy = ref(true)
 const fornecedorForm = ref(null)
 const contatoForm = ref(null)
 const contatoDialog = ref(false)

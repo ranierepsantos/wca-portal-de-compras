@@ -1,7 +1,7 @@
 <template>
     <div>
-        <bread-crumbs title="Itens Fornecedor" @novoClick="openProdutoForm = true" :custom-button-show="true"
-            custom-button-text="Importar Planilha" @customClick="editar('novo')" />
+        <bread-crumbs :title="`Itens Fornecedor (${nomeFornecedor})`" @novoClick="openProdutoForm = true"
+            :custom-button-show="true" custom-button-text="Importar Planilha" @customClick="editar('novo')" />
         <v-row>
             <v-col cols="6">
                 <v-text-field label="Pesquisar" placeholder="(Produto)" v-model="filter" density="compact"
@@ -141,6 +141,7 @@ const produtoValorRules = ref([
     (v) => !!v || 'Valor é obrigatório',
     (v) => parseFloat(v) > 0 || "O campo valor deve ser maior que 0",
 ]);
+let nomeFornecedor = ref("")
 
 //VUE METHODS
 onMounted(async () =>
@@ -149,7 +150,9 @@ onMounted(async () =>
     {
         idFornecedor = route.query.fornecedor
     }
-    await fornecedorService.getById(idFornecedor).then().catch(error =>
+    await fornecedorService.getById(idFornecedor).then(
+        resp => nomeFornecedor.value = resp.data.nome
+    ).catch(error =>
     {
         if (error.response.status == 404)
         {
@@ -157,6 +160,7 @@ onMounted(async () =>
         } else
             handleErrors(error)
     })
+
     await getTipoFornecimentoToList();
     await getItems();
     clearFormData();

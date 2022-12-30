@@ -17,20 +17,20 @@
             <v-container fluid>
                 <h1 class="text-primary mb-2">Pedido #{{ requisicao.id }}</h1>
                 <p>
-                    <span class="text-primary wca-texto">Cliente:</span>
+                    <span class="text-primary wca-texto">Cliente: </span>
                     <span class="text-grey wca-texto">{{ requisicao.cliente.nome }}</span>
                 </p>
                 <p>
-                    <span class="text-primary wca-texto">CNPJ:</span>
+                    <span class="text-primary wca-texto">CNPJ: </span>
                     <span class="text-grey wca-texto">{{ requisicao.cliente.cnpj }}</span>
                 </p>
-                <p><span class="text-primary wca-texto">Endereço:</span> <span class="text-grey wca-texto">{{
+                <p><span class="text-primary wca-texto">Endereço: </span> <span class="text-grey wca-texto">{{
         requisicao.cliente.endereco + ', ' + requisicao.cliente.numero +
         ', ' + requisicao.cliente.cidade + ', ' + requisicao.cliente.uf + ', ' +
         requisicao.cliente.cep
 }}</span></p>
                 <p>
-                    <span class="text-primary wca-texto">Supervisor:</span>
+                    <span class="text-primary wca-texto">Supervisor: </span>
                     <span class="text-grey wca-texto">{{ requisicao.usuario.text }}</span>
                 </p>
 

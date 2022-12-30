@@ -28,9 +28,10 @@
             </v-col>
             <v-col cols="1"></v-col>
             <v-col cols="2" class="text-right" v-for="config in orcamento" :key="config.tipoFornecimentoId">
-                <v-progress-linear :color="config.percentual > 100 ? 'red' : config.percentual > 60 ? 'warning' : 'success'"
-                    :model-value="config.valorTotal" :max="config.valorPedido * (1 + config.tolerancia / 100)" :height="7"
-                    title="Insumos"></v-progress-linear>
+                <v-progress-linear
+                    :color="config.percentual > 100 ? 'red' : config.percentual > 60 ? 'warning' : 'success'"
+                    :model-value="config.valorTotal" :max="config.valorPedido * (1 + config.tolerancia / 100)"
+                    :height="7" :title="getTipoFornecimentoNome(config.tipoFornecimentoId)"></v-progress-linear>
                 <span style="font-size:12px;" class="text-grey">{{ config.valorTotal.toFixed(2) }} /
                     {{ (config.valorPedido * (1 + config.tolerancia / 100)).toFixed(2) }}</span>
             </v-col>
@@ -101,7 +102,7 @@ import { useAuthStore } from "@/store/auth.store";
 import fornecedorService from "@/services/fornecedor.service";
 import { compararValor } from "@/helpers/functions"
 import router from "@/router";
-import { isMetaProperty } from "@babel/types";
+import tipoFornecimentoService from "@/services/tipofornecimento.service";
 
 //DATA
 const authStore = useAuthStore();
@@ -126,10 +127,10 @@ const destinos = ref([
     { value: 1, text: "Diretoria" },
 ])
 const produtos = ref([]);
-const insumosValor = ref(20.20)
 const swal = inject("$swal");
 const filter = ref("");
 let orcamento = ref(null);
+let tipoFornecimento = ref([])
 
 //VUE METHODS
 onMounted(async () =>
@@ -138,6 +139,7 @@ onMounted(async () =>
     requisicao.value.NomeUsuario = authStore.user.nome;
     requisicao.value.UsuarioId = authStore.user.id;
     await getFornecedorToList(authStore.user.filial)
+    await getTipoFornecimentoToList();
 });
 
 watch(() => requisicao.value.fornecedorId, async (fornecedorId) =>
@@ -241,6 +243,30 @@ async function getProdutosToList(fornecedorId)
     {
         isBusy.value = false
     }
+}
+
+function getTipoFornecimentoNome(tipoId)
+{
+    let tipo = tipoFornecimento.value.filter(t => t.value == tipoId)
+    if (tipo.length > 0)
+    {
+        return tipo[0].text
+    }
+    return ""
+}
+
+async function getTipoFornecimentoToList() 
+{
+    try
+    {
+        isBusy.value = true;
+        let response = await tipoFornecimentoService.toList();
+        tipoFornecimento.value = response.data;
+    } catch (error)
+    {
+        console.log("getTipoFornecimentoToList.error:", error);
+        handleErrors(error)
+    } finally { isBusy.value = false; }
 }
 
 function ordenarRequisicaoItens() 
