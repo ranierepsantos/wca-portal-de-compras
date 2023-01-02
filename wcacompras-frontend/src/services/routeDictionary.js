@@ -34,6 +34,7 @@ export const route = {
     produtoCreate: "Fornecedor/Produto",
     produtoUpdate: "Fornecedor/Produto",
     produtoRemove: "Fornecedor/Produto",
+    produtoImportFromExcel: "Fornecedor/Produtos/ImportFromExcel",
     produtoGetById: "Fornecedor/{fornecedorId}/Fornecedor/{id}",
     produtoPaginate: "Fornecedor/{fornecedorId}/Produtos/Paginate/{pageSize}/{page}",
 

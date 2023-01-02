@@ -127,27 +127,56 @@ namespace wca.compras.services
             }
         }
 
-        public void ImportProdutoFromExcel(int filialId, int fornecedorId, ImportProdutoDto importProdutoDto)
+        public async Task<bool> ImportProdutoFromExcel(int filialId, int fornecedorId, ImportProdutoDto importProdutoDto)
         {
-            byte[] data = Convert.FromBase64String(importProdutoDto.Arquivo); ;
-            
-            // salvar o arquivo
-            MemoryStream ms = new MemoryStream(data);
-
-            var sheets = MiniExcel.GetSheetNames(ms);
-
-            for (var index = 0; index < sheets.Count; index++)
+            try
             {
-                Console.WriteLine("SheetName: " + sheets[index]);
+                //checar se o usuario pode alterar dados do fornecedor
+                if ((await GetById(filialId, fornecedorId)) == null)
+                {
+                    return false;
+                }
+
+                var produtos = await _rm.ProdutoRepository
+                            .SelectByCondition(c => c.FornecedorId.Equals(importProdutoDto.FornecedorId))
+                            .ToListAsync();
+
+                foreach (var produto in produtos)
+                {
+                    _rm.ProdutoRepository.Delete(produto);
+                }
+
+                var categorias = await _rm.TipoFornecimentoRepository.SelectAll().ToListAsync();
+
+                // ler o arquivo
+                byte[] arquivo = Convert.FromBase64String(importProdutoDto.Arquivo);
+                MemoryStream ms = new MemoryStream(arquivo);
+                var sheets = MiniExcel.GetSheetNames(ms);
+                for (var idx = 0; idx < sheets.Count; idx++)
+                {
+                    var rows = MiniExcel.Query(ms, sheetName: sheets[idx]).Skip(1).ToList();
+                    for (var index = 0; index < rows.Count; index++)
+                    {
+                        var produto = new Produto();
+                        produto.Codigo = rows[index].A.ToString();
+                        produto.FornecedorId = importProdutoDto.FornecedorId;
+                        produto.Nome = rows[index].B;
+                        produto.TipoFornecimentoId = categorias.Where(c => c.Nome.Contains(rows[index].C)).FirstOrDefault().Id;
+                        produto.UnidadeMedida = rows[index].D;
+                        produto.Valor = (decimal)rows[index].E;
+                        produto.TaxaGestao = (decimal)rows[index].F;
+
+                        _rm.ProdutoRepository.Create(produto);
+                    }
+                }
+                await _rm.SaveAsync();
+                return true;
             }
-
-            var rows = MiniExcel.Query(ms, sheetName: sheets[0]).Skip(2).ToList();
-
-            for (var index = 0; index < rows.Count; index++)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Row {index}: {rows[index].B}, {rows[index].C}");
+                Console.WriteLine($"FornecedorService.ProdutosImportarFromArquivo.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
             }
-
         }
 
         public Pagination<FornecedorDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "")
@@ -211,7 +240,7 @@ namespace wca.compras.services
         {
             throw new NotImplementedException();
         }
-
+        
         public async Task<bool> RemoveProduto(int filialId, int fornecedorId, int id)
         {
             try
@@ -224,7 +253,7 @@ namespace wca.compras.services
                 {
                     query = query.Where(c => c.Fornecedor.FilialId == filialId);
                 }
-                
+
                 var baseData = await query.FirstOrDefaultAsync();
 
                 if (baseData == null)
@@ -314,5 +343,6 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
+
     }
 }

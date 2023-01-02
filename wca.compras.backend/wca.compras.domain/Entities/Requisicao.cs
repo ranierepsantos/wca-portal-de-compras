@@ -61,7 +61,8 @@ namespace wca.compras.domain.Entities
         TODOS = -1,
         AGUARDANDO,
         APROVADO,
-        REJEITADO
+        REJEITADO,
+        FINALIZADO
     }
 
     public enum EnumDestinoRequisicao

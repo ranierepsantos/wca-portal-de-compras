@@ -1,7 +1,7 @@
 <template>
     <div>
         <bread-crumbs :title="`Itens Fornecedor (${nomeFornecedor})`" @novoClick="openProdutoForm = true"
-            :custom-button-show="true" custom-button-text="Importar Planilha" @customClick="editar('novo')" />
+            :custom-button-show="true" custom-button-text="Importar Planilha" @customClick="importarProduto()" />
         <v-row>
             <v-col cols="6">
                 <v-text-field label="Pesquisar" placeholder="(Produto)" v-model="filter" density="compact"
@@ -10,7 +10,7 @@
             </v-col>
         </v-row>
         <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
-        <v-table class="elevation-2">
+        <v-table class="elevation-2" v-show="!isBusy">
             <thead>
                 <tr>
                     <th class="text-left text-grey">CÓDIGO</th>
@@ -26,9 +26,9 @@
                 <tr v-for="item in produtos" :key="item.id">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
-                    <td class="text-left">{{ item.valor.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
-                    <td class="text-center">{{ item.taxaGestao.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
                     <td class="text-center">{{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}</td>
                     <td class="text-right">
                         <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"
@@ -113,10 +113,13 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
+import { toBase64 } from "@/helpers/functions";
+
+
 //DATA
 const page = ref(1);
 const pageSize = 10;
-const isBusy = ref(false);
+const isBusy = ref(true);
 const totalPages = ref(1);
 const produtos = ref([]);
 const categorias = ref([]);
@@ -236,6 +239,46 @@ async function getTipoFornecimentoToList()
         console.log("getTipoFornecimentoToList.error:", error);
         handleErrors(error)
     }
+}
+
+async function importarProduto()
+{
+    try
+    {
+        const { value: file } = await swal.fire({
+            title: 'Selecionar planilha',
+            input: 'file',
+            showCancelButton: true,
+            inputAttributes: {
+                'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel',
+                'aria-label': 'Selecione a planilha de produtos'
+            }
+        })
+
+        if (file)
+        {
+            isBusy.value = true
+            console.log(file.name);
+            var arquivo = await toBase64(file);
+            arquivo = arquivo.split(";")[1].replace('base64,', '');
+
+            let arquivoImportacao = {
+                fornecedorId: idFornecedor,
+                nomeArquivo: file.name,
+                arquivo: arquivo
+            }
+
+            await fornecedorService.produtosImportar(arquivoImportacao);
+
+            await getItems();
+
+        }
+    } catch (error)
+    {
+        console.log("importarProduto.error:", error);
+        handleErrors(error)
+    } finally { isBusy.value = false }
+
 }
 
 async function remove(item)

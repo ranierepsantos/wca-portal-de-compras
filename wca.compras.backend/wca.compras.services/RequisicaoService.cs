@@ -170,10 +170,12 @@ namespace wca.compras.services
 
                 await _rm.SaveAsync();
 
+                string status = aprovarRequisicaoDto.Aprovado ? "aprovada" : "rejeitada";
+
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = requisicaoAprovacao.RequisicaoId,
-                    Evento = $"Requisição aprovada por {requisicaoAprovacao.NomeAprovador}\nComentário: {aprovarRequisicaoDto.Comentario}",
+                    Evento = $"Requisição {status} por {requisicaoAprovacao.NomeAprovador}<br/>Comentário: {aprovarRequisicaoDto.Comentario}",
                     DataHora = DateTime.Now
                 };
 

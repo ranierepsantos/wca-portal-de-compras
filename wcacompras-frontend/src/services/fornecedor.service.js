@@ -57,4 +57,9 @@ export default {
         return api.put(route.produtoUpdate, produto);
     },
 
+    produtosImportar(data)
+    {
+        return api.post(route.produtoImportFromExcel, data);
+    }
+
 }

@@ -148,11 +148,12 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         [HttpPost]
         [Route("Produtos/ImportFromExcel")]
-        public ActionResult ProdutosImportFromExcel([FromBody] ImportProdutoDto importProdutoDto)
+        public async Task<ActionResult> ProdutosImportFromExcel([FromBody] ImportProdutoDto importProdutoDto)
         {
             try
             {
-                service.ImportProdutoFromExcel(1, importProdutoDto.FornecedorId, importProdutoDto);
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                await service.ImportProdutoFromExcel(filial, importProdutoDto.FornecedorId, importProdutoDto);
                 return Ok();
             }
             catch (Exception ex)
