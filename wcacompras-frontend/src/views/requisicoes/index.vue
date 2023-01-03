@@ -234,7 +234,7 @@ async function remove(item)
         if (response.isConfirmed)
         {
             await requisicaoService.remove(item.id);
-            await this.getItems()
+            await getItems()
 
             swal.fire({
                 toast: true,

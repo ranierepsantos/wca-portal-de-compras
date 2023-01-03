@@ -304,7 +304,7 @@ async function remove(item)
                 page.value--;
             } else
             {
-                await this.getItems()
+                await getItems()
             }
 
             swal.fire({

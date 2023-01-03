@@ -102,7 +102,7 @@ async function enableDisable(item)
             let data = { ...item }
             data.ativo = !data.ativo
             await clienteService.update(data);
-            await this.getItems()
+            await getItems()
 
             swal.fire({
                 toast: true,
@@ -144,7 +144,7 @@ async function remove(item)
                 page.value--;
             } else
             {
-                await this.getItems()
+                await getItems()
             }
 
             swal.fire({

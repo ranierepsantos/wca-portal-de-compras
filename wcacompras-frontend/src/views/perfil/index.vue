@@ -102,7 +102,7 @@ async function enableDisable(item)
       let data = response.data
       data.ativo = !data.ativo
       await perfilService.update(data);
-      await this.getItems()
+      await getItems()
 
       swal.fire({
         toast: true,

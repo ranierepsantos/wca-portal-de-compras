@@ -102,7 +102,7 @@ async function enableDisable(item)
             let data = { ...item }
             data.ativo = !data.ativo
             await fornecedorService.update(data);
-            await this.getItems()
+            await getItems()
 
             swal.fire({
                 toast: true,
