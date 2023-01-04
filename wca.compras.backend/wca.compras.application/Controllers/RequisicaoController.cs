@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MiniExcelLibs;
 using System.Net;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
@@ -19,6 +20,76 @@ namespace wca.compras.webapi.Controllers
             this.service = service;
         }
 
+        //[HttpGet]
+        //[Route("DownloadExcel")]
+        //public async Task<ActionResult> DownloadExcel()
+        //{
+        //    var currentDirectory = Directory.GetCurrentDirectory();
+        //    var parentDirectory = Directory.GetParent(currentDirectory).FullName;
+        //    var filesDirectory = Path.Combine(parentDirectory, "Files");
+        //    filesDirectory = Path.Combine(filesDirectory, "excel");
+
+        //    var excelFile = Path.Combine(filesDirectory, "teste0.xlsx");
+        //    var saveFile = Path.Combine(filesDirectory, $"teste0exported.xlsx");
+
+        //    // 1. By POCO
+        //    // var tvalue = new
+        //    // {
+        //    //     title = "FooCompany",
+        //    //     managers = new[] {
+        //    //                     new {name="Jack",department="HR"},
+        //    //                     new {name="Loan",department="IT"}
+        //    //                 },
+        //    //     employees = new[] {
+        //    //                         new {name="Wade",department="HR"},
+        //    //                         new {name="Felix",department="HR"},
+        //    //                         new {name="Eric",department="IT"},
+        //    //                         new {name="Keaton",department="IT"}
+        //    //                     }
+        //    // };
+        //    var tvalue = new
+        //    {
+        //        employees = new[] {
+        //                        new {name="Jack",department="HR"},
+        //                        new {name="Lisa",department="HR"},
+        //                        new {name="John",department="HR"},
+        //                        new {name="Mike",department="IT"},
+        //                        new {name="Neo",department="IT"},
+        //                        new {name="Loan",department="IT"}
+        //                    }
+        //    };
+        //    MiniExcel.SaveAsByTemplate(saveFile, excelFile, tvalue);
+
+        //    // var requisicao = await service.GetById(1, 12);
+
+        //    // var value = new
+        //    // {
+        //    //     pedido = requisicao.Id,
+        //    //     cliente = requisicao.Cliente.Nome,
+        //    //     cnpj = requisicao.Cliente.CNPJ,
+        //    //     endereco = "",
+        //    //     supervisor = requisicao.Usuario.Text,
+        //    //     Produtos = requisicao.RequisicaoItens,
+        //    // };
+
+        //    // MiniExcel.SaveAsByTemplate(saveFile, excelFile, value);
+        //    return Ok();
+
+
+        //    // var values = new[] {
+        //    //                     new { Name = "MiniExcel", Valor = 1 },
+        //    //                     new { Name = "Github", Valor = 2}
+        //    //                 };
+
+        //    // var memoryStream = new MemoryStream();
+        //    // memoryStream.SaveAs(values);
+        //    // memoryStream.Seek(0, SeekOrigin.Begin);
+        //    // return new FileStreamResult(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        //    // {
+        //    //     FileDownloadName = "demo.xlsx"
+        //    // };
+        //}
+
         /// <summary>
         /// Cadastra uma nova Requisição
         /// </summary>
@@ -34,8 +105,8 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                
-                var result = await service.Create(createRequisicaoDto);
+
+                var result = await service.Create(createRequisicaoDto, Request.Headers["origin"]);
 
                 return Created("", result);
             }
@@ -93,7 +164,7 @@ namespace wca.compras.webapi.Controllers
                 }
 
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                
+
                 var result = await service.Update(filial, updateRequisicaoDto);
                 if (result == null)
                 {
@@ -181,7 +252,7 @@ namespace wca.compras.webapi.Controllers
             try
             {
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = service.Paginate(filial, page, pageSize,clienteId, fornecedorId, usuarioId, status);
+                var items = service.Paginate(filial, page, pageSize, clienteId, fornecedorId, usuarioId, status);
                 return Ok(items);
             }
             catch (Exception ex)

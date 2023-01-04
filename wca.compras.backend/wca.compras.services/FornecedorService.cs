@@ -194,6 +194,8 @@ namespace wca.compras.services
                 {
                     query = query.Where(q => q.Nome.Contains(termo));
                 }
+                query = query.Include("FornecedorContatos");
+
                 query = query.OrderBy(p => p.Nome);
 
                 var pagination = Pagination<FornecedorDto>.ToPagedList(_mapper, query, page, pageSize);
