@@ -6,6 +6,7 @@ using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
+using wca.compras.services;
 
 namespace wca.compras.webapi.Controllers
 {
@@ -260,6 +261,34 @@ namespace wca.compras.webapi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
 
+        }
+
+        /// <summary>
+        /// Altera o status da requisição para Cancelado
+        /// </summary>
+        /// <param name="id"></param>
+        [HttpDelete]
+        [Authorize("Bearer")]
+        public async Task<ActionResult> Remove(int id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                string nomeUsuario = User.FindFirst("UsuarioNome").Value;
+                var result = await service.Remove(filial, id, nomeUsuario);
+
+                if (!result) return NotFound($"Requisição, não localizado!");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }

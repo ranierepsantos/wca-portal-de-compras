@@ -121,7 +121,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import { useRoute } from "vue-router";
 import router from "@/router";
 import BreadCrumbs from "@/components/breadcrumbs.vue";
-import { compararValor } from "@/helpers/functions"
+import { status, compararValor } from "@/helpers/functions"
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 
 //DATA
@@ -150,13 +150,6 @@ const requisicao = ref({
     requisicaoHistorico: []
 });
 let orcamento = ref(null);
-let status = [
-    { value: -1, text: "Todos" },
-    { value: 0, text: "Aguardando", color: "warning" },
-    { value: 1, text: "Aprovado", color: "success" },
-    { value: 2, text: "Rejeitado", color: "error" },
-    { value: 3, text: "Finalizado", color: "success" }
-]
 let tipoFornecimento = ref([])
 
 //VUE METHODS

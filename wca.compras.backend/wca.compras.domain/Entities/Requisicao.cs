@@ -62,7 +62,8 @@ namespace wca.compras.domain.Entities
         AGUARDANDO,
         APROVADO,
         REJEITADO,
-        FINALIZADO
+        FINALIZADO,
+        CANCELADO
     }
 
     public enum EnumDestinoRequisicao

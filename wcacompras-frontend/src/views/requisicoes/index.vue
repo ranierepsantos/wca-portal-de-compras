@@ -59,15 +59,16 @@
                     <td class="text-right">{{ item.valorTotal.toFixed(2) }}</td>
                     <td class="text-center"><v-btn :color="getStatus(item.status).color" variant="tonal"
                             density="compact" class="text-center"> {{
-        getStatus(item.status).text
-}}</v-btn></td>
+                                getStatus(item.status).text
+                            }}</v-btn></td>
                     <td class="text-right">
-                        <v-btn icon="mdi-content-copy" size="smaller" variant="plain" color="info"
-                            title="Duplicar"></v-btn>
+                        <v-btn icon="mdi-content-copy" size="smaller" variant="plain" color="info" title="Duplicar"
+                            disabled></v-btn>
                         <v-btn icon="mdi-lead-pencil" size="smaller" variant="plain" color="primary"
                             @click="editar(item.id)" title="Editar"></v-btn>
-                        <v-btn icon="mdi-trash-can-outline" size="smaller" variant="plain" color="error"
-                            @click="remove(item)" title="Excluir"></v-btn>
+                        <v-btn icon="mdi-close-circle-outline" size="smaller" variant="plain" color="error"
+                            @click="remove(item)" title="Cancelar"
+                            :disabled="getStatus(item.status).text == 'Cancelado'"></v-btn>
                     </td>
                 </tr>
             </tbody>
@@ -92,6 +93,7 @@ import { useAuthStore } from "@/store/auth.store";
 import clienteService from "@/services/cliente.service";
 import userService from "@/services/user.service";
 import fornecedorService from "@/services/fornecedor.service";
+import { status } from "@/helpers/functions"
 
 //DATA
 const authStore = useAuthStore();
@@ -111,14 +113,6 @@ const filter = ref({
     usuarioId: null,
     status: -1
 });
-
-let status = [
-    { value: -1, text: "Todos" },
-    { value: 0, text: "Aguardando", color: "warning" },
-    { value: 1, text: "Aprovado", color: "success" },
-    { value: 2, text: "Rejeitado", color: "error" },
-    { value: 3, text: "Finalizado", color: "success" }
-]
 
 //VUE METHODS
 onMounted(async () =>
@@ -222,8 +216,8 @@ async function remove(item)
     try
     {
         let options = {
-            title: "Confirmar Exclusão",
-            text: `Deseja realmente excluir o requisição: #${item.id}?`,
+            title: "Confirmar Cancelamento",
+            text: `Deseja realmente cancelar a requisição: #${item.id}?`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Sim",
@@ -241,7 +235,7 @@ async function remove(item)
                 icon: "success",
                 position: "top-end",
                 title: "Sucesso!",
-                text: "Exclusão realizada!",
+                text: "Cancelamento realizado!",
                 showConfirmButton: false,
                 timer: 2000,
             })

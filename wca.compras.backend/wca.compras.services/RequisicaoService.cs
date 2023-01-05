@@ -228,9 +228,41 @@ namespace wca.compras.services
             }
         }
 
-        public Task<bool> Remove(int filialId, int id)
+        public async Task<bool> Remove(int filialId, int id, string nomeUsuario)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id,true);
+
+                if (filialId > 1)
+                    query = query.Where(c => c.FilialId == filialId);
+
+                var data = await query.FirstOrDefaultAsync();
+
+                if (data == null) return false;
+
+                data.Status = EnumStatusRequisicao.CANCELADO;
+                
+                await _rm.SaveAsync();
+                
+                RequisicaoHistorico reqH = new RequisicaoHistorico()
+                {
+                    RequisicaoId = data.Id,
+                    Evento = $"Requisição <b>CANCELADA</b> por {nomeUsuario}.",
+                    DataHora = DateTime.Now
+                };
+
+                await CreateRequisicaoHistorico(reqH);
+
+
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.Remove.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
         }
 
         public async Task<RequisicaoDto> Update(int filialId, UpdateRequisicaoDto updateRequisicaoDto, string urlOrigin = "")

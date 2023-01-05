@@ -245,13 +245,13 @@ const isContatoValido = ref(true);
 onMounted(async () =>
 {
     await getFilialToList()
-    await getTipoFornecimentoToList()
 
     fornecedor.value.filialId = authStore.user.filial;
     if (parseInt(route.query.id) > 0)
     {
         await getfornecedor(route.query.id)
     }
+    isBusy.value = false;
 });
 
 //METHODS

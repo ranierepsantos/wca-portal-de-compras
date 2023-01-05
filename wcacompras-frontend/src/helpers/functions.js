@@ -1,4 +1,14 @@
-export const compararValor = function(key, order = "asc") {
+export const status = [
+    { value: -1, text: "Todos" },
+    { value: 0, text: "Aguardando", color: "warning" },
+    { value: 1, text: "Aprovado", color: "success" },
+    { value: 2, text: "Rejeitado", color: "error" },
+    { value: 3, text: "Finalizado", color: "success" },
+    { value: 4, text: "Cancelado", color: "error" }
+]
+
+export const compararValor = function (key, order = "asc")
+{
     return function(a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
             // property doesn't exist on either object
