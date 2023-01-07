@@ -45,6 +45,8 @@ export const route = {
     requisicaoRemove: "Requisicao",
     requisicaoUpdate: "Requisicao",
     requisicaoPaginate: "Requisicao/Paginate/{pageSize}/{page}",
+    requisicaoDownloadById: "Requisicao/ExportExcel/{id}",
+    requisicaoDownloadByToken: "Requisicao/ExportExcel/{token}",
 
     tipoFornecimentoToList: "TipoFornecimento/ToList",
 

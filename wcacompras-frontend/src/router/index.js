@@ -159,6 +159,11 @@ const routes = [
     component: () => import('../views/requisicoes/aprovar')
   },
   {
+    path: "/app/agradecimento",
+    name: "agradecimento",
+    component: () => import('../views/requisicoes/agradecimento')
+  },
+  {
     path: "/login",
     name: "login",
     component: () => import("../views/sessoes/login")

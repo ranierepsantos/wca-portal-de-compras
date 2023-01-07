@@ -1,6 +1,7 @@
 <template>
     <v-app>
-        <v-app-bar elevation="3" rounded>
+        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
+        <v-app-bar elevation="3" rounded v-show="!isBusy">
             <div style="padding-top: 2px; margin-left: 10px;">
                 <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" width="45" height="45"
                     style="border-radius: 20%;" />
@@ -13,9 +14,18 @@
             </v-btn>
         </v-app-bar>
 
-        <v-main>
+        <v-main v-show="!isBusy">
             <v-container fluid>
-                <h1 class="text-primary mb-2">Pedido #{{ requisicao.id }}</h1>
+                <v-row class="ma-1">
+                    <h1 class="text-primary">Pedido #{{ requisicao.id || '' }}</h1>
+                    <v-spacer></v-spacer>
+                    <v-btn variant="outlined" class="text-capitalize" color="primary" @click="download()"
+                        v-if="!isDownloading" :disabled="requisicao.id == null">
+                        <v-icon icon="mdi-download" size="x-large"></v-icon>
+                        Download
+                    </v-btn>
+                    <v-progress-circular color="primary" indeterminate v-else></v-progress-circular>
+                </v-row>
                 <p>
                     <span class="text-primary wca-texto">Cliente: </span>
                     <span class="text-grey wca-texto">{{ requisicao.cliente.nome }}</span>
@@ -25,10 +35,8 @@
                     <span class="text-grey wca-texto">{{ requisicao.cliente.cnpj }}</span>
                 </p>
                 <p><span class="text-primary wca-texto">Endereço: </span> <span class="text-grey wca-texto">{{
-        requisicao.cliente.endereco + ', ' + requisicao.cliente.numero +
-        ', ' + requisicao.cliente.cidade + ', ' + requisicao.cliente.uf + ', ' +
-        requisicao.cliente.cep
-}}</span></p>
+                    Endereco
+                }}</span></p>
                 <p>
                     <span class="text-primary wca-texto">Supervisor: </span>
                     <span class="text-grey wca-texto">{{ requisicao.usuario.text }}</span>
@@ -73,13 +81,14 @@
                 <!-- BOTÕES DE APROVAÇÃO / RECUSA -->
                 <v-row>
                     <v-col cols="10" offset="1" class="text-right">
+                        <v-progress-circular color="primary" indeterminate v-show="isSaving"></v-progress-circular>
                         <v-btn :color="requisicao.id == null ? 'grey' : '#EDCCCC'" class="mr-4"
                             style="color:#950000; font-weight: bold;" @click="aprovarReprovar(false)"
-                            :disabled="requisicao.id == null">
+                            :disabled="requisicao.id == null" v-show="!isSaving">
                             Recusar
                         </v-btn>
                         <v-btn :disabled="requisicao.id == null" :color="requisicao.id == null ? 'grey' : 'success'"
-                            style="font-weight: bold;" @click="aprovarReprovar(true)">
+                            style="font-weight: bold;" @click="aprovarReprovar(true)" v-show="!isSaving">
                             Aprovar
                         </v-btn>
                     </v-col>
@@ -91,14 +100,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, computed } from "vue";
 import requisicaoService from "@/services/requisicao.service";
 import handleErrors from "@/helpers/HandleErrors"
 import { useRoute } from "vue-router";
-
+import { realizarDownload } from "@/helpers/functions";
+import router from "@/router";
 //DATA
 const swal = inject("$swal")
-const isBusy = ref(false);
+const isBusy = ref(true);
+const isDownloading = ref(false);
+const isSaving = ref(false)
 const route = useRoute();
 const requisicao = ref({
     id: null,
@@ -126,19 +138,41 @@ const token = ref("");
 //VUE METHODS
 onMounted(async () =>
 {
-
     token.value = route.params.token;
-    await getRequisicaoData(token.value)
+    await getRequisicaoData()
 });
-
+const Endereco = computed(() =>
+{
+    return requisicao.value.id == null ? '' : requisicao.value.cliente.endereco + ', ' + requisicao.value.cliente.numero +
+        ', ' + requisicao.value.cliente.cidade + ', ' + requisicao.value.cliente.uf + ', '
+        + requisicao.value.cliente.cep;
+})
 
 //METHODS
-async function getRequisicaoData(token)
+async function download()
+{
+    try
+    {
+        isDownloading.value = true;
+        let response = await requisicaoService.downloadByToken(token.value);
+        let nomeArquivo = response.headers['content-disposition'].split(';')[1].replace('filename=', '').trim()
+        realizarDownload(response, nomeArquivo, response.headers.getContentType());
+
+    } catch (error)
+    {
+        console.log("download.error:", error);
+        handleErrors(error)
+    } finally
+    {
+        isDownloading.value = false
+    }
+}
+async function getRequisicaoData()
 {
     try
     {
         isBusy.value = true;
-        let response = await requisicaoService.getByToken(token);
+        let response = await requisicaoService.getByToken(token.value);
         requisicao.value = response.data;
     } catch (error)
     {
@@ -154,6 +188,7 @@ async function aprovarReprovar(isAprovado)
 {
     try
     {
+        isSaving.value = true;
         let data = {
             id: requisicao.id,
             aprovado: isAprovado,
@@ -162,21 +197,13 @@ async function aprovarReprovar(isAprovado)
         }
         await requisicaoService.aprovar(data);
 
-        swal.fire({
-            toast: true,
-            icon: "success",
-            index: "top-end",
-            title: "Sucesso!",
-            text: "Dados salvos com sucesso! <br/> Criar pagina!",
-            showConfirmButton: false,
-            timer: 2000,
-        })
+        router.push({ name: 'agradecimento' })
 
     } catch (error)
     {
         console.log("aprovarReprovar.error:", error);
         handleErrors(error)
-    }
+    } finally { isSaving.value = false }
 }
 
 </script>

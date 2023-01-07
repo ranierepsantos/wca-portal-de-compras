@@ -18,5 +18,6 @@ namespace wca.compras.domain.Interfaces.Services
         Pagination<RequisicaoDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS);
         Task<RequisicaoAprovacaoDto> GetByAprovacaoToken(string tokenAprovacao);
         Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto);
+        Task<Stream> ExportToExcel(int requisicaoId);
     }
 }

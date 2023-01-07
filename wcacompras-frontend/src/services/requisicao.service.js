@@ -34,4 +34,13 @@ export default {
         let url = route.requisicaoPaginate.replace("{pageSize}", pageSize).replace("{page}", page)
         return api.get(url, {params: { ...filters }} );
     },
+
+    downloadById()
+    {
+        return api.get(route.requisicaoDownloadById, { responseType: 'blob'});
+    },
+    downloadByToken(token)
+    {
+        return api.get(route.requisicaoDownloadByToken.replace('{token}',token), { responseType: 'blob'});
+    }
 }

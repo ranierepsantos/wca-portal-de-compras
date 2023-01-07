@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using wca.compras.domain.Dtos;
@@ -119,13 +120,16 @@ namespace wca.compras.services
                     return null;
                 }
 
-                var ra = _mapper.Map<RequisicaoAprovacaoDto>(data);
-
                 var dto = new RequisicaoAprovacaoDto(
-                        ra.Id, ra.ValorTotal, ra.TaxaGestao, ra.Destino,
-                        ra.Cliente, ra.Usuario, 
-                        ra.RequisicaoItens, requisicaoAprovacao.NomeAprovador
-                    );
+                    data.Id, 
+                    data.ValorTotal, 
+                    data.TaxaGestao, 
+                    data.Destino,
+                    data.Cliente,
+                    _mapper.Map<ListItem>(data.Usuario), 
+                    _mapper.Map<IList<RequisicaoItemDto>>(data.RequisicaoItens), 
+                    requisicaoAprovacao.NomeAprovador
+                );
                 return dto;
             }
             catch (Exception ex)
@@ -170,12 +174,12 @@ namespace wca.compras.services
 
                 await _rm.SaveAsync();
 
-                string status = aprovarRequisicaoDto.Aprovado ? "aprovada" : "rejeitada";
+                string status = aprovarRequisicaoDto.Aprovado ? "APROVADA" : "REJEITADA";
 
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = requisicaoAprovacao.RequisicaoId,
-                    Evento = $"Requisição {status} por {requisicaoAprovacao.NomeAprovador}<br/>Comentário: {aprovarRequisicaoDto.Comentario}",
+                    Evento = $"Requisição <b>{status}</b> por {requisicaoAprovacao.NomeAprovador}<br/>Comentário: {aprovarRequisicaoDto.Comentario}",
                     DataHora = DateTime.Now
                 };
 
@@ -312,6 +316,63 @@ namespace wca.compras.services
             }
         }
 
+        public async Task<Stream> ExportToExcel(int requisicaoId)
+        {
+
+            try
+            {
+                var requisicao = await GetById(1, requisicaoId);
+
+                if (requisicao == null)
+                {
+                    return null;
+                }
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var parentDirectory = Directory.GetParent(currentDirectory).FullName;
+                var filesDirectory = Path.Combine(parentDirectory, "Files");
+                filesDirectory = Path.Combine(filesDirectory, "excel");
+                var excelFile = Path.Combine(filesDirectory, "WCAPedidoFornecedor.xlsx");
+
+                var saveFile = $"WCAPedido_{requisicaoId}.xlsx";
+
+
+                var workbook = new XLWorkbook(excelFile);
+                var ws = workbook.Worksheet(1);
+                ws.Cell("C1").SetValue(requisicao.Id);
+                ws.Cell("C3").SetValue(requisicao.Cliente.Nome);
+                ws.Cell("C4").SetValue(requisicao.Cliente.CNPJ);
+                ws.Cell("C5").SetValue(requisicao.Cliente.Endereco);
+                ws.Cell("C6").SetValue(requisicao.Usuario.Text);
+
+                var row = 9;
+
+                foreach (var item in requisicao.RequisicaoItens)
+                {
+                    ws.Cell($"A{row}").SetValue(item.Codigo);
+                    ws.Cell($"B{row}").SetValue(item.Nome);
+                    ws.Cell($"C{row}").SetValue(item.Valor);
+                    ws.Cell($"D{row}").SetValue(item.Quantidade);
+                    ws.Cell($"E{row}").SetValue(item.UnidadeMedida);
+                    ws.Cell($"F{row}").SetValue(item.ValorTotal);
+                    row++;
+                }
+                Stream spreadsheetStream = new MemoryStream();
+                workbook.SaveAs(spreadsheetStream);
+                spreadsheetStream.Position = 0;
+
+                return spreadsheetStream;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.ExportExcel.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+
+        }
+
+
+        #region Private Functions
         private async Task CreateRequisicaoHistorico(RequisicaoHistorico historico)
         {
             try
@@ -368,7 +429,6 @@ namespace wca.compras.services
             }
         }
 
-
         private string randomTokenString()
         {
             var randomBytes = new byte[40];
@@ -378,5 +438,6 @@ namespace wca.compras.services
             }
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }
+        #endregion
     }
 }

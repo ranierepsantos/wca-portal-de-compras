@@ -203,6 +203,10 @@
               "target": "Package",
               "version": "[4.0.3, )"
             },
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.97.0, )"
+            },
             "MimeKit": {
               "target": "Package",
               "version": "[3.2.0, )"

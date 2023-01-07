@@ -121,7 +121,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import { useRoute } from "vue-router";
 import router from "@/router";
 import BreadCrumbs from "@/components/breadcrumbs.vue";
-import { status, compararValor } from "@/helpers/functions"
+import { status, compararValor, realizarDownload } from "@/helpers/functions"
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 
 //DATA
@@ -249,6 +249,18 @@ async function getTipoFornecimentoToList()
     } catch (error)
     {
         console.log("getTipoFornecimentoToList.error:", error);
+        handleErrors(error)
+    } finally { isBusy.value = false; }
+}
+
+async function salvar()
+{
+    try
+    {
+        console.log('salvar');
+    } catch (error)
+    {
+        console.log("salvar.error:", error);
         handleErrors(error)
     } finally { isBusy.value = false; }
 }

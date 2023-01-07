@@ -2,7 +2,7 @@
     <div>
         <bread-crumbs :title="(hasRequisicaoAllUsersPermission ? 'Requisições' : 'Minhas Requisições')"
             @novoClick="router.push({ name: 'requisicaoCadastro' })" custom-button-text="Exportar Dados"
-            @customClick="editar('novo')" :custom-button-show="true" />
+            @customClick="editar('novo')" :custom-button-show="false" />
         <v-row>
             <v-col cols="3">
                 <v-select label="Clientes" v-model="filter.clienteId" :items="clientes" density="compact"
