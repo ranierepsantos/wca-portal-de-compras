@@ -43,10 +43,11 @@ namespace wca.compras.services
             try
             {
                 var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true)
+                                        .Include(u => u.Filial)
                                         .Include(u => u.Cliente)
                                         .ThenInclude(c => c.ClienteOrcamentoConfiguracao)
                                         .FirstOrDefaultAsync();
-                if (authUser == null || !BC.Verify(login.Password, authUser.Password))
+                if (authUser == null || !BC.Verify(login.Password, authUser.Password) || authUser.Filial.Ativo == false)
                 {
                     return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, 0, "", null, null);
                 }
