@@ -36,37 +36,36 @@ namespace wca.compras.services
       return emailMessage;
     }
 
-    public void SendRequisicaoFornecedorEmail(string[] sentTo, string url)
+    public void SendRequisicaoParaAprovacao(string[] sentTo, string bodyHtml)
     {
-      var currentDirectory = Directory.GetCurrentDirectory();
-      var parentDirectory = Directory.GetParent(currentDirectory).FullName;
-      var filesDirectory = Path.Combine(parentDirectory, "Files");
+            try
+            {
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var parentDirectory = Directory.GetParent(currentDirectory).FullName;
+                var filesDirectory = Path.Combine(parentDirectory, "Files");
 
-      BodyBuilder builder = new BodyBuilder();
-      var imagePath = Path.Combine(filesDirectory, "logoWCA.png");
+                BodyBuilder builder = new BodyBuilder();
+                var imagePath = Path.Combine(filesDirectory, "logoWCA.png");
 
-      var image = builder.LinkedResources.Add(imagePath);
-      image.ContentId = MimeUtils.GenerateMessageId();
+                var image = builder.LinkedResources.Add(imagePath);
+                image.ContentId = MimeUtils.GenerateMessageId();
 
-      
-      var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido da WCA.<br/>";
-        bodyHtml += "Clique no botão abaixo para acessar o <br/>";
-        bodyHtml += "pedido<p><br/>";
-        bodyHtml += $"<p style='text-align: center;'><a href='{url}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
-      
+                builder.HtmlBody = string.Format(@"<p style='text-align:center;'><img src='cid:{0}' width='250px'; height='172.25px';></p>{1}", image.ContentId, bodyHtml);
 
-      builder.HtmlBody = string.Format(@"<p style='text-align:center;'><img src='cid:{0}' width='250px'; height='172.25px';></p>{1}", image.ContentId, bodyHtml);
-      
+                var message = new Message(sentTo, "Novo pedido WCA", "");
+                var emailMessage = new MimeMessage();
+                emailMessage.From.Add(new MailboxAddress("WCA Gestão Compras", _emailConfig.From));
+                emailMessage.To.AddRange(message.To);
+                emailMessage.Subject = message.Subject;
+                emailMessage.Body = builder.ToMessageBody();
 
-      var message = new Message(sentTo, "Novo pedido WCA", "");
-      var emailMessage = new MimeMessage();
-      emailMessage.From.Add(new MailboxAddress("WCA Gestão Compras", _emailConfig.From));
-      emailMessage.To.AddRange(message.To);
-      emailMessage.Subject = message.Subject;
-      emailMessage.Body = builder.ToMessageBody();
-
-      Send(emailMessage);
-
+                Send(emailMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SendRequisicaoParaAprovacao.Erro: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
     }
 
     private void Send(MimeMessage mailMessage)

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using wca.compras.domain.Dtos;
+﻿using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Util;
 
@@ -17,7 +12,9 @@ namespace wca.compras.domain.Interfaces.Services
         Task<RequisicaoDto> GetById(int filialId, int id);
         Pagination<RequisicaoDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS);
         Task<RequisicaoAprovacaoDto> GetByAprovacaoToken(string tokenAprovacao);
-        Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto);
+        Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto, string urlOrigin);
         Task<Stream> ExportToExcel(int requisicaoId);
+        Task<RequisicaoDto> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin);
+        Task<bool> FinalizarPedido(FinalizarRequisicaoDto finalizarRequisicaoDto, string usuarioNome);
     }
 }

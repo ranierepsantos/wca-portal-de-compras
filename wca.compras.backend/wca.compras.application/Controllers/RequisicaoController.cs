@@ -81,7 +81,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                var result = await service.aprovarRequisicao(aprovarRequisicaoDto);
+                var result = await service.aprovarRequisicao(aprovarRequisicaoDto, Request.Headers["origin"]);
 
                 if (result == false)
                     return NotFound();
@@ -114,7 +114,7 @@ namespace wca.compras.webapi.Controllers
 
                 int filial = int.Parse(User.FindFirst("Filial").Value);
 
-                var result = await service.Update(filial, updateRequisicaoDto);
+                var result = await service.Update(filial, updateRequisicaoDto, Request.Headers["origin"]);
                 if (result == null)
                 {
                     return NotFound($"Requisição íd: {updateRequisicaoDto.Id}, não localizado!");
@@ -232,6 +232,68 @@ namespace wca.compras.webapi.Controllers
                 if (!result) return NotFound($"Requisição, não localizado!");
 
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Cria uma requisição com base numa requisição existente
+        /// </summary>
+        ///<param name="id"></param>
+        [HttpPut]
+        [Route("Duplicate/{id}")]
+        [Authorize("Bearer")]
+        public async Task<ActionResult> Duplicate(int id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                string nomeUsuario = User.FindFirst("UsuarioNome").Value;
+                int usuarioId = int.Parse(User.FindFirst("CodigoUsuario").Value);
+
+                var result = await service.Duplicate(id, usuarioId,nomeUsuario, Request.Headers["origin"]);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Cria uma requisição com base numa requisição existente
+        /// </summary>
+        ///<param name="id"></param>
+        [HttpPost]
+        [Route("FinalizarPedido")]
+        [Authorize("Bearer")]
+        public async Task<ActionResult> Finalizar(FinalizarRequisicaoDto finalizarRequisicao)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                string nomeUsuario = User.FindFirst("UsuarioNome").Value;
+                
+                var result = await service.FinalizarPedido(finalizarRequisicao, nomeUsuario);
+
+                if (result == false)
+                {
+                    return NotFound();
+                }
+
+                return Ok();
             }
             catch (Exception ex)
             {

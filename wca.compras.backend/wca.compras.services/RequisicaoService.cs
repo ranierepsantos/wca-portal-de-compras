@@ -30,6 +30,7 @@ namespace wca.compras.services
         {
             try
             {
+                
                 var data = _mapper.Map<Requisicao>(createRequisicaoDto);
                 
                 _rm.RequisicaoRepository.Attach(data);
@@ -38,6 +39,26 @@ namespace wca.compras.services
                 {
                     var produto = _mapper.Map<RequisicaoItem>(item);
                     data.RequisicaoItens.Add(produto);
+                }
+
+                if (data.RequerAutorizacaoWCA == false || data.RequerAutorizacaoCliente == false)
+                {
+                    var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, DateTime.Now.AddDays(-30), DateTime.Now);
+
+                    var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
+                                           .Include(inc => inc.ClienteOrcamentoConfiguracao)
+                                           .FirstOrDefaultAsync();
+
+                    foreach (var item in cliente.ClienteOrcamentoConfiguracao)
+                    {
+                        if (comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                        {
+                            if (item.AprovadoPor == EnumAprovadoPor.WCA)
+                                data.RequerAutorizacaoWCA = true;
+                            else
+                                data.RequerAutorizacaoCliente = true;
+                        }
+                    }
                 }
 
                 await _rm.SaveAsync();
@@ -51,11 +72,18 @@ namespace wca.compras.services
 
                 await CreateRequisicaoHistorico(reqH);
 
-                /* checar se houve "estouro do limite de compra por categoria
-                 * sim => enviar e-mail para adm ou cliente aprovar
-                 * não => enviar e-mail para o fornecedor
-                */
-                await solicitarAprovacaoFornecedor(urlOrigin, data);
+                
+                if (data.RequerAutorizacaoCliente == true ) {
+                    await solicitarAprovacaoCliente(urlOrigin, data);
+                }
+                
+                if (data.RequerAutorizacaoWCA == true ) {
+                    await solicitarAprovacaoWCA(urlOrigin, data);
+                }
+                
+                if (data.RequerAutorizacaoWCA == false && data.RequerAutorizacaoCliente ==false) {
+                    await solicitarAprovacaoFornecedor(urlOrigin, data);
+                }
 
                 return _mapper.Map<RequisicaoDto>(data);
             }
@@ -139,7 +167,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto) 
+        public async Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto, string urlOrigin) 
         {
             try
             {
@@ -161,6 +189,12 @@ namespace wca.compras.services
                 else
                     data.Status = requisicaoAprovacao.AlteraStatus? EnumStatusRequisicao.APROVADO: data.Status;
 
+                //verificar se a aprovação é do cliente ou WCA
+                if (requisicaoAprovacao.TipoAprovador == EnumTipoAprovador.WCA)
+                    data.RequerAutorizacaoWCA = false;
+                if (requisicaoAprovacao.TipoAprovador == EnumTipoAprovador.CLIENTE)
+                    data.RequerAutorizacaoCliente = false;
+                
                 _rm.RequisicaoRepository.Update(data);
                 
                 //invalidar token da requisicao
@@ -171,7 +205,6 @@ namespace wca.compras.services
                     item.DataRevogacao = DateTime.UtcNow;
                     _rm.RequisicaoAprovacaoRepository.Update(item);
                 }
-
                 await _rm.SaveAsync();
 
                 string status = aprovarRequisicaoDto.Aprovado ? "APROVADA" : "REJEITADA";
@@ -185,6 +218,12 @@ namespace wca.compras.services
 
                 await CreateRequisicaoHistorico(reqH);
 
+                //verificar se envia solicitação de aprovação do fornecedor, caso a  aprovação seja por cliente/wca
+                if (requisicaoAprovacao.TipoAprovador != EnumTipoAprovador.FORNECEDOR && 
+                    !data.RequerAutorizacaoCliente && !data.RequerAutorizacaoWCA)
+                {
+                    await solicitarAprovacaoFornecedor(urlOrigin, data);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -294,18 +333,59 @@ namespace wca.compras.services
                         if (item != null) _rm.RequisicaoItemRepository.Delete(item);
                     }
                 });
-
                 _mapper.Map(updateRequisicaoDto, data);
-                
-                _rm.RequisicaoRepository.Update(data);
 
+                if (updateRequisicaoDto.Status == EnumStatusRequisicao.ITENSALTERADOS)
+                {
+                    if (updateRequisicaoDto.RequerAutorizacaoCliente == false || updateRequisicaoDto.RequerAutorizacaoWCA == false)
+                    {
+                        var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, DateTime.Now.AddDays(-30), DateTime.Now);
+
+                        var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
+                                               .Include(inc => inc.ClienteOrcamentoConfiguracao)
+                                               .FirstOrDefaultAsync();
+
+                        foreach (var item in cliente.ClienteOrcamentoConfiguracao)
+                        {
+                            if (comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                            {
+                                if (item.AprovadoPor == EnumAprovadoPor.WCA)
+                                    data.RequerAutorizacaoWCA = true;
+                                else
+                                    data.RequerAutorizacaoCliente = true;
+                            }
+                        }
+                    }
+                    data.Status = EnumStatusRequisicao.AGUARDANDO;
+                }
+                _rm.RequisicaoRepository.Update(data);
+                
                 await _rm.SaveAsync();
 
                 await CreateRequisicaoHistorico(new RequisicaoHistorico() {
                     DataHora = DateTime.Now,
-                    Evento = $"Requisição alterada por ${updateRequisicaoDto.NomeUsuario}",
+                    Evento = $"Requisição alterada por {updateRequisicaoDto.NomeUsuario}",
                     RequisicaoId = data.Id
                 });
+
+                if (updateRequisicaoDto.Status == EnumStatusRequisicao.ITENSALTERADOS)
+                {
+
+                    if (data.RequerAutorizacaoCliente == true)
+                    {
+                        await solicitarAprovacaoCliente(urlOrigin, data);
+                    }
+
+                    if (data.RequerAutorizacaoWCA == true)
+                    {
+                        await solicitarAprovacaoWCA(urlOrigin, data);
+                    }
+
+                    if (data.RequerAutorizacaoWCA == false && data.RequerAutorizacaoCliente == false)
+                    {
+                        await solicitarAprovacaoFornecedor(urlOrigin, data);
+                    }
+                }
 
                 return _mapper.Map<RequisicaoDto>(data);
             }
@@ -371,6 +451,80 @@ namespace wca.compras.services
 
         }
 
+        public async Task<RequisicaoDto> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin)
+        {
+            var query = _rm.RequisicaoRepository.SelectByCondition(c => c.Id == requisicaoId);
+                query = query.Include(r => r.RequisicaoItens);
+
+            var requisicao = await query.FirstOrDefaultAsync();
+
+            if (requisicao == null)
+                return null;
+
+
+            //Replicar os produtos, somente os que existem na base
+            List<RequisicaoItemDto> itens = new List<RequisicaoItemDto>();
+            string message = "";
+            foreach(var reqItem in requisicao.RequisicaoItens)
+            {
+                var produto = await _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId && c.Codigo == reqItem.Codigo).FirstOrDefaultAsync();
+
+                if (produto != null)
+                {
+                    reqItem.Id = 0;
+                    reqItem.RequisicaoId = 0;
+                    reqItem.Valor = produto.Valor;
+                    reqItem.TaxaGestao = produto.TaxaGestao;
+                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao) * reqItem.Quantidade;
+                    RequisicaoItemDto item = _mapper.Map<RequisicaoItemDto>(reqItem);
+                    itens.Add(item);
+                }else
+                {
+                    message += $"Produto {produto.Nome} não existe. <br/>" ;
+                }
+            }
+
+            // Checar se passou dos limites configurados para o cliente;
+            
+
+            // Criar o pedido
+            CreateRequisicaoDto novoPedido = new CreateRequisicaoDto( (int) requisicao.FilialId, (int) requisicao.ClienteId,
+                (int) requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,usuarioId,
+                usuarioNome,itens,false, false           
+            );
+
+            return await Create(novoPedido, urlOrigin);
+        }
+
+        public async Task<bool> FinalizarPedido(FinalizarRequisicaoDto finalizarRequisicaoDto, string usuarioNome)
+        {
+
+            var requisicao = await _rm.RequisicaoRepository.SelectByCondition(c => c.Id == finalizarRequisicaoDto.Id, true)
+                                   .FirstOrDefaultAsync();
+
+            if (requisicao == null)
+            {
+                return false;
+            }
+
+            requisicao.Status = EnumStatusRequisicao.FINALIZADO;
+            requisicao.DataEntrega = finalizarRequisicaoDto.DataEntrega;
+            requisicao.NotaFiscal = finalizarRequisicaoDto.NotaFiscal;
+
+            await _rm.SaveAsync();
+
+            RequisicaoHistorico reqH = new RequisicaoHistorico()
+            {
+                RequisicaoId = requisicao.Id,
+                Evento = $"Requisição <b>FINALIZADA</b> por {usuarioNome}, Data Entrega: {requisicao.DataEntrega} Nota Fiscal: {requisicao.NotaFiscal}",
+                DataHora = DateTime.Now
+            };
+
+            await CreateRequisicaoHistorico(reqH);
+
+
+            return true;
+        }
 
         #region Private Functions
         private async Task CreateRequisicaoHistorico(RequisicaoHistorico historico)
@@ -403,19 +557,131 @@ namespace wca.compras.services
                         RequisicaoId = requisicao.Id,
                         TokenRequisicao = requisicaoToken,
                         TokenAprovador = randomTokenString(),
-                        AlteraStatus = true
+                        AlteraStatus = true,
+                        TipoAprovador = EnumTipoAprovador.FORNECEDOR
                     };
                     _rm.RequisicaoAprovacaoRepository.Create(req);
                     await _rm.SaveAsync();
 
                     var link = $"{urlOrigin}/app/requisicoes/aprovar/{req.TokenAprovador}";
-                    _emailService.SendRequisicaoFornecedorEmail(new string[] { contato.Email }, link);
+
+                    var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido da WCA.<br/>";
+                    bodyHtml += "Clique no botão abaixo para acessar o <br/>";
+                    bodyHtml += "pedido<p><br/>";
+                    bodyHtml += $"<p style='text-align: center;'><a href='{link}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
+
+                    _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email },bodyHtml);
                 }
 
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = requisicao.Id,
                     Evento = $"Solicitação de aprovação enviada ao fornecedor!",
+                    DataHora = DateTime.Now
+                };
+
+                await CreateRequisicaoHistorico(reqH);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.solicitarAprovacaoFornecedor.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        private async Task solicitarAprovacaoWCA(string urlOrigin, Requisicao requisicao)
+        {
+            try
+            {
+                var query = _rm.UsuarioRepository.SelectAll()
+                            .Include(u => u.Cliente)
+                            .Include(u => u.Perfil)
+                            .ThenInclude(p => p.Permissao)
+                            .Where(c => c.Perfil.Permissao.Any(p => p.Regra == "aprova_requisicao") && 
+                                        c.Cliente.Any(c =>  c.Id == requisicao.ClienteId));
+
+                var usuarios = await query.ToListAsync();
+
+                var requisicaoToken = randomTokenString();
+
+                foreach (var contato in usuarios)
+                {
+                    RequisicaoAprovacao req = new RequisicaoAprovacao()
+                    {
+                        NomeAprovador = contato.Nome,
+                        RequisicaoId = requisicao.Id,
+                        TokenRequisicao = requisicaoToken,
+                        TokenAprovador = randomTokenString(),
+                        AlteraStatus = false,
+                        TipoAprovador = EnumTipoAprovador.WCA
+                    };
+                    _rm.RequisicaoAprovacaoRepository.Create(req);
+                    await _rm.SaveAsync();
+
+                    var link = $"{urlOrigin}/app/requisicoes/aprovar/{req.TokenAprovador}";
+
+                    var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido para.<br/>";
+                    bodyHtml += "aprovar. Clique no botão abaixo para acessar o <br/>";
+                    bodyHtml += "pedido<p><br/>";
+                    bodyHtml += $"<p style='text-align: center;'><a href='{link}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
+
+                    _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email }, bodyHtml);
+                }
+
+                RequisicaoHistorico reqH = new RequisicaoHistorico()
+                {
+                    RequisicaoId = requisicao.Id,
+                    Evento = $"Solicitação de aprovação enviada para aprovação do administrador!",
+                    DataHora = DateTime.Now
+                };
+
+                await CreateRequisicaoHistorico(reqH);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.solicitarAprovacaoFornecedor.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        private async Task solicitarAprovacaoCliente(string urlOrigin, Requisicao requisicao)
+        {
+            try
+            {
+                IList<ClienteContato> contatos = await _rm.ClienteContatoRepository.SelectByCondition(c => c.ClienteId == requisicao.ClienteId).ToListAsync();
+
+                var requisicaoToken = randomTokenString();
+
+                foreach (var contato in contatos)
+                {
+                    RequisicaoAprovacao req = new RequisicaoAprovacao()
+                    {
+                        NomeAprovador = contato.Nome,
+                        RequisicaoId = requisicao.Id,
+                        TokenRequisicao = requisicaoToken,
+                        TokenAprovador = randomTokenString(),
+                        AlteraStatus = false,
+                        TipoAprovador = EnumTipoAprovador.CLIENTE
+                    };
+                    _rm.RequisicaoAprovacaoRepository.Create(req);
+                    await _rm.SaveAsync();
+
+                    var link = $"{urlOrigin}/app/requisicoes/aprovar/{req.TokenAprovador}";
+
+                    var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido para.<br/>";
+                    bodyHtml += "aprovar. Clique no botão abaixo para acessar o <br/>";
+                    bodyHtml += "pedido<p><br/>";
+                    bodyHtml += $"<p style='text-align: center;'><a href='{link}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
+
+                    _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email }, bodyHtml);
+                }
+
+                RequisicaoHistorico reqH = new RequisicaoHistorico()
+                {
+                    RequisicaoId = requisicao.Id,
+                    Evento = $"Solicitação de aprovação enviada para aprovação do Cliente!",
                     DataHora = DateTime.Now
                 };
 
@@ -438,6 +704,32 @@ namespace wca.compras.services
             }
             return BitConverter.ToString(randomBytes).Replace("-", "");
         }
+
+        private async Task<Dictionary<int, int>> GetQuantidadePedidoPorCliente(int clienteId, DateTime initialDate, DateTime finalDate)
+        {
+            var query = _rm.RequisicaoRepository
+                .SelectByCondition(cnd => cnd.ClienteId == clienteId
+                                && cnd.DataCriacao >= initialDate
+                                && cnd.DataCriacao <= finalDate)
+                .Include("RequisicaoItens");
+            var result = await query.ToListAsync();
+
+            Dictionary<int, int> QuantidadePorTipo = new Dictionary<int, int>();
+
+            QuantidadePorTipo.Add(1, 0);
+            QuantidadePorTipo.Add(2, 0);
+            QuantidadePorTipo.Add(3, 0);
+
+            foreach (var item in result)
+            {
+                QuantidadePorTipo[1] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 1).Count() > 0 ? 1 : 0;
+                QuantidadePorTipo[2] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 2).Count() > 0 ? 1 : 0;
+                QuantidadePorTipo[3] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 3).Count() > 0 ? 1 : 0;
+
+            }
+            return QuantidadePorTipo;
+        }
+
         #endregion
     }
 }

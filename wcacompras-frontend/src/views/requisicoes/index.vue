@@ -63,12 +63,13 @@
                             }}</v-btn></td>
                     <td class="text-right">
                         <v-btn icon="mdi-content-copy" size="smaller" variant="plain" color="info" title="Duplicar"
-                            disabled></v-btn>
+                            @click="duplicar(item)"
+                            :disabled="getStatus(item.status).text == 'Cancelado' || isBusy"></v-btn>
                         <v-btn icon="mdi-lead-pencil" size="smaller" variant="plain" color="primary"
-                            @click="editar(item.id)" title="Editar"></v-btn>
+                            @click="editar(item.id)" title="Editar" :disabled="isBusy"></v-btn>
                         <v-btn icon="mdi-close-circle-outline" size="smaller" variant="plain" color="error"
                             @click="remove(item)" title="Cancelar"
-                            :disabled="getStatus(item.status).text == 'Cancelado'"></v-btn>
+                            :disabled="getStatus(item.status).text.toLowerCase() == 'cancelado' || getStatus(item.status).text.toLowerCase() == 'finalizado' || isBusy"></v-btn>
                     </td>
                 </tr>
             </tbody>
@@ -144,6 +145,42 @@ function clearFilters()
     filter.value.fornecedorId = null
     filter.value.usuarioId = hasRequisicaoAllUsersPermission.value ? null : authStore.user.id
     filter.value.status = -1
+}
+async function duplicar(item)
+{
+    try
+    {
+        let options = {
+            title: "Confirmar Duplicação",
+            text: `Deseja realmente duplicar a requisição: #${item.id}?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sim",
+            cancelButtonText: "Não",
+        }
+
+        let response = await swal.fire(options);
+        if (response.isConfirmed)
+        {
+            isBusy.value = true;
+            await requisicaoService.duplicate(item.id, authStore.user.id);
+            await getItems()
+
+            swal.fire({
+                toast: true,
+                icon: "success",
+                position: "top-end",
+                title: "Sucesso!",
+                text: "Requisição duplicada com sucesso!",
+                showConfirmButton: false,
+                timer: 2000,
+            })
+        }
+    } catch (error)
+    {
+        console.log("requisicoes.remove.error:", error);
+        handleErrors(error)
+    } finally { isBusy.value = false; }
 }
 function editar(id)
 {
@@ -227,6 +264,7 @@ async function remove(item)
         let response = await swal.fire(options);
         if (response.isConfirmed)
         {
+            isBusy.value = true;
             await requisicaoService.remove(item.id);
             await getItems()
 
@@ -244,6 +282,9 @@ async function remove(item)
     {
         console.log("requisicoes.remove.error:", error);
         handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
     }
 }
 

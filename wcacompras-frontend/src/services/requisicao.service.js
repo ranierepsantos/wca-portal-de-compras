@@ -11,6 +11,16 @@ export default {
     {
         return api.post(route.requisicaoCreate, requisicao);
     },
+    duplicate (id) 
+    {
+        return api.put(route.requisicaoDuplicate.replace("{id}", id));
+    },
+    
+    finalizarPedido(data)
+    {
+        return api.post(route.requisicaoFinalizar, data);
+    },
+
     remove (id) 
     {
         return api.delete(route.requisicaoRemove, { params: {"id": id } });

@@ -48,6 +48,21 @@ namespace wca.compras.domain.Entities
         [Column("fornecedor_id")]
         public int? FornecedorId { get; set; }
 
+        [Column("data_entrega", TypeName = "smalldatetime")]
+        public DateTime? DataEntrega { get; set; }
+
+        [Column("local_entrega", TypeName = "varchar(300)")]
+        public string? LocalEntrega { get; set; }
+
+        [Column("nota_fiscal", TypeName = "varchar(50)")]
+        public string? NotaFiscal { get; set; }
+
+        [Column("requer_autorizacao_cliente")]
+        public bool RequerAutorizacaoCliente { get; set; }
+
+        [Column("requer_autorizacao_wca")]
+        public bool RequerAutorizacaoWCA { get; set;  }
+
         [JsonIgnore]
         public Fornecedor? Fornecedor { get; set; }
 
@@ -58,6 +73,7 @@ namespace wca.compras.domain.Entities
 
     public enum EnumStatusRequisicao
     {
+        ITENSALTERADOS = -2,
         TODOS = -1,
         AGUARDANDO,
         APROVADO,

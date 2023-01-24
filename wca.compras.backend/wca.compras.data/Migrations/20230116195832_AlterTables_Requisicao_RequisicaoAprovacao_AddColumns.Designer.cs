@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230116195832_AlterTables_Requisicao_RequisicaoAprovacao_AddColumns")]
+    partial class AlterTables_Requisicao_RequisicaoAprovacao_AddColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -490,10 +492,6 @@ namespace wca.compras.data.Migrations
                     b.Property<string>("LocalEntrega")
                         .HasColumnType("varchar(300)")
                         .HasColumnName("local_entrega");
-
-                    b.Property<string>("NotaFiscal")
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("nota_fiscal");
 
                     b.Property<bool>("RequerAutorizacaoCliente")
                         .HasColumnType("bit")

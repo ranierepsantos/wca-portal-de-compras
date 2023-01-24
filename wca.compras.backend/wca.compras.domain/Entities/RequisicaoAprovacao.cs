@@ -41,10 +41,20 @@ namespace wca.compras.domain.Entities
         [Column("altera_status")]
         public bool AlteraStatus { get; set; }
 
+        [Column("tipoAprovador")]
+        public EnumTipoAprovador TipoAprovador { get; set; }
+
         [JsonIgnore, NotMapped]
         public bool Expirado => DateTimeOffset.UtcNow > DataExpiracao;
 
         [JsonIgnore, NotMapped]
         public bool Ativo => !Expirado && DataRevogacao == null;
+    }
+
+    public enum EnumTipoAprovador
+    {
+        FORNECEDOR,
+        WCA,
+        CLIENTE
     }
 }

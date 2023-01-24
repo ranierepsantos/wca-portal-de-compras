@@ -6,6 +6,6 @@ namespace wca.compras.domain.Interfaces.Services
     {
         void SendEmail(Message message);
 
-        void SendRequisicaoFornecedorEmail(string[] sentTo, string url);
+        void SendRequisicaoParaAprovacao(string[] sentTo, string bodyHtml);
     }
 }

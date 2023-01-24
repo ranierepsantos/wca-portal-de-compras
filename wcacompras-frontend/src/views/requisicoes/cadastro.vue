@@ -43,6 +43,7 @@
                     <th class="text-center text-grey">CÓDIGO</th>
                     <th class="text-center text-grey">PRODUTO</th>
                     <th class="text-center text-grey">VALOR</th>
+                    <th class="text-center text-grey">TAXA GESTÃO</th>
                     <th class="text-center text-grey">QUANTIDADE</th>
                     <th class="text-center text-grey">U. M.</th>
                     <th class="text-center text-grey">VALOR TOTAL</th>
@@ -54,6 +55,7 @@
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-right">{{ item.valor.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
                             :hide-details="true" class="ml-12" v-model="item.quantidade" min="0"
@@ -61,7 +63,9 @@
                         </v-text-field>
                     </td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
-                    <td class="text-right">{{ (item.valor * item.quantidade).toFixed(2) }}
+                    <td class="text-right">
+                        {{ ((item.valor + item.taxaGestao) * (isNaN(item.quantidade) ? 0 :
+                        item.quantidade)).toFixed(2)}}
                     </td>
                     <td class="text-center">
                         <v-btn icon="mdi-package-variant-minus" variant="plain" color="red" title="Remover Produto"
@@ -73,6 +77,7 @@
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-right">{{ item.valor.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
                             :hide-details="true" class="sm ml-12" v-model="item.quantidade" min="0"
@@ -80,8 +85,10 @@
                         </v-text-field>
                     </td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
-                    <td class="text-right">{{ (item.valor * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2)
-                        }}</td>
+                    <td class="text-right">
+                        {{ ((item.valor + item.taxaGestao) * (isNaN(item.quantidade) ? 0 :
+                        item.quantidade)).toFixed(2) }}
+                    </td>
                     <td class="text-center">
                         <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
                             :disabled="(isNaN(item.quantidade) ? 0 : item.quantidade) == 0"
@@ -200,7 +207,7 @@ function calcularOrcamentoTotais()
     {
         let item = requisicao.value.requisicaoItens[idx]
         let index = orcamento.value.findIndex(o => o.tipoFornecimentoId == item.tipoFornecimentoId);
-        orcamento.value[index].valorTotal += (parseFloat(item.valor) * item.quantidade)
+        orcamento.value[index].valorTotal += ((parseFloat(item.valor) + parseFloat(item.taxaGestao)) * item.quantidade)
         orcamento.value[index].percentual = (orcamento.value[index].valorTotal / (orcamento.value[index].valorPedido * (1 + orcamento.value[index].tolerancia / 100))) * 100
     }
 }
@@ -303,9 +310,9 @@ async function salvar()
         requisicao.value.requisicaoItens.forEach(produto =>
         {
             delete produto.id
-            //produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
-            produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
-            produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
+            produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
+            // produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
+            // produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
 
             requisicao.value.taxaGestao += produto.taxaGestao
             requisicao.value.valorTotal += produto.valorTotal
@@ -320,7 +327,7 @@ async function salvar()
         {
             if (o.percentual > 100)
             {
-                if (o.AprovadorPor == 1)
+                if (o.aprovadoPor == 1)
                     requisicao.value.requerAutorizacaoCliente = true;
                 else
                     requisicao.value.requerAutorizacaoWCA = true;

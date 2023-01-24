@@ -14,6 +14,8 @@ namespace wca.compras.domain.Dtos
         decimal TaxaGestao,
         EnumStatusRequisicao Status,
         EnumDestinoRequisicao Destino,
+        string NotaFiscal,
+        DateTime DataEntrega,
         Cliente Cliente,
         ListItem Usuario,
         ListItem Fornecedor,
@@ -39,6 +41,11 @@ namespace wca.compras.domain.Dtos
         string Token
     );
 
+    public record FinalizarRequisicaoDto(
+        int Id,
+        string NotaFiscal,
+        DateTime DataEntrega
+    );
 
     public record CreateRequisicaoDto (
         [Required(ErrorMessage = "O campo é obrigatório!")] int FilialId,
@@ -65,7 +72,9 @@ namespace wca.compras.domain.Dtos
         EnumDestinoRequisicao Destino,
         [Required(ErrorMessage = "O campo é obrigatório!")] string NomeUsuario,
         IList<RequisicaoItemDto> RequisicaoItens,
-        IList<RequisicaoHistoricoDto> RequisicaoHistorico
+        IList<RequisicaoHistoricoDto> RequisicaoHistorico,
+        bool RequerAutorizacaoWCA = false,
+        bool RequerAutorizacaoCliente = false
     );
 
     public record RequisicaoItemDto (
@@ -87,5 +96,11 @@ namespace wca.compras.domain.Dtos
         DateTime DataHora,
         string Evento
     );
+
+    public class RequisicaoCategoriaConsolidadoDto
+    {
+        public int TipoFornecimentoId { get; set; }
+        public int Quantidade { get; set; }
+    }
 
 }

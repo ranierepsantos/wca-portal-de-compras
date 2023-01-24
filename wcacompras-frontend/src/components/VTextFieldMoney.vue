@@ -50,12 +50,12 @@ defineEmits(['update:modelValue'])
 </script>
 
 <style scoped>
-.right-input>>>input {
+.right-input :deep(input) {
     text-align: right
 }
 
-.right-input>>>input::-webkit-outer-spin-button,
-.right-input>>>input::-webkit-inner-spin-button {
+.right-input :deep(input::-webkit-outer-spin-button),
+.right-input :deep(input::-webkit-inner-spin-button) {
     -webkit-appearance: none;
     margin: 0;
 }

@@ -43,11 +43,12 @@ export const route = {
     requisicaoGetById: "Requisicao/{id}",
     requisicaoGetByToken: "Requisicao/GetByToken/{token}",
     requisicaoRemove: "Requisicao",
+    requisicaoDuplicate: "Requisicao/Duplicate/{id}",
     requisicaoUpdate: "Requisicao",
     requisicaoPaginate: "Requisicao/Paginate/{pageSize}/{page}",
     requisicaoDownloadById: "Requisicao/ExportExcel/{id}",
     requisicaoDownloadByToken: "Requisicao/ExportExcel/{token}",
-
+    requisicaoFinalizar: "Requisicao/FinalizarPedido",
     tipoFornecimentoToList: "TipoFornecimento/ToList",
 
     usuarioCreate: "Usuario",

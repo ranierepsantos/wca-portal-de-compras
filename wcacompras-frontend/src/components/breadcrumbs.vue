@@ -6,7 +6,7 @@
     <div class="text-h4 text-primary">{{ title }}</div>
     <v-spacer></v-spacer>
     <v-btn color="primary" variant="outlined" class="text-capitalize" @click="$emit('customClick')"
-      v-show="customButtonShow">
+      v-show="customButtonShow" :disabled="customButtonDisabled">
       <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon>
       <b>{{ customButtonText }}</b>
     </v-btn>
@@ -24,7 +24,8 @@ defineProps({
   showButton: { type: Boolean, default: true },
   customButtonShow: { type: Boolean, default: false },
   customButtonText: { type: String, default: "customButtonText" },
-  customButtonIcon: { type: String, default: "" }
+  customButtonIcon: { type: String, default: "" },
+  customButtonDisabled: { type: Boolean, default: false }
 })
 </script>
 

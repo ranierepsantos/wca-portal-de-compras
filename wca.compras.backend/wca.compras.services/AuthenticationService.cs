@@ -66,6 +66,7 @@ namespace wca.compras.services
                     new[] {
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim("UsuarioNome", authUser.Nome),
+                    new Claim("CodigoUsuario", authUser.Id.ToString()),
                     new Claim("Filial",authUser.FilialId.ToString())
                     }
                 );
