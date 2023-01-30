@@ -98,8 +98,6 @@ namespace wca.compras.services
         {
             try
             {
-                //_emailService.SendRequisicaoFornecedorEmail();
-
                 var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id);
 
                 if (filialId > 1)
@@ -451,7 +449,7 @@ namespace wca.compras.services
 
         }
 
-        public async Task<RequisicaoDto> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin)
+        public async Task<RequisicaoDuplicarResponse> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin)
         {
             var query = _rm.RequisicaoRepository.SelectByCondition(c => c.Id == requisicaoId);
                 query = query.Include(r => r.RequisicaoItens);
@@ -480,12 +478,9 @@ namespace wca.compras.services
                     itens.Add(item);
                 }else
                 {
-                    message += $"Produto {produto.Nome} não existe. <br/>" ;
+                    message += $"Produto {reqItem.Codigo} - {reqItem.Nome}. <br/>" ;
                 }
             }
-
-            // Checar se passou dos limites configurados para o cliente;
-            
 
             // Criar o pedido
             CreateRequisicaoDto novoPedido = new CreateRequisicaoDto( (int) requisicao.FilialId, (int) requisicao.ClienteId,
@@ -493,7 +488,9 @@ namespace wca.compras.services
                 usuarioNome,itens,false, false           
             );
 
-            return await Create(novoPedido, urlOrigin);
+            var data = await Create(novoPedido, urlOrigin);
+
+            return new RequisicaoDuplicarResponse(data, message);
         }
 
         public async Task<bool> FinalizarPedido(FinalizarRequisicaoDto finalizarRequisicaoDto, string usuarioNome)

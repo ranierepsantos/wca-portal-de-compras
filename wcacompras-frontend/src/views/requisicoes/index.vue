@@ -163,18 +163,30 @@ async function duplicar(item)
         if (response.isConfirmed)
         {
             isBusy.value = true;
-            await requisicaoService.duplicate(item.id, authStore.user.id);
+            let response = await requisicaoService.duplicate(item.id, authStore.user.id);
+            console.log('duplicar.response', response);
             await getItems()
+            if (response.data.message == "")
+            {
+                swal.fire({
+                    toast: true,
+                    icon: "success",
+                    position: "top-end",
+                    title: "Sucesso!",
+                    html: `Requisição duplicada com sucesso!`,
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+            } else
+            {
+                swal.fire({
+                    icon: "warning",
+                    title: "Atenção!",
+                    html: `Requisição duplicada, mas alguns produtos não foram encontrados!<br/><br/> ${response.data.message}`,
+                    showConfirmButton: true
+                })
+            }
 
-            swal.fire({
-                toast: true,
-                icon: "success",
-                position: "top-end",
-                title: "Sucesso!",
-                text: "Requisição duplicada com sucesso!",
-                showConfirmButton: false,
-                timer: 2000,
-            })
         }
     } catch (error)
     {

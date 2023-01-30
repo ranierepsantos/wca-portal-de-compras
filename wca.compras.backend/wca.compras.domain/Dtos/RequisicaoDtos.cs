@@ -103,4 +103,17 @@ namespace wca.compras.domain.Dtos
         public int Quantidade { get; set; }
     }
 
+    public class RequisicaoDuplicarResponse
+    {
+        public RequisicaoDuplicarResponse(RequisicaoDto requisicao, string message)
+        {
+            Requisicao = requisicao;
+            Message = message;
+        }
+
+        public RequisicaoDto Requisicao { get; private set; }
+        
+        public string  Message { get; private set; }
+
+    }
 }
