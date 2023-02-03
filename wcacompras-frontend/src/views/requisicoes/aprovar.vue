@@ -155,7 +155,7 @@ async function download()
     {
         isDownloading.value = true;
         let response = await requisicaoService.downloadByToken(token.value);
-        let nomeArquivo = response.headers['content-disposition'].split(';')[1].replace('filename=', '').trim()
+        let nomeArquivo = 'WCACompras_Pedido' + token.value.substring(1,10) + '.xlsx' //response.headers['content-disposition'].split(';')[1].replace('filename=', '').trim()
         realizarDownload(response, nomeArquivo, response.headers.getContentType());
 
     } catch (error)
