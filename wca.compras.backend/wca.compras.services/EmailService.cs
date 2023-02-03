@@ -40,17 +40,17 @@ namespace wca.compras.services
     {
             try
             {
-                var currentDirectory = Directory.GetCurrentDirectory();
-                var parentDirectory = Directory.GetParent(currentDirectory).FullName;
-                var filesDirectory = Path.Combine(parentDirectory, "Files");
+                //var currentDirectory = Directory.GetCurrentDirectory();
+                //var parentDirectory = Directory.GetParent(currentDirectory).FullName;
+                //var filesDirectory = Path.Combine(parentDirectory, "Files");
 
                 BodyBuilder builder = new BodyBuilder();
-                var imagePath = Path.Combine(filesDirectory, "logoWCA.png");
+                //var imagePath = Path.Combine(filesDirectory, "logoWCA.png");
 
-                var image = builder.LinkedResources.Add(imagePath);
-                image.ContentId = MimeUtils.GenerateMessageId();
+                //var image = builder.LinkedResources.Add(imagePath);
+                //image.ContentId = MimeUtils.GenerateMessageId();
 
-                builder.HtmlBody = string.Format(@"<p style='text-align:center;'><img src='cid:{0}' width='250px'; height='172.25px';></p>{1}", image.ContentId, bodyHtml);
+                builder.HtmlBody = string.Format(@"<p style='text-align:center;'><img src='{0}' width='250px'; height='172.25px';></p>{1}", "https://wcacompras.blob.core.windows.net/files/logoWCA.png", bodyHtml);
 
                 var message = new Message(sentTo, "Novo pedido WCA", "");
                 var emailMessage = new MimeMessage();

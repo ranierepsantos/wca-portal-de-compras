@@ -405,11 +405,11 @@ namespace wca.compras.services
                 {
                     return null;
                 }
-                var currentDirectory = Directory.GetCurrentDirectory();
-                var parentDirectory = Directory.GetParent(currentDirectory).FullName;
-                var filesDirectory = Path.Combine(parentDirectory, "Files");
-                filesDirectory = Path.Combine(filesDirectory, "excel");
-                var excelFile = Path.Combine(filesDirectory, "WCAPedidoFornecedor.xlsx");
+                //var currentDirectory = Directory.GetCurrentDirectory();
+                //var parentDirectory = Directory.GetParent(currentDirectory).FullName;
+                //var filesDirectory = Path.Combine(parentDirectory, "Files");
+                //filesDirectory = Path.Combine(filesDirectory, "excel");
+                var excelFile = "Files/excel/WCAPedidoFornecedor.xlsx"; //Path.Combine(filesDirectory, "WCAPedidoFornecedor.xlsx");
 
                 var saveFile = $"WCAPedido_{requisicaoId}.xlsx";
 
