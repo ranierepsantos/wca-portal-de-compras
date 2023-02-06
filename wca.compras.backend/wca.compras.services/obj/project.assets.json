@@ -7146,35 +7146,37 @@
     ]
   },
   "packageFolders": {
-    "/Users/ranierepsantos/.nuget/packages/": {}
+    "C:\\Users\\ivani\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.services/wca.compras.services.csproj",
+      "projectUniqueName": "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.services\\wca.compras.services.csproj",
       "projectName": "wca.compras.services",
-      "projectPath": "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.services/wca.compras.services.csproj",
-      "packagesPath": "/Users/ranierepsantos/.nuget/packages/",
-      "outputPath": "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.services/obj/",
+      "projectPath": "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.services\\wca.compras.services.csproj",
+      "packagesPath": "C:\\Users\\ivani\\.nuget\\packages\\",
+      "outputPath": "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.services\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/ranierepsantos/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\ivani\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.data/wca.compras.data.csproj": {
-              "projectPath": "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.data/wca.compras.data.csproj"
+            "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.data\\wca.compras.data.csproj": {
+              "projectPath": "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.data\\wca.compras.data.csproj"
             },
-            "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.domain/wca.compras.domain.csproj": {
-              "projectPath": "/Users/ranierepsantos/Documents/GitHub/wca-portal-de-compras/wca.compras.backend/wca.compras.domain/wca.compras.domain.csproj"
+            "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.domain\\wca.compras.domain.csproj": {
+              "projectPath": "E:\\Projetos\\NorgeLabs\\wca-portal-de-compras\\wca.compras.backend\\wca.compras.domain\\wca.compras.domain.csproj"
             }
           }
         }
@@ -7226,7 +7228,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.101/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
       }
     }
   }

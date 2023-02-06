@@ -17,5 +17,6 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<ClienteDto> GetById(int filialId, int id);
         public Pagination<ClienteDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "");
         public Task<IList<ListItem>> GetToList(int filialId);
+        public Task<IList<ClienteDto>> GetByUser(int usuarioId);
     }
 }

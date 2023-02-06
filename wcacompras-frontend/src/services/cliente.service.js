@@ -30,5 +30,10 @@ export default {
         let url = route.clientePaginate.replace("{pageSize}", pageSize).replace("{page}", page)
         return api.get(url, {params: { termo: termo}} );
     },
+
+    getListByAuthenticatedUser () 
+    {
+        return api.get(route.clienteListByAuthenticatedUser);
+    },
    
 }

@@ -142,5 +142,26 @@ namespace wca.compras.webapi.Controllers
             }
 
         }
+
+        /// <summary>
+        /// Retorna lista de Clientes ativos para preenchimento de Listas e Combos
+        /// </summary>
+        /// <returns>items</returns>
+        /// <param name="filial"></param>
+        [HttpGet]
+        [Route("ListByAuthenticatedUser")]
+        public async Task<ActionResult<IList<ClienteDto>>> ListByAuthenticatedUser()
+        {
+            try
+            {
+                int codigoUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                var items = await service.GetByUser(codigoUsuario);
+                return Ok(items);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }

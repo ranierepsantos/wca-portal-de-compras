@@ -9,6 +9,7 @@ export const route = {
     clienteGetById: "Cliente/{id}",
     clienteToList: "Cliente/ToList/{filial}",
     clientePaginate: "Cliente/Paginate/{pageSize}/{page}",
+    clienteListByAuthenticatedUser: "Cliente/ListByAuthenticatedUser",
 
     filialCreate: "Filial",
     filialUpdate: "Filial",

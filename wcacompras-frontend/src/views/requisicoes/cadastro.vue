@@ -110,6 +110,7 @@ import fornecedorService from "@/services/fornecedor.service";
 import { compararValor } from "@/helpers/functions"
 import router from "@/router";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
+import clienteService from "@/services/cliente.service";
 
 //DATA
 const authStore = useAuthStore();
@@ -142,9 +143,10 @@ let tipoFornecimento = ref([])
 //VUE METHODS
 onMounted(async () =>
 {
-    clientes.value = authStore.user.cliente;
+    
     requisicao.value.NomeUsuario = authStore.user.nome;
     requisicao.value.UsuarioId = authStore.user.id;
+    await getClienteListByUser()
     await getFornecedorToList(authStore.user.filial)
     await getTipoFornecimentoToList();
 });
@@ -216,6 +218,20 @@ function clearOrcamentoTotais()
     for (let idx = 0; idx < orcamento.value.length; idx++)
         orcamento.value[idx].valorTotal = 0;
 }
+
+async function getClienteListByUser() 
+{
+    try
+    {
+        let response = await clienteService.getListByAuthenticatedUser();
+        clientes.value = response.data;
+    } catch (error)
+    {
+        console.log("getUsuarioToList.error:", error);
+        handleErrors(error)
+    }
+}
+
 async function getFornecedorToList(filial)
 {
     try

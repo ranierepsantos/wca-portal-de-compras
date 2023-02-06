@@ -16,8 +16,7 @@ namespace wca.compras.domain.Dtos
         int UsuarioId,
         int? FilialId,
         string UsuarioNome,
-        PerfilPermissoesDto Perfil,
-        IList<ClienteDto> Cliente
+        PerfilPermissoesDto Perfil
     );
     
     public record ForgotPasswordRequest (

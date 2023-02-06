@@ -192,5 +192,23 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
+
+        public async Task<IList<ClienteDto>> GetByUser(int usuarioId)
+        {
+            try
+            {
+                var clientes = await _rm.ClienteRepository.SelectAll()
+                    .Include(c => c.ClienteOrcamentoConfiguracao)
+                    .Where(c => c.Usuario.Any(c => c.Id == usuarioId))
+                    .ToListAsync();
+                
+                return _mapper.Map<IList<ClienteDto>>(clientes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.GetByUser.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
     }
 }

@@ -124,7 +124,7 @@ onMounted(async () =>
     {
         filter.value.usuarioId = authStore.user.id;
         filial = authStore.user.filial;
-        clientes.value = authStore.user.cliente
+        await getClienteListByUser();
     }
     if (hasRequisicaoAllUsersPermission.value)
     {
@@ -198,6 +198,24 @@ function editar(id)
 {
     router.push({ name: "requisicaoEdicao", params: { requisicao: id } })
 }
+
+async function getClienteListByUser() 
+{
+    try
+    {
+        let response = await clienteService.getListByAuthenticatedUser();
+        let list = response.data;
+        list.forEach(elem => {
+            clientes.value.push({text: elem.nome, value: elem.id })
+        });
+        
+    } catch (error)
+    {
+        console.log("getClienteListByUser.error:", error);
+        handleErrors(error)
+    }
+}
+
 async function getClienteToList(filial)
 {
     try
