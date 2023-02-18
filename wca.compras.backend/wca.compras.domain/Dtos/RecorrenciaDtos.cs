@@ -6,53 +6,66 @@ namespace wca.compras.domain.Dtos
 {
     public record RecorrenciaDto (
         int Id,
+        string Nome,
         int FilialId,
         int ClienteId,
         int FornecedorId,
+        int UsuarioId,
         int TipoRecorrencia,
         DateTime DataCriacao,
         int Dia,
         EnumDestinoRequisicao Destino,
+        bool Ativo,
         ListItem Cliente,
         ListItem Usuario,
         ListItem Fornecedor,
-        IList<RecorrenciaProduto> RecorrenciaProdutos,
-        IList<RecorrenciaLog> RecorrenciaLogs
+        IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
+        IList<RecorrenciaLogDto> RecorrenciaLogs
     );
 
+    public record EnabledRecorrenciaDto (
+        int Id,
+        bool Ativo
+    );
     public record CreateRecorrenciaDto(
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")] int FilialId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int ClienteId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int FornecedorId,
+        [Required(ErrorMessage = "O campo é obrigatório!")] int UsuarioId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int TipoRecorrencia,
         [Required(ErrorMessage = "O campo é obrigatório!")] int Dia,
         EnumDestinoRequisicao Destino,
-        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProduto> RecorrenciaProdutos
+        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos
     );
     public record UpdateRecorrenciaDto(
         [Required(ErrorMessage = "O campo é obrigatório!")] int Id,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")] int FilialId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int ClienteId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int FornecedorId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int TipoRecorrencia,
         [Required(ErrorMessage = "O campo é obrigatório!")] int Dia,
+        bool Ativo,
         EnumDestinoRequisicao Destino,
-        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProduto> RecorrenciaProdutos
+        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos
     );
 
     public record RecorrenciaProdutoDto(
-        int Id,
-        int RequisicaoId,
-        string Codigo,
-        string Nome,
-        string UnidadeMedida,
+        int Id ,
+        int RecorrenciaId ,
+        string Codigo ,
+        string Nome ,
+        string UnidadeMedida ,
         int Quantidade
     );
 
+    
     public record RecorrenciaLogDto(
         int Id,
-        int RequisicaoId,
+        int RecorrenciaId ,
         DateTime DataHora,
-        string Log
+        string Status ,
+        string Log 
     );
 }

@@ -39,6 +39,13 @@ export const route = {
     produtoGetById: "Fornecedor/{fornecedorId}/Fornecedor/{id}",
     produtoPaginate: "Fornecedor/{fornecedorId}/Produtos/Paginate/{pageSize}/{page}",
 
+    recorrenciaCreate: "Recorrencia",
+    recorrenciaGetById: "Recorrencia/{id}",
+    recorrenciaPaginateLogs: "Recorrencia/Log/{id}/{pageSize}/{page}",
+    recorrenciaEnabledDisabled: "Recorrencia/EnabledDisabled",
+    recorrenciaUpdate: "Recorrencia",
+    recorrenciaPaginate: "Recorrencia/Paginate/{pageSize}/{page}",
+    
     requisicaoAprovar: "Requisicao/AprovarReprovar",
     requisicaoCreate: "Requisicao",
     requisicaoGetById: "Requisicao/{id}",

@@ -19,6 +19,9 @@ namespace wca.compras.domain.Interfaces
         public IRepository<RequisicaoItem> RequisicaoItemRepository { get; }
         public IRepository<FornecedorContato> FornecedorContatoRepository { get; }
         public IRepository<RequisicaoAprovacao> RequisicaoAprovacaoRepository { get; }
+        public IRepository<Recorrencia> RecorrenciaRepository { get; }
+        public IRepository<RecorrenciaProduto> RecorrenciaProdutoRepository { get; }
+        public IRepository<RecorrenciaLog> RecorrenciaLogRepository { get; }
 
         Task SaveAsync();
     }

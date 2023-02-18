@@ -96,6 +96,12 @@ const menuItems = ref([
     permissao: "perfil"
   },
   {
+    title: "Recorrências",
+    value: 3,
+    route: "/app/recorrencias",
+    permissao: "recorrencia|recorrencias_view_others_users"
+  },
+  {
     title: "Requisições",
     value: 3,
     route: "/app/requisicoes",

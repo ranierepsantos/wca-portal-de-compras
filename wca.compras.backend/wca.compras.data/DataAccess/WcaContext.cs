@@ -22,10 +22,29 @@ namespace wca.compras.data.DataAccess
         public DbSet<RequisicaoHistorico> RequisicaoHistoricos { get; set; }
         public DbSet<FornecedorContato> FornecedorContatos { get; set; }
         public DbSet<RequisicaoAprovacao> RequisicaoAprovacoes { get; set; }
+        public DbSet<Recorrencia> Recorrencias { get; set; }
+        public DbSet<RecorrenciaProduto> RecorrenciaProdutos { get; set; }
+        public DbSet<RecorrenciaLog> RecorrenciaLogs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Permissao>().HasData(
+                new Permissao()
+                {
+                    Id = 9,
+                    Nome = "Recorrência",
+                    Descricao = "Permite incluir, alterar e inativar recorrência",
+                    Regra = "recorrencia",
+                },
+                new Permissao()
+                {
+                    Id = 10,
+                    Nome = "Administrador Recorrência",
+                    Descricao = "Permite alterar e inativar recorrência de outros usuários",
+                    Regra = "recorrencias_view_others_users",
+                }
+            );
         }
     }
 }

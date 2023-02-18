@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230215011238_AddTablesForRecorrencia")]
+    partial class AddTablesForRecorrencia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -400,22 +402,6 @@ namespace wca.compras.data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Permissao");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 8,
-                            Descricao = "Permite incluir, alterar e inativar recorrência",
-                            Nome = "Recorrência",
-                            Regra = "recorrencia"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Descricao = "Permite alterar e inativar recorrência de outros usuários",
-                            Nome = "Administrador Recorrência",
-                            Regra = "recorrencias_view_others_users"
-                        });
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Produto", b =>
@@ -515,11 +501,6 @@ namespace wca.compras.data.Migrations
                     b.Property<int>("TipoRecorrencia")
                         .HasColumnType("int")
                         .HasColumnName("tipo_recorrencia");
-
-                    b.Property<string>("UrlOrigin")
-                        .IsRequired()
-                        .HasColumnType("varchar(1000)")
-                        .HasColumnName("url_origin");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int")

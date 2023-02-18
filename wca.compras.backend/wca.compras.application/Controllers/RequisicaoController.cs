@@ -1,5 +1,4 @@
-﻿using ClosedXML.Excel;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using wca.compras.domain.Dtos;
@@ -269,9 +268,9 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
-        /// Cria uma requisição com base numa requisição existente
+        /// Finalizar o Requisição, alterando seu status para Finalizado
         /// </summary>
-        ///<param name="id"></param>
+        ///<param name="finalizarRequisicao"></param>
         [HttpPost]
         [Route("FinalizarPedido")]
         [Authorize("Bearer")]

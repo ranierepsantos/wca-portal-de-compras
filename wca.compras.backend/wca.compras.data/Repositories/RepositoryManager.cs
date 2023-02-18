@@ -22,7 +22,9 @@ namespace wca.compras.data.Repositories
         private IRepository<RequisicaoHistorico> _requisicaoHistoricoRepo;
         private IRepository<FornecedorContato> _fornecedorContatoRepo;
         private IRepository<RequisicaoAprovacao> _requisicaoAprovacaoRepo;
-        
+        private IRepository<Recorrencia> _recorrenciaRepo;
+        private IRepository<RecorrenciaProduto> _recorrenciaProdutoRepo;
+        private IRepository<RecorrenciaLog> _recorrenciaLogRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -201,6 +203,37 @@ namespace wca.compras.data.Repositories
             }
         }
 
+        public IRepository<Recorrencia> RecorrenciaRepository
+        {
+            get
+            {
+                if (_recorrenciaRepo == null)
+                    _recorrenciaRepo = new BaseRepository<Recorrencia>(_context);
+
+                return _recorrenciaRepo;
+            }
+        }
+
+        public IRepository<RecorrenciaProduto> RecorrenciaProdutoRepository
+        {
+            get
+            {
+                if (_recorrenciaProdutoRepo == null)
+                    _recorrenciaProdutoRepo = new BaseRepository<RecorrenciaProduto>(_context);
+
+                return _recorrenciaProdutoRepo;
+            }
+        }
+        public IRepository<RecorrenciaLog> RecorrenciaLogRepository
+        {
+            get
+            {
+                if (_recorrenciaLogRepo == null)
+                    _recorrenciaLogRepo = new BaseRepository<RecorrenciaLog>(_context);
+
+                return _recorrenciaLogRepo;
+            }
+        }
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

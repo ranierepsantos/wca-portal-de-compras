@@ -40,6 +40,9 @@ namespace wca.compras.domain.Entities
         [Column("destino", TypeName = "tinyint")]
         public EnumDestinoRequisicao Destino { get; set; } = 0;
 
+        [Column("url_origin", TypeName = "varchar(1000)")]
+        public string UrlOrigin { get; set; } = string.Empty;
+
         [JsonIgnore]
         public Filial? Filial { get; set; }
 
@@ -96,6 +99,11 @@ namespace wca.compras.domain.Entities
 
         [Column("data_hora", TypeName = "smalldatetime")]
         public DateTime DataHora { get; set; } = DateTime.Now;
+
+        [Required]
+        [Column("status", TypeName = "varchar(15)")]
+        public string Status { get; set; } = "";
+
 
         [Required]
         [Column("log", TypeName = "varchar(5000)")]

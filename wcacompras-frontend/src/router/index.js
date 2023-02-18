@@ -102,6 +102,36 @@ const routes = [
         props: route => ({ query: route.query.id })
       },
       {
+        path: 'app/recorrencias',
+        name: 'recorrencias',
+        //meta: {permissao:"recorrencias|recorrencias_view_others_users"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "recorrencias" */ '../views/recorrencias')
+      },
+      {
+        path: 'app/recorrencias/cadastro',
+        name: 'recorrenciaCadastro',
+        //meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/recorrencias/cadastro')
+      },
+      {
+        path: 'app/recorrencias/edicao/:codigo',
+        name: 'recorrenciaEdicao',
+        //meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/recorrencias/cadastro')
+      },
+      {
         path: 'app/requisicoes',
         name: 'requisicoes',
         meta: {permissao:"requisicao|requisicao_all_users"},

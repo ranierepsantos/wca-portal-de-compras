@@ -73,6 +73,7 @@
                 </v-col>
             </v-row>
             <v-progress-linear color="primary" indeterminate :height="5" v-show="isLoadingProduto"></v-progress-linear>
+            <small class="text-error" v-show="!hasProduto">Adicione pelo menos 1 produto</small>
             <v-table class="mt-2 elevation-2">
                 <thead>
                     <tr>
@@ -251,6 +252,7 @@ let finalizarData = ref({
     notaFiscal: null,
     dataEntrega: moment().format("YYYY-MM-DD")
 })
+let hasProduto = ref(true);
 //VUE METHODS
 onMounted(async () =>
 {
@@ -298,6 +300,10 @@ function adicionarProdutoRequisicao(item)
         let produto = { ...item }
         delete produto.id
         requisicao.value.requisicaoItens.push(produto)
+
+        if (!hasProduto.value) 
+            hasProduto.value = true;
+
         produtoRemoveFromList(item)
         ordenarRequisicaoItens()
     }
@@ -484,50 +490,53 @@ async function salvar()
     try
     {
         isSaving.value = true;
-        //remover o campo id da requisicaoItens
-        requisicao.value.requisicaoItens.forEach(produto =>
-        {
-            produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
-            // produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
-            // produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
-
-            requisicao.value.taxaGestao += produto.taxaGestao
-            requisicao.value.valorTotal += produto.valorTotal
-
-            produto.valorTotal = produto.valorTotal.toFixed(2)
-            produto.taxaGestao = produto.taxaGestao.toFixed(2)
-        })
-        requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
-        requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
-        requisicao.value.NomeUsuario = authStore.user.nome;
-        orcamento.value.forEach(o =>
-        {
-            if (o.percentual > 100)
+        hasProduto.value = requisicao.value.requisicaoItens.length > 0;
+        if (hasProduto.value) {
+            //remover o campo id da requisicaoItens
+            requisicao.value.requisicaoItens.forEach(produto =>
             {
-                if (o.AprovadorPor == 1)
-                    requisicao.value.requerAutorizacaoCliente = true;
-                else
-                    requisicao.value.requerAutorizacaoWCA = true;
+                produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
+                // produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
+                // produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
+
+                requisicao.value.taxaGestao += produto.taxaGestao
+                requisicao.value.valorTotal += produto.valorTotal
+
+                produto.valorTotal = produto.valorTotal.toFixed(2)
+                produto.taxaGestao = produto.taxaGestao.toFixed(2)
+            })
+            requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
+            requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
+            requisicao.value.NomeUsuario = authStore.user.nome;
+            orcamento.value.forEach(o =>
+            {
+                if (o.percentual > 100)
+                {
+                    if (o.AprovadorPor == 1)
+                        requisicao.value.requerAutorizacaoCliente = true;
+                    else
+                        requisicao.value.requerAutorizacaoWCA = true;
+                }
+            })
+            let data = { ...requisicao.value }
+            if (hasChanged.value == true)
+            {
+                data.status = -2; //Itens Alterados
             }
-        })
-        let data = { ...requisicao.value }
-        if (hasChanged.value == true)
-        {
-            data.status = -2; //Itens Alterados
+
+            await requisicaoService.update(data);
+
+            swal.fire({
+                toast: true,
+                icon: "success",
+                index: "top-end",
+                title: "Sucesso!",
+                text: "Dados salvos com sucesso!",
+                showConfirmButton: false,
+                timer: 2000,
+            })
+            router.push({ name: "requisicoes" })
         }
-
-        await requisicaoService.update(data);
-
-        swal.fire({
-            toast: true,
-            icon: "success",
-            index: "top-end",
-            title: "Sucesso!",
-            text: "Dados salvos com sucesso!",
-            showConfirmButton: false,
-            timer: 2000,
-        })
-        router.push({ name: "requisicoes" })
     } catch (error)
     {
         console.log("salvar.error:", error);

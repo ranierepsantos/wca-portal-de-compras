@@ -2,24 +2,25 @@
     <div>
         <bread-crumbs title="Nova Requisição" :show-button="false" :custom-button-show="true"
             custom-button-text="Salvar" @customClick="salvar()" />
-        <v-row>
-            <v-col cols="5">
-                <v-select label="Clientes" v-model="requisicao.clienteId" :items="clientes" density="compact"
-                    item-title="nome" item-value="id" variant="outlined" color="primary"
-                    :hide-details="true"></v-select>
-            </v-col>
-            <v-col cols="5">
-                <v-select label="Fornecedor" v-model="requisicao.fornecedorId" :items="fornecedores" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary" :hide-details="true"
-                    :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
-            </v-col>
-            <v-col cols="2">
-                <v-select label="Destino" v-model="requisicao.destino" :items="destinos" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"
-                    :hide-details="true"></v-select>
-            </v-col>
-
-        </v-row>
+            <v-form ref="formCadastro">
+                <v-row>
+                    <v-col cols="5">
+                        <v-select label="Clientes" v-model="requisicao.clienteId" :items="clientes" density="compact"
+                            item-title="nome" item-value="id" variant="outlined" color="primary"
+                            :hide-details="false" :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
+                    </v-col>
+                    <v-col cols="5">
+                        <v-select label="Fornecedor" v-model="requisicao.fornecedorId" :items="fornecedores" density="compact"
+                            item-title="text" item-value="value" variant="outlined" color="primary" :hide-details="false"
+                            :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
+                    </v-col>
+                    <v-col cols="2">
+                        <v-select label="Destino" v-model="requisicao.destino" :items="destinos" density="compact"
+                            item-title="text" item-value="value" variant="outlined" color="primary"
+                            :hide-details="false" ></v-select>
+                    </v-col>
+                </v-row>
+            </v-form>
         <v-row>
             <v-col cols="5">
                 <v-text-field label="Pesquisar Produto" v-model="filter" placeholder="Nome ou Código" density="compact"
@@ -37,6 +38,7 @@
             </v-col>
         </v-row>
         <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
+        <small class="text-error" v-show="!hasProduto">Adicione pelo menos 1 produto</small>
         <v-table class="elevation-2">
             <thead>
                 <tr>
@@ -135,10 +137,12 @@ const destinos = ref([
     { value: 1, text: "Diretoria" },
 ])
 const produtos = ref([]);
+const hasProduto= ref(true);
 const swal = inject("$swal");
 const filter = ref("");
 let orcamento = ref(null);
 let tipoFornecimento = ref([])
+const formCadastro = ref(null);
 
 //VUE METHODS
 onMounted(async () =>
@@ -185,6 +189,10 @@ function adicionarProdutoRequisicao(item)
     {
         let produto = { ...item }
         requisicao.value.requisicaoItens.push(produto)
+        
+        if (!hasProduto.value) 
+            hasProduto.value = true;
+
         produtoRemoveFromList(item)
         ordenarRequisicaoItens()
     }
@@ -322,45 +330,52 @@ async function salvar()
     try
     {
         isBusy.value = true;
-        //remover o campo id da requisicaoItens
-        requisicao.value.requisicaoItens.forEach(produto =>
-        {
-            delete produto.id
-            produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
-            // produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
-            // produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
 
-            requisicao.value.taxaGestao += produto.taxaGestao
-            requisicao.value.valorTotal += produto.valorTotal
-
-            produto.valorTotal = produto.valorTotal.toFixed(2)
-            produto.taxaGestao = produto.taxaGestao.toFixed(2)
-        })
-        requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
-        requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
-
-        orcamento.value.forEach(o =>
-        {
-            if (o.percentual > 100)
+        let { valid } = await formCadastro.value.validate();
+        hasProduto.value = requisicao.value.requisicaoItens.length > 0
+        
+        if (valid && hasProduto.value) {
+                
+            //remover o campo id da requisicaoItens
+            requisicao.value.requisicaoItens.forEach(produto =>
             {
-                if (o.aprovadoPor == 1)
-                    requisicao.value.requerAutorizacaoCliente = true;
-                else
-                    requisicao.value.requerAutorizacaoWCA = true;
-            }
-        })
+                delete produto.id
+                produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
+                // produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
+                // produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
 
-        await requisicaoService.create(requisicao.value)
-        swal.fire({
-            toast: true,
-            icon: "success",
-            index: "top-end",
-            title: "Sucesso!",
-            text: "Dados salvos com sucesso!",
-            showConfirmButton: false,
-            timer: 2000,
-        })
-        router.push({ name: "requisicoes" })
+                requisicao.value.taxaGestao += produto.taxaGestao
+                requisicao.value.valorTotal += produto.valorTotal
+
+                produto.valorTotal = produto.valorTotal.toFixed(2)
+                produto.taxaGestao = produto.taxaGestao.toFixed(2)
+            })
+            requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
+            requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
+
+            orcamento.value.forEach(o =>
+            {
+                if (o.percentual > 100)
+                {
+                    if (o.aprovadoPor == 1)
+                        requisicao.value.requerAutorizacaoCliente = true;
+                    else
+                        requisicao.value.requerAutorizacaoWCA = true;
+                }
+            })
+
+            await requisicaoService.create(requisicao.value)
+            swal.fire({
+                toast: true,
+                icon: "success",
+                index: "top-end",
+                title: "Sucesso!",
+                text: "Dados salvos com sucesso!",
+                showConfirmButton: false,
+                timer: 2000,
+            })
+            router.push({ name: "requisicoes" })
+        }
     } catch (error)
     {
         console.log("salvar.error:", error);
