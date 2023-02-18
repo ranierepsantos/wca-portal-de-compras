@@ -1,4 +1,5 @@
 .vs/
+.vscode/
 wca.compras.application/bin/
 wca.compras.application/obj/
 wca.compras.crosscutting/bin/
@@ -9,5 +10,6 @@ wca.compras.domain/bin/
 wca.compras.domain/obj/
 wca.compras.services/bin/
 wca.compras.service/obj/
-
+__blobstorage__/
+__queuestorage__/
 
