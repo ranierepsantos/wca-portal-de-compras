@@ -33,6 +33,9 @@ namespace wca.compras.domain.Entities
         [Column("quantidade", TypeName = "int")]
         public int Quantidade { get; set; }
 
+        [Column("valor_ipi", TypeName = "money")]
+        public decimal ValorIpi { get; set; }
+
         [Column("valor_total", TypeName = "money")]
         public decimal ValorTotal { get; set; }
 

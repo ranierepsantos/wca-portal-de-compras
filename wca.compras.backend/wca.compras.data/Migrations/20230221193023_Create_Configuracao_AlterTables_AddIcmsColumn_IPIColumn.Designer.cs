@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230221193023_Create_Configuracao_AlterTables_AddIcmsColumn_IPIColumn")]
+    partial class Create_Configuracao_AlterTables_AddIcmsColumn_IPIColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -490,10 +492,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("nome");
 
-                    b.Property<decimal>("PercentualIPI")
-                        .HasColumnType("decimal(4,2)")
-                        .HasColumnName("percentual_ipi");
-
                     b.Property<decimal>("TaxaGestao")
                         .HasColumnType("money")
                         .HasColumnName("taxa_gestao");
@@ -511,6 +509,10 @@ namespace wca.compras.data.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("money")
                         .HasColumnName("valor");
+
+                    b.Property<decimal>("ValorIPI")
+                        .HasColumnType("money")
+                        .HasColumnName("valor_ipi");
 
                     b.HasKey("Id");
 

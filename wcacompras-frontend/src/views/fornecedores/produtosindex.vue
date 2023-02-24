@@ -1,7 +1,14 @@
 <template>
     <div>
-        <bread-crumbs :title="`Itens Fornecedor (${nomeFornecedor})`" @novoClick="openProdutoForm = true"
-            :custom-button-show="true" custom-button-text="Importar Planilha" @customClick="importarProduto()" />
+        <bread-crumbs :title="`Itens Fornecedor (${nomeFornecedor})`"
+            :custom-button-show="false" :show-button="false"
+            :buttons="[{text: 'Importar Produtos', icon:'mdi-upload', event:'importar-click'},
+                       {text: 'Exportar Produtos', icon:'mdi-download', event:'exportar-click'},
+                       {text: 'Novo', icon:'mdi-plus', event:'novo-click'}]" 
+                        @importar-click="importarProduto()"
+                        @exportar-click="download()"
+                        @novo-click = "openProdutoForm= true"
+            />
         <v-row>
             <v-col cols="6">
                 <v-text-field label="Pesquisar" placeholder="(Produto)" v-model="filter" density="compact"
@@ -9,7 +16,7 @@
                 </v-text-field>
             </v-col>
         </v-row>
-        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
+        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy || isDownloading"></v-progress-linear>
         <v-table class="elevation-2" v-show="!isBusy">
             <thead>
                 <tr>
@@ -18,6 +25,7 @@
                     <th class="text-left text-grey">VALOR</th>
                     <th class="text-center text-grey">U.M.</th>
                     <th class="text-center text-grey">TAXA</th>
+                    <th class="text-center text-grey">%IPI</th>
                     <th class="text-center text-grey">CATEGORIA</th>
                     <th></th>
                 </tr>
@@ -28,7 +36,8 @@
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-right">{{ item.valor.toFixed(2) }}</td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
-                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.taxaGestao?.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.percentualIPI?.toFixed(2) }}</td>
                     <td class="text-center">{{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}</td>
                     <td class="text-right">
                         <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"
@@ -77,6 +86,12 @@
                                 <v-text-field-money label-text="Taxa Gestão" v-model="produto.taxaGestao"
                                     color="primary" :number-decimal="2"></v-text-field-money>
                             </v-col>
+                            <v-col>
+                                <v-text-field-money label-text="IPI (%)" v-model="produto.percentualIPI"
+                                    color="primary" :number-decimal="2"
+                                    :rules="[(v) => parseFloat(v) < 100 || 'O percentual deve ser no máximo 99.99%']"
+                                    ></v-text-field-money>
+                            </v-col>
                         </v-row>
                         <v-row>
                             <v-col>
@@ -113,7 +128,7 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import { toBase64 } from "@/helpers/functions";
+import { toBase64, realizarDownload } from "@/helpers/functions";
 
 
 //DATA
@@ -128,6 +143,7 @@ const filter = ref("");
 const produtoFormTitle = ref("Novo Produto")
 const openProdutoForm = ref(false);
 const produtoForm = ref(null);
+const isDownloading = ref(false)
 let idFornecedor = 0;
 const route = useRoute();
 const produto = ref({
@@ -138,6 +154,7 @@ const produto = ref({
     valor: 0,
     taxaGestao: 0,
     tipoFornecimentoId: null,
+    percentualIPI: 0,
     unidadeMedida: ""
 })
 const produtoValorRules = ref([
@@ -191,6 +208,26 @@ function closeDialog()
     produtoForm.value.reset();
     clearFormData();
     openProdutoForm.value = false;
+}
+
+async function download()
+{
+    try
+    {
+        isDownloading.value = true;
+        let response = await fornecedorService.produtosExportar(idFornecedor);
+        console.log('download', response)
+        let nomeArquivo = `WCACompras_${idFornecedor}_Produtos.xlsx`
+        realizarDownload(response, nomeArquivo, response.headers.getContentType());
+
+    } catch (error)
+    {
+        console.log("download.error:", error);
+        handleErrors(error)
+    } finally
+    {
+        isDownloading.value = false
+    }
 }
 
 function editar(item)

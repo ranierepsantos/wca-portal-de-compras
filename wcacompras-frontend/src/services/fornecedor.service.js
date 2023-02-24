@@ -60,6 +60,11 @@ export default {
     produtosImportar(data)
     {
         return api.post(route.produtoImportFromExcel, data);
+    },
+
+    produtosExportar(fornecedorId) {
+        return api.get(route.produtoExportExcel.replace("{fornecedorId}", fornecedorId), { responseType: 'blob'});
     }
+
 
 }

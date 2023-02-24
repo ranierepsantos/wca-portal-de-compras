@@ -14,6 +14,17 @@ const routes = [
         beforeEnter: protectRoute,
       },
       {
+        path: 'app/categorias',
+        name: 'categorias',
+        beforeEnter: protectRoute,
+        //meta: {permissao: "categorias"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "filial" */ '../views/categorias'),
+        
+      },
+      {
         path: 'app/clientes',
         name: 'clientes',
         beforeEnter: protectRoute,
@@ -114,7 +125,7 @@ const routes = [
       {
         path: 'app/recorrencias/cadastro',
         name: 'recorrenciaCadastro',
-        //meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencia|recorrencias_view_others_users"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -124,7 +135,7 @@ const routes = [
       {
         path: 'app/recorrencias/edicao/:codigo',
         name: 'recorrenciaEdicao',
-        //meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencia|recorrencias_view_others_users"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route

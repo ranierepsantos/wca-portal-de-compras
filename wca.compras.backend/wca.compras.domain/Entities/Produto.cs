@@ -28,6 +28,9 @@ namespace wca.compras.domain.Entities
         [Column("taxa_gestao", TypeName = "money")]
         public decimal TaxaGestao { get; set; }
 
+        [Column("percentual_ipi", TypeName = "decimal(4,2)")]
+        public decimal PercentualIPI { get; set; }
+
         [Column("fornecedor_id")]
         public int? FornecedorId { get; set; }
 

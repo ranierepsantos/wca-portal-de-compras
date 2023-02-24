@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using MiniExcelLibs;
 using wca.compras.domain.Dtos;
@@ -157,14 +158,17 @@ namespace wca.compras.services
                     var rows = MiniExcel.Query(ms, sheetName: sheets[idx]).Skip(1).ToList();
                     for (var index = 0; index < rows.Count; index++)
                     {
-                        var produto = new Produto();
-                        produto.Codigo = rows[index].A.ToString();
-                        produto.FornecedorId = importProdutoDto.FornecedorId;
-                        produto.Nome = rows[index].B;
-                        produto.TipoFornecimentoId = categorias.Where(c => c.Nome.Contains(rows[index].C)).FirstOrDefault().Id;
-                        produto.UnidadeMedida = rows[index].D;
-                        produto.Valor = (decimal)rows[index].E;
-                        produto.TaxaGestao = (decimal)rows[index].F;
+                        var produto = new Produto
+                        {
+                            Codigo = rows[index].A.ToString(),
+                            FornecedorId = importProdutoDto.FornecedorId,
+                            Nome = rows[index].B,
+                            TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.Contains(rows[index].C)).Id,
+                            UnidadeMedida = rows[index].D,
+                            Valor = (decimal)rows[index].E,
+                            TaxaGestao = (decimal)rows[index].F,
+                            PercentualIPI = (decimal)rows[index].G
+                        };
 
                         _rm.ProdutoRepository.Create(produto);
                     }
@@ -346,5 +350,55 @@ namespace wca.compras.services
             }
         }
 
+        public async Task<Stream?> ProdutosExportToExcel(int fornecedorId)
+        {
+
+            try
+            {
+                List<Produto> produtos = await _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId)
+                                         .Include(p => p.TipoFornecimento)
+                                         .OrderBy(o =>  o.Nome) 
+                                         .ToListAsync();
+
+                if (produtos.Count == 0) return null;
+
+
+                var workbook = new XLWorkbook();
+                var ws = workbook.AddWorksheet("Produtos");
+                ws.Cell("A1").SetValue("CÓDIGO");
+                ws.Cell("B1").SetValue("NOME");
+                ws.Cell("C1").SetValue("CATEGORIA");
+                ws.Cell("D1").SetValue("U.M");
+                ws.Cell("E1").SetValue("VALOR");
+                ws.Cell("F1").SetValue("TAXA GESTÃO");
+                ws.Cell("G1").SetValue("IPI (%)");
+
+                var row = 2;
+
+                foreach (var item in produtos)
+                {
+                    ws.Cell($"A{row}").SetValue(item.Codigo);
+                    ws.Cell($"B{row}").SetValue(item.Nome);
+                    ws.Cell($"C{row}").SetValue(item.TipoFornecimento.Nome);
+                    ws.Cell($"D{row}").SetValue(item.UnidadeMedida);
+                    ws.Cell($"E{row}").SetValue(item.Valor);
+                    ws.Cell($"F{row}").SetValue(item.TaxaGestao);
+                    ws.Cell($"G{row}").SetValue(item.PercentualIPI);
+                    row++;
+                }
+                Stream spreadsheetStream = new MemoryStream();
+                workbook.SaveAs(spreadsheetStream);
+                spreadsheetStream.Position = 0;
+
+                return spreadsheetStream;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.ProdutosExportToExcel.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+
+        }
     }
 }

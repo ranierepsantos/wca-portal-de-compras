@@ -10,7 +10,7 @@ function initialDecimalNumber(value, numberOfDecimal)
 {
 
     let num = 0
-    if (value.toString().trim() != '') num = value
+    if (value && value.toString().trim() != '') num = value
 
     let arr = num.toString().split('.')
     let dec = ""
@@ -28,7 +28,7 @@ function toDecimalNumber(value, numberOfDecimal)
 {
 
     let num = 0
-    if (value.toString().trim() != '') num = value
+    if (value && value.toString().trim() != '') num = value
 
     num = parseInt(num.toString().replace(".", "")) / 10 ** numberOfDecimal;
     return num.toFixed(numberOfDecimal);

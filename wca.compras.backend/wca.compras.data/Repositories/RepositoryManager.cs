@@ -25,6 +25,7 @@ namespace wca.compras.data.Repositories
         private IRepository<Recorrencia> _recorrenciaRepo;
         private IRepository<RecorrenciaProduto> _recorrenciaProdutoRepo;
         private IRepository<RecorrenciaLog> _recorrenciaLogRepo;
+        private IRepository<Configuracao> _configuracaoRepo;
 
         public RepositoryManager(WcaContext context)
         {
@@ -232,6 +233,17 @@ namespace wca.compras.data.Repositories
                     _recorrenciaLogRepo = new BaseRepository<RecorrenciaLog>(_context);
 
                 return _recorrenciaLogRepo;
+            }
+        }
+
+        public IRepository<Configuracao> ConfiguracaoRepository
+        {
+            get
+            {
+                if (_configuracaoRepo == null)
+                    _configuracaoRepo = new BaseRepository<Configuracao>(_context);
+
+                return _configuracaoRepo;
             }
         }
         public async Task SaveAsync()

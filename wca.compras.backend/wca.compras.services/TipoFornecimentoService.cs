@@ -1,10 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -30,13 +25,15 @@ namespace wca.compras.services
             {
                 var data = _mapper.Map<TipoFornecimento>(tipo);
 
+                _rm.TipoFornecimentoRepository.Create(data);
+
                 await _rm.SaveAsync();
 
                 return _mapper.Map<TipoFornecimentoDto>(data);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"TipoFornecimentoService.Create.Error: {ex.Message}");
+                Console.WriteLine($"{this.GetType().Name}.Create.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
@@ -45,7 +42,7 @@ namespace wca.compras.services
         {
             try
             {
-                var itens = await _rm.TipoFornecimentoRepository.SelectAll()
+                var itens = await _rm.TipoFornecimentoRepository.SelectByCondition(c => c.Ativo)
                             .OrderBy(p => p.Nome).ToListAsync(); ;
 
                 return _mapper.Map<IList<ListItem>>(itens);
@@ -53,7 +50,7 @@ namespace wca.compras.services
             catch (Exception ex)
             {
 
-                Console.WriteLine($"TipoFornecimentoService.GetToList.Error: {ex.Message}");
+                Console.WriteLine($"{this.GetType().Name}.GetToList.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
             
@@ -79,7 +76,31 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"TipoFornecimentoService.Update.Error: {ex.Message}");
+                Console.WriteLine($"{this.GetType().Name}.Update.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        public Pagination<TipoFornecimentoDto> Paginate(int page, int pageSize, string termo = "")
+        {
+            try
+            {
+                //Não trazer a MATRIZ
+                var query = _rm.TipoFornecimentoRepository.SelectAll();
+
+                if (!string.IsNullOrEmpty(termo))
+                {
+                    query = query.Where(q => q.Nome.Contains(termo));
+                }
+                query = query.OrderBy(p => p.Nome);
+
+                var pagination = Pagination<TipoFornecimentoDto>.ToPagedList(_mapper, query, page, pageSize);
+
+                return pagination;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.Paginate.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }

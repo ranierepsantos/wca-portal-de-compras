@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230223004241_AlterTable_Produtos_AlterColumn_ValorIPI_to_PercentualIPI")]
+    partial class AlterTable_Produtos_AlterColumn_ValorIPI_to_PercentualIPI
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -491,7 +493,7 @@ namespace wca.compras.data.Migrations
                         .HasColumnName("nome");
 
                     b.Property<decimal>("PercentualIPI")
-                        .HasColumnType("decimal(4,2)")
+                        .HasColumnType("decimal(3,2)")
                         .HasColumnName("percentual_ipi");
 
                     b.Property<decimal>("TaxaGestao")

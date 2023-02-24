@@ -25,6 +25,7 @@ namespace wca.compras.data.DataAccess
         public DbSet<Recorrencia> Recorrencias { get; set; }
         public DbSet<RecorrenciaProduto> RecorrenciaProdutos { get; set; }
         public DbSet<RecorrenciaLog> RecorrenciaLogs { get; set; }
+        public DbSet<Configuracao> Configuracoes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

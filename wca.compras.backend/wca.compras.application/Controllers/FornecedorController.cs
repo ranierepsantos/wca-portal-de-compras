@@ -300,5 +300,23 @@ namespace wca.compras.webapi.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("{fornecedorId}/Produtos/ExportExcel")]
+        public async Task<ActionResult> ExportExcel(int fornecedorId)
+        {
+            try
+            {
+                Stream? st = await service.ProdutosExportToExcel(fornecedorId);
+
+                return new FileStreamResult(st, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"Produtos_Fornecedor_{fornecedorId}.xlsx" };
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+
+        }
+
     }
 }

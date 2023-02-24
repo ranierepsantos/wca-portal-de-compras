@@ -72,44 +72,50 @@ const menuItems = ref([
     permissao: "livre"
   },
   {
-    title: "Clientes",
+    title: "Categorias",
     value: 2,
+    route: "/app/categorias",
+    permissao: "livre"
+  },
+  {
+    title: "Clientes",
+    value: 3,
     route: "/app/clientes",
     permissao: "cliente"
   },
   {
     title: "Filiais",
-    value: 2,
+    value: 4,
     route: "/app/filiais",
     permissao: "filial"
   },
   {
     title: "Fornecedores",
-    value: 2,
+    value: 5,
     route: "/app/fornecedores",
     permissao: "fornecedor"
   },
   {
     title: "Perfil",
-    value: 2,
+    value: 6,
     route: "/app/perfil",
     permissao: "perfil"
   },
   {
     title: "Recorrências",
-    value: 3,
+    value: 7,
     route: "/app/recorrencias",
     permissao: "recorrencia|recorrencias_view_others_users"
   },
   {
     title: "Requisições",
-    value: 3,
+    value: 8,
     route: "/app/requisicoes",
     permissao: "requisicao|requisicao_all_users"
   },
   {
     title: "Usuários",
-    value: 3,
+    value: 9,
     route: "/app/usuarios",
     permissao: "usuario"
   },

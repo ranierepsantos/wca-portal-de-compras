@@ -18,5 +18,6 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<bool> RemoveProduto(int filialId, int fornecedorId, int id);
         public Task<bool> ImportProdutoFromExcel(int filialId, int fornecedorId, ImportProdutoDto importProdutoDto);
         public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "");
+        Task<Stream?> ProdutosExportToExcel(int fornecedorId);
     }
 }

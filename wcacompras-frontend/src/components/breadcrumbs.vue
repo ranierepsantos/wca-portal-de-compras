@@ -5,6 +5,13 @@
     </template>
     <div class="text-h4 text-primary">{{ title }}</div>
     <v-spacer></v-spacer>
+    <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" v-for="(button, index) in buttons"
+      @click="$emit(button.event)"
+      >
+      <v-icon :icon="button.icon" v-if="button.icon != ''"></v-icon>
+      <b>{{ button.text }}</b>
+    </v-btn>
+    &nbsp;
     <v-btn color="primary" variant="outlined" class="text-capitalize" @click="$emit('customClick')"
       v-show="customButtonShow" :disabled="customButtonDisabled">
       <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon>
@@ -25,7 +32,13 @@ defineProps({
   customButtonShow: { type: Boolean, default: false },
   customButtonText: { type: String, default: "customButtonText" },
   customButtonIcon: { type: String, default: "" },
-  customButtonDisabled: { type: Boolean, default: false }
+  customButtonDisabled: { type: Boolean, default: false },
+  buttons: {
+    type: Object,
+    default: function () {
+      return []
+    }
+  }
 })
 </script>
 

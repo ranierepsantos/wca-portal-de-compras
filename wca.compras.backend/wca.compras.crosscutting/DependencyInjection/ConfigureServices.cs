@@ -23,6 +23,7 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddTransient<IFornecedorService, FornecedorService>();
             services.AddTransient<IRequisicaoService, RequisicaoService>();
             services.AddTransient<IRecorrenciaService, RecorrenciaService>();
+            services.AddTransient<IConfiguracaoService, ConfiguracaoService>();
 
             var autoMapperConfig = new MapperConfiguration(
                 config =>
