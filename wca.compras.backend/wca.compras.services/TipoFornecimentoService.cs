@@ -8,12 +8,12 @@ using wca.compras.domain.Util;
 
 namespace wca.compras.services
 {
-    public class TipoFornecimentoService : ITipoFornecimentoService
+    public class TipoFornecimentoervice : ITipoFornecimentoervice
     {
         private readonly IRepositoryManager _rm;
         private readonly IMapper _mapper;
 
-        public TipoFornecimentoService(IRepositoryManager repositoryManager, IMapper mapper)
+        public TipoFornecimentoervice(IRepositoryManager repositoryManager, IMapper mapper)
         {
             _rm = repositoryManager;
             _mapper = mapper;

@@ -184,6 +184,16 @@ const routes = [
         component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios')
       },
       {
+        path: 'app/usuarios/cadastro',
+        name: 'usuarioCadastro',
+        meta: {permissao: "usuario"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios/cadastro')
+      },
+      {
         path: 'app/acessonegado',
         name: 'acessonegado',
         beforeEnter: protectRoute,

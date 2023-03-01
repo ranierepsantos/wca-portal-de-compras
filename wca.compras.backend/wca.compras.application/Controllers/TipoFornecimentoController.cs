@@ -12,9 +12,9 @@ namespace wca.compras.webapi.Controllers
     [Authorize("Bearer")]
     public class TipoFornecimentoController : Controller
     {
-        private readonly ITipoFornecimentoService service;
+        private readonly ITipoFornecimentoervice service;
 
-        public TipoFornecimentoController(ITipoFornecimentoService service)
+        public TipoFornecimentoController(ITipoFornecimentoervice service)
         {
             this.service = service;
         }

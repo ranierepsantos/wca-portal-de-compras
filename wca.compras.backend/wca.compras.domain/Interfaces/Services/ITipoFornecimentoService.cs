@@ -3,7 +3,7 @@ using wca.compras.domain.Util;
 
 namespace wca.compras.domain.Interfaces.Services
 {
-    public interface ITipoFornecimentoService
+    public interface ITipoFornecimentoervice
     {
         public Task<TipoFornecimentoDto> Create(CreateTipoFornecimentoDto tipo);
 

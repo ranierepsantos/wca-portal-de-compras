@@ -19,7 +19,7 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddTransient<IEmailService, EmailService>();
             services.AddTransient<IClienteService, ClienteService>();
             services.AddTransient<IFilialService, FilialService>();
-            services.AddTransient<ITipoFornecimentoService, TipoFornecimentoService>();
+            services.AddTransient<ITipoFornecimentoervice, TipoFornecimentoervice>();
             services.AddTransient<IFornecedorService, FornecedorService>();
             services.AddTransient<IRequisicaoService, RequisicaoService>();
             services.AddTransient<IRecorrenciaService, RecorrenciaService>();

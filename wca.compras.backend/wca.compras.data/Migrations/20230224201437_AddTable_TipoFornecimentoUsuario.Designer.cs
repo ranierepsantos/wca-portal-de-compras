@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230224201437_AddTable_TipoFornecimentoUsuario")]
+    partial class AddTable_TipoFornecimentoUsuario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,11 +122,6 @@ namespace wca.compras.data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)")
                         .HasColumnName("numero");
-
-                    b.Property<string>("PeriodoEntrega")
-                        .HasMaxLength(1500)
-                        .HasColumnType("varchar(1500)")
-                        .HasColumnName("periodo_entrega");
 
                     b.Property<string>("UF")
                         .HasMaxLength(2)

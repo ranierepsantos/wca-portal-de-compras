@@ -40,6 +40,14 @@ namespace wca.compras.services
                     _rm.ClienteRepository.Attach(cli);
                     data.Cliente.Add(cli);
                 }
+
+                foreach (var item in usuario.TipoFornecimento)
+                {
+                    var categoria = _mapper.Map<TipoFornecimento>(item);
+                    _rm.TipoFornecimentoRepository.Attach(categoria);
+                    data.TipoFornecimento.Add(categoria);
+                }
+
                 await _rm.SaveAsync();
 
                 return _mapper.Map<UsuarioDto>(data);
@@ -73,7 +81,9 @@ namespace wca.compras.services
                 {
                     query = query.Where(u => u.FilialId == filialId);
                 }
-                var data = await query.Include("Cliente").FirstOrDefaultAsync();
+                var data = await query.Include("Cliente")
+                                      .Include(u => u.TipoFornecimento)
+                                      .FirstOrDefaultAsync();
                 
                 if (data == null)
                 {
@@ -131,7 +141,8 @@ namespace wca.compras.services
                 {
                     query = query.Where(u => u.FilialId == filialId);
                 }
-                query = query.Include("Cliente");
+                query = query.Include("Cliente")
+                    .Include("TipoFornecimento");
 
                 var baseData = await query.FirstOrDefaultAsync();
                 
@@ -160,7 +171,17 @@ namespace wca.compras.services
                     }
                 });
 
-                //Adicionar permissões caso tenha novas
+                //Remover Tipo de Fornecimento que foram retirados do relacionamento
+                baseData.TipoFornecimento.ToList().ForEach(tipo =>
+                {
+                    if (usuario.TipoFornecimento.Where(p => p.Value == tipo.Id).FirstOrDefault() == null)
+                    {
+                        var tp = baseData.TipoFornecimento.FirstOrDefault(p => p.Id == tipo.Id);
+                        baseData.TipoFornecimento.Remove(tp);
+                    }
+                });
+
+                //Adicionar cliente caso tenha novas
                 usuario.Cliente.ToList().ForEach(cli =>
                 {
                     if (baseData.Cliente.Where(p => p.Id == cli.Value).FirstOrDefault() == null)
@@ -168,6 +189,17 @@ namespace wca.compras.services
                         var cliente = _mapper.Map<Cliente>(cli);
                         _rm.ClienteRepository.Attach(cliente);
                         baseData.Cliente.Add(cliente);
+                    }
+                });
+
+                //Adicionar Tipo Fornecimento caso tenha novas
+                usuario.TipoFornecimento.ToList().ForEach(tip =>
+                {
+                    if (baseData.TipoFornecimento.Where(p => p.Id == tip.Value).FirstOrDefault() == null)
+                    {
+                        var tipo = _mapper.Map<TipoFornecimento>(tip);
+                        _rm.TipoFornecimentoRepository.Attach(tipo);
+                        baseData.TipoFornecimento.Add(tipo);
                     }
                 });
 

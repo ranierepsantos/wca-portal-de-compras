@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using wca.compras.domain.Interfaces;
+using System.Text.Json.Serialization;
 
 namespace wca.compras.domain.Entities
 {
@@ -15,5 +16,8 @@ namespace wca.compras.domain.Entities
 
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
+
+        [JsonIgnore]
+        public IList<Usuario> Usuario { get; set; } = new List<Usuario>();
     }
 }

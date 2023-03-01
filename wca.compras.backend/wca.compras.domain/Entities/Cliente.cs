@@ -45,6 +45,10 @@ namespace wca.compras.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
+        [MaxLength(1500)]
+        [Column("periodo_entrega", TypeName = "varchar(1500)")]
+        public string? PeriodoEntrega { get; set; }
+
         [JsonIgnore]
         public Filial Filial { get; set; }
 
