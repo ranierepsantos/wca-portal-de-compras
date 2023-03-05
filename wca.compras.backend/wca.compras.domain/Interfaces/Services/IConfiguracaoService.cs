@@ -5,7 +5,7 @@ namespace wca.compras.domain.Interfaces.Services
 {
     public interface IConfiguracaoService
     {
-        Task<Configuracao> Update(UpdateConfiguracaoDto configuracao);
+        Task<bool?> Update(UpdateConfiguracaoDto configuracao);
 
         Task<IList<Configuracao>> GetAll();
 

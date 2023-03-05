@@ -57,6 +57,15 @@ export const diasDoMes = [
     { value: 30, text: "30" },
     { value: 31, text: "31" },
 ]
+
+export const TipoCampo = [
+    {value: 1, text: 'bool'},
+    {value: 2, text: 'text'},
+    {value: 3, text: 'number'},
+    {value: 4, text: 'decimal'},
+    {value: 5, text: 'combo'},
+]
+
 export const compararValor = function (key, order = "asc") {
     return function (a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
@@ -112,3 +121,12 @@ export const realizarDownload = async function (response, nomearquivo, fileType 
         window.URL.revokeObjectURL(data);
     }, 100);
 };
+
+export const retornarValorTotalProduto = function (produto)
+{
+    let valor=  parseFloat(produto.valor)
+    let taxaGestao = parseFloat(produto.taxaGestao)
+    let ipi = parseFloat(produto.percentualIPI)
+
+    return (valor + taxaGestao + (valor * ipi / 100)).toFixed(2);
+}

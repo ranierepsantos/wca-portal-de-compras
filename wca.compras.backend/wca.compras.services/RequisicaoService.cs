@@ -15,6 +15,7 @@ namespace wca.compras.services
         private readonly IRepositoryManager _rm;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
+        private readonly List<Configuracao> _configuracoes;
 
         public RequisicaoService(IMapper mapper, 
             IRepositoryManager repositoryManager,
@@ -23,6 +24,9 @@ namespace wca.compras.services
             _mapper = mapper;
             _rm = repositoryManager;
             _emailService = emailService;
+
+            _configuracoes = _rm.ConfiguracaoRepository.SelectAll().ToList();
+
         }
 
         
@@ -43,20 +47,27 @@ namespace wca.compras.services
 
                 if (data.RequerAutorizacaoWCA == false || data.RequerAutorizacaoCliente == false)
                 {
-                    var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, DateTime.Now.AddDays(-30), DateTime.Now);
 
                     var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
                                            .Include(inc => inc.ClienteOrcamentoConfiguracao)
+                                           .Where(c => c.ClienteOrcamentoConfiguracao.Any(cf =>  cf.Ativo))
                                            .FirstOrDefaultAsync();
 
-                    foreach (var item in cliente.ClienteOrcamentoConfiguracao)
+                    if (cliente?.ClienteOrcamentoConfiguracao.Count() > 0)
                     {
-                        if (comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                        var (dataIni, dataFim) = getDataCorte();
+
+                        var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, dataIni, dataFim);
+
+                        foreach (var item in cliente.ClienteOrcamentoConfiguracao)
                         {
-                            if (item.AprovadoPor == EnumAprovadoPor.WCA)
-                                data.RequerAutorizacaoWCA = true;
-                            else
-                                data.RequerAutorizacaoCliente = true;
+                            if (item.Ativo && comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                            {
+                                if (item.AprovadoPor == EnumAprovadoPor.WCA)
+                                    data.RequerAutorizacaoWCA = true;
+                                else
+                                    data.RequerAutorizacaoCliente = true;
+                            }
                         }
                     }
                 }
@@ -542,6 +553,10 @@ namespace wca.compras.services
         {
             try
             {
+                //Verificar se esta configurado para enviar solicitação ao Fornecedor
+                Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.fornecedor");
+                if (config.Valor == "false") return;
+
                 IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
@@ -713,18 +728,54 @@ namespace wca.compras.services
 
             Dictionary<int, int> QuantidadePorTipo = new Dictionary<int, int>();
 
-            QuantidadePorTipo.Add(1, 0);
-            QuantidadePorTipo.Add(2, 0);
-            QuantidadePorTipo.Add(3, 0);
+            var categorias = await _rm.TipoFornecimentoRepository.SelectByCondition(c => c.Ativo).ToListAsync();
+
+            foreach(var categoria in categorias)
+            {
+                QuantidadePorTipo.Add(categoria.Id, 0);
+            }
 
             foreach (var item in result)
             {
-                QuantidadePorTipo[1] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 1).Count() > 0 ? 1 : 0;
-                QuantidadePorTipo[2] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 2).Count() > 0 ? 1 : 0;
-                QuantidadePorTipo[3] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 3).Count() > 0 ? 1 : 0;
-
+                foreach(int key in QuantidadePorTipo.Keys)
+                {
+                    QuantidadePorTipo[key] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == key).Count() > 0 ? 1 : 0;
+                }
             }
             return QuantidadePorTipo;
+        }
+
+        private (DateTime, DateTime) getDataCorte()
+        {
+
+            var diaHoje = DateTime.Now.Day;
+
+            DateTime dataCorteIni = DateTime.Now.AddDays(-30);
+            DateTime dataCorteFim = DateTime.Now;
+
+            Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.datacorte");
+
+            if (config != null) {
+                var diaCorte = int.Parse(config.Valor);
+
+                if (diaHoje > diaCorte)
+                {
+                    dataCorteIni = new DateTime(DateTime.Now.Year, DateTime.Now.Month, diaCorte);
+                }
+                else
+                {
+                    if (DateTime.Now.Month == 1)
+                    {
+                        dataCorteIni = new DateTime(DateTime.Now.Year - 1, DateTime.Now.Month - 1, diaCorte);
+                    }
+                    else
+                    {
+                        dataCorteIni = new DateTime(DateTime.Now.Year, DateTime.Now.Month - 1, diaCorte);
+                    }
+                }
+            }
+            
+            return (dataCorteIni, dataCorteFim);
         }
 
         #endregion

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230302020206_AlterTables_Cliente_AddColumns_NaoUltrapassarLimitePorRequisicao_ValorLimiteRequisicao_ClienteConfiguracaoOrcamento_AddColumn_Ativo")]
+    partial class AlterTables_Cliente_AddColumns_NaoUltrapassarLimitePorRequisicao_ValorLimiteRequisicao_ClienteConfiguracaoOrcamento_AddColumn_Ativo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,12 +254,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(150)")
                         .HasColumnName("chave");
 
-                    b.Property<string>("ComboValores")
-                        .IsRequired()
-                        .HasMaxLength(8000)
-                        .HasColumnType("varchar(8000)")
-                        .HasColumnName("combo_valores");
-
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -275,29 +271,15 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("valor");
 
+                    b.Property<string>("combo_valores")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("varchar(8000)")
+                        .HasColumnName("combo_valores");
+
                     b.HasKey("Id");
 
                     b.ToTable("Configuracoes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Chave = "requisicao.sendemail.fornecedor",
-                            ComboValores = "",
-                            Descricao = "Requisição solicitar aprovação fornecedor",
-                            TipoCampo = 1,
-                            Valor = "false"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Chave = "requisicao.datacorte",
-                            ComboValores = "[{\"value\":1,\"text\":\"01\"},{\"value\":2,\"text\":\"02\"},{\"value\":3,\"text\":\"03\"},{\"value\":4,\"text\":\"04\"},{\"value\":5,\"text\":\"05\"},{\"value\":6,\"text\":\"06\"},{\"value\":7,\"text\":\"07\"},{\"value\":8,\"text\":\"08\"},{\"value\":9,\"text\":\"09\"},{\"value\":10,\"text\":\"10\"},{\"value\":11,\"text\":\"11\"},{\"value\":12,\"text\":\"12\"},{\"value\":13,\"text\":\"13\"},{\"value\":14,\"text\":\"14\"},{\"value\":15,\"text\":\"15\"},{\"value\":16,\"text\":\"16\"},{\"value\":17,\"text\":\"17\"},{\"value\":18,\"text\":\"18\"},{\"value\":19,\"text\":\"19\"},{\"value\":20,\"text\":\"20\"},{\"value\":21,\"text\":\"21\"},{\"value\":22,\"text\":\"22\"},{\"value\":23,\"text\":\"23\"},{\"value\":24,\"text\":\"24\"},{\"value\":25,\"text\":\"25\"},{\"value\":26,\"text\":\"26\"},{\"value\":27,\"text\":\"27\"},{\"value\":28,\"text\":\"28\"},{\"value\":29,\"text\":\"29\"},{\"value\":30,\"text\":\"30\"},{\"value\":31,\"text\":\"31\"}]",
-                            Descricao = "Requisição Data de Corte",
-                            TipoCampo = 5,
-                            Valor = "1"
-                        });
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Filial", b =>
@@ -514,13 +496,6 @@ namespace wca.compras.data.Migrations
                             Descricao = "Permite alterar e inativar recorrência de outros usuários",
                             Nome = "Administrador Recorrência",
                             Regra = "recorrencias_view_others_users"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Descricao = "Permite alterar configurações do sistema",
-                            Nome = "Configurações",
-                            Regra = "configuracao"
                         });
                 });
 
@@ -917,10 +892,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("nome");
 
-                    b.Property<decimal>("PercentualIPI")
-                        .HasColumnType("decimal(5,2)")
-                        .HasColumnName("percentual_ipi");
-
                     b.Property<int>("Quantidade")
                         .HasColumnType("int")
                         .HasColumnName("quantidade");
@@ -946,6 +917,10 @@ namespace wca.compras.data.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("money")
                         .HasColumnName("valor");
+
+                    b.Property<decimal>("ValorIpi")
+                        .HasColumnType("money")
+                        .HasColumnName("valor_ipi");
 
                     b.Property<decimal>("ValorTotal")
                         .HasColumnType("money")

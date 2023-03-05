@@ -220,9 +220,9 @@ namespace wca.compras.services
 
                     if (produto != null)
                     {
-                        var valorTotalProduto = (produto.TaxaGestao + produto.Valor) * recorrenciaProduto.Quantidade ;
+                        var valorTotalProduto = (produto.TaxaGestao + produto.Valor + decimal.Parse((produto.Valor * produto.PercentualIPI/100).ToString("n2")) )  * recorrenciaProduto.Quantidade;
                     
-                        produtos.Add(new RequisicaoItemDto(0, 0, produto.Codigo, produto.Nome, produto.UnidadeMedida, produto.Valor, produto.TaxaGestao, recorrenciaProduto.Quantidade, valorTotalProduto, produto.TipoFornecimentoId));
+                        produtos.Add(new RequisicaoItemDto(0, 0, produto.Codigo, produto.Nome, produto.UnidadeMedida, produto.Valor, produto.TaxaGestao, produto.PercentualIPI, recorrenciaProduto.Quantidade, valorTotalProduto, produto.TipoFornecimentoId));
 
                         requisicaoTaxaGestao += produto.TaxaGestao;
                         requisicaoValorTotal += valorTotalProduto;

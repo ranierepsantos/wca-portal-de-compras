@@ -69,7 +69,6 @@ const totalPages = ref(1);
 const users = ref([]);
 const listPerfil = ref([]);
 const filiais = ref([]);
-const dialog = ref(false);
 const swal = inject("$swal");
 const authStore = useAuthStore();
 const filter = ref("");

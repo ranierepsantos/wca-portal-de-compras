@@ -21,7 +21,7 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "filial" */ '../views/categorias'),
+        component: () => import(/* webpackChunkName: "categorias" */ '../views/categorias'),
         
       },
       {
@@ -44,6 +44,16 @@ const routes = [
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "cliente" */ '../views/clientes/cadastro.vue'),
+      },
+      {
+        path: 'app/configuracoes',
+        name: 'configuracoes',
+        beforeEnter: protectRoute,
+        meta: {permissao: "configuracao"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "configuracoes" */ '../views/configuracoes/configuracoes'),
         
       },
       {
@@ -115,12 +125,12 @@ const routes = [
       {
         path: 'app/recorrencias',
         name: 'recorrencias',
-        //meta: {permissao:"recorrencias|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencias|recorrencias_view_others_users"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "recorrencias" */ '../views/recorrencias')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/recorrencias')
       },
       {
         path: 'app/recorrencias/cadastro',

@@ -85,10 +85,19 @@
                         <!-- ORÇAMENTOS -->
                         <v-row class="mt-2">
                             <v-col>
-                                <h3 class="text-left text-grey">CONFIGURAÇÃO DE ORÇAMENTOS</h3>
-                                <v-divider class="mt-3"></v-divider>
+                                <h3 class="text-left text-grey mt-2">CONFIGURAÇÃO DE ORÇAMENTOS</h3>
+                                
+                            </v-col>
+                            <v-col>
+                                <v-row>
+                                    <v-col><v-checkbox v-model="cliente.naoUltrapassarLimitePorRequisicao" label="Não ultrapassar o valor limite por requisição" color="primary" :hide-details="true" density="compact"></v-checkbox>
+                                </v-col>
+                                    <v-col cols="4"><v-text-field-money label-text="" v-model="cliente.valorLimiteRequisicao" color="primary"
+                                    :number-decimal="2" :hide-details="true" density="compact" :disabled="!cliente.naoUltrapassarLimitePorRequisicao"></v-text-field-money></v-col>
+                                </v-row>
                             </v-col>
                         </v-row>
+                        <v-divider class="mt-3"></v-divider>
                         <v-row class="text-subtitle-2 text-grey">
                             <v-col class="text-left" cols="3">
                                 Fornecimento
@@ -102,7 +111,7 @@
                             <v-col class="text-center" cols="2">
                                 Tolerância (%)
                             </v-col>
-                            <v-col class="text-center" cols="3">
+                            <v-col class="text-center" cols="2">
                                 Aprovador por
                             </v-col>
                         </v-row>
@@ -110,27 +119,26 @@
                         <v-row class="mt-1" v-for="item in cliente.clienteOrcamentoConfiguracao"
                             :key="item.tipoFornecimentoId">
                             <v-col class="text-left" cols="3">
-                                {{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}
+                                <v-checkbox color="primary" v-model="item.ativo" density="compact" :label= "getTipoFornecimentoNome(item.tipoFornecimentoId)" :hide-details="true"></v-checkbox>
                             </v-col>
                             <v-col cols="2">
                                 <v-text-field-money label-text="" v-model="item.valorPedido" color="primary"
-                                    :number-decimal="2"></v-text-field-money>
+                                    :number-decimal="2" :disabled="!item.ativo"></v-text-field-money>
                             </v-col>
                             <v-col class="text-left" cols="2">
                                 <v-text-field v-model="item.quantidadeMes" density="compact" variant="outlined"
-                                    color="primary" :hide-details="true" type="number" class="text-left" min="0" />
+                                    color="primary" :hide-details="true" type="number" class="text-left" min="0" :disabled="!item.ativo" />
                             </v-col>
                             <v-col class="text-left" cols="2">
                                 <v-text-field v-model="item.tolerancia" density="compact" variant="outlined" color="primary"
-                                    :hide-details="true" type="number" min="0" max="100" />
+                                    :hide-details="true" type="number" min="0" max="100" :disabled="!item.ativo" />
                             </v-col>
                             <v-col class="text-left" cols="3">
-                                <v-select v-model="item.aprovadoPor" :items="aprovadorList" density="compact"
+                                <v-select v-model="item.aprovadoPor" :items="aprovadorList" density="compact" :disabled="!item.ativo"
                                     item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
                             </v-col>
                         </v-row>
                         <v-divider class="mt-2"></v-divider>
-                        
                         <!-- CONTATOS -->
                         <v-row class="mt-2">
                             <v-col>
@@ -319,6 +327,17 @@ onMounted(async () => {
     cliente.value.filialId = authStore.user.filial;
     if (parseInt(route.query.id) > 0) {
         await getCliente(route.query.id)
+
+       if (cliente.value.clienteOrcamentoConfiguracao.length > 0) {
+        let configuracoes = [...cliente.value.clienteOrcamentoConfiguracao]
+        configuracoes.forEach(item => {
+            if(fornecimentos.value.findIndex(t =>  t.value == item.tipoFornecimentoId) == -1) {
+
+                let index = cliente.value.clienteOrcamentoConfiguracao.findIndex(t => t.id == item.id)
+                cliente.value.clienteOrcamentoConfiguracao.splice(index,1)
+            }
+        })
+       }
     }
 
     fornecimentos.value.forEach(item => {
@@ -334,6 +353,7 @@ onMounted(async () => {
         let hasTipo = cliente.value.clienteOrcamentoConfiguracao.filter(o => o.tipoFornecimentoId == orcamento.tipoFornecimentoId)[0] != undefined
         if (!hasTipo) cliente.value.clienteOrcamentoConfiguracao.push(orcamento);
     })
+
 
 });
 

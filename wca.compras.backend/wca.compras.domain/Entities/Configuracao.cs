@@ -27,14 +27,17 @@ namespace wca.compras.domain.Entities
 
         [Required, MaxLength(8000)]
         [Column("combo_valores", TypeName = "varchar(8000)")]
-        public string combo_valores { get; set; } = string.Empty;
+        public string ComboValores { get; set; } = string.Empty;
 
     }
 
     public enum TipoCampoConfiguracao
     {
-        Text,
-        Bool,
-        Combo
+
+        Bool = 1,
+        Text = 2,
+        Number =3,
+        Decimal =4,
+        Combo = 5
     }
 }

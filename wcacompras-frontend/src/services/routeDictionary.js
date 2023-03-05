@@ -11,6 +11,9 @@ export const route = {
     clientePaginate: "Cliente/Paginate/{pageSize}/{page}",
     clienteListByAuthenticatedUser: "Cliente/ListByAuthenticatedUser",
 
+    configuracaoGetAll: "configuracao",
+    configuracaoUpdate: "configuracao",
+
     filialCreate: "Filial",
     filialUpdate: "Filial",
     filialToList: "Filial/ToList",

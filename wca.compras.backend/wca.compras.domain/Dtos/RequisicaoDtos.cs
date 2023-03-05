@@ -85,6 +85,7 @@ namespace wca.compras.domain.Dtos
         string UnidadeMedida,
         decimal Valor,
         decimal TaxaGestao,
+        decimal PercentualIPI,
         int Quantidade,
         decimal ValorTotal,
         int TipoFornecimentoId

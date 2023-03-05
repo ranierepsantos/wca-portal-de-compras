@@ -22,11 +22,13 @@
                 <tr>
                     <th class="text-left text-grey">CÓDIGO</th>
                     <th class="text-left text-grey">PRODUTO</th>
+                    <th class="text-center text-grey">CATEGORIA</th>
                     <th class="text-left text-grey">VALOR</th>
                     <th class="text-center text-grey">U.M.</th>
                     <th class="text-center text-grey">TAXA</th>
                     <th class="text-center text-grey">%IPI</th>
-                    <th class="text-center text-grey">CATEGORIA</th>
+                    <th class="text-center text-grey">VALOR PRODUTO</th>
+                    
                     <th></th>
                 </tr>
             </thead>
@@ -34,11 +36,12 @@
                 <tr v-for="item in produtos" :key="item.id">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
+                    <td class="text-center">{{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}</td>
                     <td class="text-right">{{ item.valor.toFixed(2) }}</td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
                     <td class="text-right">{{ item.taxaGestao?.toFixed(2) }}</td>
-                    <td class="text-right">{{ item.percentualIPI?.toFixed(2) }}</td>
-                    <td class="text-center">{{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}</td>
+                    <td class="text-right">{{ item.percentualIPI?.toFixed(2) }} %</td>
+                    <td class="text-right">{{ retornarValorTotalProduto(item) }}</td>
                     <td class="text-right">
                         <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"
                             title="Editar"></v-btn>
@@ -48,7 +51,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="6">
+                    <td colspan="9">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -105,7 +108,14 @@
                                     :rules="[(v) => !!v || 'U.M. é obrigatório']" density="compact">
                                 </v-text-field>
                             </v-col>
+                            <v-col>
+                                <v-text-field label="Valor Total" type="text"
+                                    required variant="outlined" color="primary" :model-value="retornarValorTotalProduto(produto)"
+                                    density="compact" :readonly="true" class="right-input">
+                                </v-text-field>
+                            </v-col>
                         </v-row>
+                        
                         <v-row>
                             <v-col class="text-right">
                                 <v-btn variant="outlined" color="primary" @click="closeDialog()">Cancelar</v-btn>
@@ -120,7 +130,7 @@
 </template>
   
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import { ref, onMounted, watch, inject, computed} from "vue";
 import fornecedorService from "@/services/fornecedor.service";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import handleErrors from "@/helpers/HandleErrors"
@@ -128,7 +138,7 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import { toBase64, realizarDownload } from "@/helpers/functions";
+import { toBase64, realizarDownload, retornarValorTotalProduto } from "@/helpers/functions";
 
 
 //DATA
@@ -395,6 +405,14 @@ async function salvar()
     }
 }
 
+
+
 </script>
+
+<style scoped>
+.right-input >>> input {
+    text-align: right
+}
+</style>
   
   

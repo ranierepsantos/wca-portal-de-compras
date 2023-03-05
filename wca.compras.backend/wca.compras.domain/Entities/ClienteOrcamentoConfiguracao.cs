@@ -33,6 +33,9 @@ namespace wca.compras.domain.Entities
         [Column("aprovador_por", TypeName = "tinyint")]
         public EnumAprovadoPor AprovadoPor { get; set; }
 
+        [Column("ativo")]
+        public bool Ativo { get; set; } = false;
+
         [JsonIgnore]
         public Cliente Cliente { get; set; }
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230304160118_Configuracao_AddData")]
+    partial class Configuracao_AddData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -514,13 +516,6 @@ namespace wca.compras.data.Migrations
                             Descricao = "Permite alterar e inativar recorrência de outros usuários",
                             Nome = "Administrador Recorrência",
                             Regra = "recorrencias_view_others_users"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Descricao = "Permite alterar configurações do sistema",
-                            Nome = "Configurações",
-                            Regra = "configuracao"
                         });
                 });
 
@@ -917,10 +912,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("nome");
 
-                    b.Property<decimal>("PercentualIPI")
-                        .HasColumnType("decimal(5,2)")
-                        .HasColumnName("percentual_ipi");
-
                     b.Property<int>("Quantidade")
                         .HasColumnType("int")
                         .HasColumnName("quantidade");
@@ -946,6 +937,10 @@ namespace wca.compras.data.Migrations
                     b.Property<decimal>("Valor")
                         .HasColumnType("money")
                         .HasColumnName("valor");
+
+                    b.Property<decimal>("ValorIpi")
+                        .HasColumnType("money")
+                        .HasColumnName("valor_ipi");
 
                     b.Property<decimal>("ValorTotal")
                         .HasColumnType("money")

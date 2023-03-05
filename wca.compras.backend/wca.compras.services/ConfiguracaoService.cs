@@ -33,7 +33,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<Configuracao> Update(UpdateConfiguracaoDto configuracao)
+        public async Task<bool?> Update(UpdateConfiguracaoDto configuracao)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace wca.compras.services
 
                 await _rm.SaveAsync();
 
-                return data;
+                return true;
             }
             catch (Exception ex)
             {

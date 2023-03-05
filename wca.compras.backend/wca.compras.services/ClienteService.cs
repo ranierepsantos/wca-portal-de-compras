@@ -179,6 +179,16 @@ namespace wca.compras.services
                     }
                 });
 
+                //Remover configuração de orçamento caso tenha alterado
+                baseData.ClienteOrcamentoConfiguracao.ToList().ForEach(config =>
+                {
+                    var c = cliente.ClienteOrcamentoConfiguracao.Where(p => p.Id == config.Id).FirstOrDefault();
+                    if (c == null)
+                    {
+                        baseData.ClienteOrcamentoConfiguracao.Remove(config);
+                    }
+                });
+
                 _mapper.Map(cliente, baseData);
                 _rm.ClienteRepository.Update(baseData);
                 

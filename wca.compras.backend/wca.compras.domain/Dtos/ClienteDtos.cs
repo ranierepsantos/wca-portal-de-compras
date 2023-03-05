@@ -16,6 +16,8 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         string PeriodoEntrega,
         int FilialId,
+        bool NaoUltrapassarLimitePorRequisicao,
+        decimal ValorLimiteRequisicao,
         IList<ClienteContatoDto> ClienteContatos,
         IList<ClienteOrcamentoConfiguracaoDto> ClienteOrcamentoConfiguracao
     );
@@ -36,6 +38,8 @@ namespace wca.compras.domain.Dtos
         string UF,
         bool Ativo,
         string PeriodoEntrega,
+        bool NaoUltrapassarLimitePorRequisicao,
+        decimal ValorLimiteRequisicao,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
         IList<ClienteContatoDto> ClienteContatos,
@@ -57,6 +61,8 @@ namespace wca.compras.domain.Dtos
         string UF,
         bool Ativo,
         string PeriodoEntrega,
+        bool NaoUltrapassarLimitePorRequisicao,
+        decimal ValorLimiteRequisicao,
         [Required(ErrorMessage = "O campo é obrigatório!")] 
         int FilialId,
         IList<ClienteContatoDto> ClienteContatos,
@@ -84,6 +90,7 @@ namespace wca.compras.domain.Dtos
         decimal ValorPedido,
         decimal QuantidadeMes,
         decimal Tolerancia,
-        EnumAprovadoPor AprovadoPor
+        EnumAprovadoPor AprovadoPor,
+        bool Ativo = false
     );
 }
