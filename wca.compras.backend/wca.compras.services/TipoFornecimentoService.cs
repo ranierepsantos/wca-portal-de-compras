@@ -104,5 +104,22 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
+
+        public async Task<IList<TipoFornecimentoDto>> GetByUser(int usuarioId)
+        {
+            try
+            {
+                var categorias = await _rm.TipoFornecimentoRepository.SelectByCondition(c =>  c.Ativo)
+                    .Where(c => c.Usuario.Any(c => c.Id == usuarioId))
+                    .ToListAsync();
+
+                return _mapper.Map<IList<TipoFornecimentoDto>>(categorias);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.GetByUser.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
     }
 }

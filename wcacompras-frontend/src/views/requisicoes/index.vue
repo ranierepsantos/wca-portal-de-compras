@@ -11,7 +11,7 @@
             </v-col>
             <v-col cols="4">
                 <v-select label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    item-title="nome" item-value="id" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
             <v-col cols="3" v-show="hasRequisicaoAllUsersPermission">

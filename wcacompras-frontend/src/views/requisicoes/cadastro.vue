@@ -11,8 +11,8 @@
                 </v-col>
                 <v-col cols="5">
                     <v-select label="Fornecedor" v-model="requisicao.fornecedorId" :items="fornecedores" density="compact"
-                        item-title="text" item-value="value" variant="outlined" color="primary" :hide-details="false"
-                        :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
+                        item-title="nome" item-value="id" variant="outlined" color="primary" :hide-details="false"
+                        :rules="[(v) => !!v || 'Campo obrigatório']" :disabled="requisicao.clienteId == null"></v-select>
                 </v-col>
                 <v-col cols="2">
                     <v-select label="Destino" v-model="requisicao.destino" :items="destinos" density="compact"
@@ -21,19 +21,39 @@
                 </v-col>
             </v-row>
             <v-row>
-            <v-col cols="10">
-                <v-text-field label="Local Entrega" v-model="requisicao.localEntrega" placeholder="Local de entrega do Pedido" density="compact"
-                    variant="outlined" color="primary" :rules="[(v) => !!v || 'Campo obrigatório']" counter="300">
-                </v-text-field>
-            </v-col>
+                <v-col cols="10">
+                    <v-text-field label="Local Entrega" v-model="requisicao.localEntrega"
+                        placeholder="Local de entrega do Pedido" density="compact" variant="outlined" color="primary"
+                        :rules="[(v) => !!v || 'Campo obrigatório']">
+                    </v-text-field>
+                </v-col>
 
-            <v-col cols="2">
-                <v-text-field-money label-text="ICMS (%)" v-model="requisicao.icms" color="primary"
-                    :number-decimal="2"></v-text-field-money>
-            </v-col>
-            
-        </v-row>
+                <v-col cols="2">
+                    <v-text-field-money label-text="ICMS (%)" v-model="requisicao.icms" color="primary"
+                        :number-decimal="2"></v-text-field-money>
+                </v-col>
+            </v-row>
+            <v-row v-show="requisicao.clienteId > 0">
+                <v-col cols="10" class="text-left">
+                    <div>
+                        <span class="text-grey">Entregas: <small>Legenda: (M - Manhã, T - Tarde, N - Noite)</small></span>
+                        <br />
+                        <span v-for="(dia, index) in diasDaSemana" :key="dia"
+                            :class="index > 0 ? 'text-primary ml-2' : 'text-primary'"
+                            v-show="requisicao.periodoEntrega[dia.value].selected && requisicao.periodoEntrega[dia.value].periodo.length > 0">
+                            {{ dia.text }}:&nbsp;
+                            <v-avatar color="info" size="x-small"
+                                v-for="periodo in requisicao.periodoEntrega[dia.value].periodo">{{ periodo.slice(0, 1)
+                                }}</v-avatar>
+                        </span>
+                    </div>
+                </v-col>
+                <v-col>
+                    <v-btn color="primary" @click="openPeriodoForm = true">Alterar Período</v-btn>
+                </v-col>
+            </v-row>
         </v-form>
+        <v-divider class="mt-5 mb-2"></v-divider>
         <v-row>
             <v-col cols="5">
                 <v-text-field label="Pesquisar Produto" v-model="filter" placeholder="Nome ou Código" density="compact"
@@ -41,7 +61,22 @@
                 </v-text-field>
             </v-col>
             <v-col cols="1"></v-col>
-            
+            <v-col v-show="cliente.naoUltrapassarLimitePorRequisicao">
+                <v-row>
+                    <v-col class="text-right text-grey">Valor limite por pedido: </v-col>
+                    <v-col>
+                        <v-progress-linear
+                            :color="(parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao * 100) > 100 ? 'red' : (parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao * 100) > 60 ? 'warning' : 'success'"
+                            :model-value="valorTotalPedido" :max="cliente.valorLimiteRequisicao" :height="7"
+                            title="Valor Máximo Pedido" class="mt-2">
+                        </v-progress-linear>
+                        <span style="font-size:12px;" class="text-grey">
+                            {{ valorTotalPedido }} / {{ cliente.valorLimiteRequisicao.toFixed(2) }}
+                        </span>
+                    </v-col>
+                </v-row>
+
+            </v-col>
         </v-row>
         <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
         <small class="text-error" v-show="!hasProduto">Adicione pelo menos 1 produto</small>
@@ -106,9 +141,13 @@
                 </tr>
             </tbody>
             <tfoot>
-                <tr>
-                    <td colspan="7" class="text-right">TOTAL PEDIDO:</td>
-                    <td class="text-right">{{valorTotalPedido}}</td>
+                <tr style="font-weight:600;">
+                    <td colspan="2" class="text-right">SUBTOTAL:</td>
+                    <td class="text-right">{{ (requisicao.valorTotal - requisicao.valorIcms).toFixed(2) }}</td>
+                    <td class="text-right">ICMS:</td>
+                    <td class="text-right">{{ requisicao.valorIcms }}</td>
+                    <td colspan="2" class="text-right">TOTAL PEDIDO:</td>
+                    <td class="text-right">{{ valorTotalPedido }}</td>
                     <td></td>
                 </tr>
             </tfoot>
@@ -123,6 +162,27 @@
                     {{ (config.valorPedido * (1 + config.tolerancia / 100)).toFixed(2) }}</span>
             </v-col>
         </v-row>
+        <v-dialog v-model="openPeriodoForm" max-width="700" :absolute="false" persistent>
+            <v-form ref="produtoForm" @submit.prevent="">
+                <v-card>
+                    <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                        Confirmar período de Entrega
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col>
+                                <periodo v-model:dia-selecionado="requisicao.periodoEntrega" />
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-btn color="primary" @click="openPeriodoForm = false">Confirmar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-form>
+        </v-dialog>
     </div>
 </template>
   
@@ -133,12 +193,13 @@ import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import { useAuthStore } from "@/store/auth.store";
 import fornecedorService from "@/services/fornecedor.service";
-import { compararValor, retornarValorTotalProduto } from "@/helpers/functions"
+import { compararValor, retornarValorTotalProduto, diasDaSemana } from "@/helpers/functions"
 import router from "@/router";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import clienteService from "@/services/cliente.service";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-
+import Periodo from '@/components/Periodo.vue';
+import authService from "@/services/auth.service";
 //DATA
 const authStore = useAuthStore();
 const isBusy = ref(false);
@@ -155,7 +216,16 @@ const requisicao = ref({
     requerAutorizacaoWCA: false,
     requerAutorizacaoCliente: false,
     icms: 0,
-    valorIcms: 0
+    valorIcms: 0,
+    periodoEntrega: {
+        0: { periodo: [], selected: false },
+        1: { periodo: [], selected: false },
+        2: { periodo: [], selected: false },
+        3: { periodo: [], selected: false },
+        4: { periodo: [], selected: false },
+        5: { periodo: [], selected: false },
+        6: { periodo: [], selected: false }
+    },
 });
 const clientes = ref([]);
 const fornecedores = ref([]);
@@ -170,6 +240,12 @@ const filter = ref("");
 let orcamento = ref(null);
 let tipoFornecimento = ref([])
 const formCadastro = ref(null);
+const openPeriodoForm = ref(false)
+const cliente = ref({
+    id: null,
+    valorLimiteRequisicao: 0,
+    naoUltrapassarLimitePorRequisicao: false
+})
 
 //VUE METHODS
 onMounted(async () => {
@@ -184,21 +260,34 @@ onMounted(async () => {
 watch(() => requisicao.value.fornecedorId, async (fornecedorId) => {
     requisicao.value.requisicaoItens = []
     await getProdutosToList(fornecedorId)
+    requisicao.value.icms = fornecedores.value.filter(c => c.id == fornecedorId)[0].icms
 
+    let { value: icms } = await swal.fire({
+        title: 'Confirmar o percentual do ICMS:',
+        input: 'number',
+        inputValue: requisicao.value.icms,
+        confirmButtonText: 'SIM',
+        showCancelButton: false,
+        inputValidator: (value) => {
+            if (!value || value < 0) {
+                return 'Você deve informar um valor maior ou igual a 0'
+            }
+        }
+    })
+    requisicao.value.icms = icms;
 })
 
 watch(() => requisicao.value.clienteId, (clienteId) => {
-    let cliente = clientes.value.filter(c => c.id == clienteId)[0];
-    
-    orcamento.value = cliente.clienteOrcamentoConfiguracao.filter(c =>  c.ativo == true);
+    cliente.value = clientes.value.filter(c => c.id == clienteId)[0];
+
+    orcamento.value = cliente.value.clienteOrcamentoConfiguracao.filter(c => c.ativo == true);
     for (let idx = 0; idx < orcamento.value.length; idx++) {
         orcamento.value[idx].valorTotal = 0
         orcamento.value[idx].percentual = 0
     }
-
-    requisicao.value.localEntrega = `${cliente.endereco}, ${cliente.numero} - ${cliente.cep} - ${cliente.cidade} / ${cliente.uf}`
-
-
+    requisicao.value.localEntrega = `${cliente.value.endereco}, ${cliente.value.numero} - ${cliente.value.cep} - ${cliente.value.cidade} / ${cliente.value.uf}`
+    requisicao.value.periodoEntrega = JSON.parse(cliente.value.periodoEntrega)
+    openPeriodoForm.value = true
 })
 
 watch(filter, async () => {
@@ -212,11 +301,17 @@ const valorTotalPedido = computed(() => {
 
     let produtos = requisicao.value.requisicaoItens;
     let valorTotal = 0;
+    let valorTaxaGestao = 0;
 
     produtos.forEach(produto => {
         valorTotal += produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
+        valorTaxaGestao += produto.quantidade * produto.taxaGestao
     })
-    return valorTotal.toFixed(2);
+    valorTotal = valorTotal.toFixed(2)
+    requisicao.value.valorIcms = (parseFloat(valorTotal) * requisicao.value.icms / 100).toFixed(2)
+    requisicao.value.valorTotal = parseFloat(valorTotal) + parseFloat(requisicao.value.valorIcms)
+    requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2))
+    return requisicao.value.valorTotal.toFixed(2);
 })
 
 //METHODS
@@ -249,7 +344,7 @@ function calcularOrcamentoTotais() {
     for (let idx = 0; idx < requisicao.value.requisicaoItens.length; idx++) {
         let item = requisicao.value.requisicaoItens[idx]
         let index = orcamento.value.findIndex(o => o.tipoFornecimentoId == item.tipoFornecimentoId);
-        orcamento.value[index].valorTotal += ((parseFloat(item.valor) + parseFloat(item.taxaGestao)) * item.quantidade)
+        orcamento.value[index].valorTotal += item.quantidade * parseFloat(retornarValorTotalProduto(item));
         orcamento.value[index].percentual = (orcamento.value[index].valorTotal / (orcamento.value[index].valorPedido * (1 + orcamento.value[index].tolerancia / 100))) * 100
     }
 }
@@ -281,7 +376,7 @@ async function getFornecedorToList(filial) {
 async function getProdutosToList(fornecedorId) {
     try {
         isBusy.value = true;
-        let response = await fornecedorService.produtoPaginate(fornecedorId, 99999, 1, filter.value);
+        let response = await fornecedorService.produtoPaginate(fornecedorId, 99999, 1, filter.value, true);
         produtos.value = response.data.items;
 
         for (let index = 0; index < requisicao.value.requisicaoItens.length; index++) {
@@ -344,33 +439,69 @@ async function salvar() {
         hasProduto.value = requisicao.value.requisicaoItens.length > 0
 
         if (valid && hasProduto.value) {
-
+            let data = { ...requisicao.value }
             //remover o campo id da requisicaoItens
-            requisicao.value.requisicaoItens.forEach(produto => {
+            data.requisicaoItens.forEach(produto => {
                 delete produto.id
-                produto.valorTotal = ((parseFloat(produto.taxaGestao) + parseFloat(produto.valor)) * produto.quantidade)
-                // produto.valorTotal = ((parseFloat(produto.valor)) * produto.quantidade)
-                // produto.taxaGestao = (parseFloat(produto.taxaGestao) * produto.quantidade)
-
-                requisicao.value.taxaGestao += produto.taxaGestao
-                requisicao.value.valorTotal += produto.valorTotal
-
-                produto.valorTotal = produto.valorTotal.toFixed(2)
-                produto.taxaGestao = produto.taxaGestao.toFixed(2)
+                produto.valorTotal = retornarValorTotalProduto(produto) * produto.quantidade
             })
-            requisicao.value.valorTotal = requisicao.value.valorTotal.toFixed(2)
-            requisicao.value.taxaGestao = requisicao.value.taxaGestao.toFixed(2)
+            data.periodoEntrega = JSON.stringify(data.periodoEntrega);
 
+            // verificar se requer autorização
             orcamento.value.forEach(o => {
                 if (o.percentual > 100) {
                     if (o.aprovadoPor == 1)
-                        requisicao.value.requerAutorizacaoCliente = true;
+                        data.requerAutorizacaoCliente = true;
                     else
-                        requisicao.value.requerAutorizacaoWCA = true;
+                        data.requerAutorizacaoWCA = true;
                 }
             })
+            // verificar se ultrassou o limite estabelecido para o cliente
+            if (cliente.value.naoUltrapassarLimitePorRequisicao &&
+                parseFloat(cliente.value.valorLimiteRequisicao) < parseFloat(valorTotalPedido.value)) {
+                data.requerAutorizacaoWCA = true
+            }
 
-            await requisicaoService.create(requisicao.value)
+            if (data.requerAutorizacaoWCA) {
+                if (!authStore.hasPermissao("aprova_requisicao")) {
+                    let result = await swal.fire({
+                        title: 'Autorização',
+                        html: `<input type="email" id="login" class="swal2-input" placeholder="E-mail">
+                       <input type="password" id="password" class="swal2-input" placeholder="Senha">`,
+                        confirmButtonText: 'Autorizar',
+                        focusConfirm: false,
+                        preConfirm: async () => {
+                            const login = swal.getPopup().querySelector('#login').value
+                            const password = swal.getPopup().querySelector('#password').value
+                            let emailRegex = new RegExp(/^[A-Za-z0-9_!#$%&'*+\/=?`{|}~^.-]+@[A-Za-z0-9.-]+$/, "gm");
+
+                            if (!login || !password) {
+                                swal.showValidationMessage(`Por favor informe o e-mail e senha`)
+                            } else if (!emailRegex.test(login)) {
+                                swal.showValidationMessage(`Por favor informe um e-mail válido`)
+                            } else {
+                                let response = await authService.login({ email: login, password: password })
+                                if (!response.data.authenticated) {
+                                    swal.showValidationMessage(`Usuário e/ou senha inválido!`)
+                                } else if (response.data.perfil.permissao.filter(c => c.regra == 'aprova_requisicao').length == 0) {
+                                    swal.showValidationMessage(`Usuário não tem permissão para realizar aprovação!`)
+                                }
+                                return response.data
+                            }
+                        }
+                    })
+                    if (!result.isConfirmed) {
+                        return
+                    }
+                    data.requerAutorizacaoWCA = false
+                    data.usuarioAutorizador = result.value.usuarioNome
+                }
+                data.requerAutorizacaoWCA = false
+            }
+
+            //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
+
+            await requisicaoService.create(data)
             swal.fire({
                 toast: true,
                 icon: "success",
@@ -381,6 +512,7 @@ async function salvar() {
                 timer: 2000,
             })
             router.push({ name: "requisicoes" })
+
         }
     } catch (error) {
         console.log("salvar.error:", error);

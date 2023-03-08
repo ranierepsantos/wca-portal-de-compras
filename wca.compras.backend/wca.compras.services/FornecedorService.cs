@@ -106,7 +106,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ListItem>> GetToList(int filialId)
+        public async Task<IList<FornecedorListDto>> GetToList(int filialId)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace wca.compras.services
 
                 var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 
-                return _mapper.Map<IList<ListItem>>(itens);
+                return _mapper.Map<IList<FornecedorListDto>>(itens);
             }
             catch (Exception ex)
             {
@@ -213,15 +213,17 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "")
+        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "", int usuarioId = 0)
         {
             try
             {
-                var query = _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId)
-                    .Include("Fornecedor");
+                var query = _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId);
+                    
+                
                 //Matriz (id: 1) retorna todos os dados
                 if (filialId > 1)
                 {
+                    query = query.Include("Fornecedor");
                     query = query.Where(c => c.Fornecedor.FilialId == filialId);
                 }
 
@@ -229,6 +231,14 @@ namespace wca.compras.services
                 {
                     query = query.Where(q => q.Nome.Contains(termo) || q.Codigo.Contains(termo));
                 }
+
+                if (usuarioId> 0)
+                {
+                    query = query.Include(n => n.TipoFornecimento)
+                        .ThenInclude(n => n.Usuario)
+                        .Where(c => c.TipoFornecimento.Ativo && c.TipoFornecimento.Usuario.Any(c => c.Id == usuarioId));
+                }
+
                 query = query.OrderBy(p => p.Nome);
 
                 var pagination = Pagination<ProdutoDto>.ToPagedList(_mapper, query, page, pageSize);

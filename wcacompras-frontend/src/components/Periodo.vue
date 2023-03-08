@@ -27,16 +27,6 @@ import { diasDaSemana, periodosDia } from '@/helpers/functions';
 // import { ref } from 'vue';
 defineProps(['diaSelecionado'])
 
-// const diaSelecionado = ref({
-//     0: { periodo: [], selected: false },
-//     1: { periodo: [], selected: false },
-//     2: { periodo: [], selected: false },
-//     3: { periodo: [], selected: false },
-//     4: { periodo: [], selected: false },
-//     5: { periodo: [], selected: false },
-//     6: { periodo: [], selected: false }
-// })
-
 function onCheckBoxChange(e) {
     if (!e.selected) {
         e.periodo =[]

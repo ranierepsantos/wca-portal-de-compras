@@ -207,7 +207,7 @@ namespace wca.compras.services
         {
             try
             {
-                var clientes = await _rm.ClienteRepository.SelectAll()
+                var clientes = await _rm.ClienteRepository.SelectByCondition(c => c.Ativo)
                     .Include(c => c.ClienteOrcamentoConfiguracao)
                     .Where(c => c.Usuario.Any(c => c.Id == usuarioId))
                     .ToListAsync();

@@ -92,5 +92,26 @@ namespace wca.compras.webapi.Controllers
             }
 
         }
+
+        /// <summary>
+        /// Retorna lista de Categorias ativas relacionados ao usuário
+        /// </summary>
+        /// <returns>items</returns>
+        [HttpGet]
+        [Route("ListByAuthenticatedUser")]
+        public async Task<ActionResult<IList<ClienteDto>>> ListByAuthenticatedUser()
+        {
+            try
+            {
+                int codigoUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                var items = await service.GetByUser(codigoUsuario);
+                return Ok(items);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
     }
 }

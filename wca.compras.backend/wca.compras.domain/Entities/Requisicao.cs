@@ -63,10 +63,14 @@ namespace wca.compras.domain.Entities
         public bool RequerAutorizacaoWCA { get; set;  }
 
         [Column("icms", TypeName = "money")]
-        public decimal icms { get; set; }
+        public decimal Icms { get; set; }
 
         [Column("valor_icms", TypeName = "money")]
-        public decimal valor_icms { get; set; }
+        public decimal ValorIcms { get; set; }
+
+        [MaxLength(1500)]
+        [Column("periodo_entrega", TypeName = "varchar(1500)")]
+        public string? PeriodoEntrega { get; set; }
 
         [JsonIgnore]
         public Fornecedor? Fornecedor { get; set; }

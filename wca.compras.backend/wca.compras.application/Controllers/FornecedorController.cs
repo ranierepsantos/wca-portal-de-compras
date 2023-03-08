@@ -109,7 +109,7 @@ namespace wca.compras.webapi.Controllers
         /// <param name="filial"></param>
         [HttpGet]
         [Route("ToList/{filial}")]
-        public async Task<ActionResult<IList<ListItem>>> List(int filial)
+        public async Task<ActionResult<IList<FornecedorListDto>>> List(int filial)
         {
             try
             {
@@ -169,12 +169,18 @@ namespace wca.compras.webapi.Controllers
         /// <returns>Paginnation</returns>
         [HttpGet]
         [Route("{fornecedorId}/Produtos/Paginate/{pageSize}/{page}")]
-        public ActionResult<Pagination<FornecedorDto>> Paginate(int fornecedorId, int pageSize = 10, int page = 1, string? termo = "")
+        public ActionResult<Pagination<FornecedorDto>> Paginate(int fornecedorId, int pageSize = 10, int page = 1, string? termo = "", bool onlyAuthUser = false)
         {
             try
             {
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = service.Paginate(filial, fornecedorId, page, pageSize, termo);
+                int idUsuario = 0;
+                if (onlyAuthUser)
+                {
+                    idUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                }
+
+                var items = service.Paginate(filial, fornecedorId, page, pageSize, termo, idUsuario);
                 return Ok(items);
             }
             catch (Exception ex)

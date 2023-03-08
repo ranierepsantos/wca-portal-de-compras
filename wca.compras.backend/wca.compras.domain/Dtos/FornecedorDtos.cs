@@ -112,4 +112,10 @@ namespace wca.compras.domain.Dtos
         string Celular,
         bool AprovaPedido
     );
+
+    public record FornecedorListDto (
+        int Id,
+        string Nome,
+        decimal Icms
+    );
 }

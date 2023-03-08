@@ -286,6 +286,8 @@ const cliente = ref({
     filialId: null,
     clienteContatos: [],
     clienteOrcamentoConfiguracao: [],
+    naoUltrapassarLimitePorRequisicao: false,
+    valorLimiteRequisicao: 0,
     periodoEntrega: {
         0: { periodo: [], selected: false },
         1: { periodo: [], selected: false },

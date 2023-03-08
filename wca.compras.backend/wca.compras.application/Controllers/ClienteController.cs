@@ -144,10 +144,9 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
-        /// Retorna lista de Clientes ativos para preenchimento de Listas e Combos
+        /// Retorna lista de Clientes ativos relacionados ao usuário
         /// </summary>
         /// <returns>items</returns>
-        /// <param name="filial"></param>
         [HttpGet]
         [Route("ListByAuthenticatedUser")]
         public async Task<ActionResult<IList<ClienteDto>>> ListByAuthenticatedUser()

@@ -86,7 +86,7 @@ import Breadcrumbs from "@/components/breadcrumbs.vue";
 
 //DATA
 const page = ref(1);
-const pageSize = 5;
+const pageSize = 10;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const filiais = ref([]);

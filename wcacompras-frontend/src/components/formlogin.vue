@@ -1,0 +1,46 @@
+<template>
+    <v-form ref="form" @submit.prevent="submit()">
+
+        <v-text-field variant="outlined" density="compact" label="Email" type="email" v-model="formData.email"
+            :rules="emailRules" required></v-text-field>
+
+        <v-text-field variant="outlined" density="compact" label="Senha" type="password" v-model="formData.password"
+            :rules="[(v) => !!v || 'Senha é obrigatório']" required></v-text-field>
+
+        <v-btn type="submit" block color="primary" size="large" class="mt-5" v-if="!isBusy">
+            Entrar
+        </v-btn>
+        <div class="text-center" v-else>
+            <v-progress-circular indeterminate :size="40"></v-progress-circular>
+        </div>
+    </v-form>
+</template>
+
+<script setup>
+import {ref} from 'vue'
+
+defineProps({
+    isBusy: {type: Boolean, default: false}
+})
+const emit = defineEmits(['autenticar'])
+
+const form = ref(null);
+
+const formData = ref({
+  email: "",
+  password: "",
+});
+
+const emailRules = ref([
+  (v) => !!v || "E-mail é obrigatório",
+  (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
+]);
+
+async function submit() {
+    let { valid } = await form.value.validate();
+    if (valid) {
+        emit('autenticar',formData.value)
+    }
+}
+
+</script>

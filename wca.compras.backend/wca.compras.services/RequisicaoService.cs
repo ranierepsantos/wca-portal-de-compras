@@ -28,13 +28,11 @@ namespace wca.compras.services
             _configuracoes = _rm.ConfiguracaoRepository.SelectAll().ToList();
 
         }
-
-        
+                
         public async Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto, string urlOrigin = "")
         {
             try
             {
-                
                 var data = _mapper.Map<Requisicao>(createRequisicaoDto);
                 
                 _rm.RequisicaoRepository.Attach(data);
@@ -50,9 +48,9 @@ namespace wca.compras.services
 
                     var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
                                            .Include(inc => inc.ClienteOrcamentoConfiguracao)
-                                           .Where(c => c.ClienteOrcamentoConfiguracao.Any(cf =>  cf.Ativo))
                                            .FirstOrDefaultAsync();
 
+                    //verificar o foi excedido a quantidade de pedidos determinadas pro mês
                     if (cliente?.ClienteOrcamentoConfiguracao.Count() > 0)
                     {
                         var (dataIni, dataFim) = getDataCorte();
@@ -70,20 +68,36 @@ namespace wca.compras.services
                             }
                         }
                     }
+                    //verificar se o pedido ultrapassa o valor limite 
+                    if (cliente.NaoUltrapassarLimitePorRequisicao && cliente.ValorLimiteRequisicao < data.ValorTotal)
+                    {
+                        data.RequerAutorizacaoWCA = true;
+                    }
+
+                }
+
+                if (!string.IsNullOrEmpty(createRequisicaoDto.UsuarioAutorizador))
+                {
+                    data.RequerAutorizacaoWCA = false;
+                    if (data.RequerAutorizacaoCliente == false) data.Status = EnumStatusRequisicao.APROVADO;
                 }
 
                 await _rm.SaveAsync();
 
+
+                string mensagemEvento = $"Requisição criada por {createRequisicaoDto.NomeUsuario}";
+                mensagemEvento += string.IsNullOrEmpty(createRequisicaoDto.UsuarioAutorizador) ? "." : $" e autorizada por {createRequisicaoDto.UsuarioAutorizador}.";
+
+
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = data.Id,
-                    Evento = $"Requisição criada por {createRequisicaoDto.NomeUsuario}",
+                    Evento = mensagemEvento,
                     DataHora= DateTime.Now
                 };
 
                 await CreateRequisicaoHistorico(reqH);
-
-                
+                                
                 if (data.RequerAutorizacaoCliente == true ) {
                     await solicitarAprovacaoCliente(urlOrigin, data);
                 }
@@ -484,7 +498,8 @@ namespace wca.compras.services
                     reqItem.RequisicaoId = 0;
                     reqItem.Valor = produto.Valor;
                     reqItem.TaxaGestao = produto.TaxaGestao;
-                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao) * reqItem.Quantidade;
+                    reqItem.PercentualIPI = produto.PercentualIPI;
+                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao + (produto.Valor * produto.PercentualIPI/100)) * reqItem.Quantidade;
                     RequisicaoItemDto item = _mapper.Map<RequisicaoItemDto>(reqItem);
                     itens.Add(item);
                 }else
@@ -496,7 +511,7 @@ namespace wca.compras.services
             // Criar o pedido
             CreateRequisicaoDto novoPedido = new CreateRequisicaoDto( (int) requisicao.FilialId, (int) requisicao.ClienteId,
                 (int) requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,usuarioId,
-                usuarioNome,itens,false, false           
+                usuarioNome,itens,false, false,requisicao.LocalEntrega,requisicao.ValorIcms, requisicao.Icms, requisicao.PeriodoEntrega          
             );
 
             var data = await Create(novoPedido, urlOrigin);
