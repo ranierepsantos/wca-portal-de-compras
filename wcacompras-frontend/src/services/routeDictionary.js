@@ -11,6 +11,9 @@ export const route = {
     clientePaginate: "Cliente/Paginate/{pageSize}/{page}",
     clienteListByAuthenticatedUser: "Cliente/ListByAuthenticatedUser",
 
+    configuracaoGetAll: "configuracao",
+    configuracaoUpdate: "configuracao",
+
     filialCreate: "Filial",
     filialUpdate: "Filial",
     filialToList: "Filial/ToList",
@@ -36,6 +39,7 @@ export const route = {
     produtoUpdate: "Fornecedor/Produto",
     produtoRemove: "Fornecedor/Produto",
     produtoImportFromExcel: "Fornecedor/Produtos/ImportFromExcel",
+    produtoExportExcel: "Fornecedor/{fornecedorId}/Produtos/ExportExcel",
     produtoGetById: "Fornecedor/{fornecedorId}/Fornecedor/{id}",
     produtoPaginate: "Fornecedor/{fornecedorId}/Produtos/Paginate/{pageSize}/{page}",
 
@@ -57,7 +61,13 @@ export const route = {
     requisicaoDownloadById: "Requisicao/ExportExcel/{id}",
     requisicaoDownloadByToken: "Requisicao/ExportExcel/{token}",
     requisicaoFinalizar: "Requisicao/FinalizarPedido",
+    requisicaoEnviarEmailFornecedor: "Requisicao/SolicitarAprovacaoFornecedor/{requisicaoId}",
+    
+
+    tipoFornecimentoCreate: "TipoFornecimento",
+    tipoFornecimentoUpdate: "TipoFornecimento",
     tipoFornecimentoToList: "TipoFornecimento/ToList",
+    tipoFornecimentoPaginate: "TipoFornecimento/Paginate/{pageSize}/{page}",
 
     usuarioCreate: "Usuario",
     usuarioGetById: "Usuario/{id}",

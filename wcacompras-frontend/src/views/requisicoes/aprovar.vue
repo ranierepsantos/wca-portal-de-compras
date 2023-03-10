@@ -34,9 +34,23 @@
                     <span class="text-primary wca-texto">CNPJ: </span>
                     <span class="text-grey wca-texto">{{ requisicao.cliente.cnpj }}</span>
                 </p>
-                <p><span class="text-primary wca-texto">Endereço: </span> <span class="text-grey wca-texto">{{
-                    Endereco
+                <p><span class="text-primary wca-texto">Local Entrega: </span> <span class="text-grey wca-texto">{{
+                    requisicao.localEntrega
                 }}</span></p>
+                <p>
+
+                    <span class="text-primary wca-texto">Entregas: <small class="text-grey">Legenda: (M - Manhã, T - Tarde, N -
+                            Noite)</small></span>
+                    <br />
+                    <span v-for="(dia, index) in diasDaSemana" :key="dia"
+                        :class="index > 0 ? 'text-primary ml-2' : 'text-primary'"
+                        v-show="requisicao.periodoEntrega[dia.value].selected && requisicao.periodoEntrega[dia.value].periodo.length > 0">
+                        {{ dia.text }}:&nbsp;
+                        <v-avatar color="info" size="x-small"
+                            v-for="periodo in requisicao.periodoEntrega[dia.value].periodo">{{ periodo.slice(0, 1)
+                            }}</v-avatar>
+                    </span>
+                </p>
                 <p>
                     <span class="text-primary wca-texto">Supervisor: </span>
                     <span class="text-grey wca-texto">{{ requisicao.usuario.text }}</span>
@@ -104,7 +118,7 @@ import { ref, onMounted, inject, computed } from "vue";
 import requisicaoService from "@/services/requisicao.service";
 import handleErrors from "@/helpers/HandleErrors"
 import { useRoute } from "vue-router";
-import { realizarDownload } from "@/helpers/functions";
+import { realizarDownload, diasDaSemana } from "@/helpers/functions";
 import router from "@/router";
 //DATA
 const swal = inject("$swal")
@@ -131,63 +145,67 @@ const requisicao = ref({
         value: ""
     },
     nomeAprovador: "",
-    requisicaoItens: []
+    requisicaoItens: [],
+    localEntrega: "",
+    periodoEntrega: {
+        0: { periodo: [], selected: false },
+        1: { periodo: [], selected: false },
+        2: { periodo: [], selected: false },
+        3: { periodo: [], selected: false },
+        4: { periodo: [], selected: false },
+        5: { periodo: [], selected: false },
+        6: { periodo: [], selected: false }
+    }
 });
 const comentario = ref("")
 const token = ref("");
 //VUE METHODS
-onMounted(async () =>
-{
+onMounted(async () => {
     token.value = route.params.token;
     await getRequisicaoData()
 });
-const Endereco = computed(() =>
-{
+const Endereco = computed(() => {
     return requisicao.value.id == null ? '' : requisicao.value.cliente.endereco + ', ' + requisicao.value.cliente.numero +
         ', ' + requisicao.value.cliente.cidade + ', ' + requisicao.value.cliente.uf + ', '
         + requisicao.value.cliente.cep;
 })
 
 //METHODS
-async function download()
-{
-    try
-    {
+async function download() {
+    try {
         isDownloading.value = true;
         let response = await requisicaoService.downloadByToken(token.value);
-        let nomeArquivo = 'WCACompras_Pedido' + token.value.substring(1,10) + '.xlsx' //response.headers['content-disposition'].split(';')[1].replace('filename=', '').trim()
+        let nomeArquivo = 'WCACompras_Pedido' + token.value.substring(1, 10) + '.xlsx' //response.headers['content-disposition'].split(';')[1].replace('filename=', '').trim()
         realizarDownload(response, nomeArquivo, response.headers.getContentType());
 
-    } catch (error)
-    {
+    } catch (error) {
         console.log("download.error:", error);
         handleErrors(error)
-    } finally
-    {
+    } finally {
         isDownloading.value = false
     }
 }
-async function getRequisicaoData()
-{
-    try
-    {
+async function getRequisicaoData() {
+    try {
         isBusy.value = true;
         let response = await requisicaoService.getByToken(token.value);
+        let data = response.data;
+        if (data.periodoEntrega.trim() != "")
+            data.periodoEntrega = JSON.parse(data.periodoEntrega)
+        else
+            data.periodoEntrega = requisicao.value.periodoEntrega
+
         requisicao.value = response.data;
-    } catch (error)
-    {
+    } catch (error) {
         console.log("getRequisicaoData.error:", error);
         handleErrors(error)
-    } finally
-    {
+    } finally {
         isBusy.value = false
     }
 }
 
-async function aprovarReprovar(isAprovado)
-{
-    try
-    {
+async function aprovarReprovar(isAprovado) {
+    try {
         isSaving.value = true;
         let data = {
             id: requisicao.id,
@@ -199,8 +217,7 @@ async function aprovarReprovar(isAprovado)
 
         router.push({ name: 'agradecimento' })
 
-    } catch (error)
-    {
+    } catch (error) {
         console.log("aprovarReprovar.error:", error);
         handleErrors(error)
     } finally { isSaving.value = false }

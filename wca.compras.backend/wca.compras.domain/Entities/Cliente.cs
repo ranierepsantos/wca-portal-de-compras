@@ -45,6 +45,16 @@ namespace wca.compras.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
+        [MaxLength(1500)]
+        [Column("periodo_entrega", TypeName = "varchar(1500)")]
+        public string? PeriodoEntrega { get; set; }
+
+        [Column("nao_ultrapassar_limite_por_requisicao")]
+        public bool NaoUltrapassarLimitePorRequisicao { get; set; } = false;
+
+        [Column("valor_limite_requisicao", TypeName = "money")]
+        public decimal ValorLimiteRequisicao { get; set; } = 0;
+
         [JsonIgnore]
         public Filial Filial { get; set; }
 

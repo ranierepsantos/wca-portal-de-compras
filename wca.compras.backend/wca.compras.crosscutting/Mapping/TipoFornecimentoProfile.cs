@@ -13,7 +13,8 @@ namespace wca.compras.crosscutting.Mapping
             CreateMap<TipoFornecimento, TipoFornecimentoDto>().ReverseMap();
             CreateMap<TipoFornecimento, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome))
+                .ReverseMap();
         }
     }
 }

@@ -11,7 +11,7 @@
             </v-col>
             <v-col cols="4">
                 <v-select label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
-                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    item-title="nome" item-value="id" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
             <v-col cols="3" v-show="hasRequisicaoAllUsersPermission">
@@ -56,7 +56,7 @@
                     <td class="text-center">{{ new Date(item.dataCriacao).toLocaleDateString() }}</td>
                     <td class="text-left">{{ item.cliente.nome }}</td>
                     <td class="text-left">{{ item.fornecedor.text }}</td>
-                    <td class="text-right">{{ item.valorTotal.toFixed(2) }}</td>
+                    <td class="text-right">{{ parseFloat(item.valorTotal.toFixed(2)).toLocaleString("pt-BR", {style: "currency", currency: "BRL"}) }}</td>
                     <td class="text-center"><v-btn :color="getStatus(item.status).color" variant="tonal"
                             density="compact" class="text-center"> {{
                                 getStatus(item.status).text

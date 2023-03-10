@@ -22,6 +22,7 @@ namespace wca.compras.domain.Interfaces
         public IRepository<Recorrencia> RecorrenciaRepository { get; }
         public IRepository<RecorrenciaProduto> RecorrenciaProdutoRepository { get; }
         public IRepository<RecorrenciaLog> RecorrenciaLogRepository { get; }
+        public IRepository<Configuracao> ConfiguracaoRepository { get; }
 
         Task SaveAsync();
     }

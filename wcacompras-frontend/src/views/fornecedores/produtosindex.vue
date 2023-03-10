@@ -1,7 +1,14 @@
 <template>
     <div>
-        <bread-crumbs :title="`Itens Fornecedor (${nomeFornecedor})`" @novoClick="openProdutoForm = true"
-            :custom-button-show="true" custom-button-text="Importar Planilha" @customClick="importarProduto()" />
+        <bread-crumbs :title="`Itens Fornecedor (${nomeFornecedor})`"
+            :custom-button-show="false" :show-button="false"
+            :buttons="[{text: 'Importar Produtos', icon:'mdi-upload', event:'importar-click'},
+                       {text: 'Exportar Produtos', icon:'mdi-download', event:'exportar-click'},
+                       {text: 'Novo', icon:'mdi-plus', event:'novo-click'}]" 
+                        @importar-click="importarProduto()"
+                        @exportar-click="download()"
+                        @novo-click = "openProdutoForm= true"
+            />
         <v-row>
             <v-col cols="6">
                 <v-text-field label="Pesquisar" placeholder="(Produto)" v-model="filter" density="compact"
@@ -9,16 +16,19 @@
                 </v-text-field>
             </v-col>
         </v-row>
-        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
+        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy || isDownloading"></v-progress-linear>
         <v-table class="elevation-2" v-show="!isBusy">
             <thead>
                 <tr>
                     <th class="text-left text-grey">CÓDIGO</th>
                     <th class="text-left text-grey">PRODUTO</th>
+                    <th class="text-center text-grey">CATEGORIA</th>
                     <th class="text-left text-grey">VALOR</th>
                     <th class="text-center text-grey">U.M.</th>
                     <th class="text-center text-grey">TAXA</th>
-                    <th class="text-center text-grey">CATEGORIA</th>
+                    <th class="text-center text-grey">%IPI</th>
+                    <th class="text-center text-grey">VALOR PRODUTO</th>
+                    
                     <th></th>
                 </tr>
             </thead>
@@ -26,10 +36,12 @@
                 <tr v-for="item in produtos" :key="item.id">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
-                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
-                    <td class="text-center">{{ item.unidadeMedida }}</td>
-                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
                     <td class="text-center">{{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
+                    <td class="text-center">{{ item.unidadeMedida }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao?.toFixed(2)) }}</td>
+                    <td class="text-right">{{ item.percentualIPI?.toFixed(2) }} %</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-right">
                         <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"
                             title="Editar"></v-btn>
@@ -39,7 +51,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="6">
+                    <td colspan="9">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -70,12 +82,18 @@
                         <v-row>
                             <v-col>
                                 <v-text-field-money label-text="Valor" v-model="produto.valor" color="primary"
-                                    :number-decimal="2" :field-rules="produtoValorRules"></v-text-field-money>
+                                    :number-decimal="2" :field-rules="produtoValorRules" prefix="R$"></v-text-field-money>
                             </v-col>
 
                             <v-col>
                                 <v-text-field-money label-text="Taxa Gestão" v-model="produto.taxaGestao"
-                                    color="primary" :number-decimal="2"></v-text-field-money>
+                                    color="primary" :number-decimal="2" prefix="R$"></v-text-field-money>
+                            </v-col>
+                            <v-col>
+                                <v-text-field-money label-text="IPI (%)" v-model="produto.percentualIPI"
+                                    color="primary" :number-decimal="2" sufix="%"
+                                    :rules="[(v) => parseFloat(v) < 100 || 'O percentual deve ser no máximo 99.99%']"
+                                    ></v-text-field-money>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -90,7 +108,14 @@
                                     :rules="[(v) => !!v || 'U.M. é obrigatório']" density="compact">
                                 </v-text-field>
                             </v-col>
+                            <v-col>
+                                <v-text-field label="Valor Total" type="text" prefix="R$"
+                                    required variant="outlined" color="primary" :model-value="retornarValorTotalProduto(produto)"
+                                    density="compact" :readonly="true" class="right-input">
+                                </v-text-field>
+                            </v-col>
                         </v-row>
+                        
                         <v-row>
                             <v-col class="text-right">
                                 <v-btn variant="outlined" color="primary" @click="closeDialog()">Cancelar</v-btn>
@@ -105,7 +130,7 @@
 </template>
   
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import { ref, onMounted, watch, inject, computed} from "vue";
 import fornecedorService from "@/services/fornecedor.service";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import handleErrors from "@/helpers/HandleErrors"
@@ -113,7 +138,7 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import { toBase64 } from "@/helpers/functions";
+import { toBase64, realizarDownload, retornarValorTotalProduto, formatToCurrencyBRL } from "@/helpers/functions";
 
 
 //DATA
@@ -128,6 +153,7 @@ const filter = ref("");
 const produtoFormTitle = ref("Novo Produto")
 const openProdutoForm = ref(false);
 const produtoForm = ref(null);
+const isDownloading = ref(false)
 let idFornecedor = 0;
 const route = useRoute();
 const produto = ref({
@@ -138,6 +164,7 @@ const produto = ref({
     valor: 0,
     taxaGestao: 0,
     tipoFornecimentoId: null,
+    percentualIPI: 0,
     unidadeMedida: ""
 })
 const produtoValorRules = ref([
@@ -182,6 +209,7 @@ function clearFormData()
         nome: null,
         valor: 0,
         taxaGestao: 0,
+        percentualIPI: 0,
         tipoFornecimentoId: null,
         unidadeMedida: ""
     }
@@ -191,6 +219,26 @@ function closeDialog()
     produtoForm.value.reset();
     clearFormData();
     openProdutoForm.value = false;
+}
+
+async function download()
+{
+    try
+    {
+        isDownloading.value = true;
+        let response = await fornecedorService.produtosExportar(idFornecedor);
+        console.log('download', response)
+        let nomeArquivo = `WCACompras_${idFornecedor}_Produtos.xlsx`
+        realizarDownload(response, nomeArquivo, response.headers.getContentType());
+
+    } catch (error)
+    {
+        console.log("download.error:", error);
+        handleErrors(error)
+    } finally
+    {
+        isDownloading.value = false
+    }
 }
 
 function editar(item)
@@ -358,6 +406,14 @@ async function salvar()
     }
 }
 
+
+
 </script>
+
+<style scoped>
+.right-input >>> input {
+    text-align: right
+}
+</style>
   
   

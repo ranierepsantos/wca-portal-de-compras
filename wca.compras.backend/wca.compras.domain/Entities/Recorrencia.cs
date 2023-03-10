@@ -43,6 +43,11 @@ namespace wca.compras.domain.Entities
         [Column("url_origin", TypeName = "varchar(1000)")]
         public string UrlOrigin { get; set; } = string.Empty;
 
+        [Column("local_entrega", TypeName = "varchar(300)")]
+        public string LocalEntrega { get; set; } = string.Empty;
+
+        [Column("periodo_entrega", TypeName = "varchar(1500)")]
+        public string PeriodoEntrega { get; set; } = string.Empty;
         [JsonIgnore]
         public Filial? Filial { get; set; }
 

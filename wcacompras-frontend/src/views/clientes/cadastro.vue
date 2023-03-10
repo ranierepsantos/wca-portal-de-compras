@@ -8,8 +8,8 @@
                     <v-form ref="clienteForm" lazy-validation>
                         <v-row>
                             <v-col cols="8">
-                                <v-text-field label="Nome" v-model="cliente.nome" type="text" required
-                                    variant="outlined" color="primary" density="compact"
+                                <v-text-field label="Nome" v-model="cliente.nome" type="text" required variant="outlined"
+                                    color="primary" density="compact"
                                     :rules="[(v) => !!v || 'Campo é obrigatório']"></v-text-field>
                             </v-col>
                             <v-col>
@@ -64,18 +64,40 @@
                                 </v-text-field>
                             </v-col>
                             <v-col cols="2">
-                                <v-text-field label="UF" v-model="cliente.uf" type="text" variant="outlined"
-                                    color="primary" density="compact" v-maska="'AA'">
+                                <v-text-field label="UF" v-model="cliente.uf" type="text" variant="outlined" color="primary"
+                                    density="compact" v-maska="'AA'">
                                 </v-text-field>
                             </v-col>
                         </v-row>
-                        <!-- ORÇAMENTOS -->
+                        <!-- PERÍODOS DE ENTREGA -->
                         <v-row>
                             <v-col>
-                                <h3 class="text-left text-grey">Orçamentos</h3>
+                                <h3 class="text-left text-grey">INFORME OS DIAS e PERÍODOS PARA ENTREGA</h3>
                                 <v-divider class="mt-3"></v-divider>
                             </v-col>
                         </v-row>
+                        <v-row>
+                            <v-col>
+                                <periodo v-model:dia-selecionado="cliente.periodoEntrega" />
+                            </v-col>
+                        </v-row>
+                        <v-divider class="mt-2"></v-divider>
+                        <!-- ORÇAMENTOS -->
+                        <v-row class="mt-2">
+                            <v-col>
+                                <h3 class="text-left text-grey mt-2">CONFIGURAÇÃO DE ORÇAMENTOS</h3>
+                                
+                            </v-col>
+                            <v-col>
+                                <v-row>
+                                    <v-col><v-checkbox v-model="cliente.naoUltrapassarLimitePorRequisicao" label="Não ultrapassar o valor limite por requisição" color="primary" :hide-details="true" density="compact"></v-checkbox>
+                                </v-col>
+                                    <v-col cols="4"><v-text-field-money label-text="" v-model="cliente.valorLimiteRequisicao" color="primary" prefix="R$"
+                                    :number-decimal="2" :hide-details="true" density="compact" :disabled="!cliente.naoUltrapassarLimitePorRequisicao"></v-text-field-money></v-col>
+                                </v-row>
+                            </v-col>
+                        </v-row>
+                        <v-divider class="mt-3"></v-divider>
                         <v-row class="text-subtitle-2 text-grey">
                             <v-col class="text-left" cols="3">
                                 Fornecimento
@@ -89,7 +111,7 @@
                             <v-col class="text-center" cols="2">
                                 Tolerância (%)
                             </v-col>
-                            <v-col class="text-center" cols="3">
+                            <v-col class="text-center" cols="2">
                                 Aprovador por
                             </v-col>
                         </v-row>
@@ -97,30 +119,31 @@
                         <v-row class="mt-1" v-for="item in cliente.clienteOrcamentoConfiguracao"
                             :key="item.tipoFornecimentoId">
                             <v-col class="text-left" cols="3">
-                                {{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}
+                                <v-checkbox color="primary" v-model="item.ativo" density="compact" :label= "getTipoFornecimentoNome(item.tipoFornecimentoId)" :hide-details="true"></v-checkbox>
                             </v-col>
                             <v-col cols="2">
-                                <v-text-field-money label-text="" v-model="item.valorPedido" color="primary"
-                                    :number-decimal="2"></v-text-field-money>
+                                <v-text-field-money label-text="" v-model="item.valorPedido" color="primary" prefix="R$"
+                                    :number-decimal="2" :disabled="!item.ativo"></v-text-field-money>
                             </v-col>
                             <v-col class="text-left" cols="2">
                                 <v-text-field v-model="item.quantidadeMes" density="compact" variant="outlined"
-                                    color="primary" :hide-details="true" type="number" class="text-left" min="0" />
+                                    color="primary" :hide-details="true" type="number" class="text-left" min="0" :disabled="!item.ativo" />
                             </v-col>
                             <v-col class="text-left" cols="2">
-                                <v-text-field v-model="item.tolerancia" density="compact" variant="outlined"
-                                    color="primary" :hide-details="true" type="number" min="0" max="100" />
+                                <v-text-field-money label-text="" v-model="item.tolerancia" color="primary" sufix="%"
+                                    :number-decimal="2" :disabled="!item.ativo"></v-text-field-money>
+                                
                             </v-col>
                             <v-col class="text-left" cols="3">
-                                <v-select v-model="item.aprovadoPor" :items="aprovadorList" density="compact"
+                                <v-select v-model="item.aprovadoPor" :items="aprovadorList" density="compact" :disabled="!item.ativo"
                                     item-title="text" item-value="value" variant="outlined" color="primary"></v-select>
                             </v-col>
                         </v-row>
-
+                        <v-divider class="mt-2"></v-divider>
                         <!-- CONTATOS -->
-                        <v-row>
+                        <v-row class="mt-2">
                             <v-col>
-                                <h3 class="text-left text-grey">Contatos</h3>
+                                <h3 class="text-left text-grey">CONTATOS</h3>
                                 <v-divider class="mt-3"></v-divider>
                             </v-col>
                         </v-row>
@@ -240,6 +263,7 @@ import clienteService from '@/services/cliente.service';
 import filialService from "@/services/filial.service";
 import { mask } from "maska"
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
+import Periodo from '@/components/Periodo.vue';
 
 // VARIABLES
 //const mask = new Mask({ mask: [, "(##) ####-####"] })
@@ -262,7 +286,18 @@ const cliente = ref({
     ativo: true,
     filialId: null,
     clienteContatos: [],
-    clienteOrcamentoConfiguracao: []
+    clienteOrcamentoConfiguracao: [],
+    naoUltrapassarLimitePorRequisicao: false,
+    valorLimiteRequisicao: 0,
+    periodoEntrega: {
+        0: { periodo: [], selected: false },
+        1: { periodo: [], selected: false },
+        2: { periodo: [], selected: false },
+        3: { periodo: [], selected: false },
+        4: { periodo: [], selected: false },
+        5: { periodo: [], selected: false },
+        6: { periodo: [], selected: false }
+    }
 });
 const clienteContato = ref({
     id: 0,
@@ -285,21 +320,30 @@ const emailRules = ref([
     (v) => !!v || "Campo é obrigatório",
     (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
 ]);
+
 //VUE FUNCTIONS
 
-onMounted(async () =>
-{
+onMounted(async () => {
     await getFilialToList()
     await getTipoFornecimentoToList()
     console.log("route.query.id", route.query.id)
     cliente.value.filialId = authStore.user.filial;
-    if (parseInt(route.query.id) > 0)
-    {
+    if (parseInt(route.query.id) > 0) {
         await getCliente(route.query.id)
+
+       if (cliente.value.clienteOrcamentoConfiguracao.length > 0) {
+        let configuracoes = [...cliente.value.clienteOrcamentoConfiguracao]
+        configuracoes.forEach(item => {
+            if(fornecimentos.value.findIndex(t =>  t.value == item.tipoFornecimentoId) == -1) {
+
+                let index = cliente.value.clienteOrcamentoConfiguracao.findIndex(t => t.id == item.id)
+                cliente.value.clienteOrcamentoConfiguracao.splice(index,1)
+            }
+        })
+       }
     }
 
-    fornecimentos.value.forEach(item =>
-    {
+    fornecimentos.value.forEach(item => {
         let orcamento = {
             "id": 0,
             "clienteId": 0,
@@ -313,11 +357,11 @@ onMounted(async () =>
         if (!hasTipo) cliente.value.clienteOrcamentoConfiguracao.push(orcamento);
     })
 
+
 });
 
 //METHODS
-function clearContato()
-{
+function clearContato() {
     clienteContato.value = {
         id: 0,
         clienteId: cliente.value.id,
@@ -329,77 +373,67 @@ function clearContato()
     }
 }
 
-function closeContatoDialog()
-{
+function closeContatoDialog() {
     contatoDialog.value = false
     clearContato();
 }
 
-function editarContato(contato)
-{
+function editarContato(contato) {
     clearContato();
-    if (contato != null)
-    {
+    if (contato != null) {
         clienteContato.value = { ...contato }
     }
     contatoDialog.value = true
 }
 
-async function getCliente(clienteId)
-{
-    try
-    {
+async function getCliente(clienteId) {
+    try {
         isBusy.value = true
         let response = await clienteService.getById(clienteId);
-        cliente.value = response.data;
-    } catch (error)
-    {
-        console.log("getTipoFornecimentoToList.error:", error);
+        let data = response.data;
+        if (data.periodoEntrega == null || data.periodoEntrega.trim() == "") {
+            data.periodoEntrega = {...cliente.value.periodoEntrega}
+        }else {
+            data.periodoEntrega = JSON.parse(data.periodoEntrega)
+        }
+        cliente.value = data;
+    } catch (error) {
+        console.log("getCliente.error:", error);
         handleErrors(error)
-    } finally
-    {
+    } finally {
         isBusy.value = false
     }
 }
 
-async function getFilialToList()
-{
-    try
-    {
+async function getFilialToList() {
+    try {
         let response = await filialService.toList();
         filiais.value = response.data;
-    } catch (error)
-    {
+    } catch (error) {
         console.log("getFilialToList.error:", error);
         handleErrors(error)
     }
 }
 
-function getTipoFornecimentoNome(tipoId)
-{
+function getTipoFornecimentoNome(tipoId) {
     let tipo = fornecimentos.value.filter(t => t.value == tipoId)
-    if (tipo.length > 0)
-    {
+    if (tipo.length > 0) {
         return tipo[0].text
     }
     return ""
 }
 
-async function getTipoFornecimentoToList() 
-{
-    try
-    {
+async function getTipoFornecimentoToList() {
+    try {
         let response = await tipoFornecimentoService.toList();
         fornecimentos.value = response.data;
-    } catch (error)
-    {
+    } catch (error) {
         console.log("getTipoFornecimentoToList.error:", error);
         handleErrors(error)
     }
 }
 
-async function removerContato(contato)
-{
+async function removerContato(contato) {
     let options = {
         title: "Confirma Exclusão?",
         text: "Deseja realmente excluir o contato: " + contato.nome + "?",
@@ -410,31 +444,27 @@ async function removerContato(contato)
     }
 
     let response = await swal.fire(options);
-    if (response.isConfirmed)
-    {
+    if (response.isConfirmed) {
         let index = cliente.value.clienteContatos.findIndex(c => { return c.id == contato.id })
-        if (index > -1)
-        {
+        if (index > -1) {
             cliente.value.clienteContatos.splice(index, 1);
         }
     }
 }
 
-async function salvar()
-{
-    try
-    {
+async function salvar() {
+    try {
         isBusy.value = true
         const { valid } = await clienteForm.value.validate()
-        if (valid)
-        {
-            if (cliente.value.id == 0)
-            {
+        let data = {...cliente.value}
+        data.periodoEntrega = JSON.stringify(cliente.value.periodoEntrega)
+        if (valid) {
+            if (cliente.value.id == 0) {
 
-                await clienteService.create(cliente.value)
+                await clienteService.create(data)
             }
             else
-                await clienteService.update(cliente.value)
+                await clienteService.update(data)
 
             swal.fire({
                 toast: true,
@@ -448,27 +478,21 @@ async function salvar()
             router.push({ name: "clientes" })
         }
 
-    } catch (error)
-    {
+    } catch (error) {
         console.log("cliente.cadastro.salvar.erro", error)
         handleErrors(error)
-    } finally
-    {
+    } finally {
         isBusy.value = false
     }
 }
 
-async function salvarContato()
-{
+async function salvarContato() {
     const { valid } = await contatoForm.value.validate()
-    if (valid)
-    {
+    if (valid) {
         let index = -1;
-        if (clienteContato.value.id > 0)
-        {
+        if (clienteContato.value.id > 0) {
             index = cliente.value.clienteContatos.findIndex(c => { return c.id == clienteContato.value.id })
-            if (index > -1)
-            {
+            if (index > -1) {
                 cliente.value.clienteContatos[index] = { ...clienteContato.value }
             }
         }

@@ -13,6 +13,7 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
+        decimal Icms,
         int FilialId,
         IList<FornecedorContatoDto> FornecedorContatos
     );
@@ -30,6 +31,7 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
+        decimal Icms,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
         [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
@@ -51,6 +53,7 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
+        decimal Icms,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
         [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
@@ -64,6 +67,7 @@ namespace wca.compras.domain.Dtos
         string UnidadeMedida,
         decimal Valor,
         decimal TaxaGestao,
+        decimal PercentualIPI,
         int FornecedorId,
         int TipoFornecimentoId
     );
@@ -74,6 +78,7 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] string UnidadeMedida,
         [Required(ErrorMessage = "O campo é obrigatório!")] decimal Valor,
         decimal TaxaGestao,
+        decimal PercentualIPI,
         [Required(ErrorMessage = "O campo é obrigatório!")] int FornecedorId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int TipoFornecimentoId
     );
@@ -85,6 +90,7 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] string UnidadeMedida,
         [Required(ErrorMessage = "O campo é obrigatório!")] decimal Valor,
         decimal TaxaGestao,
+        decimal PercentualIPI,
         [Required(ErrorMessage = "O campo é obrigatório!")] int FornecedorId,
         [Required(ErrorMessage = "O campo é obrigatório!")] int TipoFornecimentoId
     );
@@ -105,5 +111,11 @@ namespace wca.compras.domain.Dtos
         string Telefone,
         string Celular,
         bool AprovaPedido
+    );
+
+    public record FornecedorListDto (
+        int Id,
+        string Nome,
+        decimal Icms
     );
 }

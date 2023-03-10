@@ -52,5 +52,11 @@ export default {
     downloadByToken(token)
     {
         return api.get(route.requisicaoDownloadByToken.replace('{token}',token), { responseType: 'blob'});
+    },
+
+    enviarEmailFornecedor(requisicaoId)
+    {
+        return api.put(route.requisicaoEnviarEmailFornecedor.replace("{requisicaoId}", requisicaoId));
     }
+
 }

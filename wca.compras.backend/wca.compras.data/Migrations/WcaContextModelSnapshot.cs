@@ -52,6 +52,21 @@ namespace wca.compras.data.Migrations
                     b.ToTable("PerfilPermissao");
                 });
 
+            modelBuilder.Entity("TipoFornecimentoUsuario", b =>
+                {
+                    b.Property<int>("TipoFornecimentoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TipoFornecimentoId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("TipoFornecimentoUsuario");
+                });
+
             modelBuilder.Entity("wca.compras.domain.Entities.Cliente", b =>
                 {
                     b.Property<int>("Id")
@@ -95,6 +110,10 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(20)")
                         .HasColumnName("inscricao_estadual");
 
+                    b.Property<bool>("NaoUltrapassarLimitePorRequisicao")
+                        .HasColumnType("bit")
+                        .HasColumnName("nao_ultrapassar_limite_por_requisicao");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -106,10 +125,19 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(10)")
                         .HasColumnName("numero");
 
+                    b.Property<string>("PeriodoEntrega")
+                        .HasMaxLength(1500)
+                        .HasColumnType("varchar(1500)")
+                        .HasColumnName("periodo_entrega");
+
                     b.Property<string>("UF")
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)")
                         .HasColumnName("uf");
+
+                    b.Property<decimal>("ValorLimiteRequisicao")
+                        .HasColumnType("money")
+                        .HasColumnName("valor_limite_requisicao");
 
                     b.HasKey("Id");
 
@@ -176,6 +204,10 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("tinyint")
                         .HasColumnName("aprovador_por");
 
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit")
+                        .HasColumnName("ativo");
+
                     b.Property<int>("ClienteId")
                         .HasColumnType("int")
                         .HasColumnName("cliente_id");
@@ -203,6 +235,69 @@ namespace wca.compras.data.Migrations
                     b.HasIndex("TipoFornecimentoId");
 
                     b.ToTable("ClienteOrcamentoConfiguracaos");
+                });
+
+            modelBuilder.Entity("wca.compras.domain.Entities.Configuracao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Chave")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("chave");
+
+                    b.Property<string>("ComboValores")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("varchar(8000)")
+                        .HasColumnName("combo_valores");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("descricao");
+
+                    b.Property<int>("TipoCampo")
+                        .HasMaxLength(500)
+                        .HasColumnType("int")
+                        .HasColumnName("tipo_campo");
+
+                    b.Property<string>("Valor")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configuracoes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Chave = "requisicao.sendemail.fornecedor",
+                            ComboValores = "",
+                            Descricao = "Requisição solicitar aprovação fornecedor",
+                            TipoCampo = 1,
+                            Valor = "false"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Chave = "requisicao.datacorte",
+                            ComboValores = "[{\"value\":1,\"text\":\"01\"},{\"value\":2,\"text\":\"02\"},{\"value\":3,\"text\":\"03\"},{\"value\":4,\"text\":\"04\"},{\"value\":5,\"text\":\"05\"},{\"value\":6,\"text\":\"06\"},{\"value\":7,\"text\":\"07\"},{\"value\":8,\"text\":\"08\"},{\"value\":9,\"text\":\"09\"},{\"value\":10,\"text\":\"10\"},{\"value\":11,\"text\":\"11\"},{\"value\":12,\"text\":\"12\"},{\"value\":13,\"text\":\"13\"},{\"value\":14,\"text\":\"14\"},{\"value\":15,\"text\":\"15\"},{\"value\":16,\"text\":\"16\"},{\"value\":17,\"text\":\"17\"},{\"value\":18,\"text\":\"18\"},{\"value\":19,\"text\":\"19\"},{\"value\":20,\"text\":\"20\"},{\"value\":21,\"text\":\"21\"},{\"value\":22,\"text\":\"22\"},{\"value\":23,\"text\":\"23\"},{\"value\":24,\"text\":\"24\"},{\"value\":25,\"text\":\"25\"},{\"value\":26,\"text\":\"26\"},{\"value\":27,\"text\":\"27\"},{\"value\":28,\"text\":\"28\"},{\"value\":29,\"text\":\"29\"},{\"value\":30,\"text\":\"30\"},{\"value\":31,\"text\":\"31\"}]",
+                            Descricao = "Requisição Data de Corte",
+                            TipoCampo = 5,
+                            Valor = "1"
+                        });
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Filial", b =>
@@ -266,6 +361,10 @@ namespace wca.compras.data.Migrations
                     b.Property<int>("FilialId")
                         .HasColumnType("int")
                         .HasColumnName("filial_id");
+
+                    b.Property<decimal>("Icms")
+                        .HasColumnType("money")
+                        .HasColumnName("icms");
 
                     b.Property<string>("InscricaoEstadual")
                         .HasMaxLength(20)
@@ -404,17 +503,24 @@ namespace wca.compras.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 8,
+                            Id = 9,
                             Descricao = "Permite incluir, alterar e inativar recorrência",
                             Nome = "Recorrência",
                             Regra = "recorrencia"
                         },
                         new
                         {
-                            Id = 9,
+                            Id = 10,
                             Descricao = "Permite alterar e inativar recorrência de outros usuários",
                             Nome = "Administrador Recorrência",
                             Regra = "recorrencias_view_others_users"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Descricao = "Permite alterar configurações do sistema",
+                            Nome = "Configurações",
+                            Regra = "configuracao"
                         });
                 });
 
@@ -442,6 +548,10 @@ namespace wca.compras.data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
                         .HasColumnName("nome");
+
+                    b.Property<decimal>("PercentualIPI")
+                        .HasColumnType("decimal(4,2)")
+                        .HasColumnName("percentual_ipi");
 
                     b.Property<decimal>("TaxaGestao")
                         .HasColumnType("money")
@@ -506,11 +616,21 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fornecedor_id");
 
+                    b.Property<string>("LocalEntrega")
+                        .IsRequired()
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("local_entrega");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)")
                         .HasColumnName("nome");
+
+                    b.Property<string>("PeriodoEntrega")
+                        .IsRequired()
+                        .HasColumnType("varchar(1500)")
+                        .HasColumnName("periodo_entrega");
 
                     b.Property<int>("TipoRecorrencia")
                         .HasColumnType("int")
@@ -647,6 +767,10 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fornecedor_id");
 
+                    b.Property<decimal>("Icms")
+                        .HasColumnType("money")
+                        .HasColumnName("icms");
+
                     b.Property<string>("LocalEntrega")
                         .HasColumnType("varchar(300)")
                         .HasColumnName("local_entrega");
@@ -654,6 +778,11 @@ namespace wca.compras.data.Migrations
                     b.Property<string>("NotaFiscal")
                         .HasColumnType("varchar(50)")
                         .HasColumnName("nota_fiscal");
+
+                    b.Property<string>("PeriodoEntrega")
+                        .HasMaxLength(1500)
+                        .HasColumnType("varchar(1500)")
+                        .HasColumnName("periodo_entrega");
 
                     b.Property<bool>("RequerAutorizacaoCliente")
                         .HasColumnType("bit")
@@ -674,6 +803,10 @@ namespace wca.compras.data.Migrations
                     b.Property<int?>("UsuarioId")
                         .HasColumnType("int")
                         .HasColumnName("usuario_id");
+
+                    b.Property<decimal>("ValorIcms")
+                        .HasColumnType("money")
+                        .HasColumnName("valor_icms");
 
                     b.Property<decimal>("ValorTotal")
                         .HasColumnType("money")
@@ -798,6 +931,10 @@ namespace wca.compras.data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
                         .HasColumnName("nome");
+
+                    b.Property<decimal>("PercentualIPI")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("percentual_ipi");
 
                     b.Property<int>("Quantidade")
                         .HasColumnType("int")
@@ -973,6 +1110,21 @@ namespace wca.compras.data.Migrations
                     b.HasOne("wca.compras.domain.Entities.Permissao", null)
                         .WithMany()
                         .HasForeignKey("PermissaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TipoFornecimentoUsuario", b =>
+                {
+                    b.HasOne("wca.compras.domain.Entities.TipoFornecimento", null)
+                        .WithMany()
+                        .HasForeignKey("TipoFornecimentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.compras.domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using System.ComponentModel;
 
 namespace wca.compras.domain.Entities
 {
@@ -62,6 +61,16 @@ namespace wca.compras.domain.Entities
 
         [Column("requer_autorizacao_wca")]
         public bool RequerAutorizacaoWCA { get; set;  }
+
+        [Column("icms", TypeName = "money")]
+        public decimal Icms { get; set; }
+
+        [Column("valor_icms", TypeName = "money")]
+        public decimal ValorIcms { get; set; }
+
+        [MaxLength(1500)]
+        [Column("periodo_entrega", TypeName = "varchar(1500)")]
+        public string? PeriodoEntrega { get; set; }
 
         [JsonIgnore]
         public Fornecedor? Fornecedor { get; set; }

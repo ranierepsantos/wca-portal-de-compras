@@ -14,7 +14,7 @@ namespace wca.compras.functions
         }
 
         [Function("WcaComprasSchedule")]
-        public async Task Run([TimerTrigger("0 06 15 * * *")] MyInfo myTimer)
+        public async Task Run([TimerTrigger("0 15 06 * * *")] MyInfo myTimer)
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
             HttpClient client = new HttpClient();

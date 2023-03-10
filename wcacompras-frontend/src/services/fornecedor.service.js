@@ -41,10 +41,10 @@ export default {
     {
         return api.get(route.produtoGetById.replace("{fornecedorId}", fornecedorId).replace("{id}", id));
     },
-    produtoPaginate(fornecedorId, pageSize, page, termo = "")
+    produtoPaginate(fornecedorId, pageSize, page, termo = "", onlyAuthUser = false)
     {
         let url = route.produtoPaginate.replace("{fornecedorId}", fornecedorId).replace("{pageSize}", pageSize).replace("{page}", page)
-        return api.get(url, {params: { termo: termo}} );
+        return api.get(url, {params: { termo: termo, onlyAuthUser: onlyAuthUser}} );
     },
    
     produtoRemove(fornecedorId, id)
@@ -60,6 +60,11 @@ export default {
     produtosImportar(data)
     {
         return api.post(route.produtoImportFromExcel, data);
+    },
+
+    produtosExportar(fornecedorId) {
+        return api.get(route.produtoExportExcel.replace("{fornecedorId}", fornecedorId), { responseType: 'blob'});
     }
+
 
 }

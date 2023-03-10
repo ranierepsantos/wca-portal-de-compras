@@ -16,5 +16,6 @@ namespace wca.compras.domain.Interfaces.Services
         Task<Stream> ExportToExcel(int requisicaoId);
         Task<RequisicaoDuplicarResponse> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin);
         Task<bool> FinalizarPedido(FinalizarRequisicaoDto finalizarRequisicaoDto, string usuarioNome);
+        Task<bool> EnviarRequisicao2Fornecedor(int requisicaoId, string urlOrigin);
     }
 }

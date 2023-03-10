@@ -15,6 +15,7 @@ namespace wca.compras.services
         private readonly IRepositoryManager _rm;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
+        private readonly List<Configuracao> _configuracoes;
 
         public RequisicaoService(IMapper mapper, 
             IRepositoryManager repositoryManager,
@@ -23,14 +24,15 @@ namespace wca.compras.services
             _mapper = mapper;
             _rm = repositoryManager;
             _emailService = emailService;
-        }
 
-        
+            _configuracoes = _rm.ConfiguracaoRepository.SelectAll().ToList();
+
+        }
+                
         public async Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto, string urlOrigin = "")
         {
             try
             {
-                
                 var data = _mapper.Map<Requisicao>(createRequisicaoDto);
                 
                 _rm.RequisicaoRepository.Attach(data);
@@ -43,36 +45,61 @@ namespace wca.compras.services
 
                 if (data.RequerAutorizacaoWCA == false || data.RequerAutorizacaoCliente == false)
                 {
-                    var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, DateTime.Now.AddDays(-30), DateTime.Now);
 
                     var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
                                            .Include(inc => inc.ClienteOrcamentoConfiguracao)
                                            .FirstOrDefaultAsync();
 
-                    foreach (var item in cliente.ClienteOrcamentoConfiguracao)
+                    //verificar o foi excedido a quantidade de pedidos determinadas pro mês
+                    if (cliente?.ClienteOrcamentoConfiguracao.Count() > 0)
                     {
-                        if (comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                        var (dataIni, dataFim) = getDataCorte();
+
+                        var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, dataIni, dataFim);
+
+                        foreach (var item in cliente.ClienteOrcamentoConfiguracao)
                         {
-                            if (item.AprovadoPor == EnumAprovadoPor.WCA)
-                                data.RequerAutorizacaoWCA = true;
-                            else
-                                data.RequerAutorizacaoCliente = true;
+                            if (item.Ativo && comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                            {
+                                if (item.AprovadoPor == EnumAprovadoPor.WCA)
+                                    data.RequerAutorizacaoWCA = true;
+                                else
+                                    data.RequerAutorizacaoCliente = true;
+                            }
                         }
                     }
+                    //verificar se o pedido ultrapassa o valor limite 
+                    if (cliente.NaoUltrapassarLimitePorRequisicao && cliente.ValorLimiteRequisicao < data.ValorTotal)
+                    {
+                        data.RequerAutorizacaoWCA = true;
+                    }
+
                 }
 
+                if (!string.IsNullOrEmpty(createRequisicaoDto.UsuarioAutorizador))
+                {
+                    data.RequerAutorizacaoWCA = false;
+                }
+
+                if (data.RequerAutorizacaoCliente == false && data.RequerAutorizacaoWCA ==false) 
+                    data.Status = EnumStatusRequisicao.APROVADO;
+
                 await _rm.SaveAsync();
+
+
+                string mensagemEvento = $"Requisição criada por {createRequisicaoDto.NomeUsuario}";
+                mensagemEvento += string.IsNullOrEmpty(createRequisicaoDto.UsuarioAutorizador) ? "." : $" e autorizada por {createRequisicaoDto.UsuarioAutorizador}.";
+
 
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = data.Id,
-                    Evento = $"Requisição criada por {createRequisicaoDto.NomeUsuario}",
+                    Evento = mensagemEvento,
                     DataHora= DateTime.Now
                 };
 
                 await CreateRequisicaoHistorico(reqH);
-
-                
+                                
                 if (data.RequerAutorizacaoCliente == true ) {
                     await solicitarAprovacaoCliente(urlOrigin, data);
                 }
@@ -126,7 +153,6 @@ namespace wca.compras.services
         {
             try
             {
-
                var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
                     .SelectByCondition(c => c.TokenAprovador == tokenAprovacao)
                     .FirstOrDefaultAsync();
@@ -154,7 +180,9 @@ namespace wca.compras.services
                     data.Cliente,
                     _mapper.Map<ListItem>(data.Usuario), 
                     _mapper.Map<IList<RequisicaoItemDto>>(data.RequisicaoItens), 
-                    requisicaoAprovacao.NomeAprovador
+                    requisicaoAprovacao.NomeAprovador,
+                    data.LocalEntrega,
+                    data.PeriodoEntrega
                 );
                 return dto;
             }
@@ -419,7 +447,7 @@ namespace wca.compras.services
                 ws.Cell("C1").SetValue(requisicao.Id);
                 ws.Cell("C3").SetValue(requisicao.Cliente.Nome);
                 ws.Cell("C4").SetValue(requisicao.Cliente.CNPJ);
-                ws.Cell("C5").SetValue(requisicao.Cliente.Endereco);
+                ws.Cell("C5").SetValue(requisicao.LocalEntrega);
                 ws.Cell("C6").SetValue(requisicao.Usuario.Text);
 
                 var row = 9;
@@ -473,7 +501,8 @@ namespace wca.compras.services
                     reqItem.RequisicaoId = 0;
                     reqItem.Valor = produto.Valor;
                     reqItem.TaxaGestao = produto.TaxaGestao;
-                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao) * reqItem.Quantidade;
+                    reqItem.PercentualIPI = produto.PercentualIPI;
+                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao + (produto.Valor * produto.PercentualIPI/100)) * reqItem.Quantidade;
                     RequisicaoItemDto item = _mapper.Map<RequisicaoItemDto>(reqItem);
                     itens.Add(item);
                 }else
@@ -485,7 +514,7 @@ namespace wca.compras.services
             // Criar o pedido
             CreateRequisicaoDto novoPedido = new CreateRequisicaoDto( (int) requisicao.FilialId, (int) requisicao.ClienteId,
                 (int) requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,usuarioId,
-                usuarioNome,itens,false, false           
+                usuarioNome,itens,false, false,requisicao.LocalEntrega,requisicao.ValorIcms, requisicao.Icms, requisicao.PeriodoEntrega          
             );
 
             var data = await Create(novoPedido, urlOrigin);
@@ -523,6 +552,26 @@ namespace wca.compras.services
             return true;
         }
 
+        public async Task<bool> EnviarRequisicao2Fornecedor(int requisicaoId, string urlOrigin)
+        {
+            try
+            {
+                Requisicao requisicao = await _rm.RequisicaoRepository.SelectByCondition(c =>  c.Id == requisicaoId).FirstOrDefaultAsync();
+
+                if (requisicao == null) { return false; }
+
+                await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"{this.GetType().Name}.EnviarRequisicao2Fornecedor.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
         #region Private Functions
         private async Task CreateRequisicaoHistorico(RequisicaoHistorico historico)
         {
@@ -538,10 +587,18 @@ namespace wca.compras.services
             }
         }
 
-        private async Task solicitarAprovacaoFornecedor (string urlOrigin, Requisicao requisicao)
+        private async Task solicitarAprovacaoFornecedor (string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
         {
             try
             {
+                //Verificar se esta configurado para enviar solicitação ao Fornecedor
+                if (checkConfiguracao == true)
+                {
+                    Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.fornecedor");
+                    if (config.Valor == "false") return;
+
+                }
+                
                 IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
@@ -713,18 +770,54 @@ namespace wca.compras.services
 
             Dictionary<int, int> QuantidadePorTipo = new Dictionary<int, int>();
 
-            QuantidadePorTipo.Add(1, 0);
-            QuantidadePorTipo.Add(2, 0);
-            QuantidadePorTipo.Add(3, 0);
+            var categorias = await _rm.TipoFornecimentoRepository.SelectByCondition(c => c.Ativo).ToListAsync();
+
+            foreach(var categoria in categorias)
+            {
+                QuantidadePorTipo.Add(categoria.Id, 0);
+            }
 
             foreach (var item in result)
             {
-                QuantidadePorTipo[1] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 1).Count() > 0 ? 1 : 0;
-                QuantidadePorTipo[2] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 2).Count() > 0 ? 1 : 0;
-                QuantidadePorTipo[3] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == 3).Count() > 0 ? 1 : 0;
-
+                foreach(int key in QuantidadePorTipo.Keys)
+                {
+                    QuantidadePorTipo[key] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == key).Count() > 0 ? 1 : 0;
+                }
             }
             return QuantidadePorTipo;
+        }
+
+        private (DateTime, DateTime) getDataCorte()
+        {
+
+            var diaHoje = DateTime.Now.Day;
+
+            DateTime dataCorteIni = DateTime.Now.AddDays(-30);
+            DateTime dataCorteFim = DateTime.Now;
+
+            Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.datacorte");
+
+            if (config != null) {
+                var diaCorte = int.Parse(config.Valor);
+
+                if (diaHoje > diaCorte)
+                {
+                    dataCorteIni = new DateTime(DateTime.Now.Year, DateTime.Now.Month, diaCorte);
+                }
+                else
+                {
+                    if (DateTime.Now.Month == 1)
+                    {
+                        dataCorteIni = new DateTime(DateTime.Now.Year - 1, DateTime.Now.Month - 1, diaCorte);
+                    }
+                    else
+                    {
+                        dataCorteIni = new DateTime(DateTime.Now.Year, DateTime.Now.Month - 1, diaCorte);
+                    }
+                }
+            }
+            
+            return (dataCorteIni, dataCorteFim);
         }
 
         #endregion

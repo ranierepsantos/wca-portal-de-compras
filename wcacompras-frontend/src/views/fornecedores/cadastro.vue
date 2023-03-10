@@ -21,23 +21,30 @@
 
                         </v-row>
                         <v-row>
-                            <v-col>
+                            <v-col cols="4">
                                 <v-text-field label="Inscrição Estadual" v-model="fornecedor.inscricaoEstadual"
                                     type="text" required density="compact" variant="outlined" color="primary"
                                     v-maska="'###.###.###.###'"
                                     :rules="[(v) => !!v || 'Campo é obrigatório']"></v-text-field>
                             </v-col>
-                            <v-col>
+                            <v-col cols="4">
                                 <v-select label="Matriz/Filial" :items="filiais" variant="outlined" color="primary"
                                     item-title="text" item-value="value" v-model="fornecedor.filialId"
                                     :disabled="(authStore.user.filial != 1)" density="compact"
                                     :rules="[(v) => !!v || 'Filial é obrigatório']"></v-select>
                             </v-col>
                             <v-col>
+                                <v-text-field-money label-text="ICMS (%)" v-model="fornecedor.icms"
+                                    color="primary" :number-decimal="2"
+                                    :rules="[(v) => parseFloat(v) < 100 || 'O percentual deve ser no máximo 99.99%']"
+                                    ></v-text-field-money>
+                            </v-col>
+                            <v-col>
                                 <v-checkbox v-model="fornecedor.ativo" color="primary" label="Ativo?" density="compact"
                                     v-show="fornecedor.id > 0">
                                 </v-checkbox>
                             </v-col>
+                            
                         </v-row>
                         <v-row>
                             <v-col>
@@ -198,6 +205,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import fornecedorService from '@/services/fornecedor.service';
 import filialService from "@/services/filial.service";
 import { mask } from "maska"
+import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 
 // VARIABLES
 const authStore = useAuthStore()
