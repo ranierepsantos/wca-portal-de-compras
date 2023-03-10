@@ -20,7 +20,9 @@ namespace wca.compras.domain.Dtos
         ListItem Usuario,
         ListItem Fornecedor,
         IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
-        IList<RecorrenciaLogDto> RecorrenciaLogs
+        IList<RecorrenciaLogDto> RecorrenciaLogs,
+        string LocalEntrega,
+        string PeriodoEntrega
     );
 
     public record EnabledRecorrenciaDto (
@@ -36,7 +38,9 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] int TipoRecorrencia,
         [Required(ErrorMessage = "O campo é obrigatório!")] int Dia,
         EnumDestinoRequisicao Destino,
-        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos
+        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string LocalEntrega,
+        string PeriodoEntrega = ""
     );
     public record UpdateRecorrenciaDto(
         [Required(ErrorMessage = "O campo é obrigatório!")] int Id,
@@ -48,9 +52,11 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] int Dia,
         bool Ativo,
         EnumDestinoRequisicao Destino,
-        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos
+        [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string LocalEntrega,
+        string PeriodoEntrega = ""
     );
-
+    
     public record RecorrenciaProdutoDto(
         int Id ,
         int RecorrenciaId ,

@@ -208,11 +208,11 @@ namespace wca.compras.services
                 .Include(n => n.Usuario)
                 .ToListAsync();
 
-            decimal requisicaoValorTotal = 0;
-            decimal requisicaoTaxaGestao = 0;
-
             foreach (var item in lista )
             {
+                decimal requisicaoValorTotal = 0;
+                decimal requisicaoTaxaGestao = 0;
+
                 // montar a lista de produtos
                 List<RequisicaoItemDto> produtos = new List<RequisicaoItemDto>();
                 foreach (var recorrenciaProduto in item.RecorrenciaProdutos) {
@@ -239,8 +239,10 @@ namespace wca.compras.services
                 {
                     try
                     {
+                        var valorICMS = decimal.Parse((requisicaoValorTotal * item.Fornecedor.Icms / 100).ToString("n2"));
+
                         var pedido = new CreateRequisicaoDto(item.FilialId, item.ClienteId, item.FornecedorId, requisicaoValorTotal, requisicaoTaxaGestao, item.Destino,
-                                                             item.UsuarioId, item.Usuario.Nome, produtos, false, false);
+                                                             item.UsuarioId, item.Usuario.Nome, produtos, false, false,item.LocalEntrega, valorICMS,item.Fornecedor.Icms,item.PeriodoEntrega);
 
                         var requisicao = await requisicaoService.Create(pedido, item.UrlOrigin);
 

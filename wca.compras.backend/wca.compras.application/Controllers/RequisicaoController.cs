@@ -299,5 +299,35 @@ namespace wca.compras.webapi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        /// <summary>
+        /// Envia requisição para aprovação do fornecedor
+        /// </summary>
+        /// <returns>NoContent</returns>
+        /// <param name="requisicaoId"></param>
+        [HttpPut]
+        [Route("SolicitarAprovacaoFornecedor/{requisicaoId}")]
+        [Authorize("Bearer")]
+        public async Task<ActionResult> SolicitarAprovacaoFornecedor(int requisicaoId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await service.EnviarRequisicao2Fornecedor(requisicaoId, Request.Headers["origin"]);
+
+                if (result == false)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }

@@ -56,7 +56,7 @@
                     <td class="text-center">{{ new Date(item.dataCriacao).toLocaleDateString() }}</td>
                     <td class="text-left">{{ item.cliente.nome }}</td>
                     <td class="text-left">{{ item.fornecedor.text }}</td>
-                    <td class="text-right">{{ item.valorTotal.toFixed(2) }}</td>
+                    <td class="text-right">{{ parseFloat(item.valorTotal.toFixed(2)).toLocaleString("pt-BR", {style: "currency", currency: "BRL"}) }}</td>
                     <td class="text-center"><v-btn :color="getStatus(item.status).color" variant="tonal"
                             density="compact" class="text-center"> {{
                                 getStatus(item.status).text

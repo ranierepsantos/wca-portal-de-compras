@@ -1,11 +1,24 @@
 <template>
     <v-text-field density="compact" type="number" :model-value="initialDecimalNumber(modelValue, 2)" :label="labelText"
-        variant="outlined" :color="color" class="right-input" :rules="fieldRules"
+        variant="outlined" :color="color" class="right-input" :rules="fieldRules" :prefix="prefix" :suffix="sufix"
         @input="$emit('update:modelValue', toDecimalNumber($event.target.value, numberDecimal))">
     </v-text-field>
 </template>
 
-<script>
+<script setup>
+
+const props = defineProps({
+    modelValue: [String, Number],
+    numberDecimal: Number,
+    labelText: String,
+    color: String,
+    fieldRules: Object,
+    prefix: {String,default:""},
+    sufix: {String,default:""}
+})
+// defines what events our component emits
+defineEmits(['update:modelValue'])
+
 function initialDecimalNumber(value, numberOfDecimal)
 {
 
@@ -33,19 +46,6 @@ function toDecimalNumber(value, numberOfDecimal)
     num = parseInt(num.toString().replace(".", "")) / 10 ** numberOfDecimal;
     return num.toFixed(numberOfDecimal);
 }
-
-</script>
-<script setup>
-
-const props = defineProps({
-    modelValue: [String, Number],
-    numberDecimal: Number,
-    labelText: String,
-    color: String,
-    fieldRules: Object
-})
-// defines what events our component emits
-defineEmits(['update:modelValue'])
 
 </script>
 

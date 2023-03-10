@@ -1,7 +1,9 @@
 <template>
     <div>
         <bread-crumbs :title="'Pedido #' + requisicao.id" :show-button="false" :custom-button-show="podeEditar" custom-button-text="Salvar"
-            @customClick="salvar()" />
+            @customClick="salvar()"
+            :buttons="[{text: 'Fornecedor Solicitar Aprovação', icon:'mdi-email-arrow-right-outline', event:'EmailFornecedorClick'}]"
+            @email-fornecedor-click="enviarEmailFornecedor()" />
         <v-form ref="formCadastro">
             <v-row>
                 <v-col cols="5">
@@ -57,7 +59,7 @@
                 </v-col>
                 <v-col cols="2" class="text-center">
                     <v-btn :color="getStatus(requisicao.status).color" variant="tonal" density="compact"
-                        class="text-center">
+                        class="text-center" >
                         {{ getStatus(requisicao.status).text }}
                     </v-btn>
                 </v-col>
@@ -125,10 +127,10 @@
                 <tr v-for="item in requisicao.requisicaoItens" :key="item.id">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
-                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
-                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
                     <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
-                    <td class="text-right">{{ retornarValorTotalProduto(item) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
                             :hide-details="true" class="sm ml-12" v-model="item.quantidade" min=0
@@ -137,7 +139,7 @@
                         <span v-else>{{ item.quantidade }}</span>
                     </td>
                     <td class="text-right">
-                        {{ (retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2) }}
+                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2)) }}
                     </td>
                     <td class="text-center" v-show="podeEditar">
                         <v-btn icon="mdi-package-variant-minus" variant="plain" color="red" title="Remover Produto"
@@ -148,10 +150,10 @@
                 <tr v-for="item in produtos" :key="item.id" class="text-grey" v-show="podeEditar">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
-                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
-                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
                     <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
-                    <td class="text-right">{{ retornarValorTotalProduto(item) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
                             :hide-details="true" class="sm ml-12" v-model="item.quantidade" min="0"
@@ -159,7 +161,7 @@
                         </v-text-field>
                     </td>
                     <td class="text-right">
-                        {{ (retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2) }}
+                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2)) }}
                     </td>
                     <td class="text-center">
                         <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
@@ -171,11 +173,11 @@
             <tfoot>
                 <tr style="font-weight:600;">
                     <td colspan="2" class="text-right">SUBTOTAL:</td>
-                    <td class="text-right">{{ (requisicao.valorTotal - requisicao.valorIcms).toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL((requisicao.valorTotal - requisicao.valorIcms).toFixed(2)) }}</td>
                     <td class="text-right">ICMS:</td>
-                    <td class="text-right">{{ requisicao.valorIcms }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(requisicao.valorIcms) }}</td>
                     <td colspan="2" class="text-right">TOTAL PEDIDO:</td>
-                    <td class="text-right">{{ valorTotalPedido }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(valorTotalPedido) }}</td>
                     <td></td>
                 </tr>
             </tfoot>
@@ -269,7 +271,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import { useAuthStore } from "@/store/auth.store";
 import fornecedorService from "@/services/fornecedor.service";
-import { status, compararValor, retornarValorTotalProduto, diasDaSemana } from "@/helpers/functions"
+import { status, compararValor, retornarValorTotalProduto, diasDaSemana,formatToCurrencyBRL } from "@/helpers/functions"
 import router from "@/router";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
@@ -429,6 +431,27 @@ function calcularOrcamentoTotais() {
     }
 }
 
+async function enviarEmailFornecedor() {
+    try {
+        
+        await requisicaoService.enviarEmailFornecedor(requisicao.value.id)
+
+        await swal.fire({
+            toast: true,
+            icon: "success",
+            index: "top-end",
+            title: "Sucesso!",
+            text: "Solicitação enviada com sucesso!",
+            showConfirmButton: false,
+            timer: 2000,
+        })
+
+    } catch (error) {
+        console.log("finalizarPedido.error", error)
+        handleErrors(error)
+    }
+}
+
 async function finalizarPedido() {
     try {
         let data = {
@@ -457,7 +480,6 @@ async function finalizarPedido() {
     }
 }
 
-
 function formatarDataHora(dataHora) {
     return (new Date(dataHora)).toLocaleString('pt-BR')
 }
@@ -472,7 +494,6 @@ async function getProdutosToList(fornecedorId) {
         isLoadingProduto.value = true;
         let response = await fornecedorService.produtoPaginate(fornecedorId, 99999, 1, filter.value, true);
         produtos.value = response.data.items;
-        debugger
         for (let index = 0; index < requisicao.value.requisicaoItens.length; index++) {
             let item = requisicao.value.requisicaoItens[index];
             produtoRemoveFromList(item)
@@ -490,7 +511,6 @@ async function getRequisicaoData(id) {
         isBusy.value = true;
         let response = await requisicaoService.getById(id);
         let data = response.data
-        debugger;
         data.requisicaoHistorico.sort(compararValor("dataHora", "desc"))
         if (data.periodoEntrega == null || data.periodoEntrega.trim() == "") {
             data.periodoEntrega = requisicao.value.periodoEntrega

@@ -35,7 +35,9 @@ namespace wca.compras.domain.Dtos
         Cliente Cliente,
         ListItem Usuario,
         IList<RequisicaoItemDto> RequisicaoItens,
-        string NomeAprovador = ""
+        string NomeAprovador = "",
+        string LocalEntrega ="",
+        string PeriodoEntrega =""
     );
 
     public record AprovarRequisicaoDto(

@@ -37,11 +37,11 @@
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-center">{{ getTipoFornecimentoNome(item.tipoFornecimentoId) }}</td>
-                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
                     <td class="text-center">{{ item.unidadeMedida }}</td>
-                    <td class="text-right">{{ item.taxaGestao?.toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao?.toFixed(2)) }}</td>
                     <td class="text-right">{{ item.percentualIPI?.toFixed(2) }} %</td>
-                    <td class="text-right">{{ retornarValorTotalProduto(item) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-right">
                         <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"
                             title="Editar"></v-btn>
@@ -82,16 +82,16 @@
                         <v-row>
                             <v-col>
                                 <v-text-field-money label-text="Valor" v-model="produto.valor" color="primary"
-                                    :number-decimal="2" :field-rules="produtoValorRules"></v-text-field-money>
+                                    :number-decimal="2" :field-rules="produtoValorRules" prefix="R$"></v-text-field-money>
                             </v-col>
 
                             <v-col>
                                 <v-text-field-money label-text="Taxa Gestão" v-model="produto.taxaGestao"
-                                    color="primary" :number-decimal="2"></v-text-field-money>
+                                    color="primary" :number-decimal="2" prefix="R$"></v-text-field-money>
                             </v-col>
                             <v-col>
                                 <v-text-field-money label-text="IPI (%)" v-model="produto.percentualIPI"
-                                    color="primary" :number-decimal="2"
+                                    color="primary" :number-decimal="2" sufix="%"
                                     :rules="[(v) => parseFloat(v) < 100 || 'O percentual deve ser no máximo 99.99%']"
                                     ></v-text-field-money>
                             </v-col>
@@ -109,7 +109,7 @@
                                 </v-text-field>
                             </v-col>
                             <v-col>
-                                <v-text-field label="Valor Total" type="text"
+                                <v-text-field label="Valor Total" type="text" prefix="R$"
                                     required variant="outlined" color="primary" :model-value="retornarValorTotalProduto(produto)"
                                     density="compact" :readonly="true" class="right-input">
                                 </v-text-field>
@@ -138,7 +138,7 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import { toBase64, realizarDownload, retornarValorTotalProduto } from "@/helpers/functions";
+import { toBase64, realizarDownload, retornarValorTotalProduto, formatToCurrencyBRL } from "@/helpers/functions";
 
 
 //DATA
@@ -209,6 +209,7 @@ function clearFormData()
         nome: null,
         valor: 0,
         taxaGestao: 0,
+        percentualIPI: 0,
         tipoFornecimentoId: null,
         unidadeMedida: ""
     }

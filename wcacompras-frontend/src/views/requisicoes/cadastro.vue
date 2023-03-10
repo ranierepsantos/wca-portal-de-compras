@@ -71,7 +71,7 @@
                             title="Valor Máximo Pedido" class="mt-2">
                         </v-progress-linear>
                         <span style="font-size:12px;" class="text-grey">
-                            {{ valorTotalPedido }} / {{ cliente.valorLimiteRequisicao.toFixed(2) }}
+                            {{ formatToCurrencyBRL(valorTotalPedido) }} / {{ formatToCurrencyBRL(cliente.valorLimiteRequisicao.toFixed(2)) }}
                         </span>
                     </v-col>
                 </v-row>
@@ -98,18 +98,20 @@
                 <tr v-for="item in requisicao.requisicaoItens" :key="item.id">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
-                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
-                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
                     <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
-                    <td class="text-right">{{ retornarValorTotalProduto(item) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
-                            :hide-details="true" class="ml-12" v-model="item.quantidade" min="0"
+                            :hide-details="true" class="sm ml-12" v-model="item.quantidade" min=0
                             @change="adicionarRemoverProduto(item)">
                         </v-text-field>
+
                     </td>
                     <td class="text-right">
-                        {{ (retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2) }}
+                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 :
+                            item.quantidade)).toFixed(2)) }}
                     </td>
                     <td class="text-center">
                         <v-btn icon="mdi-package-variant-minus" variant="plain" color="red" title="Remover Produto"
@@ -120,10 +122,10 @@
                 <tr v-for="item in produtos" :key="item.id" class="text-grey">
                     <td class="text-left">{{ item.codigo }}</td>
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
-                    <td class="text-right">{{ item.valor.toFixed(2) }}</td>
-                    <td class="text-right">{{ item.taxaGestao.toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
                     <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
-                    <td class="text-right">{{ retornarValorTotalProduto(item) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
                             :hide-details="true" class="sm ml-12" v-model="item.quantidade" min="0"
@@ -131,7 +133,8 @@
                         </v-text-field>
                     </td>
                     <td class="text-right">
-                        {{ (retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2) }}
+                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 :
+                            item.quantidade)).toFixed(2)) }}
                     </td>
                     <td class="text-center">
                         <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
@@ -143,11 +146,12 @@
             <tfoot>
                 <tr style="font-weight:600;">
                     <td colspan="2" class="text-right">SUBTOTAL:</td>
-                    <td class="text-right">{{ (requisicao.valorTotal - requisicao.valorIcms).toFixed(2) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL((requisicao.valorTotal - requisicao.valorIcms).toFixed(2))
+                    }}</td>
                     <td class="text-right">ICMS:</td>
-                    <td class="text-right">{{ requisicao.valorIcms }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(requisicao.valorIcms) }}</td>
                     <td colspan="2" class="text-right">TOTAL PEDIDO:</td>
-                    <td class="text-right">{{ valorTotalPedido }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(valorTotalPedido) }}</td>
                     <td></td>
                 </tr>
             </tfoot>
@@ -193,7 +197,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import { useAuthStore } from "@/store/auth.store";
 import fornecedorService from "@/services/fornecedor.service";
-import { compararValor, retornarValorTotalProduto, diasDaSemana } from "@/helpers/functions"
+import { compararValor, retornarValorTotalProduto, diasDaSemana, formatToCurrencyBRL } from "@/helpers/functions"
 import router from "@/router";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import clienteService from "@/services/cliente.service";
@@ -434,7 +438,6 @@ async function removeProdutoRequisicao(item) {
 async function salvar() {
     try {
         isBusy.value = true;
-
         let { valid } = await formCadastro.value.validate();
         hasProduto.value = requisicao.value.requisicaoItens.length > 0
 
@@ -527,5 +530,4 @@ async function salvar() {
 <style scoped>
 table .v-text-field {
     width: 80px;
-}
-</style>
+}</style>

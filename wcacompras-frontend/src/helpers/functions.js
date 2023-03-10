@@ -130,3 +130,7 @@ export const retornarValorTotalProduto = function (produto)
 
     return (valor + taxaGestao + (valor * ipi / 100)).toFixed(2);
 }
+
+export const formatToCurrencyBRL = function (valor) {
+    return parseFloat(valor).toLocaleString("pt-BR", {style: "currency", currency: "BRL"})
+}

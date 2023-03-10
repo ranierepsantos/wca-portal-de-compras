@@ -61,6 +61,7 @@ export const route = {
     requisicaoDownloadById: "Requisicao/ExportExcel/{id}",
     requisicaoDownloadByToken: "Requisicao/ExportExcel/{token}",
     requisicaoFinalizar: "Requisicao/FinalizarPedido",
+    requisicaoEnviarEmailFornecedor: "Requisicao/SolicitarAprovacaoFornecedor/{requisicaoId}",
     
 
     tipoFornecimentoCreate: "TipoFornecimento",

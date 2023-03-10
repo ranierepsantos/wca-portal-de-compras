@@ -92,7 +92,7 @@
                                 <v-row>
                                     <v-col><v-checkbox v-model="cliente.naoUltrapassarLimitePorRequisicao" label="Não ultrapassar o valor limite por requisição" color="primary" :hide-details="true" density="compact"></v-checkbox>
                                 </v-col>
-                                    <v-col cols="4"><v-text-field-money label-text="" v-model="cliente.valorLimiteRequisicao" color="primary"
+                                    <v-col cols="4"><v-text-field-money label-text="" v-model="cliente.valorLimiteRequisicao" color="primary" prefix="R$"
                                     :number-decimal="2" :hide-details="true" density="compact" :disabled="!cliente.naoUltrapassarLimitePorRequisicao"></v-text-field-money></v-col>
                                 </v-row>
                             </v-col>
@@ -122,7 +122,7 @@
                                 <v-checkbox color="primary" v-model="item.ativo" density="compact" :label= "getTipoFornecimentoNome(item.tipoFornecimentoId)" :hide-details="true"></v-checkbox>
                             </v-col>
                             <v-col cols="2">
-                                <v-text-field-money label-text="" v-model="item.valorPedido" color="primary"
+                                <v-text-field-money label-text="" v-model="item.valorPedido" color="primary" prefix="R$"
                                     :number-decimal="2" :disabled="!item.ativo"></v-text-field-money>
                             </v-col>
                             <v-col class="text-left" cols="2">
@@ -130,8 +130,9 @@
                                     color="primary" :hide-details="true" type="number" class="text-left" min="0" :disabled="!item.ativo" />
                             </v-col>
                             <v-col class="text-left" cols="2">
-                                <v-text-field v-model="item.tolerancia" density="compact" variant="outlined" color="primary"
-                                    :hide-details="true" type="number" min="0" max="100" :disabled="!item.ativo" />
+                                <v-text-field-money label-text="" v-model="item.tolerancia" color="primary" sufix="%"
+                                    :number-decimal="2" :disabled="!item.ativo"></v-text-field-money>
+                                
                             </v-col>
                             <v-col class="text-left" cols="3">
                                 <v-select v-model="item.aprovadoPor" :items="aprovadorList" density="compact" :disabled="!item.ativo"

@@ -79,8 +79,10 @@ namespace wca.compras.services
                 if (!string.IsNullOrEmpty(createRequisicaoDto.UsuarioAutorizador))
                 {
                     data.RequerAutorizacaoWCA = false;
-                    if (data.RequerAutorizacaoCliente == false) data.Status = EnumStatusRequisicao.APROVADO;
                 }
+
+                if (data.RequerAutorizacaoCliente == false && data.RequerAutorizacaoWCA ==false) 
+                    data.Status = EnumStatusRequisicao.APROVADO;
 
                 await _rm.SaveAsync();
 
@@ -151,7 +153,6 @@ namespace wca.compras.services
         {
             try
             {
-
                var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
                     .SelectByCondition(c => c.TokenAprovador == tokenAprovacao)
                     .FirstOrDefaultAsync();
@@ -179,7 +180,9 @@ namespace wca.compras.services
                     data.Cliente,
                     _mapper.Map<ListItem>(data.Usuario), 
                     _mapper.Map<IList<RequisicaoItemDto>>(data.RequisicaoItens), 
-                    requisicaoAprovacao.NomeAprovador
+                    requisicaoAprovacao.NomeAprovador,
+                    data.LocalEntrega,
+                    data.PeriodoEntrega
                 );
                 return dto;
             }
@@ -444,7 +447,7 @@ namespace wca.compras.services
                 ws.Cell("C1").SetValue(requisicao.Id);
                 ws.Cell("C3").SetValue(requisicao.Cliente.Nome);
                 ws.Cell("C4").SetValue(requisicao.Cliente.CNPJ);
-                ws.Cell("C5").SetValue(requisicao.Cliente.Endereco);
+                ws.Cell("C5").SetValue(requisicao.LocalEntrega);
                 ws.Cell("C6").SetValue(requisicao.Usuario.Text);
 
                 var row = 9;
@@ -549,6 +552,26 @@ namespace wca.compras.services
             return true;
         }
 
+        public async Task<bool> EnviarRequisicao2Fornecedor(int requisicaoId, string urlOrigin)
+        {
+            try
+            {
+                Requisicao requisicao = await _rm.RequisicaoRepository.SelectByCondition(c =>  c.Id == requisicaoId).FirstOrDefaultAsync();
+
+                if (requisicao == null) { return false; }
+
+                await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"{this.GetType().Name}.EnviarRequisicao2Fornecedor.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
         #region Private Functions
         private async Task CreateRequisicaoHistorico(RequisicaoHistorico historico)
         {
@@ -564,14 +587,18 @@ namespace wca.compras.services
             }
         }
 
-        private async Task solicitarAprovacaoFornecedor (string urlOrigin, Requisicao requisicao)
+        private async Task solicitarAprovacaoFornecedor (string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
         {
             try
             {
                 //Verificar se esta configurado para enviar solicitação ao Fornecedor
-                Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.fornecedor");
-                if (config.Valor == "false") return;
+                if (checkConfiguracao == true)
+                {
+                    Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.fornecedor");
+                    if (config.Valor == "false") return;
 
+                }
+                
                 IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
