@@ -159,6 +159,7 @@
 
         <v-row class="mt-10">
             <v-col cols="2" class="text-right" v-for="config in orcamento" :key="config.tipoFornecimentoId">
+                <span style="font-size:12px;" class="text-grey text-left">{{ getTipoFornecimentoNome(config.tipoFornecimentoId) }}</span>
                 <v-progress-linear :color="config.percentual > 100 ? 'red' : config.percentual > 60 ? 'warning' : 'success'"
                     :model-value="config.valorTotal" :max="config.valorPedido * (1 + config.tolerancia / 100)" :height="7"
                     :title="getTipoFornecimentoNome(config.tipoFornecimentoId)"></v-progress-linear>
@@ -498,8 +499,11 @@ async function salvar() {
                     }
                     data.requerAutorizacaoWCA = false
                     data.usuarioAutorizador = result.value.usuarioNome
+                }else 
+                {
+                    data.requerAutorizacaoWCA = false
+                    data.usuarioAutorizador = authStore.user.nome
                 }
-                data.requerAutorizacaoWCA = false
             }
 
             //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
