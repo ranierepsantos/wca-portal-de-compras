@@ -125,7 +125,7 @@ const routes = [
       {
         path: 'app/recorrencias',
         name: 'recorrencias',
-        meta: {permissao:"recorrencias|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencia|recorrencias_view_others_users"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route

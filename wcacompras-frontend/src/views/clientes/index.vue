@@ -138,7 +138,6 @@ async function remove(item)
         if (response.isConfirmed)
         {
             await clienteService.remove(item.id);
-            debugger
             if (users.value.length == 1)
             {
                 page.value--;

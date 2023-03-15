@@ -204,7 +204,7 @@ const filter = ref("");
 const hasProduto = ref(true);
 const pageTitle = ref("Recorrência")
 const openPeriodoForm = ref(false)
-let clienteHasChange = false;
+let clienteHasChange = true;
 //VUE METHODS
 onMounted(async () => {
     let recorrenciaId = route.params.codigo;
@@ -213,6 +213,7 @@ onMounted(async () => {
     await getFornecedorToList(authStore.user.filial)
     if (recorrenciaId != undefined && recorrenciaId > 0) {
         pageTitle.value += " - Edição"
+        clienteHasChange = false
         await getRecorrencia(recorrenciaId)
     } else {
         pageTitle.value += " - Cadastro"

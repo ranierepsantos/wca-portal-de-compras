@@ -71,7 +71,8 @@
                             title="Valor Máximo Pedido" class="mt-2">
                         </v-progress-linear>
                         <span style="font-size:12px;" class="text-grey">
-                            {{ formatToCurrencyBRL(valorTotalPedido) }} / {{ formatToCurrencyBRL(cliente.valorLimiteRequisicao.toFixed(2)) }}
+                            {{ formatToCurrencyBRL(valorTotalPedido) }} / {{
+                                formatToCurrencyBRL(cliente.valorLimiteRequisicao.toFixed(2)) }}
                         </span>
                     </v-col>
                 </v-row>
@@ -159,7 +160,8 @@
 
         <v-row class="mt-10">
             <v-col cols="2" class="text-right" v-for="config in orcamento" :key="config.tipoFornecimentoId">
-                <span style="font-size:12px;" class="text-grey text-left">{{ getTipoFornecimentoNome(config.tipoFornecimentoId) }}</span>
+                <span style="font-size:12px;" class="text-grey text-left">{{
+                    getTipoFornecimentoNome(config.tipoFornecimentoId) }}</span>
                 <v-progress-linear :color="config.percentual > 100 ? 'red' : config.percentual > 60 ? 'warning' : 'success'"
                     :model-value="config.valorTotal" :max="config.valorPedido * (1 + config.tolerancia / 100)" :height="7"
                     :title="getTipoFornecimentoNome(config.tipoFornecimentoId)"></v-progress-linear>
@@ -349,8 +351,10 @@ function calcularOrcamentoTotais() {
     for (let idx = 0; idx < requisicao.value.requisicaoItens.length; idx++) {
         let item = requisicao.value.requisicaoItens[idx]
         let index = orcamento.value.findIndex(o => o.tipoFornecimentoId == item.tipoFornecimentoId);
-        orcamento.value[index].valorTotal += item.quantidade * parseFloat(retornarValorTotalProduto(item));
-        orcamento.value[index].percentual = (orcamento.value[index].valorTotal / (orcamento.value[index].valorPedido * (1 + orcamento.value[index].tolerancia / 100))) * 100
+        if (index != -1) {
+            orcamento.value[index].valorTotal += item.quantidade * parseFloat(retornarValorTotalProduto(item));
+            orcamento.value[index].percentual = (orcamento.value[index].valorTotal / (orcamento.value[index].valorPedido * (1 + orcamento.value[index].tolerancia / 100))) * 100
+        }
     }
 }
 function clearOrcamentoTotais() {
@@ -499,8 +503,7 @@ async function salvar() {
                     }
                     data.requerAutorizacaoWCA = false
                     data.usuarioAutorizador = result.value.usuarioNome
-                }else 
-                {
+                } else {
                     data.requerAutorizacaoWCA = false
                     data.usuarioAutorizador = authStore.user.nome
                 }
@@ -534,4 +537,5 @@ async function salvar() {
 <style scoped>
 table .v-text-field {
     width: 80px;
-}</style>
+}
+</style>
