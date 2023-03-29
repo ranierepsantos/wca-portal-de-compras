@@ -42,6 +42,9 @@ namespace wca.compras.domain.Entities
         [Column("tipofornecimento_id")]
         public int TipoFornecimentoId { get; set; }
 
+        [Column("icms", TypeName = "money")]
+        public decimal Icms { get; set; } = decimal.Zero;
+
         [JsonIgnore]
         public TipoFornecimento TipoFornecimento { get; set; }
 

@@ -66,6 +66,37 @@ export const TipoCampo = [
     {value: 5, text: 'combo'},
 ]
 
+export const Estados = [
+    {value: 'AC', text: 'Acre'},
+    {value: 'AL', text: 'Alagoas'},
+    {value: 'AP', text: 'Amapá'},
+    {value: 'AM', text: 'Amazonas'},
+    {value: 'BA', text: 'Bahia'},
+    {value: 'CE', text: 'Ceará'},
+    {value: 'DF', text: 'Distrito Federal'},
+    {value: 'ES', text: 'Espírito Santo'},
+    {value: 'GO', text: 'Goiás'},
+    {value: 'MA', text: 'Maranhão'},
+    {value: 'MT', text: 'Mato Grosso'},
+    {value: 'MS', text: 'Mato Grosso do Sul'},
+    {value: 'MG', text: 'Minas Gerais'},
+    {value: 'PA', text: 'Pará'},
+    {value: 'PB', text: 'Paraíba'},
+    {value: 'PR', text: 'Paraná'},
+    {value: 'PE', text: 'Pernambuco'},
+    {value: 'PI', text: 'Piauí'},
+    {value: 'RJ', text: 'Rio de Janeiro'},
+    {value: 'RN', text: 'Rio Grande do Norte'},
+    {value: 'RS', text: 'Rio Grande do Sul'},
+    {value: 'RO', text: 'Rondônia'},
+    {value: 'RR', text: 'Roraima'},
+    {value: 'SC', text: 'Santa Catarina'},
+    {value: 'SP', text: 'São Paulo'},
+    {value: 'SE', text: 'Sergipe'},
+    {value: 'TO', text: 'Tocantins'}
+]
+
+
 export const compararValor = function (key, order = "asc") {
     return function (a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
@@ -127,8 +158,17 @@ export const retornarValorTotalProduto = function (produto)
     let valor=  parseFloat(produto.valor)
     let taxaGestao = parseFloat(produto.taxaGestao)
     let ipi = parseFloat(produto.percentualIPI)
+    let icms = parseFloat(produto.icms)
 
-    return (valor + taxaGestao + (valor * ipi / 100)).toFixed(2);
+    let valorIcms = 0
+    if (produto.hasOwnProperty("icms")) {
+        valorIcms = parseFloat((valor * icms/100).toFixed(2))
+    }
+    let valorIpi = parseFloat((valor * ipi/100).toFixed(2))
+    
+    let valorTotalProduto = (valor + taxaGestao + valorIcms + valorIpi).toFixed(2)
+
+    return valorTotalProduto;
 }
 
 export const formatToCurrencyBRL = function (valor) {

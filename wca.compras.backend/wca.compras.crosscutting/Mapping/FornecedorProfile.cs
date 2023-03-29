@@ -28,6 +28,7 @@ namespace wca.compras.crosscutting.Mapping
             CreateMap<UpdateProdutoDto, Produto>().ReverseMap();
 
             CreateMap<FornecedorContato, FornecedorContatoDto>().ReverseMap();
+            CreateMap<ProdutoIcmsEstado, ProdutoIcmsEstadoDto>().ReverseMap();
         }
     }
 }

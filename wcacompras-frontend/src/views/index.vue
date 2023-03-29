@@ -75,7 +75,7 @@ const menuItems = ref([
     title: "Categorias",
     value: 2,
     route: "/app/categorias",
-    permissao: "livre"
+    permissao: "categoria"
   },
   {
     title: "Clientes",

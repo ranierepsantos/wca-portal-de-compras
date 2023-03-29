@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MiniExcelLibs;
+using System.Linq;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -89,12 +91,14 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.ProdutoRepository.SelectByCondition(p => p.Id == id && p.FornecedorId == fornecedorId)
+                var query = _rm.ProdutoRepository
+                    .SelectByCondition(p => p.Id == id && p.FornecedorId == fornecedorId)
+                    .Include(p => p.ProdutoIcmsEstado)
                     .Include("Fornecedor");
 
                 if (filialId > 1)
                     query = query.Where(c => c.Fornecedor.FilialId == filialId);
-
+                
                 var data = await query.FirstOrDefaultAsync();
 
                 return _mapper.Map<ProdutoDto>(data);
@@ -138,42 +142,62 @@ namespace wca.compras.services
                     return false;
                 }
 
-                var produtos = await _rm.ProdutoRepository
-                            .SelectByCondition(c => c.FornecedorId.Equals(importProdutoDto.FornecedorId))
-                            .ToListAsync();
+                //EXCLUIR A RELAÇÃO PRODUTO X ICMS X ESTADO dos produto do fornecedor
+                string command = "DELETE pi FROM produto_icms_estado pi " 
+                               + "INNER JOIN produtos po ON po.id = pi.produto_id "
+                               + $"WHERE po.fornecedor_id = {fornecedorId}";
 
-                foreach (var produto in produtos)
-                {
-                    _rm.ProdutoRepository.Delete(produto);
-                }
+                await _rm.ExecuteCommandAsync(command);
 
+                //EXCLUIR TODOS OS PRODUTOS DO FORNECEDOR
+                command = $"DELETE FROM produtos WHERE fornecedor_id = {fornecedorId}";
+                
+                await _rm.ExecuteCommandAsync(command);
+
+
+                //TRAZER AS CATEGORIAS
                 var categorias = await _rm.TipoFornecimentoRepository.SelectAll().ToListAsync();
 
                 // ler o arquivo
                 byte[] arquivo = Convert.FromBase64String(importProdutoDto.Arquivo);
                 MemoryStream ms = new MemoryStream(arquivo);
                 var sheets = MiniExcel.GetSheetNames(ms);
+                string codigoProduto = string.Empty;
+
+                Produto  produto = new Produto();
+
                 for (var idx = 0; idx < sheets.Count; idx++)
                 {
                     var rows = MiniExcel.Query(ms, sheetName: sheets[idx]).Skip(1).ToList();
+                    
                     for (var index = 0; index < rows.Count; index++)
                     {
-                        var produto = new Produto
-                        {
-                            Codigo = rows[index].A.ToString(),
-                            FornecedorId = importProdutoDto.FornecedorId,
-                            Nome = rows[index].B,
-                            TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.Contains(rows[index].C)).Id,
-                            UnidadeMedida = rows[index].D,
-                            Valor = (decimal)rows[index].E,
-                            TaxaGestao = (decimal)rows[index].F,
-                            PercentualIPI = (decimal)rows[index].G
-                        };
 
-                        _rm.ProdutoRepository.Create(produto);
+                        if (codigoProduto != rows[index].A.ToString())
+                        {
+                            produto = new Produto
+                            {
+                                Codigo = rows[index].A.ToString(),
+                                FornecedorId = importProdutoDto.FornecedorId,
+                                Nome = rows[index].B,
+                                TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.Contains(rows[index].C)).Id,
+                                UnidadeMedida = rows[index].D,
+                                Valor = (decimal)rows[index].E,
+                                TaxaGestao = (decimal)rows[index].F,
+                                PercentualIPI = (decimal)rows[index].G,
+                            };
+                            codigoProduto = produto.Codigo;
+                            _rm.ProdutoRepository.Attach(produto);
+                        }
+
+                        produto.ProdutoIcmsEstado.Add(new ProdutoIcmsEstado() {
+                            UF = rows[index].H,
+                            Icms = (decimal)rows[index].I
+                        });
                     }
+                    await _rm.SaveAsync();
                 }
-                await _rm.SaveAsync();
+                
                 return true;
             }
             catch (Exception ex)
@@ -213,12 +237,11 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "", int usuarioId = 0)
+        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "")
         {
             try
             {
                 var query = _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId);
-                    
                 
                 //Matriz (id: 1) retorna todos os dados
                 if (filialId > 1)
@@ -231,14 +254,7 @@ namespace wca.compras.services
                 {
                     query = query.Where(q => q.Nome.Contains(termo) || q.Codigo.Contains(termo));
                 }
-
-                if (usuarioId> 0)
-                {
-                    query = query.Include(n => n.TipoFornecimento)
-                        .ThenInclude(n => n.Usuario)
-                        .Where(c => c.TipoFornecimento.Ativo && c.TipoFornecimento.Usuario.Any(c => c.Id == usuarioId));
-                }
-
+                
                 query = query.OrderBy(p => p.Nome);
 
                 var pagination = Pagination<ProdutoDto>.ToPagedList(_mapper, query, page, pageSize);
@@ -251,6 +267,57 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
+
+        public async Task<IList<ProdutoWithIcmsDto>> ListProdutoByFornecedorWithIcms(int filialId, int fornecedorId, string uf, int usuarioId, string? termo = "")
+        {
+            try
+            {
+                var query = _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId);
+                query = query.Include(p => p.ProdutoIcmsEstado.Where(c => c.UF.Equals(uf.ToUpper())));
+
+
+                //Matriz (id: 1) retorna todos os dados
+                if (filialId > 1)
+                {
+                    query = query.Include("Fornecedor");
+                    query = query.Where(c => c.Fornecedor.FilialId == filialId);
+                }
+
+                //Filtrar somente produtos das categorias relacionadas ao usuário
+                query = query.Include(n => n.TipoFornecimento)
+                    .ThenInclude(n => n.Usuario)
+                    .Where(c => c.TipoFornecimento.Ativo && c.TipoFornecimento.Usuario.Any(c => c.Id == usuarioId));
+
+                //Filtrar se for informado o nome ou código do produto
+                if (!string.IsNullOrEmpty(termo))
+                {
+                    query = query.Where(q => q.Nome.Contains(termo) || q.Codigo.Contains(termo));
+                }
+
+                query = query.OrderBy(p => p.Nome);
+
+                var queryResult = (await query.ToListAsync()).Select(p => new ProdutoWithIcmsDto(
+                        p.Id,
+                        p.Codigo,
+                        p.Nome,
+                        p.UnidadeMedida,
+                        p.Valor,
+                        p.TaxaGestao,
+                        p.PercentualIPI,
+                        p.FornecedorId ?? 0,
+                        p.TipoFornecimentoId,
+                        p.ProdutoIcmsEstado.Count == 0 ? 0 : p.ProdutoIcmsEstado[0].Icms)
+                    ).ToList();
+
+                return queryResult;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"FornecedorService.ListProdutoByFornecedorWithIcms.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
 
         public Task<bool> Remove(int filialId, int id)
         {
@@ -367,6 +434,7 @@ namespace wca.compras.services
             {
                 List<Produto> produtos = await _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId)
                                          .Include(p => p.TipoFornecimento)
+                                         .Include(p => p.ProdutoIcmsEstado)
                                          .OrderBy(o =>  o.Nome) 
                                          .ToListAsync();
 
@@ -382,19 +450,27 @@ namespace wca.compras.services
                 ws.Cell("E1").SetValue("VALOR");
                 ws.Cell("F1").SetValue("TAXA GESTÃO");
                 ws.Cell("G1").SetValue("IPI (%)");
+                ws.Cell("G1").SetValue("UF");
+                ws.Cell("G1").SetValue("ICMS (%)");
 
                 var row = 2;
 
                 foreach (var item in produtos)
                 {
-                    ws.Cell($"A{row}").SetValue(item.Codigo);
-                    ws.Cell($"B{row}").SetValue(item.Nome);
-                    ws.Cell($"C{row}").SetValue(item.TipoFornecimento.Nome);
-                    ws.Cell($"D{row}").SetValue(item.UnidadeMedida);
-                    ws.Cell($"E{row}").SetValue(item.Valor);
-                    ws.Cell($"F{row}").SetValue(item.TaxaGestao);
-                    ws.Cell($"G{row}").SetValue(item.PercentualIPI);
-                    row++;
+                    foreach(var icms in item.ProdutoIcmsEstado)
+                    {
+                        ws.Cell($"A{row}").SetValue(item.Codigo);
+                        ws.Cell($"B{row}").SetValue(item.Nome);
+                        ws.Cell($"C{row}").SetValue(item.TipoFornecimento.Nome);
+                        ws.Cell($"D{row}").SetValue(item.UnidadeMedida);
+                        ws.Cell($"E{row}").SetValue(item.Valor);
+                        ws.Cell($"F{row}").SetValue(item.TaxaGestao);
+                        ws.Cell($"G{row}").SetValue(item.PercentualIPI);
+                        ws.Cell($"H{row}").SetValue(icms.UF);
+                        ws.Cell($"I{row}").SetValue(icms.Icms);
+                        row++;
+                    }
+                    
                 }
                 Stream spreadsheetStream = new MemoryStream();
                 workbook.SaveAs(spreadsheetStream);

@@ -21,8 +21,12 @@ namespace wca.compras.domain.Dtos
         ListItem Fornecedor,
         IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
         IList<RecorrenciaLogDto> RecorrenciaLogs,
-        string LocalEntrega,
-        string PeriodoEntrega
+        string PeriodoEntrega,
+        string Endereco,
+        string Numero,
+        string CEP,
+        string Cidade,
+        string UF
     );
 
     public record EnabledRecorrenciaDto (
@@ -39,7 +43,11 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] int Dia,
         EnumDestinoRequisicao Destino,
         [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
-        [Required(ErrorMessage = "O campo é obrigatório!")] string LocalEntrega,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Endereco,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Numero,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string CEP,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Cidade,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string UF,
         string PeriodoEntrega = ""
     );
     public record UpdateRecorrenciaDto(
@@ -53,7 +61,11 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         EnumDestinoRequisicao Destino,
         [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RecorrenciaProdutoDto> RecorrenciaProdutos,
-        [Required(ErrorMessage = "O campo é obrigatório!")] string LocalEntrega,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Endereco,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Numero,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string CEP,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Cidade,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string UF,
         string PeriodoEntrega = ""
     );
     

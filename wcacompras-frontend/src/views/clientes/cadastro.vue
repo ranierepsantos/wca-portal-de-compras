@@ -40,35 +40,7 @@
                                 <v-divider class="mt-3"></v-divider>
                             </v-col>
                         </v-row>
-                        <v-row>
-                            <v-col>
-                                <v-text-field label="Endereço" v-model="cliente.endereco" type="text" variant="outlined"
-                                    color="primary" density="compact" maxlength="150">
-                                </v-text-field>
-                            </v-col>
-                            <v-col cols="2">
-                                <v-text-field label="Numero" v-model="cliente.numero" type="text" variant="outlined"
-                                    color="primary" density="compact" maxlength="10">
-                                </v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col cols="2">
-                                <v-text-field label="Cep" v-model="cliente.cep" type="text" variant="outlined"
-                                    color="primary" density="compact" v-maska="'#####-###'">
-                                </v-text-field>
-                            </v-col>
-                            <v-col>
-                                <v-text-field label="Cidade" v-model="cliente.cidade" type="text" variant="outlined"
-                                    color="primary" density="compact" maxlength="100">
-                                </v-text-field>
-                            </v-col>
-                            <v-col cols="2">
-                                <v-text-field label="UF" v-model="cliente.uf" type="text" variant="outlined" color="primary"
-                                    density="compact" v-maska="'AA'">
-                                </v-text-field>
-                            </v-col>
-                        </v-row>
+                        <endereco v-model:data="cliente"/>
                         <!-- PERÍODOS DE ENTREGA -->
                         <v-row>
                             <v-col>
@@ -264,6 +236,7 @@ import filialService from "@/services/filial.service";
 import { mask } from "maska"
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import Periodo from '@/components/Periodo.vue';
+import Endereco from '@/components/endereco.vue';
 
 // VARIABLES
 //const mask = new Mask({ mask: [, "(##) ####-####"] })

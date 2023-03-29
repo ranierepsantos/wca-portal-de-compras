@@ -14,7 +14,6 @@
                 <tr>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CNPJ</th>
-                    <th class="text-left text-grey">ICMS</th>
                     <th class="text-center text-grey">ATIVO</th>
                     <th></th>
                 </tr>
@@ -26,7 +25,6 @@
                         &nbsp;{{ item.nome }}
                     </td>
                     <td class="text-left">{{ item.cnpj }}</td>
-                    <td class="text-right">{{ item.icms?.toFixed(2) }} %</td>
                     <td class="text-center">
                         <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
                             :color="item.ativo ? 'success' : 'error'"></v-icon>

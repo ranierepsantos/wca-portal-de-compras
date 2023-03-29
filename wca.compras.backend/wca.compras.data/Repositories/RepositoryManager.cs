@@ -1,4 +1,5 @@
-﻿using wca.compras.data.DataAccess;
+﻿using Microsoft.EntityFrameworkCore;
+using wca.compras.data.DataAccess;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 
@@ -249,6 +250,12 @@ namespace wca.compras.data.Repositories
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> ExecuteCommandAsync(string command)
+        {
+            int result = await _context.Database.ExecuteSqlRawAsync(command);
+            return result;
         }
     }
 }

@@ -1,9 +1,11 @@
 <template>
     <div>
-        <bread-crumbs :title="'Pedido #' + requisicao.id" :show-button="false" :custom-button-show="podeEditar" custom-button-text="Salvar"
-            @customClick="salvar()"
-            :buttons="[{text: 'Fornecedor Solicitar Aprovação', icon:'mdi-email-arrow-right-outline', event:'EmailFornecedorClick'}]"
-            @email-fornecedor-click="enviarEmailFornecedor()" />
+        <bread-crumbs :title="'Pedido #' + requisicao.id" :show-button="false" :custom-button-show="podeEditar"
+            custom-button-text="Salvar" @customClick="salvar()" :buttons="headerButtons"
+            @email-fornecedor-click="enviarEmail(DESTINOEMAIL.FORNECEDOR)"
+            @email-cliente-click="enviarEmail(DESTINOEMAIL.CLIENTE)" />
+        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy" class="mt-2 mb-3"> </v-progress-linear>
+        
         <v-form ref="formCadastro">
             <v-row>
                 <v-col cols="5">
@@ -21,16 +23,15 @@
                 </v-col>
             </v-row>
             <v-row>
-                <v-col cols="10">
-                    <v-text-field label="Local Entrega" v-model="requisicao.localEntrega"
-                        placeholder="Local de entrega do Pedido" density="compact" variant="outlined" color="primary"
-                        :rules="[(v) => !!v || 'Campo obrigatório']" :disabled="!podeEditar">
+                <v-col :cols="podeEditar && authStore.hasPermissao('requisicao_local_entrega') ? 10 : 12">
+                    <v-text-field label="Local Entrega" :model-value="localEntrega" placeholder="Local de entrega do Pedido"
+                        density="compact" variant="outlined" color="primary" disabled>
                     </v-text-field>
                 </v-col>
 
-                <v-col cols="2">
-                    <v-text-field-money label-text="ICMS (%)" v-model="requisicao.icms" color="primary" :number-decimal="2"
-                        :hide-details="true" :disabled="!podeEditar"></v-text-field-money>
+                <v-col v-show="podeEditar && authStore.hasPermissao('requisicao_local_entrega')">
+                    <v-btn color="primary" @click="openEnderecoForm = true" :disabled="requisicao.clienteId == null">Alterar
+                        Local</v-btn>
                 </v-col>
             </v-row>
             <v-row>
@@ -53,14 +54,21 @@
                 </v-col>
             </v-row>
             <v-row>
-                <v-col cols="5">
+                <v-col cols="4">
                     <v-text-field label="Supervisor" v-model="requisicao.usuario.text" disabled density="compact"
                         variant="outlined" color="primary" :hide-details="true"></v-text-field>
                 </v-col>
-                <v-col cols="2" class="text-center">
+                <v-col cols="3" class="text-center">
                     <v-btn :color="getStatus(requisicao.status).color" variant="tonal" density="compact"
-                        class="text-center" >
-                        {{ getStatus(requisicao.status).text }}
+                        class="text-center">
+                        {{ getStatus(requisicao.status).text + (requisicao.status == 0 ? aguardaQuem: "") }}
+                    </v-btn>
+                </v-col>
+                <v-col v-show="getStatus(requisicao.status).text.toLowerCase() == 'aguardando'
+                    && authStore.hasPermissao('aprova_requisicao')
+                    && requisicao.requerAutorizacaoWCA">
+                    <v-btn color="primary" variant="outlined" class="text-center" @click="openAprovacaoForm = true">
+                        Aprovar / Rejeitar
                     </v-btn>
                 </v-col>
                 <v-col class="text-right">
@@ -117,6 +125,7 @@
                     <th class="text-center text-grey">VALOR</th>
                     <th class="text-center text-grey">TX.GESTÃO</th>
                     <th class="text-center text-grey">IPI (%)</th>
+                    <th class="text-center text-grey">ICMS (%)</th>
                     <th class="text-center text-grey">VL. PRODUTO</th>
                     <th class="text-center text-grey">QUANT.</th>
                     <th class="text-center text-grey">TOTAL</th>
@@ -129,9 +138,10 @@
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
-                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}%</td>
+                    <td class="text-right">{{ item.icms.toFixed(2) }}%</td>
                     <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
-                    <td class="text-left">
+                    <td :class="podeEditar ? 'text-left' : 'text-center'">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
                             :hide-details="true" class="sm ml-12" v-model="item.quantidade" min=0
                             @change="adicionarRemoverProduto(item)" v-if="podeEditar">
@@ -139,7 +149,8 @@
                         <span v-else>{{ item.quantidade }}</span>
                     </td>
                     <td class="text-right">
-                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2)) }}
+                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 :
+                            item.quantidade)).toFixed(2)) }}
                     </td>
                     <td class="text-center" v-show="podeEditar">
                         <v-btn icon="mdi-package-variant-minus" variant="plain" color="red" title="Remover Produto"
@@ -152,7 +163,8 @@
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
-                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}%</td>
+                    <td class="text-right">{{ item.icms.toFixed(2) }}%</td>
                     <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
@@ -161,7 +173,8 @@
                         </v-text-field>
                     </td>
                     <td class="text-right">
-                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 : item.quantidade)).toFixed(2)) }}
+                        {{ formatToCurrencyBRL((retornarValorTotalProduto(item) * (isNaN(item.quantidade) ? 0 :
+                            item.quantidade)).toFixed(2)) }}
                     </td>
                     <td class="text-center">
                         <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
@@ -172,20 +185,24 @@
             </tbody>
             <tfoot>
                 <tr style="font-weight:600;">
-                    <td colspan="2" class="text-right">SUBTOTAL:</td>
-                    <td class="text-right">{{ formatToCurrencyBRL((requisicao.valorTotal - requisicao.valorIcms).toFixed(2)) }}</td>
+                    <!-- <td colspan="3" class="text-right">SUBTOTAL:</td>
+                    <td class="text-right">{{ formatToCurrencyBRL((requisicao.valorTotal - requisicao.valorIcms).toFixed(2))
+                    }}</td>
                     <td class="text-right">ICMS:</td>
                     <td class="text-right">{{ formatToCurrencyBRL(requisicao.valorIcms) }}</td>
-                    <td colspan="2" class="text-right">TOTAL PEDIDO:</td>
+                    -->
+                    <td colspan="8" class="text-right">TOTAL PEDIDO:</td>
                     <td class="text-right">{{ formatToCurrencyBRL(valorTotalPedido) }}</td>
                     <td></td>
                 </tr>
             </tfoot>
         </v-table>
+
         <!--LIMITES DEFINIDOS PELO CLIENTE-->
         <v-row class="mt-10">
             <v-col cols="2" class="text-right" v-for="config in orcamento" :key="config.tipoFornecimentoId">
-                <span style="font-size:12px;" class="text-grey text-left">{{ getTipoFornecimentoNome(config.tipoFornecimentoId) }}</span>
+                <span style="font-size:12px;" class="text-grey text-left">{{
+                    getTipoFornecimentoNome(config.tipoFornecimentoId) }}</span>
                 <v-progress-linear :color="config.percentual > 100 ? 'red' : config.percentual > 60 ? 'warning' : 'success'"
                     :model-value="config.valorTotal" :max="config.valorPedido * (1 + config.tolerancia / 100)" :height="7"
                     :title="getTipoFornecimentoNome(config.tipoFornecimentoId)"></v-progress-linear>
@@ -214,7 +231,7 @@
                 </v-timeline>
             </v-col>
         </v-row>
-
+        <!-- ALTERAR PERIODO DE ENTREGA -->
         <v-dialog v-model="openPeriodoForm" max-width="700" :absolute="false" persistent>
             <v-form ref="produtoForm" @submit.prevent="">
                 <v-card>
@@ -230,6 +247,28 @@
                         <v-row>
                             <v-col class="text-right">
                                 <v-btn color="primary" @click="openPeriodoForm = false">Confirmar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-form>
+        </v-dialog>
+        <!-- ALTERAR LOCAL DE ENTREGA -->
+        <v-dialog v-model="openEnderecoForm" max-width="900" :absolute="false" persistent>
+            <v-form>
+                <v-card>
+                    <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                        Alterar Local de Entrega
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col>
+                                <endereco v-model:data="requisicao" />
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-btn color="primary" @click="openEnderecoForm = false">Confirmar</v-btn>
                             </v-col>
                         </v-row>
                     </v-card-text>
@@ -272,6 +311,45 @@
                 <v-card-actions></v-card-actions>
             </v-card>
         </v-dialog>
+        <!-- FORM PARA APROVAR / REJEITAR PEDIDO-->
+        <v-dialog v-model="openAprovacaoForm" max-width="700" :absolute="false" persistent>
+            <v-form ref="formAprovacao">
+                <v-card>
+                    <v-row>
+                        <v-col>
+                            <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                                PEDIDO - APROVAR / REJEITAR
+                            </v-card-title>
+                        </v-col>
+                        <v-col class="text-right">
+                            <v-btn class="mb-2 mt-3 mr-2" variant="plain" color="grey" @click="openAprovacaoForm = false" icon="mdi-close-circle-outline"></v-btn>
+                        </v-col>
+                        
+                    </v-row>
+                    <v-card-text>
+                        <v-row>
+                            <v-col>
+                                <v-textarea variant="outlined" label="Comentário" 
+                                class="text-primary" v-model="comentario"
+                                :rules="[(v) => !!v || 'Campo obrigatório']">
+                                </v-textarea>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-progress-circular color="primary" indeterminate v-show="isSaving"></v-progress-circular>
+                                <v-btn color="success" @click="aprovarReprovar(true)" v-show="!isSaving">Aprovar</v-btn>
+                                &nbsp;
+                                <v-btn color="#EDCCCC" class="mr-3" style="color:#950000; font-weight: bold;"
+                                    @click="aprovarReprovar(false)" v-show="!isSaving">Rejeitar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-form>
+        </v-dialog>
+
+
     </div>
 </template>
   
@@ -282,14 +360,18 @@ import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import { useAuthStore } from "@/store/auth.store";
 import fornecedorService from "@/services/fornecedor.service";
-import { status, compararValor, retornarValorTotalProduto, diasDaSemana,formatToCurrencyBRL } from "@/helpers/functions"
+import { status, compararValor, retornarValorTotalProduto, diasDaSemana, formatToCurrencyBRL } from "@/helpers/functions"
 import router from "@/router";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
-import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
+import endereco from "@/components/endereco.vue";
 import Periodo from '@/components/Periodo.vue';
-import authService from "@/services/auth.service";
 import { useRoute } from "vue-router";
 import moment from 'moment'
+
+const DESTINOEMAIL = {
+    CLIENTE: 1,
+    FORNECEDOR: 2
+};
 
 //DATA
 const authStore = useAuthStore();
@@ -327,7 +409,6 @@ const requisicao = ref({
     requisicaoItens: [],
     requerAutorizacaoWCA: false,
     requerAutorizacaoCliente: false,
-    icms: 0,
     valorIcms: 0,
     periodoEntrega: {
         0: { periodo: [], selected: false },
@@ -339,7 +420,12 @@ const requisicao = ref({
         6: { periodo: [], selected: false }
     },
     notaFiscal: null,
-    dataEntrega: null
+    dataEntrega: null,
+    endereco: "",
+    numero: "",
+    cep: "",
+    cidade: "",
+    uf: null
 });
 let requisicaoOriginal = ref(null)
 const destinos = ref([
@@ -355,6 +441,8 @@ let orcamento = ref(null);
 let tipoFornecimento = ref([])
 const formCadastro = ref(null);
 const openPeriodoForm = ref(false)
+const openEnderecoForm = ref(false)
+const openAprovacaoForm = ref(false)
 let dialog = ref(false);
 let finalizarForm = ref(null);
 let finalizarData = ref({
@@ -362,6 +450,10 @@ let finalizarData = ref({
     notaFiscal: null,
     dataEntrega: moment().format("YYYY-MM-DD")
 })
+const formAprovacao = ref(null);
+const comentario = ref("")
+const isSaving = ref(false)
+
 //VUE METHODS
 onMounted(async () => {
 
@@ -377,23 +469,63 @@ onMounted(async () => {
 
 watch(filter, async () => { await getProdutosToList(requisicao.value.fornecedorId) })
 
+watch(() => requisicao.value.uf, async (uf, oldUF) => {
+    if (oldUF != null && oldUF != uf && requisicao.value.fornecedorId != null && uf.length == 2) {
+        await getProdutosToList(requisicao.value.fornecedorId, true)
+    }
+})
+
 const podeEditar = computed(() => requisicao.value.status != 1 && requisicao.value.status != 3 && requisicao.value.status != 4)
+
+const aguardaQuem = computed(() => {
+    let texto = "";
+    if (requisicao.value.requerAutorizacaoCliente && requisicao.value.requerAutorizacaoWCA)
+        texto = ": WCA / Cliente"
+    else if (requisicao.value.requerAutorizacaoCliente)
+        texto = ": Cliente"
+    else if (requisicao.value.requerAutorizacaoWCA)
+        texto = ": WCA"
+
+    return texto;
+})
+
+const localEntrega = computed(() => {
+    let localEntrega = ""
+    if (requisicao.value.endereco && requisicao.value.endereco?.trim() != "")
+        localEntrega = `${requisicao.value.endereco}, ${requisicao.value.numero} - ${requisicao.value.cep} - ${requisicao.value.cidade} / ${requisicao.value.uf}`
+    return localEntrega
+})
+
 const valorTotalPedido = computed(() => {
     if (requisicao.value.requisicaoItens.length == 0) return 0;
 
     let produtos = requisicao.value.requisicaoItens;
     let valorTotal = 0;
     let valorTaxaGestao = 0;
+    let valorIcms = 0;
 
     produtos.forEach(produto => {
         valorTotal += produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
         valorTaxaGestao += produto.quantidade * produto.taxaGestao
+        valorIcms += produto.quantidade * parseFloat((produto.valor * produto.icms / 100).toFixed(2))
     })
     valorTotal = valorTotal.toFixed(2)
-    requisicao.value.valorIcms = (parseFloat(valorTotal) * requisicao.value.icms / 100).toFixed(2)
-    requisicao.value.valorTotal = parseFloat(valorTotal) + parseFloat(requisicao.value.valorIcms)
+    requisicao.value.valorIcms = parseFloat(valorIcms.toFixed(2))
+    requisicao.value.valorTotal = parseFloat(valorTotal)
     requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2))
+
     return requisicao.value.valorTotal.toFixed(2);
+})
+
+const headerButtons = computed(() => {
+    let buttons = [];
+
+    if (requisicao.value.status == 1) //aprovado
+        buttons.push({ text: 'Solicitar Aprovação - Fornecedor', icon: 'mdi-email-arrow-right-outline', event: 'EmailFornecedorClick' })
+    if (requisicao.value.requerAutorizacaoCliente)
+        buttons.push({ text: 'Solicitar Aprovação - Cliente', icon: 'mdi-email-arrow-right-outline', event: 'EmailClienteClick' })
+
+    return buttons;
 })
 
 const hasChanged = computed(() => {
@@ -424,6 +556,41 @@ function adicionarProdutoRequisicao(item) {
     calcularOrcamentoTotais()
 }
 
+async function aprovarReprovar(isAprovado) {
+    try {
+        let { valid } = await formAprovacao.value.validate();
+        if (valid)
+        {
+            isSaving.value = true;
+            let data = {
+                id: requisicao.value.id,
+                aprovado: isAprovado,
+                comentario: comentario.value,
+                token: "TELAEDICAO",
+                nomeUsuario: authStore.user.nome
+            }
+            await requisicaoService.aprovar(data);
+            await getRequisicaoData(data.id);
+            openAprovacaoForm.value = false;
+            swal.fire({
+                toast: true,
+                icon: "success",
+                index: "top-end",
+                title: "Sucesso!",
+                text: (isAprovado ? "Aprovação": "Rejeição") + " realizada com sucesso!",
+                showConfirmButton: false,
+                timer: 2000,
+            })
+
+        }
+    } catch (error) {
+        console.log("aprovarReprovar.error:", error);
+        handleErrors(error)
+    } finally { isSaving.value = false }
+}
+
+
+
 function adicionarRemoverProduto(item) {
     if (item.quantidade > 0) {
         adicionarProdutoRequisicao(item)
@@ -442,10 +609,10 @@ function calcularOrcamentoTotais() {
     }
 }
 
-async function enviarEmailFornecedor() {
+async function enviarEmail(destinoEmail) {
     try {
-        
-        await requisicaoService.enviarEmailFornecedor(requisicao.value.id)
+
+        await requisicaoService.enviarEmail(requisicao.value.id, destinoEmail)
 
         await swal.fire({
             toast: true,
@@ -500,13 +667,18 @@ function clearOrcamentoTotais() {
         orcamento.value[idx].valorTotal = 0;
 }
 
-async function getProdutosToList(fornecedorId) {
+async function getProdutosToList(fornecedorId, changeIcms = false) {
     try {
         isLoadingProduto.value = true;
-        let response = await fornecedorService.produtoPaginate(fornecedorId, 99999, 1, filter.value, true);
-        produtos.value = response.data.items;
+        let response = await fornecedorService.produtoListWithIcms(fornecedorId, requisicao.value.uf, filter.value);
+        produtos.value = response.data;
+
         for (let index = 0; index < requisicao.value.requisicaoItens.length; index++) {
             let item = requisicao.value.requisicaoItens[index];
+            let produto = produtos.value.filter(c => c.codigo == item.codigo)[0]
+            if (produto != undefined && changeIcms)
+                requisicao.value.requisicaoItens[index].icms = produto.icms;
+
             produtoRemoveFromList(item)
         }
     } catch (error) {
@@ -606,7 +778,8 @@ async function salvar() {
                 produto.valorTotal = retornarValorTotalProduto(produto) * produto.quantidade
             })
             data.periodoEntrega = JSON.stringify(data.periodoEntrega);
-
+            data.requerAutorizacaoWCA = false;
+            data.requerAutorizacaoCliente = false;
             // verificar se requer autorização
             //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
             orcamento.value.forEach(o => {
@@ -622,42 +795,25 @@ async function salvar() {
                 parseFloat(data.cliente.valorLimiteRequisicao) < parseFloat(valorTotalPedido.value)) {
                 data.requerAutorizacaoWCA = true
             }
+            console.log("Autorização WCA:", data.requerAutorizacaoWCA)
+            console.log("Autorização Cliente:", data.requerAutorizacaoCliente)
 
-            if (data.requerAutorizacaoWCA) {
+            if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
                 if (!authStore.hasPermissao("aprova_requisicao")) {
                     let result = await swal.fire({
-                        title: 'Autorização',
-                        html: `<input type="email" id="login" class="swal2-input" placeholder="E-mail">
-                       <input type="password" id="password" class="swal2-input" placeholder="Senha">`,
-                        confirmButtonText: 'Autorizar',
+                        icon: "warning",
+                        title: 'Atenção',
+                        text: "O pedido excedeu limites configurados, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
+                        confirmButtonText: 'Estou ciente',
                         focusConfirm: false,
-                        preConfirm: async () => {
-                            const login = swal.getPopup().querySelector('#login').value
-                            const password = swal.getPopup().querySelector('#password').value
-                            let emailRegex = new RegExp(/^[A-Za-z0-9_!#$%&'*+\/=?`{|}~^.-]+@[A-Za-z0-9.-]+$/, "gm");
-
-                            if (!login || !password) {
-                                swal.showValidationMessage(`Por favor informe o e-mail e senha`)
-                            } else if (!emailRegex.test(login)) {
-                                swal.showValidationMessage(`Por favor informe um e-mail válido`)
-                            } else {
-                                let response = await authService.login({ email: login, password: password })
-                                if (!response.data.authenticated) {
-                                    swal.showValidationMessage(`Usuário e/ou senha inválido!`)
-                                } else if (response.data.perfil.permissao.filter(c => c.regra == 'aprova_requisicao').length == 0) {
-                                    swal.showValidationMessage(`Usuário não tem permissão para realizar aprovação!`)
-                                }
-                                return response.data
-                            }
-                        }
                     })
                     if (!result.isConfirmed) {
                         return
                     }
+                } else {
                     data.requerAutorizacaoWCA = false
-                    data.usuarioAutorizador = result.value.usuarioNome
+                    data.usuarioAutorizador = authStore.user.nome
                 }
-                data.requerAutorizacaoWCA = false
             }
 
             if (hasChanged.value == true) {

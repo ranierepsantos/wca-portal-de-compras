@@ -50,9 +50,6 @@ namespace wca.compras.domain.Entities
         [Column("data_entrega", TypeName = "smalldatetime")]
         public DateTime? DataEntrega { get; set; }
 
-        [Column("local_entrega", TypeName = "varchar(300)")]
-        public string? LocalEntrega { get; set; }
-
         [Column("nota_fiscal", TypeName = "varchar(50)")]
         public string? NotaFiscal { get; set; }
 
@@ -62,15 +59,35 @@ namespace wca.compras.domain.Entities
         [Column("requer_autorizacao_wca")]
         public bool RequerAutorizacaoWCA { get; set;  }
 
-        [Column("icms", TypeName = "money")]
-        public decimal Icms { get; set; }
-
         [Column("valor_icms", TypeName = "money")]
         public decimal ValorIcms { get; set; }
 
         [MaxLength(1500)]
         [Column("periodo_entrega", TypeName = "varchar(1500)")]
         public string? PeriodoEntrega { get; set; }
+
+        //DADOS DO ENDERECO DE ENTREGA
+        [MaxLength(150)]
+        [Column("endereco", TypeName = "varchar(150)")]
+        public string? Endereco { get; set; }
+
+        [MaxLength(9)]
+        [Column("cep", TypeName = "varchar(9)")]
+        public string? Cep { get; set; }
+
+        [MaxLength(10)]
+        [Column("numero", TypeName = "varchar(10)")]
+        public string? Numero { get; set; }
+
+        [MaxLength(100)]
+        [Column("cidade", TypeName = "varchar(100)")]
+        public string? Cidade { get; set; }
+
+        [MaxLength(2)]
+        [Column("uf", TypeName = "varchar(2)")]
+        public string? UF { get; set; }
+
+
 
         [JsonIgnore]
         public Fornecedor? Fornecedor { get; set; }
@@ -95,5 +112,11 @@ namespace wca.compras.domain.Entities
     {
         OUTROS,
         DIRETORIA
+    }
+
+    public enum EnumRequisicaoDestinoEmail
+    {
+        CLIENTE =1,
+        FORNECEDOR =2
     }
 }

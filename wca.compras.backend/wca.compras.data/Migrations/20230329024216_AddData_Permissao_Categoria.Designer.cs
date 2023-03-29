@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230329024216_AddData_Permissao_Categoria")]
+    partial class AddData_Permissao_Categoria
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -623,16 +625,6 @@ namespace wca.compras.data.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Cep")
-                        .HasMaxLength(9)
-                        .HasColumnType("varchar(9)")
-                        .HasColumnName("cep");
-
-                    b.Property<string>("Cidade")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("cidade");
-
                     b.Property<int>("ClienteId")
                         .HasColumnType("int")
                         .HasColumnName("cliente_id");
@@ -649,11 +641,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("dia");
 
-                    b.Property<string>("Endereco")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("endereco");
-
                     b.Property<int>("FilialId")
                         .HasColumnType("int")
                         .HasColumnName("filial_id");
@@ -662,16 +649,16 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fornecedor_id");
 
+                    b.Property<string>("LocalEntrega")
+                        .IsRequired()
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("local_entrega");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)")
                         .HasColumnName("nome");
-
-                    b.Property<string>("Numero")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("numero");
 
                     b.Property<string>("PeriodoEntrega")
                         .IsRequired()
@@ -681,11 +668,6 @@ namespace wca.compras.data.Migrations
                     b.Property<int>("TipoRecorrencia")
                         .HasColumnType("int")
                         .HasColumnName("tipo_recorrencia");
-
-                    b.Property<string>("UF")
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)")
-                        .HasColumnName("uf");
 
                     b.Property<string>("UrlOrigin")
                         .IsRequired()

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using wca.compras.domain.Entities;
 
 namespace wca.compras.domain.Dtos
 {
@@ -13,7 +14,6 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
-        decimal Icms,
         int FilialId,
         IList<FornecedorContatoDto> FornecedorContatos
     );
@@ -31,7 +31,6 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
-        decimal Icms,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
         [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
@@ -53,7 +52,6 @@ namespace wca.compras.domain.Dtos
         string Cidade,
         string UF,
         bool Ativo,
-        decimal Icms,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
         [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
@@ -69,8 +67,23 @@ namespace wca.compras.domain.Dtos
         decimal TaxaGestao,
         decimal PercentualIPI,
         int FornecedorId,
-        int TipoFornecimentoId
+        int TipoFornecimentoId,
+        IList<ProdutoIcmsEstadoDto> ProdutoIcmsEstado
     );
+
+    public record ProdutoWithIcmsDto(
+        int Id,
+        string Codigo,
+        string Nome,
+        string UnidadeMedida,
+        decimal Valor,
+        decimal TaxaGestao,
+        decimal PercentualIPI,
+        int FornecedorId,
+        int TipoFornecimentoId,
+        decimal Icms
+    );
+
 
     public record CreateProdutoDto(
         [Required(ErrorMessage = "O campo é obrigatório!")] string Codigo,
@@ -115,7 +128,8 @@ namespace wca.compras.domain.Dtos
 
     public record FornecedorListDto (
         int Id,
-        string Nome,
-        decimal Icms
+        string Nome
     );
+
+    public record ProdutoIcmsEstadoDto (string UF, decimal Icms);
 }

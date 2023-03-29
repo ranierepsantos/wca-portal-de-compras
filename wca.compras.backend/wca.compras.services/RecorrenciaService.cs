@@ -212,19 +212,29 @@ namespace wca.compras.services
             {
                 decimal requisicaoValorTotal = 0;
                 decimal requisicaoTaxaGestao = 0;
+                decimal requisicaoValorIcms = 0;
 
                 // montar a lista de produtos
                 List<RequisicaoItemDto> produtos = new List<RequisicaoItemDto>();
                 foreach (var recorrenciaProduto in item.RecorrenciaProdutos) {
-                    var produto = await _rm.ProdutoRepository.SelectByCondition(c => c.Codigo.Equals(recorrenciaProduto.Codigo) && c.FornecedorId == item.FornecedorId).FirstOrDefaultAsync();
+                    var produto = await _rm.ProdutoRepository.SelectByCondition(c => c.Codigo.Equals(recorrenciaProduto.Codigo) && c.FornecedorId == item.FornecedorId)
+                        .Include(n => n.ProdutoIcmsEstado.Where(c => c.UF == item.UF))
+                        .FirstOrDefaultAsync();
 
                     if (produto != null)
                     {
-                        var valorTotalProduto = (produto.TaxaGestao + produto.Valor + decimal.Parse((produto.Valor * produto.PercentualIPI/100).ToString("n2")) )  * recorrenciaProduto.Quantidade;
+                        var percentualIcms = produto.ProdutoIcmsEstado.Count() > 0 ? produto.ProdutoIcmsEstado[0].Icms:0;
+
+                        var valorTotalProduto = (produto.Valor
+                                               + produto.TaxaGestao
+                                               + decimal.Parse((produto.Valor * produto.PercentualIPI/100).ToString("n2"))
+                                               + decimal.Parse((produto.Valor * percentualIcms / 100).ToString("n2"))
+                                               )  * recorrenciaProduto.Quantidade;
                     
-                        produtos.Add(new RequisicaoItemDto(0, 0, produto.Codigo, produto.Nome, produto.UnidadeMedida, produto.Valor, produto.TaxaGestao, produto.PercentualIPI, recorrenciaProduto.Quantidade, valorTotalProduto, produto.TipoFornecimentoId));
+                        produtos.Add(new RequisicaoItemDto(0, 0, produto.Codigo, produto.Nome, produto.UnidadeMedida, produto.Valor, produto.TaxaGestao, produto.PercentualIPI, recorrenciaProduto.Quantidade, valorTotalProduto, produto.TipoFornecimentoId,percentualIcms));
 
                         requisicaoTaxaGestao += produto.TaxaGestao;
+                        requisicaoValorIcms += decimal.Parse((produto.Valor * percentualIcms / 100).ToString("n2")) * recorrenciaProduto.Quantidade;
                         requisicaoValorTotal += valorTotalProduto;
                     }else
                     {
@@ -239,10 +249,8 @@ namespace wca.compras.services
                 {
                     try
                     {
-                        var valorICMS = decimal.Parse((requisicaoValorTotal * item.Fornecedor.Icms / 100).ToString("n2"));
-
                         var pedido = new CreateRequisicaoDto(item.FilialId, item.ClienteId, item.FornecedorId, requisicaoValorTotal, requisicaoTaxaGestao, item.Destino,
-                                                             item.UsuarioId, item.Usuario.Nome, produtos, false, false,item.LocalEntrega, valorICMS,item.Fornecedor.Icms,item.PeriodoEntrega);
+                                                             item.Endereco,item.Numero,item.Cep,item.Cidade, item.UF, item.UsuarioId, item.Usuario.Nome, produtos, false, false, requisicaoValorIcms ,item.PeriodoEntrega);
 
                         var requisicao = await requisicaoService.Create(pedido, item.UrlOrigin);
 

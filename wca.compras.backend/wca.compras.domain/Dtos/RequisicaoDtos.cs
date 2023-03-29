@@ -9,7 +9,6 @@ namespace wca.compras.domain.Dtos
         int FilialId,
         int ClienteId,
         int FornecedorId,
-        string LocalEntrega,
         DateTime DataCriacao,
         decimal ValorTotal,
         decimal TaxaGestao,
@@ -17,12 +16,18 @@ namespace wca.compras.domain.Dtos
         EnumDestinoRequisicao Destino,
         string NotaFiscal,
         DateTime DataEntrega,
+        string Endereco,
+        string Numero,
+        string CEP,
+        string Cidade,
+        string UF,
         decimal ValorIcms,
-        decimal Icms,
         string PeriodoEntrega,
         Cliente Cliente,
         ListItem Usuario,
         ListItem Fornecedor,
+        bool RequerAutorizacaoWCA,
+        bool RequerAutorizacaoCliente,
         IList<RequisicaoHistoricoDto> RequisicaoHistorico,
         IList<RequisicaoItemDto> RequisicaoItens
     );
@@ -36,7 +41,7 @@ namespace wca.compras.domain.Dtos
         ListItem Usuario,
         IList<RequisicaoItemDto> RequisicaoItens,
         string NomeAprovador = "",
-        string LocalEntrega ="",
+        string LocalEntrega = "",
         string PeriodoEntrega =""
     );
 
@@ -44,7 +49,8 @@ namespace wca.compras.domain.Dtos
         int Id,
         bool Aprovado,
         string Comentario,
-        string Token
+        string Token,
+        string NomeUsuario
     );
 
     public record FinalizarRequisicaoDto(
@@ -60,14 +66,17 @@ namespace wca.compras.domain.Dtos
         [Required(ErrorMessage = "O campo é obrigatório!")] decimal ValorTotal,
         decimal TaxaGestao,
         EnumDestinoRequisicao Destino,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Endereco,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Numero,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string CEP,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Cidade,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string UF,
         [Required(ErrorMessage = "O campo é obrigatório!")] int UsuarioId,
         [Required(ErrorMessage = "O campo é obrigatório!")] string NomeUsuario,
         [Required(ErrorMessage = "Adicione pelo menos 1 produto"), MinLength(1, ErrorMessage = "Adicione pelo menos 1 produto")] IList<RequisicaoItemDto> RequisicaoItens,
         bool RequerAutorizacaoWCA = false,
         bool RequerAutorizacaoCliente = false,
-        string LocalEntrega = "",
         decimal ValorIcms =0,
-        decimal Icms =0,
         string PeriodoEntrega ="",
         string UsuarioAutorizador =""
     );
@@ -81,14 +90,17 @@ namespace wca.compras.domain.Dtos
         decimal TaxaGestao,
         EnumStatusRequisicao Status,
         EnumDestinoRequisicao Destino,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Endereco,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Numero,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string CEP,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Cidade,
+        [Required(ErrorMessage = "O campo é obrigatório!")] string UF,
         [Required(ErrorMessage = "O campo é obrigatório!")] string NomeUsuario,
         IList<RequisicaoItemDto> RequisicaoItens,
         IList<RequisicaoHistoricoDto> RequisicaoHistorico,
         bool RequerAutorizacaoWCA = false,
         bool RequerAutorizacaoCliente = false,
-        string LocalEntrega = "",
         decimal ValorIcms = 0,
-        decimal Icms = 0,
         string PeriodoEntrega = "",
         string UsuarioAutorizador = ""
     );
@@ -104,8 +116,9 @@ namespace wca.compras.domain.Dtos
         decimal PercentualIPI,
         int Quantidade,
         decimal ValorTotal,
-        int TipoFornecimentoId
-    );
+        int TipoFornecimentoId,
+        decimal Icms
+    );  
 
     public record RequisicaoHistoricoDto(
         int Id,

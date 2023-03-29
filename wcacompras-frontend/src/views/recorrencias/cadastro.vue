@@ -20,14 +20,15 @@
                 </v-col>
             </v-row>
             <v-row>
-                <v-col :cols="recorrencia.id > 0 ? '10' : '12'">
-                    <v-text-field label="Local Entrega" v-model="recorrencia.localEntrega"
-                        placeholder="Local de entrega do Pedido" density="compact" variant="outlined" color="primary"
-                        :rules="[(v) => !!v || 'Campo obrigatório']">
+                <v-col :cols="authStore.hasPermissao('requisicao_local_entrega') ? 10 : 12">
+                    <v-text-field label="Local Entrega" :model-value="localEntrega" placeholder="Local de entrega do Pedido"
+                        density="compact" variant="outlined" color="primary" disabled>
                     </v-text-field>
                 </v-col>
-                <v-col cols="2" v-show="recorrencia.id > 0">
-                    <v-checkbox v-model="recorrencia.ativo" label="Ativo" color="primary"></v-checkbox>
+
+                <v-col v-show="authStore.hasPermissao('requisicao_local_entrega')">
+                    <v-btn color="primary" @click="openEnderecoForm = true" :disabled="recorrencia.clienteId == null">Alterar
+                        Local</v-btn>
                 </v-col>
             </v-row>
             <v-row class="mt-1">
@@ -145,11 +146,33 @@
                 </v-card>
             </v-form>
         </v-dialog>
+        <!-- ALTERAR LOCAL DE ENTREGA -->
+        <v-dialog v-model="openEnderecoForm" max-width="900" :absolute="false" persistent>
+            <v-form>
+                <v-card>
+                    <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                        Alterar Local de Entrega
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col>
+                                <endereco v-model:data="recorrencia" />
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-btn color="primary" @click="openEnderecoForm = false">Confirmar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-form>
+        </v-dialog>
     </div>
 </template>
   
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import { ref, onMounted, watch, inject, computed } from "vue";
 import recorrenciaService from "@/services/recorrencia.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
@@ -160,6 +183,7 @@ import { compararValor, tipoRecorrencia, diasDaSemana, diasDoMes } from "@/helpe
 import router from "@/router";
 import clienteService from "@/services/cliente.service";
 import Periodo from '@/components/Periodo.vue';
+import Endereco from "@/components/endereco.vue";
 
 //DATA
 
@@ -190,7 +214,12 @@ const recorrencia = ref({
     recorrenciaProdutos: [],
     recorrenciaLogs: [],
     localEntrega: "",
-    periodoEntrega: periodoEntrega
+    periodoEntrega: periodoEntrega,
+    endereco: "",
+    numero: "",
+    cep: "",
+    cidade: "",
+    uf: null
 });
 const clientes = ref([]);
 const fornecedores = ref([]);
@@ -204,6 +233,7 @@ const filter = ref("");
 const hasProduto = ref(true);
 const pageTitle = ref("Recorrência")
 const openPeriodoForm = ref(false)
+const openEnderecoForm = ref(false)
 let clienteHasChange = true;
 //VUE METHODS
 onMounted(async () => {
@@ -233,7 +263,12 @@ watch(() => recorrencia.value.clienteId, (clienteId) => {
     if (clienteHasChange == true) {
         let cliente = clientes.value.filter(c => c.id == clienteId)[0];
 
-        recorrencia.value.localEntrega = `${cliente.endereco}, ${cliente.numero} - ${cliente.cep} - ${cliente.cidade} / ${cliente.uf}`
+        recorrencia.value.endereco = cliente.endereco
+        recorrencia.value.numero = cliente.numero
+        recorrencia.value.cep = cliente.cep
+        recorrencia.value.cidade = cliente.cidade
+        recorrencia.value.uf = cliente.uf
+
         recorrencia.value.periodoEntrega = JSON.parse(cliente.periodoEntrega)
         openPeriodoForm.value = true
     }
@@ -246,6 +281,14 @@ watch(filter, async () => {
         await getProdutosToList(recorrencia.value.fornecedorId)
     }
 })
+
+const localEntrega = computed(() => {
+    let localEntrega = ""
+    if (recorrencia.value.endereco && recorrencia.value.endereco?.trim() != "")
+        localEntrega = `${recorrencia.value.endereco}, ${recorrencia.value.numero} - ${recorrencia.value.cep} - ${recorrencia.value.cidade} / ${recorrencia.value.uf}`
+    return localEntrega
+})
+
 
 //METHODS
 

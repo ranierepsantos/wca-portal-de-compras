@@ -42,6 +42,7 @@ export const route = {
     produtoExportExcel: "Fornecedor/{fornecedorId}/Produtos/ExportExcel",
     produtoGetById: "Fornecedor/{fornecedorId}/Fornecedor/{id}",
     produtoPaginate: "Fornecedor/{fornecedorId}/Produtos/Paginate/{pageSize}/{page}",
+    produtoListWithIcms: "Fornecedor/{fornecedorId}/Produtos/{uf}",
 
     recorrenciaCreate: "Recorrencia",
     recorrenciaGetById: "Recorrencia/{id}",
@@ -61,7 +62,7 @@ export const route = {
     requisicaoDownloadById: "Requisicao/ExportExcel/{id}",
     requisicaoDownloadByToken: "Requisicao/ExportExcel/{token}",
     requisicaoFinalizar: "Requisicao/FinalizarPedido",
-    requisicaoEnviarEmailFornecedor: "Requisicao/SolicitarAprovacaoFornecedor/{requisicaoId}",
+    requisicaoEnviarEmail: "Requisicao/SolicitarAprovacao/{requisicaoId}/{destinoEmail}",
     
 
     tipoFornecimentoCreate: "TipoFornecimento",

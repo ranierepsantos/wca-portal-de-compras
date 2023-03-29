@@ -169,18 +169,18 @@ namespace wca.compras.webapi.Controllers
         /// <returns>Paginnation</returns>
         [HttpGet]
         [Route("{fornecedorId}/Produtos/Paginate/{pageSize}/{page}")]
-        public ActionResult<Pagination<FornecedorDto>> Paginate(int fornecedorId, int pageSize = 10, int page = 1, string? termo = "", bool onlyAuthUser = false)
+        public ActionResult<Pagination<FornecedorDto>> Paginate(int fornecedorId, int pageSize = 10, int page = 1, string? termo = "")
         {
             try
             {
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                int idUsuario = 0;
-                if (onlyAuthUser)
-                {
-                    idUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
-                }
+                //int idUsuario = 0;
+                //if (onlyAuthUser)
+                //{
+                //    idUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                //}
 
-                var items = service.Paginate(filial, fornecedorId, page, pageSize, termo, idUsuario);
+                var items = service.Paginate(filial, fornecedorId, page, pageSize, termo);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -323,6 +323,33 @@ namespace wca.compras.webapi.Controllers
             }
 
         }
+
+
+        /// <summary>
+        /// Lista produtos do fornecedor com o icms do estado (caso não tenha configurado retorna icms = 0)
+        /// </summary>
+        /// <returns>ProdutoWithIcmsDto</returns>
+        /// <param name="fornecedorId"></param>
+        /// <param name="uf"></param>
+        /// <param name="termo"></param>
+        [HttpGet]
+        [Route("{fornecedorId}/Produtos/{uf}")]
+        public async Task<ActionResult<IList<ProdutoWithIcmsDto>>> ListByAuthUserFornecedorUFAsync(int fornecedorId, string uf, string? termo = "")
+        {
+            try
+            {
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                int idUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                
+                var items = await service.ListProdutoByFornecedorWithIcms(filial, fornecedorId, uf, idUsuario, termo);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
 
     }
 }

@@ -42,5 +42,8 @@ namespace wca.compras.domain.Entities
 
         [Column("tipofornecimento_id")]
         public int TipoFornecimentoId { get; set; }
+
+        [JsonIgnore]
+        public IList<ProdutoIcmsEstado> ProdutoIcmsEstado { get; set; } = new List<ProdutoIcmsEstado>();
     }
 }

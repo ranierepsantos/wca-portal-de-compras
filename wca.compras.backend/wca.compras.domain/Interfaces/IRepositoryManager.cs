@@ -25,5 +25,6 @@ namespace wca.compras.domain.Interfaces
         public IRepository<Configuracao> ConfiguracaoRepository { get; }
 
         Task SaveAsync();
+        Task<int> ExecuteCommandAsync(string command);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using wca.compras.domain.Dtos;
@@ -98,6 +99,7 @@ namespace wca.compras.services
                     DataHora= DateTime.Now
                 };
 
+
                 await CreateRequisicaoHistorico(reqH);
                                 
                 if (data.RequerAutorizacaoCliente == true ) {
@@ -171,6 +173,7 @@ namespace wca.compras.services
                 {
                     return null;
                 }
+                string localEntrega = $"{data.Endereco}, {data.Numero} - CEP: {data.Cep} - {data.Cidade} / {data.UF}";
 
                 var dto = new RequisicaoAprovacaoDto(
                     data.Id, 
@@ -181,7 +184,7 @@ namespace wca.compras.services
                     _mapper.Map<ListItem>(data.Usuario), 
                     _mapper.Map<IList<RequisicaoItemDto>>(data.RequisicaoItens), 
                     requisicaoAprovacao.NomeAprovador,
-                    data.LocalEntrega,
+                    localEntrega,
                     data.PeriodoEntrega
                 );
                 return dto;
@@ -197,55 +200,96 @@ namespace wca.compras.services
         {
             try
             {
-                var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
+                bool alterarStatus = true;
+                int requisicaoId = aprovarRequisicaoDto.Id;
+                EnumTipoAprovador tipoAprovador = EnumTipoAprovador.WCA;
+
+                if (requisicaoId == 0 && aprovarRequisicaoDto.Token.ToUpper() != "TELAEDICAO")
+                {
+                    var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
                      .SelectByCondition(c => c.TokenAprovador == aprovarRequisicaoDto.Token)
                      .FirstOrDefaultAsync();
 
-                if (requisicaoAprovacao == null || !requisicaoAprovacao.Ativo)
-                    throw new Exception("Token inválido e/ou expirado!");
+                    if (requisicaoAprovacao == null || !requisicaoAprovacao.Ativo)
+                        throw new Exception("Token inválido e/ou expirado!");
 
-                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == requisicaoAprovacao.RequisicaoId);
+                    //invalidar token da requisicao
+                    var requisicaoAprovacoes = await _rm.RequisicaoAprovacaoRepository.SelectByCondition(c => c.TokenRequisicao == requisicaoAprovacao.TokenRequisicao).ToListAsync();
+
+                    foreach (var item in requisicaoAprovacoes)
+                    {
+                        item.DataRevogacao = DateTime.UtcNow;
+                        _rm.RequisicaoAprovacaoRepository.Update(item);
+                    }
+                    
+                    alterarStatus = requisicaoAprovacao.AlteraStatus;
+                    requisicaoId = requisicaoAprovacao.RequisicaoId;
+                    tipoAprovador = requisicaoAprovacao.TipoAprovador;
+                }
+
+                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == requisicaoId);
                 var data = await query.FirstOrDefaultAsync();
 
                 if (data == null)
                     return false;
 
+                string status = aprovarRequisicaoDto.Aprovado ? "APROVADA" : "REJEITADA";
+                string evento = $"Requisição <b>{status}</b> por {aprovarRequisicaoDto.NomeUsuario}<br/>Comentário: {aprovarRequisicaoDto.Comentario}";
+
+                //verificar se a aprovação é do cliente ou WCA
+                if (tipoAprovador == EnumTipoAprovador.WCA)
+                    data.RequerAutorizacaoWCA = false;
+                else if (tipoAprovador == EnumTipoAprovador.CLIENTE)
+                    data.RequerAutorizacaoCliente = false;
+
                 if (aprovarRequisicaoDto.Aprovado == false)
                     data.Status = EnumStatusRequisicao.REJEITADO;
                 else
-                    data.Status = requisicaoAprovacao.AlteraStatus? EnumStatusRequisicao.APROVADO: data.Status;
-
-                //verificar se a aprovação é do cliente ou WCA
-                if (requisicaoAprovacao.TipoAprovador == EnumTipoAprovador.WCA)
-                    data.RequerAutorizacaoWCA = false;
-                if (requisicaoAprovacao.TipoAprovador == EnumTipoAprovador.CLIENTE)
-                    data.RequerAutorizacaoCliente = false;
-                
+                {
+                    /* SOMENTE APROVAR se o status atual for AGUARDANDO
+                     *  -- CANCELADO  - NÃO ALTERAR
+                     *  -- FINALIZADO - NÃO ALTERAR
+                     *  -- REJEITADO  - NÃO ALTERAR
+                    */  
+                    if (data.Status == EnumStatusRequisicao.AGUARDANDO)
+                    {
+                        // SOMENTE ALTERAR SE:
+                        // solicitação por alterar status
+                        // não requer aprovação do cliente ou WCA
+                        if (alterarStatus && 
+                            data.RequerAutorizacaoCliente == false && 
+                            data.RequerAutorizacaoWCA == false)
+                        {
+                            data.Status = EnumStatusRequisicao.APROVADO;
+                        }
+                    }else
+                    {
+                        evento = $"APROVAÇÃO realizado por {aprovarRequisicaoDto.NomeUsuario}, NÃO ACATADA, motivo: requisição com status: ";
+                        evento += data.Status switch
+                        {
+                            EnumStatusRequisicao.APROVADO => "APROVADO",
+                            EnumStatusRequisicao.CANCELADO => "CANCELADO",
+                            EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
+                            EnumStatusRequisicao.REJEITADO => "REJEITADO",
+                            _ => "DESCONHECIDO"
+                        };
+                    }
+                }
                 _rm.RequisicaoRepository.Update(data);
                 
-                //invalidar token da requisicao
-                var requisicaoAprovacoes = await _rm.RequisicaoAprovacaoRepository.SelectByCondition(c => c.TokenRequisicao == requisicaoAprovacao.TokenRequisicao).ToListAsync();
-
-                foreach(var item in requisicaoAprovacoes)
-                {
-                    item.DataRevogacao = DateTime.UtcNow;
-                    _rm.RequisicaoAprovacaoRepository.Update(item);
-                }
                 await _rm.SaveAsync();
-
-                string status = aprovarRequisicaoDto.Aprovado ? "APROVADA" : "REJEITADA";
-
+                
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
-                    RequisicaoId = requisicaoAprovacao.RequisicaoId,
-                    Evento = $"Requisição <b>{status}</b> por {requisicaoAprovacao.NomeAprovador}<br/>Comentário: {aprovarRequisicaoDto.Comentario}",
+                    RequisicaoId = requisicaoId,
+                    Evento = evento,
                     DataHora = DateTime.Now
                 };
 
                 await CreateRequisicaoHistorico(reqH);
 
                 //verificar se envia solicitação de aprovação do fornecedor, caso a  aprovação seja por cliente/wca
-                if (requisicaoAprovacao.TipoAprovador != EnumTipoAprovador.FORNECEDOR && 
+                if (tipoAprovador != EnumTipoAprovador.FORNECEDOR && 
                     !data.RequerAutorizacaoCliente && !data.RequerAutorizacaoWCA)
                 {
                     await solicitarAprovacaoFornecedor(urlOrigin, data);
@@ -254,7 +298,7 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{this.GetType().Name}.GetByAprovacaoToken.Error: {ex.Message}");
+                Console.WriteLine($"{this.GetType().Name}.aprovarRequisicao.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
@@ -349,6 +393,9 @@ namespace wca.compras.services
 
                 if (data == null) return null;
 
+                if (data.Status == EnumStatusRequisicao.APROVADO || data.Status == EnumStatusRequisicao.CANCELADO || data.Status == EnumStatusRequisicao.FINALIZADO)
+                    throw new Exception("Requisição não pode ser editada!");
+
                 //Remover produtos caso tenha alterado
                 data.RequisicaoItens.ToList().ForEach(produto =>
                 {
@@ -441,13 +488,14 @@ namespace wca.compras.services
 
                 var saveFile = $"WCAPedido_{requisicaoId}.xlsx";
 
+                string localEntrega = string.Empty;
 
                 var workbook = new XLWorkbook(excelFile);
                 var ws = workbook.Worksheet(1);
                 ws.Cell("C1").SetValue(requisicao.Id);
                 ws.Cell("C3").SetValue(requisicao.Cliente.Nome);
                 ws.Cell("C4").SetValue(requisicao.Cliente.CNPJ);
-                ws.Cell("C5").SetValue(requisicao.LocalEntrega);
+                ws.Cell("C5").SetValue(localEntrega);
                 ws.Cell("C6").SetValue(requisicao.Usuario.Text);
 
                 var row = 9;
@@ -513,8 +561,9 @@ namespace wca.compras.services
 
             // Criar o pedido
             CreateRequisicaoDto novoPedido = new CreateRequisicaoDto( (int) requisicao.FilialId, (int) requisicao.ClienteId,
-                (int) requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,usuarioId,
-                usuarioNome,itens,false, false,requisicao.LocalEntrega,requisicao.ValorIcms, requisicao.Icms, requisicao.PeriodoEntrega          
+                (int) requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,
+                requisicao.Endereco, requisicao.Numero, requisicao.Cep, requisicao.Cidade, requisicao.UF, usuarioId,
+                usuarioNome,itens,false, false,requisicao.ValorIcms, requisicao.PeriodoEntrega          
             );
 
             var data = await Create(novoPedido, urlOrigin);
@@ -552,7 +601,7 @@ namespace wca.compras.services
             return true;
         }
 
-        public async Task<bool> EnviarRequisicao2Fornecedor(int requisicaoId, string urlOrigin)
+        public async Task<bool> EnviarRequisicao(int requisicaoId, EnumRequisicaoDestinoEmail destino, string urlOrigin)
         {
             try
             {
@@ -560,14 +609,17 @@ namespace wca.compras.services
 
                 if (requisicao == null) { return false; }
 
-                await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
-
+                if (destino == EnumRequisicaoDestinoEmail.FORNECEDOR)
+                    await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
+                else
+                    await solicitarAprovacaoCliente(urlOrigin, requisicao, false);
+                
                 return true;
             }
             catch (Exception ex)
             {
 
-                Console.WriteLine($"{this.GetType().Name}.EnviarRequisicao2Fornecedor.Error: {ex.Message}");
+                Console.WriteLine($"{this.GetType().Name}.EnviarRequisicao.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
@@ -611,7 +663,7 @@ namespace wca.compras.services
                         RequisicaoId = requisicao.Id,
                         TokenRequisicao = requisicaoToken,
                         TokenAprovador = randomTokenString(),
-                        AlteraStatus = true,
+                        AlteraStatus = false,
                         TipoAprovador = EnumTipoAprovador.FORNECEDOR
                     };
                     _rm.RequisicaoAprovacaoRepository.Create(req);
@@ -667,7 +719,7 @@ namespace wca.compras.services
                         RequisicaoId = requisicao.Id,
                         TokenRequisicao = requisicaoToken,
                         TokenAprovador = randomTokenString(),
-                        AlteraStatus = false,
+                        AlteraStatus = true,
                         TipoAprovador = EnumTipoAprovador.WCA
                     };
                     _rm.RequisicaoAprovacaoRepository.Create(req);
@@ -700,10 +752,18 @@ namespace wca.compras.services
             }
         }
 
-        private async Task solicitarAprovacaoCliente(string urlOrigin, Requisicao requisicao)
+        private async Task solicitarAprovacaoCliente(string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
         {
             try
             {
+                //Verificar se esta configurado para enviar solicitação ao Fornecedor
+                if (checkConfiguracao == true)
+                {
+                    Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.cliente");
+                    if (config.Valor == "false") return;
+
+                }
+                
                 IList<ClienteContato> contatos = await _rm.ClienteContatoRepository.SelectByCondition(c => c.ClienteId == requisicao.ClienteId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
@@ -716,7 +776,7 @@ namespace wca.compras.services
                         RequisicaoId = requisicao.Id,
                         TokenRequisicao = requisicaoToken,
                         TokenAprovador = randomTokenString(),
-                        AlteraStatus = false,
+                        AlteraStatus = true,
                         TipoAprovador = EnumTipoAprovador.CLIENTE
                     };
                     _rm.RequisicaoAprovacaoRepository.Create(req);

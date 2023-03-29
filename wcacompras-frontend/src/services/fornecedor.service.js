@@ -64,7 +64,13 @@ export default {
 
     produtosExportar(fornecedorId) {
         return api.get(route.produtoExportExcel.replace("{fornecedorId}", fornecedorId), { responseType: 'blob'});
-    }
+    },
+
+    produtoListWithIcms(fornecedorId, uf, termo = "")
+    {
+        let url = route.produtoListWithIcms.replace("{fornecedorId}", fornecedorId).replace("{uf}", uf)
+        return api.get(url, {params: { termo: termo}} );
+    },
 
 
 }

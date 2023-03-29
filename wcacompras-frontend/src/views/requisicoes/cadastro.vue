@@ -21,16 +21,15 @@
                 </v-col>
             </v-row>
             <v-row>
-                <v-col cols="10">
-                    <v-text-field label="Local Entrega" v-model="requisicao.localEntrega"
+                <v-col :cols="authStore.hasPermissao('requisicao_local_entrega')? 10 : 12">
+                    <v-text-field label="Local Entrega" :model-value="localEntrega"
                         placeholder="Local de entrega do Pedido" density="compact" variant="outlined" color="primary"
-                        :rules="[(v) => !!v || 'Campo obrigatório']">
+                        :rules="[(v) => !!v || 'Campo obrigatório']" disabled>
                     </v-text-field>
                 </v-col>
 
-                <v-col cols="2">
-                    <v-text-field-money label-text="ICMS (%)" v-model="requisicao.icms" color="primary"
-                        :number-decimal="2"></v-text-field-money>
+                <v-col v-show="authStore.hasPermissao('requisicao_local_entrega')">
+                    <v-btn color="primary" @click="openEnderecoForm = true" :disabled="requisicao.clienteId == null">Alterar Local</v-btn>
                 </v-col>
             </v-row>
             <v-row v-show="requisicao.clienteId > 0">
@@ -89,6 +88,7 @@
                     <th class="text-center text-grey">VALOR</th>
                     <th class="text-center text-grey">TX.GESTÃO</th>
                     <th class="text-center text-grey">IPI (%)</th>
+                    <th class="text-center text-grey">ICMS (%)</th>
                     <th class="text-center text-grey">VL. PRODUTO</th>
                     <th class="text-center text-grey">QUANT.</th>
                     <th class="text-center text-grey">TOTAL</th>
@@ -101,7 +101,8 @@
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
-                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}%</td>
+                    <td class="text-right">{{ item.icms.toFixed(2) }}%</td>
                     <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
@@ -125,7 +126,8 @@
                     <td class="text-left">{{ item.nome + ` (${item.unidadeMedida})` }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor.toFixed(2)) }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.taxaGestao.toFixed(2)) }}</td>
-                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}</td>
+                    <td class="text-right">{{ item.percentualIPI.toFixed(2) }}%</td>
+                    <td class="text-right">{{ item.icms.toFixed(2) }}%</td>
                     <td class="text-right">{{ formatToCurrencyBRL(retornarValorTotalProduto(item)) }}</td>
                     <td class="text-left">
                         <v-text-field density="compact" variant="outlined" type="number" color="primary"
@@ -146,12 +148,13 @@
             </tbody>
             <tfoot>
                 <tr style="font-weight:600;">
-                    <td colspan="2" class="text-right">SUBTOTAL:</td>
+                    <!-- <td colspan="3" class="text-right">SUBTOTAL:</td>
                     <td class="text-right">{{ formatToCurrencyBRL((requisicao.valorTotal - requisicao.valorIcms).toFixed(2))
                     }}</td>
                     <td class="text-right">ICMS:</td>
                     <td class="text-right">{{ formatToCurrencyBRL(requisicao.valorIcms) }}</td>
-                    <td colspan="2" class="text-right">TOTAL PEDIDO:</td>
+                    -->
+                    <td colspan="8" class="text-right">TOTAL PEDIDO:</td> 
                     <td class="text-right">{{ formatToCurrencyBRL(valorTotalPedido) }}</td>
                     <td></td>
                 </tr>
@@ -170,7 +173,7 @@
             </v-col>
         </v-row>
         <v-dialog v-model="openPeriodoForm" max-width="700" :absolute="false" persistent>
-            <v-form ref="produtoForm" @submit.prevent="">
+            <v-form>
                 <v-card>
                     <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
                         Confirmar período de Entrega
@@ -184,6 +187,27 @@
                         <v-row>
                             <v-col class="text-right">
                                 <v-btn color="primary" @click="openPeriodoForm = false">Confirmar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
+            </v-form>
+        </v-dialog>
+        <v-dialog v-model="openEnderecoForm" max-width="900" :absolute="false" persistent>
+            <v-form>
+                <v-card>
+                    <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                        Alterar Local de Entrega
+                    </v-card-title>
+                    <v-card-text>
+                        <v-row>
+                            <v-col>
+                                <endereco v-model:data="requisicao" />
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-btn color="primary" @click="openEnderecoForm = false">Confirmar</v-btn>
                             </v-col>
                         </v-row>
                     </v-card-text>
@@ -204,8 +228,8 @@ import { compararValor, retornarValorTotalProduto, diasDaSemana, formatToCurrenc
 import router from "@/router";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import clienteService from "@/services/cliente.service";
-import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import Periodo from '@/components/Periodo.vue';
+import endereco from "@/components/endereco.vue";
 import authService from "@/services/auth.service";
 //DATA
 const authStore = useAuthStore();
@@ -222,7 +246,6 @@ const requisicao = ref({
     requisicaoItens: [],
     requerAutorizacaoWCA: false,
     requerAutorizacaoCliente: false,
-    icms: 0,
     valorIcms: 0,
     periodoEntrega: {
         0: { periodo: [], selected: false },
@@ -233,6 +256,11 @@ const requisicao = ref({
         5: { periodo: [], selected: false },
         6: { periodo: [], selected: false }
     },
+    endereco: "",
+    numero: "",
+    cep: "",
+    cidade: "",
+    uf: ""
 });
 const clientes = ref([]);
 const fornecedores = ref([]);
@@ -248,6 +276,7 @@ let orcamento = ref(null);
 let tipoFornecimento = ref([])
 const formCadastro = ref(null);
 const openPeriodoForm = ref(false)
+const openEnderecoForm = ref(false)
 const cliente = ref({
     id: null,
     valorLimiteRequisicao: 0,
@@ -267,21 +296,20 @@ onMounted(async () => {
 watch(() => requisicao.value.fornecedorId, async (fornecedorId) => {
     requisicao.value.requisicaoItens = []
     await getProdutosToList(fornecedorId)
-    requisicao.value.icms = fornecedores.value.filter(c => c.id == fornecedorId)[0].icms
 
-    let { value: icms } = await swal.fire({
-        title: 'Confirmar o percentual do ICMS:',
-        input: 'number',
-        inputValue: requisicao.value.icms,
-        confirmButtonText: 'SIM',
-        showCancelButton: false,
-        inputValidator: (value) => {
-            if (!value || value < 0) {
-                return 'Você deve informar um valor maior ou igual a 0'
-            }
-        }
-    })
-    requisicao.value.icms = icms;
+    // let { value: icms } = await swal.fire({
+    //     title: 'Confirmar o percentual do ICMS:',
+    //     input: 'number',
+    //     inputValue: requisicao.value.icms,
+    //     confirmButtonText: 'SIM',
+    //     showCancelButton: false,
+    //     inputValidator: (value) => {
+    //         if (!value || value < 0) {
+    //             return 'Você deve informar um valor maior ou igual a 0'
+    //         }
+    //     }
+    // })
+    // requisicao.value.icms = icms;
 })
 
 watch(() => requisicao.value.clienteId, (clienteId) => {
@@ -292,7 +320,12 @@ watch(() => requisicao.value.clienteId, (clienteId) => {
         orcamento.value[idx].valorTotal = 0
         orcamento.value[idx].percentual = 0
     }
-    requisicao.value.localEntrega = `${cliente.value.endereco}, ${cliente.value.numero} - ${cliente.value.cep} - ${cliente.value.cidade} / ${cliente.value.uf}`
+    
+    requisicao.value.endereco = cliente.value.endereco
+    requisicao.value.numero = cliente.value.numero
+    requisicao.value.cep = cliente.value.cep
+    requisicao.value.cidade = cliente.value.cidade
+    requisicao.value.uf = cliente.value.uf
     requisicao.value.periodoEntrega = JSON.parse(cliente.value.periodoEntrega)
     openPeriodoForm.value = true
 })
@@ -303,21 +336,39 @@ watch(filter, async () => {
     }
 })
 
+watch(() => requisicao.value.uf, async (uf, oldUF) => {
+    if (oldUF != uf && requisicao.value.fornecedorId != null && uf.length == 2) {
+        await getProdutosToList(requisicao.value.fornecedorId)
+    }
+})
+
+const localEntrega = computed(() => {
+    let localEntrega =""
+    if (requisicao.value.endereco.trim() != "")
+        localEntrega = `${requisicao.value.endereco}, ${requisicao.value.numero} - ${requisicao.value.cep} - ${requisicao.value.cidade} / ${requisicao.value.uf}`
+
+    return localEntrega
+}) 
+
 const valorTotalPedido = computed(() => {
     if (requisicao.value.requisicaoItens.length == 0) return 0;
 
     let produtos = requisicao.value.requisicaoItens;
     let valorTotal = 0;
     let valorTaxaGestao = 0;
+    let valorIcms = 0;
 
     produtos.forEach(produto => {
+
         valorTotal += produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
         valorTaxaGestao += produto.quantidade * produto.taxaGestao
+        valorIcms+= produto.quantidade * parseFloat((produto.valor * produto.icms/100).toFixed(2))
     })
     valorTotal = valorTotal.toFixed(2)
-    requisicao.value.valorIcms = (parseFloat(valorTotal) * requisicao.value.icms / 100).toFixed(2)
-    requisicao.value.valorTotal = parseFloat(valorTotal) + parseFloat(requisicao.value.valorIcms)
+    requisicao.value.valorIcms = parseFloat(valorIcms.toFixed(2)) 
+    requisicao.value.valorTotal = parseFloat(valorTotal)
     requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2))
+
     return requisicao.value.valorTotal.toFixed(2);
 })
 
@@ -385,11 +436,14 @@ async function getFornecedorToList(filial) {
 async function getProdutosToList(fornecedorId) {
     try {
         isBusy.value = true;
-        let response = await fornecedorService.produtoPaginate(fornecedorId, 99999, 1, filter.value, true);
-        produtos.value = response.data.items;
+        let response = await fornecedorService.produtoListWithIcms(fornecedorId, requisicao.value.uf, filter.value);
+        produtos.value = response.data;
 
         for (let index = 0; index < requisicao.value.requisicaoItens.length; index++) {
             let item = requisicao.value.requisicaoItens[index];
+            let produto = produtos.value.filter(c =>  c.codigo == item.codigo)[0]
+            if (produto != undefined) 
+                requisicao.value.requisicaoItens[index].icms = produto.icms;
             produtoRemoveFromList(item)
         }
     } catch (error) {
@@ -470,46 +524,25 @@ async function salvar() {
                 data.requerAutorizacaoWCA = true
             }
 
-            if (data.requerAutorizacaoWCA) {
+            if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
                 if (!authStore.hasPermissao("aprova_requisicao")) {
                     let result = await swal.fire({
-                        title: 'Autorização',
-                        html: `<input type="email" id="login" class="swal2-input" placeholder="E-mail">
-                       <input type="password" id="password" class="swal2-input" placeholder="Senha">`,
-                        confirmButtonText: 'Autorizar',
+                        icon: "warning",
+                        title: 'Atenção',
+                        text: "O pedido excedeu limites configurados, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
+                        confirmButtonText: 'Estou ciente',
                         focusConfirm: false,
-                        preConfirm: async () => {
-                            const login = swal.getPopup().querySelector('#login').value
-                            const password = swal.getPopup().querySelector('#password').value
-                            let emailRegex = new RegExp(/^[A-Za-z0-9_!#$%&'*+\/=?`{|}~^.-]+@[A-Za-z0-9.-]+$/, "gm");
-
-                            if (!login || !password) {
-                                swal.showValidationMessage(`Por favor informe o e-mail e senha`)
-                            } else if (!emailRegex.test(login)) {
-                                swal.showValidationMessage(`Por favor informe um e-mail válido`)
-                            } else {
-                                let response = await authService.login({ email: login, password: password })
-                                if (!response.data.authenticated) {
-                                    swal.showValidationMessage(`Usuário e/ou senha inválido!`)
-                                } else if (response.data.perfil.permissao.filter(c => c.regra == 'aprova_requisicao').length == 0) {
-                                    swal.showValidationMessage(`Usuário não tem permissão para realizar aprovação!`)
-                                }
-                                return response.data
-                            }
-                        }
+                        cancelButtonText: "Cancelar",
+                        showCancelButton: true
                     })
                     if (!result.isConfirmed) {
                         return
                     }
-                    data.requerAutorizacaoWCA = false
-                    data.usuarioAutorizador = result.value.usuarioNome
                 } else {
                     data.requerAutorizacaoWCA = false
                     data.usuarioAutorizador = authStore.user.nome
                 }
             }
-
-            //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
 
             await requisicaoService.create(data)
             swal.fire({
@@ -522,7 +555,6 @@ async function salvar() {
                 timer: 2000,
             })
             router.push({ name: "requisicoes" })
-
         }
     } catch (error) {
         console.log("salvar.error:", error);

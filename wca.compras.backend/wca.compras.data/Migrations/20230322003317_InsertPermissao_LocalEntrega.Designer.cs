@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230322003317_InsertPermissao_LocalEntrega")]
+    partial class InsertPermissao_LocalEntrega
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -297,15 +299,6 @@ namespace wca.compras.data.Migrations
                             Descricao = "Requisição Data de Corte",
                             TipoCampo = 5,
                             Valor = "1"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Chave = "requisicao.sendemail.cliente",
-                            ComboValores = "",
-                            Descricao = "Requisição - solicitar aprovação do cliente",
-                            TipoCampo = 1,
-                            Valor = "false"
                         });
                 });
 
@@ -370,6 +363,10 @@ namespace wca.compras.data.Migrations
                     b.Property<int>("FilialId")
                         .HasColumnType("int")
                         .HasColumnName("filial_id");
+
+                    b.Property<decimal>("Icms")
+                        .HasColumnType("money")
+                        .HasColumnName("icms");
 
                     b.Property<string>("InscricaoEstadual")
                         .HasMaxLength(20)
@@ -529,10 +526,10 @@ namespace wca.compras.data.Migrations
                         },
                         new
                         {
-                            Id = 13,
-                            Descricao = "Permite incluir e alterar categorias",
-                            Nome = "Categorias",
-                            Regra = "categoria"
+                            Id = 12,
+                            Descricao = "Permite alterar o local de entrega da requisição",
+                            Nome = "Requisição - Local de entrega",
+                            Regra = "requisicao_local_entrega"
                         });
                 });
 
@@ -592,25 +589,6 @@ namespace wca.compras.data.Migrations
                     b.ToTable("Produtos");
                 });
 
-            modelBuilder.Entity("wca.compras.domain.Entities.ProdutoIcmsEstado", b =>
-                {
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("int")
-                        .HasColumnName("produto_id");
-
-                    b.Property<string>("UF")
-                        .HasColumnType("varchar(2)")
-                        .HasColumnName("uf");
-
-                    b.Property<decimal>("Icms")
-                        .HasColumnType("money")
-                        .HasColumnName("icms");
-
-                    b.HasKey("ProdutoId", "UF");
-
-                    b.ToTable("Produto_Icms_Estado");
-                });
-
             modelBuilder.Entity("wca.compras.domain.Entities.Recorrencia", b =>
                 {
                     b.Property<int>("Id")
@@ -622,16 +600,6 @@ namespace wca.compras.data.Migrations
 
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Cep")
-                        .HasMaxLength(9)
-                        .HasColumnType("varchar(9)")
-                        .HasColumnName("cep");
-
-                    b.Property<string>("Cidade")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("cidade");
 
                     b.Property<int>("ClienteId")
                         .HasColumnType("int")
@@ -649,11 +617,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("dia");
 
-                    b.Property<string>("Endereco")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("endereco");
-
                     b.Property<int>("FilialId")
                         .HasColumnType("int")
                         .HasColumnName("filial_id");
@@ -662,16 +625,16 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fornecedor_id");
 
+                    b.Property<string>("LocalEntrega")
+                        .IsRequired()
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("local_entrega");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)")
                         .HasColumnName("nome");
-
-                    b.Property<string>("Numero")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("numero");
 
                     b.Property<string>("PeriodoEntrega")
                         .IsRequired()
@@ -681,11 +644,6 @@ namespace wca.compras.data.Migrations
                     b.Property<int>("TipoRecorrencia")
                         .HasColumnType("int")
                         .HasColumnName("tipo_recorrencia");
-
-                    b.Property<string>("UF")
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)")
-                        .HasColumnName("uf");
 
                     b.Property<string>("UrlOrigin")
                         .IsRequired()
@@ -794,16 +752,6 @@ namespace wca.compras.data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Cep")
-                        .HasMaxLength(9)
-                        .HasColumnType("varchar(9)")
-                        .HasColumnName("cep");
-
-                    b.Property<string>("Cidade")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("cidade");
-
                     b.Property<int?>("ClienteId")
                         .HasColumnType("int")
                         .HasColumnName("cliente_id");
@@ -820,11 +768,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("tinyint")
                         .HasColumnName("destino");
 
-                    b.Property<string>("Endereco")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("endereco");
-
                     b.Property<int?>("FilialId")
                         .HasColumnType("int")
                         .HasColumnName("filial_id");
@@ -833,14 +776,17 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fornecedor_id");
 
+                    b.Property<decimal>("Icms")
+                        .HasColumnType("money")
+                        .HasColumnName("icms");
+
+                    b.Property<string>("LocalEntrega")
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("local_entrega");
+
                     b.Property<string>("NotaFiscal")
                         .HasColumnType("varchar(50)")
                         .HasColumnName("nota_fiscal");
-
-                    b.Property<string>("Numero")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("numero");
 
                     b.Property<string>("PeriodoEntrega")
                         .HasMaxLength(1500)
@@ -862,11 +808,6 @@ namespace wca.compras.data.Migrations
                     b.Property<decimal>("TaxaGestao")
                         .HasColumnType("money")
                         .HasColumnName("taxa_gestao");
-
-                    b.Property<string>("UF")
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)")
-                        .HasColumnName("uf");
 
                     b.Property<int?>("UsuarioId")
                         .HasColumnType("int")
@@ -993,10 +934,6 @@ namespace wca.compras.data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("codigo");
-
-                    b.Property<decimal>("Icms")
-                        .HasColumnType("money")
-                        .HasColumnName("icms");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -1277,15 +1214,6 @@ namespace wca.compras.data.Migrations
                     b.Navigation("TipoFornecimento");
                 });
 
-            modelBuilder.Entity("wca.compras.domain.Entities.ProdutoIcmsEstado", b =>
-                {
-                    b.HasOne("wca.compras.domain.Entities.Produto", null)
-                        .WithMany("ProdutoIcmsEstado")
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("wca.compras.domain.Entities.Recorrencia", b =>
                 {
                     b.HasOne("wca.compras.domain.Entities.Cliente", "Cliente")
@@ -1445,11 +1373,6 @@ namespace wca.compras.data.Migrations
                     b.Navigation("FornecedorContatos");
 
                     b.Navigation("Produtos");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.Produto", b =>
-                {
-                    b.Navigation("ProdutoIcmsEstado");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Recorrencia", b =>

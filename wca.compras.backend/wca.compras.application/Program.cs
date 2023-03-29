@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using wca.compras.crosscutting.DependencyInjection;
 using wca.compras.domain.Security;
 
@@ -82,6 +83,7 @@ builder.Services.AddSwaggerGen(c =>
             }, new List<string>()
           }
         });
+    
 });
 
 var app = builder.Build();

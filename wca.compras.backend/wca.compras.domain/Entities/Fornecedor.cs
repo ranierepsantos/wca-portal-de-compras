@@ -45,9 +45,6 @@ namespace wca.compras.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
-        [Column("icms", TypeName="money")]
-        public decimal Icms { get; set; }
-
         [JsonIgnore]
         public Filial Filial { get; set; }
 

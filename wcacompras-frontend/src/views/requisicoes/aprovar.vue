@@ -88,7 +88,6 @@
                 <v-row class="mt-2">
                     <v-col cols="10" offset="1">
                         <v-textarea variant="outlined" label="Comentário" class="text-primary" v-model="comentario">
-
                         </v-textarea>
                     </v-col>
                 </v-row>
@@ -164,11 +163,6 @@ onMounted(async () => {
     token.value = route.params.token;
     await getRequisicaoData()
 });
-const Endereco = computed(() => {
-    return requisicao.value.id == null ? '' : requisicao.value.cliente.endereco + ', ' + requisicao.value.cliente.numero +
-        ', ' + requisicao.value.cliente.cidade + ', ' + requisicao.value.cliente.uf + ', '
-        + requisicao.value.cliente.cep;
-})
 
 //METHODS
 async function download() {
@@ -208,10 +202,11 @@ async function aprovarReprovar(isAprovado) {
     try {
         isSaving.value = true;
         let data = {
-            id: requisicao.id,
+            id: 0,
             aprovado: isAprovado,
             comentario: comentario.value,
-            token: token.value
+            token: token.value,
+            nomeUsuario: requisicao.value.nomeAprovador
         }
         await requisicaoService.aprovar(data);
 

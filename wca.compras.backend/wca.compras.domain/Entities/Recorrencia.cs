@@ -42,12 +42,31 @@ namespace wca.compras.domain.Entities
 
         [Column("url_origin", TypeName = "varchar(1000)")]
         public string UrlOrigin { get; set; } = string.Empty;
-
-        [Column("local_entrega", TypeName = "varchar(300)")]
-        public string LocalEntrega { get; set; } = string.Empty;
-
+                
         [Column("periodo_entrega", TypeName = "varchar(1500)")]
         public string PeriodoEntrega { get; set; } = string.Empty;
+
+        //DADOS DO ENDERECO DE ENTREGA
+        [MaxLength(150)]
+        [Column("endereco", TypeName = "varchar(150)")]
+        public string? Endereco { get; set; }
+
+        [MaxLength(9)]
+        [Column("cep", TypeName = "varchar(9)")]
+        public string? Cep { get; set; }
+
+        [MaxLength(10)]
+        [Column("numero", TypeName = "varchar(10)")]
+        public string? Numero { get; set; }
+
+        [MaxLength(100)]
+        [Column("cidade", TypeName = "varchar(100)")]
+        public string? Cidade { get; set; }
+
+        [MaxLength(2)]
+        [Column("uf", TypeName = "varchar(2)")]
+        public string? UF { get; set; }
+
         [JsonIgnore]
         public Filial? Filial { get; set; }
 

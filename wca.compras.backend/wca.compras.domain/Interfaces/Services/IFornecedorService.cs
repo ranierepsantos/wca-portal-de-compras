@@ -17,7 +17,8 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<ProdutoDto> UpdateProduto(int filialId, UpdateProdutoDto updateProdutoDto);
         public Task<bool> RemoveProduto(int filialId, int fornecedorId, int id);
         public Task<bool> ImportProdutoFromExcel(int filialId, int fornecedorId, ImportProdutoDto importProdutoDto);
-        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "", int usuarioId = 0);
+        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "");
         Task<Stream?> ProdutosExportToExcel(int fornecedorId);
+        Task<IList<ProdutoWithIcmsDto>> ListProdutoByFornecedorWithIcms(int filialId, int fornecedorId, string uf, int usuarioId, string? termo = "");
     }
 }

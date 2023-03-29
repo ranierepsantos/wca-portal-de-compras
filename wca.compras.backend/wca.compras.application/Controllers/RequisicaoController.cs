@@ -305,10 +305,11 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>NoContent</returns>
         /// <param name="requisicaoId"></param>
+        /// <param name="destinoEmail"></param>
         [HttpPut]
-        [Route("SolicitarAprovacaoFornecedor/{requisicaoId}")]
-        [Authorize("Bearer")]
-        public async Task<ActionResult> SolicitarAprovacaoFornecedor(int requisicaoId)
+        [Route("SolicitarAprovacao/{requisicaoId}/{destinoEmail}")]
+        //[Authorize("Bearer")]
+        public async Task<ActionResult> SolicitarAprovacaoFornecedor(int requisicaoId, EnumRequisicaoDestinoEmail destinoEmail)
         {
             try
             {
@@ -317,7 +318,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                var result = await service.EnviarRequisicao2Fornecedor(requisicaoId, Request.Headers["origin"]);
+                var result = await service.EnviarRequisicao(requisicaoId, destinoEmail, Request.Headers["origin"]);
 
                 if (result == false)
                     return NotFound();

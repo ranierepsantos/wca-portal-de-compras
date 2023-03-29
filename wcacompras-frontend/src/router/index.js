@@ -16,6 +16,7 @@ const routes = [
       {
         path: 'app/categorias',
         name: 'categorias',
+        meta: {permissao: "categoria"},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
