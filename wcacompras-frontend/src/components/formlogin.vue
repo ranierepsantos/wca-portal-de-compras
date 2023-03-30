@@ -1,6 +1,8 @@
 <template>
     <v-form ref="form" @submit.prevent="submit()">
-
+        <div class="text-right">
+            <span v-once style="font-size: 10px;">v{{packageJsonInfo.version}}</span>
+        </div>
         <v-text-field variant="outlined" density="compact" label="Email" type="email" v-model="formData.email"
             :rules="emailRules" required></v-text-field>
 
@@ -42,5 +44,7 @@ async function submit() {
         emit('autenticar',formData.value)
     }
 }
+
+var packageJsonInfo = require('../../package.json');
 
 </script>
