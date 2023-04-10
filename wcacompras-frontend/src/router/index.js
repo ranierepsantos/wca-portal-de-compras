@@ -156,7 +156,7 @@ const routes = [
       {
         path: 'app/requisicoes',
         name: 'requisicoes',
-        meta: {permissao:"requisicao|requisicao_all_users"},
+        meta: {permissao:"aprova_requisicao|requisicao|requisicao_all_users"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -166,7 +166,7 @@ const routes = [
       {
         path: 'app/requisicoes/cadastro',
         name: 'requisicaoCadastro',
-        meta: {permissao:"requisicao|requisicao_all_users"},
+        meta: {permissao:"requisicao"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -176,7 +176,7 @@ const routes = [
       {
         path: 'app/requisicoes/edicao/:requisicao',
         name: 'requisicaoEdicao',
-        meta: {permissao:"requisicao|requisicao_all_users"},
+        meta: {permissao:"aprova_requisicao|requisicao|requisicao_all_users"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route

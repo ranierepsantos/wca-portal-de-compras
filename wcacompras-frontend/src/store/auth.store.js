@@ -47,6 +47,7 @@ export const useAuthStore = defineStore('auth', {
             if (permissao.indexOf("|") > -1)
             {
                 let permissoes = permissao.split('|')
+
                 for (let index = 0; index < permissoes.length; index++)
                 {
                     perm = this.user.perfil.permissao.filter(p => p.regra.toLowerCase() == permissoes[index].toLowerCase())[0]

@@ -488,7 +488,7 @@ namespace wca.compras.services
 
                 var saveFile = $"WCAPedido_{requisicaoId}.xlsx";
 
-                string localEntrega = string.Empty;
+                string localEntrega = $"{requisicao.Endereco}, {requisicao.Numero} - CEP: {requisicao.CEP} - {requisicao.Cidade} / {requisicao.UF}"; ;
 
                 var workbook = new XLWorkbook(excelFile);
                 var ws = workbook.Worksheet(1);

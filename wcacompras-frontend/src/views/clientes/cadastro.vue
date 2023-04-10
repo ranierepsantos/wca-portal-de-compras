@@ -293,6 +293,7 @@ const emailRules = ref([
     (v) => !!v || "Campo é obrigatório",
     (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
 ]);
+const clienteContatoId = ref(0);
 
 //VUE FUNCTIONS
 
@@ -432,6 +433,13 @@ async function salvar() {
         let data = {...cliente.value}
         data.periodoEntrega = JSON.stringify(cliente.value.periodoEntrega)
         if (valid) {
+
+            //alterar os id's negativos do contato
+            cliente.value.clienteContatos.forEach(contato => {
+                if (contato.id < 0)
+                    contato.id = 0;
+            })
+
             if (cliente.value.id == 0) {
 
                 await clienteService.create(data)
@@ -463,14 +471,18 @@ async function salvarContato() {
     const { valid } = await contatoForm.value.validate()
     if (valid) {
         let index = -1;
-        if (clienteContato.value.id > 0) {
+        if (clienteContato.value.id != 0) {
             index = cliente.value.clienteContatos.findIndex(c => { return c.id == clienteContato.value.id })
             if (index > -1) {
                 cliente.value.clienteContatos[index] = { ...clienteContato.value }
             }
         }
-        if (index == -1)
+        if (index == -1){
+            clienteContatoId += -1
+            clienteContato.value.id = clienteContatoId;
             cliente.value.clienteContatos.push({ ...clienteContato.value })
+        }
+            
         closeContatoDialog()
     }
 }

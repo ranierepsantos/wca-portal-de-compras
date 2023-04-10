@@ -63,12 +63,12 @@
                             }}</v-btn></td>
                     <td class="text-right">
                         <v-btn icon="mdi-content-copy" size="smaller" variant="plain" color="info" title="Duplicar"
-                            @click="duplicar(item)"
+                            @click="duplicar(item)" v-show="authStore.hasPermissao('requisicao')"
                             :disabled="getStatus(item.status).text == 'Cancelado' || isBusy"></v-btn>
                         <v-btn icon="mdi-lead-pencil" size="smaller" variant="plain" color="primary"
                             @click="editar(item.id)" title="Editar" :disabled="isBusy"></v-btn>
                         <v-btn icon="mdi-close-circle-outline" size="smaller" variant="plain" color="error"
-                            @click="remove(item)" title="Cancelar"
+                            @click="remove(item)" title="Cancelar" v-show="authStore.hasPermissao('requisicao')"
                             :disabled="getStatus(item.status).text.toLowerCase() == 'cancelado' || getStatus(item.status).text.toLowerCase() == 'finalizado' || isBusy"></v-btn>
                     </td>
                 </tr>

@@ -79,7 +79,7 @@
                     <div v-show="requisicao.status == 3">
                         <span class="text-primary wca-texto">Data Entrega: </span>
                         <span class="text-grey wca-texto">{{
-                            moment(requisicao.dataEntrega).format("DD/MM/YYYY")
+                            moment(requisicao.dataEntrega).format("DD/MM/YYYY HH:mm")
                         }}</span>
                         &nbsp;
                         <span class="text-primary wca-texto">Nota Fiscal: </span>
@@ -293,7 +293,7 @@
                         </v-row>
                         <v-row>
                             <v-col>
-                                <v-text-field label="Data Entrega" v-model="finalizarData.dataEntrega" type="date" required
+                                <v-text-field label="Data Entrega" v-model="finalizarData.dataEntrega" type="datetime-local" required
                                     variant="outlined" color="primary"
                                     :rules="[(v) => !!v || 'Data da Entrega é obrigatório']"
                                     density="compact"></v-text-field>
@@ -475,7 +475,12 @@ watch(() => requisicao.value.uf, async (uf, oldUF) => {
     }
 })
 
-const podeEditar = computed(() => requisicao.value.status != 1 && requisicao.value.status != 3 && requisicao.value.status != 4)
+const podeEditar = computed(() => 
+    requisicao.value.status != 1 && 
+    requisicao.value.status != 3 && 
+    requisicao.value.status != 4 &&
+    authStore.hasPermissao("requisicao")
+)
 
 const aguardaQuem = computed(() => {
     let texto = "";
@@ -520,9 +525,9 @@ const valorTotalPedido = computed(() => {
 const headerButtons = computed(() => {
     let buttons = [];
 
-    if (requisicao.value.status == 1) //aprovado
+    if (requisicao.value.status == 1 && authStore.hasPermissao('requisicao')) //aprovado
         buttons.push({ text: 'Solicitar Aprovação - Fornecedor', icon: 'mdi-email-arrow-right-outline', event: 'EmailFornecedorClick' })
-    if (requisicao.value.requerAutorizacaoCliente)
+    if (requisicao.value.requerAutorizacaoCliente && requisicao.value.status == 0)
         buttons.push({ text: 'Solicitar Aprovação - Cliente', icon: 'mdi-email-arrow-right-outline', event: 'EmailClienteClick' })
 
     return buttons;

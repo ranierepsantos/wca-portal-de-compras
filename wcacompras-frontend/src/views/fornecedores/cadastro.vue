@@ -34,12 +34,6 @@
                                     :rules="[(v) => !!v || 'Filial é obrigatório']"></v-select>
                             </v-col>
                             <v-col>
-                                <v-text-field-money label-text="ICMS (%)" v-model="fornecedor.icms"
-                                    color="primary" :number-decimal="2"
-                                    :rules="[(v) => parseFloat(v) < 100 || 'O percentual deve ser no máximo 99.99%']"
-                                    ></v-text-field-money>
-                            </v-col>
-                            <v-col>
                                 <v-checkbox v-model="fornecedor.ativo" color="primary" label="Ativo?" density="compact"
                                     v-show="fornecedor.id > 0">
                                 </v-checkbox>
@@ -245,7 +239,7 @@ const emailRules = ref([
     (v) => !!v || "Campo é obrigatório",
     (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
 ]);
-
+const contatoIdControl= ref(0);
 const isContatoValido = ref(true);
 
 //VUE FUNCTIONS
@@ -366,6 +360,13 @@ async function salvar()
         const { valid } = await fornecedorForm.value.validate()
         if (valid && isContatoValido.value)
         {
+
+            //alterar os id's negativos para zero
+            fornecedor.value.fornecedorContatos.forEach(contato => {
+                if (contato.id < 0)
+                    contato.id = 0;
+            })
+
             if (fornecedor.value.id == 0)
             {
                 await fornecedorService.create(fornecedor.value)
@@ -401,7 +402,7 @@ async function salvarContato()
     if (valid)
     {
         let index = -1;
-        if (fornecedor.value.id > 0)
+        if (fornecedorContato.value.id != 0)
         {
             index = fornecedor.value.fornecedorContatos.findIndex(c => { return c.id == fornecedorContato.value.id })
             if (index > -1)
@@ -409,8 +410,12 @@ async function salvarContato()
                 fornecedor.value.fornecedorContatos[index] = { ...fornecedorContato.value }
             }
         }
-        if (index < 0)
+        if (index < 0) {
+            contatoIdControl.value +=-1
+            fornecedorContato.value.id = contatoIdControl; 
             fornecedor.value.fornecedorContatos.push({ ...fornecedorContato.value })
+        }
+
         closeContatoDialog()
     }
 

@@ -411,7 +411,7 @@ async function salvar()
 </script>
 
 <style scoped>
-.right-input /deep/ input {
+.right-input :deep() input {
     text-align: right
 }
 </style>

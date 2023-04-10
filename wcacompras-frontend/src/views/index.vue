@@ -6,7 +6,8 @@
       <br />
       <br />
       <v-btn block color="orange" rounded="lg" class="text-capitalize"
-        @click="router.push({ name: 'requisicaoCadastro' })">
+        @click="router.push({ name: 'requisicaoCadastro' })"
+        v-show="checkPermissao('requisicao|requisicao_all_users')">
         <b>Requisição de compra</b>
       </v-btn>
       <br />
@@ -117,7 +118,7 @@ const menuItems = ref([
     title: "Requisições",
     value: 8,
     route: "/app/requisicoes",
-    permissao: "requisicao|requisicao_all_users"
+    permissao: "aprova_requisicao|requisicao|requisicao_all_users"
   },
   {
     title: "Usuários",
