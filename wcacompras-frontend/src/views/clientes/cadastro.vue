@@ -116,6 +116,9 @@
                         <v-row class="mt-2">
                             <v-col>
                                 <h3 class="text-left text-grey">CONTATOS</h3>
+                                <small class="text-error" v-show="!isContatoValido">
+                                    Deve haver pelo menos 1 contato que aprova requisição
+                                </small>
                                 <v-divider class="mt-3"></v-divider>
                             </v-col>
                         </v-row>
@@ -281,6 +284,7 @@ const clienteContato = ref({
     celular: "",
     aprovaPedido: false
 })
+const isContatoValido= ref(true)
 const contatoDialog = ref(false)
 const dialogTitle = "Novo Contato"
 const filiais = ref([]);
@@ -430,6 +434,8 @@ async function salvar() {
     try {
         isBusy.value = true
         const { valid } = await clienteForm.value.validate()
+        isContatoValido.value = cliente.value.clienteContatos.find(c => c.aprovaPedido == true) != undefined;
+        
         let data = {...cliente.value}
         data.periodoEntrega = JSON.stringify(cliente.value.periodoEntrega)
         if (valid) {
