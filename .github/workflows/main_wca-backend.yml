@@ -26,7 +26,7 @@ jobs:
         run: ls
         
       - name: Enter path project
-        run: cd D:\a\wca-portal-de-compras\wca-portal-de-compras/wca.compras.backend/
+        run: cd D:\a\wca-portal-de-compras\wca-portal-de-compras\wca.compras.backend
         
       - name: List path project2
         run: ls
