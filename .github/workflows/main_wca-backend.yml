@@ -21,18 +21,15 @@ jobs:
         with:
           dotnet-version: '6.0'
           include-prerelease: true
-          
-      - name: Enter path project
-        run: cd ${{env.DOTNET_ROOT}}/wca.compras.backend
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
         
       - name: List path project
         run: ls
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
-
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/wca.compras.backend
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
