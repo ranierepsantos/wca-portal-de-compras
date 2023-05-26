@@ -21,21 +21,9 @@ jobs:
         with:
           dotnet-version: '6.0'
           include-prerelease: true
-          
-      - name: List path project1
-        run: ls
         
-      - name: Enter path project
-        run: cd D:\a\wca-portal-de-compras\wca-portal-de-compras\wca.compras.backend
-        
-      - name: List path project2
-        run: ls
-
       - name: Build with dotnet
-        run: dotnet build --configuration Release
-        
-      - name: List path project2
-        run: ls
+        run: dotnet build ./wca.compras.backend --configuration Release
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
