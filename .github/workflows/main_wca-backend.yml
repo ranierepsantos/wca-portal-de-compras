@@ -24,6 +24,12 @@ jobs:
           
       - name: List path project1
         run: ls
+        
+      - name: Enter path project
+        run: cd ./wca.compras.backend/
+        
+      - name: List path project2
+        run: ls
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
