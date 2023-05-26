@@ -22,6 +22,9 @@ jobs:
           dotnet-version: '3.1'
           include-prerelease: true
           
+      - name: List path project
+        run: ls
+          
       - name: Enter path project
         run: cd wca.compras.backend
 
