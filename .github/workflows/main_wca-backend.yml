@@ -23,7 +23,7 @@ jobs:
           include-prerelease: true
           
       - name: Enter path project
-        run: cd wca.compras.backend
+        run: cd ${{env.DOTNET_ROOT}}/wca.compras.backend
         
       - name: List path project
         run: ls
