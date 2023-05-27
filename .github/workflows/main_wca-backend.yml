@@ -29,13 +29,13 @@ jobs:
         run: ls ${{env.DOTNET_ROOT}}
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/wca.compras.backend
+        run: dotnet publish ./wca.compras.backend -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: .wca.compras.backend
-          path: ${{env.DOTNET_ROOT}}/wca.compras.backend
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
     runs-on: windows-latest
