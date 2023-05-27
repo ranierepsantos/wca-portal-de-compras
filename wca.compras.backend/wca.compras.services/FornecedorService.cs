@@ -450,8 +450,8 @@ namespace wca.compras.services
                 ws.Cell("E1").SetValue("VALOR");
                 ws.Cell("F1").SetValue("TAXA GESTÃO");
                 ws.Cell("G1").SetValue("IPI (%)");
-                ws.Cell("G1").SetValue("UF");
-                ws.Cell("G1").SetValue("ICMS (%)");
+                ws.Cell("H1").SetValue("UF");
+                ws.Cell("I1").SetValue("ICMS (%)");
 
                 var row = 2;
 
