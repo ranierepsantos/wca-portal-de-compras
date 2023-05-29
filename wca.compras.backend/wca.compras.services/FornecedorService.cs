@@ -452,7 +452,7 @@ namespace wca.compras.services
                 ws.Cell("G1").SetValue("IPI (%)");
                 ws.Cell("H1").SetValue("UF");
                 ws.Cell("I1").SetValue("ICMS (%)");
-
+                
                 var row = 2;
 
                 foreach (var item in produtos)
@@ -468,6 +468,7 @@ namespace wca.compras.services
                         ws.Cell($"G{row}").SetValue(item.PercentualIPI);
                         ws.Cell($"H{row}").SetValue(icms.UF);
                         ws.Cell($"I{row}").SetValue(icms.Icms);
+                        ws.Cell($"J{row}").SetValue("Ok");
                         row++;
                     }
                     
