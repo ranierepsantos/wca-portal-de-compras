@@ -468,7 +468,6 @@ namespace wca.compras.services
                         ws.Cell($"G{row}").SetValue(item.PercentualIPI);
                         ws.Cell($"H{row}").SetValue(icms.UF);
                         ws.Cell($"I{row}").SetValue(icms.Icms);
-                        ws.Cell($"J{row}").SetValue("Ok");
                         row++;
                     }
                     
