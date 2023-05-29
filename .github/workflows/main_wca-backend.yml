@@ -23,13 +23,13 @@ jobs:
           include-prerelease: true
         
       - name: Build with dotnet
-        run: dotnet build ./wca.compras.backend --configuration Release
+        run: dotnet build ./wca.compras.backend/wca.compras.application --configuration Release
       
       - name: listar pastas antes de publicar
         run: ls ${{env.DOTNET_ROOT}}
 
       - name: dotnet publish
-        run: dotnet publish ./wca.compras.backend -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ./wca.compras.backend/wca.compras.application -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
