@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230517233447_Alter_Table_Permissao_Add_Relation_With_Sistema")]
+    partial class Alter_Table_Permissao_Add_Relation_With_Sistema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -469,13 +471,7 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("nome");
 
-                    b.Property<int?>("SistemaId")
-                        .HasColumnType("int")
-                        .HasColumnName("sistema_id");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("SistemaId");
 
                     b.ToTable("Perfil");
                 });
@@ -1112,12 +1108,6 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(250)")
                         .HasColumnName("descricao");
 
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
-                        .HasColumnName("icon");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -1133,14 +1123,12 @@ namespace wca.compras.data.Migrations
                         {
                             Id = 1,
                             Descricao = "Sistema de compras de insumos",
-                            Icon = "",
                             Nome = "Compras"
                         },
                         new
                         {
                             Id = 2,
                             Descricao = "Sistema de solicitação de reembolso",
-                            Icon = "",
                             Nome = "Reembolso"
                         });
                 });
@@ -1203,34 +1191,17 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("password");
 
+                    b.Property<int?>("PerfilId")
+                        .HasColumnType("int")
+                        .HasColumnName("perfil_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FilialId");
 
-                    b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.UsuarioSistemaPerfil", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_id");
-
-                    b.Property<int>("SistemaId")
-                        .HasColumnType("int")
-                        .HasColumnName("sistema_id");
-
-                    b.Property<int>("PerfilId")
-                        .HasColumnType("int")
-                        .HasColumnName("perfil_id");
-
-                    b.HasKey("UsuarioId", "SistemaId", "PerfilId");
-
                     b.HasIndex("PerfilId");
 
-                    b.HasIndex("SistemaId");
-
-                    b.ToTable("Usuario_Sistema_Perfil");
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("ClienteUsuario", b =>
@@ -1335,15 +1306,6 @@ namespace wca.compras.data.Migrations
                         .HasForeignKey("FornecedorId");
 
                     b.Navigation("Fornecedor");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.Perfil", b =>
-                {
-                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
-                        .WithMany()
-                        .HasForeignKey("SistemaId");
-
-                    b.Navigation("Sistema");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Permissao", b =>
@@ -1519,34 +1481,13 @@ namespace wca.compras.data.Migrations
                         .WithMany()
                         .HasForeignKey("FilialId");
 
-                    b.Navigation("Filial");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.UsuarioSistemaPerfil", b =>
-                {
                     b.HasOne("wca.compras.domain.Entities.Perfil", "Perfil")
-                        .WithMany("UsuarioSistemaPerfil")
-                        .HasForeignKey("PerfilId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("PerfilId");
 
-                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
-                        .WithMany("UsuarioSistemaPerfil")
-                        .HasForeignKey("SistemaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("wca.compras.domain.Entities.Usuario", "Usuario")
-                        .WithMany("UsuarioSistemaPerfil")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Filial");
 
                     b.Navigation("Perfil");
-
-                    b.Navigation("Sistema");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Cliente", b =>
@@ -1561,11 +1502,6 @@ namespace wca.compras.data.Migrations
                     b.Navigation("FornecedorContatos");
 
                     b.Navigation("Produtos");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.Perfil", b =>
-                {
-                    b.Navigation("UsuarioSistemaPerfil");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Produto", b =>
@@ -1585,16 +1521,6 @@ namespace wca.compras.data.Migrations
                     b.Navigation("RequisicaoHistorico");
 
                     b.Navigation("RequisicaoItens");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.Sistema", b =>
-                {
-                    b.Navigation("UsuarioSistemaPerfil");
-                });
-
-            modelBuilder.Entity("wca.compras.domain.Entities.Usuario", b =>
-                {
-                    b.Navigation("UsuarioSistemaPerfil");
                 });
 #pragma warning restore 612, 618
         }
