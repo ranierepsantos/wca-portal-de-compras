@@ -32,6 +32,7 @@ export const route = {
     perfilPaginate: "Perfil/Paginate/{pageSize}/{page}",
     perfilToList: "Perfil/ToList",
     perfilGetWithPermissions: "Perfil/{id}",
+    perfilGetByUserAndSistemaWithPermissions: "Perfil/{usuarioId}/{sistemaId}",
     permissaoToList: "Permissao/ToList",
     permissaoAll: "Permissao/all",
 

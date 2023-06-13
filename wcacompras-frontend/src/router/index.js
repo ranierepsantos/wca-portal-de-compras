@@ -8,8 +8,8 @@ const routes = [
     component: () => import("../views"), //webpackChunkName app
     children: [
       {
-        path: 'app',
-        name: 'home',
+        path: '',
+        name: 'compras',
         component: HomeView,
         beforeEnter: protectRoute,
       },
@@ -205,8 +205,9 @@ const routes = [
         component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios/cadastro')
       },
       {
-        path: 'app/acessonegado',
-        name: 'acessonegado',
+        path: '',
+        name: 'reembolso',
+        component: HomeView,
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -241,6 +242,12 @@ const routes = [
     component: () => import("../views/sessoes/resetSenha")
   },
   {
+    path: "/sistemas",
+    name: "sistemas",
+    beforeEnter: protectRoute,
+    component: () => import("../views/Sistema")
+  },
+  {
     path: "/:pathMatch(.*)*",
     component: () => import(/* webpackChunkName: "pages" */ '../views/pages/notFound')
   }
@@ -249,8 +256,11 @@ const routes = [
 
 function protectRoute(to, from, next)
 {
+  console.log("rota:",  to)
   let authStore = useAuthStore();
   if (!authStore.isAuthenticated()) next({ name: 'login' })
+
+
   if (to.meta.permissao != undefined && !authStore.hasPermissao(to.meta.permissao)) 
     next({name: "acessonegado"})
   else next()

@@ -5,10 +5,8 @@
       <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
-      <v-btn block color="orange" rounded="lg" class="text-capitalize"
-        @click="router.push({ name: 'requisicaoCadastro' })"
-        v-show="checkPermissao('requisicao|requisicao_all_users')">
-        <b>Requisição de compra</b>
+      <v-btn block color="orange" rounded="lg" class="text-capitalize">
+        <b>Nova Solicitação</b>
       </v-btn>
       <br />
       <v-list class="text-left" density="compact">
@@ -75,63 +73,34 @@ const menuItems = ref([
   {
     title: "Home",
     value: 1,
-    route: "/app",
+    route: "/reembolso",
     permissao: "livre"
   },
   {
-    title: "Categorias",
-    value: 2,
-    route: "/app/categorias",
-    permissao: "categoria"
-  },
-  {
     title: "Clientes",
-    value: 3,
-    route: "/app/clientes",
-    permissao: "cliente"
+    value: 1,
+    route: "/reembolso",
+    permissao: "livre"
   },
   {
-    title: "Configurações",
-    value: 10,
-    route: "/app/configuracoes",
-    permissao: "configuracao"
+    title: "Projetos",
+    value: 1,
+    route: "/reembolso",
+    permissao: "livre"
   },
   {
-    title: "Filiais",
-    value: 4,
-    route: "/app/filiais",
-    permissao: "filial"
+    title: "Solicitações",
+    value: 1,
+    route: "/reembolso",
+    permissao: "livre"
   },
   {
-    title: "Fornecedores",
-    value: 5,
-    route: "/app/fornecedores",
-    permissao: "fornecedor"
+    title: "Tipos Despesa",
+    value: 1,
+    route: "/reembolso",
+    permissao: "livre"
   },
-  {
-    title: "Perfil",
-    value: 6,
-    route: "/app/perfil",
-    permissao: "perfil"
-  },
-  {
-    title: "Recorrências",
-    value: 7,
-    route: "/app/recorrencias",
-    permissao: "recorrencia|recorrencias_view_others_users"
-  },
-  {
-    title: "Requisições",
-    value: 8,
-    route: "/app/requisicoes",
-    permissao: "aprova_requisicao|requisicao|requisicao_all_users"
-  },
-  {
-    title: "Usuários",
-    value: 9,
-    route: "/app/usuarios",
-    permissao: "usuario"
-  },
+  
 ]);
 const authStore = useAuthStore();
 const router = useRouter();

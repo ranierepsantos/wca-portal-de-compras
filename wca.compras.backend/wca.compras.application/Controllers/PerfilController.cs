@@ -100,6 +100,37 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
+        /// Busca o perfil com suas respectivas permissões
+        /// </summary>
+        /// <returns>Perfil com permissões</returns>
+        /// <param name="usuarioId"></param>
+        /// <param name="sistemaId"></param>
+        [HttpGet]
+        [Route("{usuarioId}/{sistemaId}")]
+        public async Task<ActionResult<PerfilPermissoesDto>> GetWithPeGetByUserAndSistemaWithPermissions(int usuarioId, int sistemaId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                var result = await service.GetByUserAndSistemaWithPermissoes(usuarioId, sistemaId);
+                if (result == null)
+                {
+                    return NotFound($"Perfil não localizado!");
+                }
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+
+
+        /// <summary>
         /// Retorna lista de perfil ativos para preenchimento de Listas e Combos
         /// </summary>
         /// <returns>Perfil com permissões</returns>

@@ -14,4 +14,11 @@ export default {
     {
         return api.post(route.recuperarSenha, data)
     },
+    getPerfilSistema (usuarioId, sistemaId) {
+        let endPoint = route.perfilGetByUserAndSistemaWithPermissions
+                       .replace("{usuarioId}", usuarioId)
+                       .replace("{sistemaId}", sistemaId);
+
+        return api.get(endPoint)
+    }
 }

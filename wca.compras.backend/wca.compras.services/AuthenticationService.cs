@@ -50,11 +50,15 @@ namespace wca.compras.services
                     return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, 0, "", null);
                 }
 
-                var perfilUser = await _rm.PerfilRepository
-                    .SelectByCondition (p => p.Id == authUser.PerfilId)
-                    .Include("Permissao")
-                    .FirstOrDefaultAsync();
-                if (perfilUser == null || perfilUser.Ativo == false)
+
+                var sistemas = await _rm.SistemaRepository
+                    .SelectByCondition(c => c.UsuarioSistemaPerfil.Any(c => c.UsuarioId == authUser.Id))
+                    .Include(ic => ic.UsuarioSistemaPerfil)
+                    .ThenInclude(x => x.Perfil)
+                    .Where(p =>  p.UsuarioSistemaPerfil.Any(z => z.Perfil.Ativo))
+                    .ToListAsync();
+
+                if (sistemas is null)
                 {
                     return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0,0, "", null);
                 }
@@ -74,7 +78,7 @@ namespace wca.compras.services
 
                 var handler = new JwtSecurityTokenHandler();
                 var token = CreateToken(identity, createDate, expirationDate, handler);
-                return await SuccessObject(createDate, expirationDate, token, authUser, _mapper.Map<PerfilPermissoesDto>(perfilUser));
+                return await SuccessObject(createDate, expirationDate, token, authUser, _mapper.Map<IList<SistemaDto>>(sistemas));
             }
             catch (Exception ex)
             {
@@ -188,7 +192,7 @@ namespace wca.compras.services
             return token;
         }
 
-        private async Task<LoginResponse> SuccessObject(DateTime createDate, DateTime expirationDate, string token, Usuario usuario, PerfilPermissoesDto perfil)
+        private async Task<LoginResponse> SuccessObject(DateTime createDate, DateTime expirationDate, string token, Usuario usuario, IList<SistemaDto>? sistemas)
         {
             return new LoginResponse(
                 Authenticated: true,
@@ -199,7 +203,7 @@ namespace wca.compras.services
                 usuario.Id,
                 usuario.FilialId,
                 usuario.Nome,
-                perfil
+                sistemas
             );
         }
     }

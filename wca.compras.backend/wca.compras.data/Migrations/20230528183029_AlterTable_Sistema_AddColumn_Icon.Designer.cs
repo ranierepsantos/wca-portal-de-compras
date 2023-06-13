@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20230528183029_AlterTable_Sistema_AddColumn_Icon")]
+    partial class AlterTable_Sistema_AddColumn_Icon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -501,7 +503,13 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("regra");
 
+                    b.Property<int?>("SistemaId")
+                        .HasColumnType("int")
+                        .HasColumnName("sistema_id");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SistemaId");
 
                     b.ToTable("Permissao");
 
@@ -1329,6 +1337,15 @@ namespace wca.compras.data.Migrations
                         .HasForeignKey("FornecedorId");
 
                     b.Navigation("Fornecedor");
+                });
+
+            modelBuilder.Entity("wca.compras.domain.Entities.Permissao", b =>
+                {
+                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
+                        .WithMany()
+                        .HasForeignKey("SistemaId");
+
+                    b.Navigation("Sistema");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Produto", b =>

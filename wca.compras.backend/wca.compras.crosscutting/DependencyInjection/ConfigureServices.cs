@@ -37,6 +37,7 @@ namespace wca.compras.crosscutting.DependencyInjection
                     config.AddProfile(new FornecedorProfile());
                     config.AddProfile(new RequisicaoProfile());
                     config.AddProfile(new RecorrenciaProfile());
+                    config.AddProfile(new SistemaProfile());
 
                 }
              );

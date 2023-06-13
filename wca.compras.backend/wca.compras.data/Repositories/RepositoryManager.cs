@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 using wca.compras.data.DataAccess;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -27,13 +28,13 @@ namespace wca.compras.data.Repositories
         private IRepository<RecorrenciaProduto> _recorrenciaProdutoRepo;
         private IRepository<RecorrenciaLog> _recorrenciaLogRepo;
         private IRepository<Configuracao> _configuracaoRepo;
-
+        private IRepository<Sistema> _sistemaRepo;
         public RepositoryManager(WcaContext context)
         {
             _context = context;
         }
 
-        public IRepository<Perfil> PerfilRepository { 
+        public IRepository<Perfil> PerfilRepository {
             get
             {
                 if (_perfilRepo == null)
@@ -126,7 +127,7 @@ namespace wca.compras.data.Repositories
                 }
                 return _clienteContatoRepo;
             }
-            
+
         }
 
         public IRepository<Fornecedor> FornecedorRepository
@@ -157,7 +158,7 @@ namespace wca.compras.data.Repositories
         {
             get
             {
-                if (_requisicaoRepo == null) 
+                if (_requisicaoRepo == null)
                     _requisicaoRepo = new BaseRepository<Requisicao>(_context);
                 return _requisicaoRepo;
             }
@@ -247,6 +248,19 @@ namespace wca.compras.data.Repositories
                 return _configuracaoRepo;
             }
         }
+
+        public IRepository<Sistema> SistemaRepository
+        {
+            get
+            {
+                if (_sistemaRepo is null)
+                {
+                    _sistemaRepo = new BaseRepository<Sistema>(_context);
+                }
+                return _sistemaRepo;
+            }
+        }
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

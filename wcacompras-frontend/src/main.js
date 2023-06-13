@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, markRaw } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
@@ -10,6 +10,10 @@ import '@sweetalert2/theme-material-ui/material-ui.css'
 import './assets/css/app.css'
 
 const pinia = createPinia()
+
+pinia.use(({ store }) => {
+    store.$router = markRaw(router)
+});
 
 createApp(App)
     .use(router)

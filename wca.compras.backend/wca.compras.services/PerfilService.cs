@@ -53,6 +53,15 @@ namespace wca.compras.services
             return _mapper.Map<PerfilPermissoesDto>(data);
         }
 
+        public async Task<PerfilPermissoesDto> GetByUserAndSistemaWithPermissoes(int usuarioId, int sistemaId)
+        {
+            var data = await _rm.PerfilRepository.SelectAll()
+                .Include(us => us.UsuarioSistemaPerfil.Where(c => c.UsuarioId == usuarioId && c.SistemaId == sistemaId))
+                .Include(pm => pm.Permissao.Where(c => c.SistemaId == sistemaId)).FirstOrDefaultAsync();
+
+            return _mapper.Map<PerfilPermissoesDto>(data);
+        }
+
         public async Task<PerfilDto> Update(UpdatePerfilDto perfil)
         {
 
