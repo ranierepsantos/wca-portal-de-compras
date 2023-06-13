@@ -32,5 +32,10 @@ namespace wca.compras.domain.Entities
         [JsonIgnore]
         public IList<Perfil> Perfil { get; set; }
 
+        [Column("sistema_id")]
+        public int? SistemaId { get; set; }
+        [JsonIgnore]
+        public Sistema Sistema { get; set; }
+
     }
 }

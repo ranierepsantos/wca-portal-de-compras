@@ -4,64 +4,68 @@ import { useAuthStore} from '@/store/auth.store'
 const routes = [
   {
     path: "/",
-    redirect: "/app",
-    component: () => import("../views"), //webpackChunkName app
+    redirect: "compras"
+  },
+  {
+    path: "/compras",
+    component: () => import("../views/indexCompras"), //webpackChunkName app
     children: [
       {
         path: '',
         name: 'compras',
+        meta: {sistema: 1},
         component: HomeView,
         beforeEnter: protectRoute,
       },
       {
-        path: 'app/categorias',
+        path: 'categorias',
         name: 'categorias',
-        meta: {permissao: "categoria"},
+        meta: {permissao: "categoria", sistema: 1},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "categorias" */ '../views/categorias'),
+        component: () => import(/* webpackChunkName: "categorias" */ '../views/compras/categorias'),
         
       },
       {
-        path: 'app/clientes',
+        path: 'clientes',
         name: 'clientes',
         beforeEnter: protectRoute,
-        meta: {permissao: "cliente"},
+        meta: {permissao: "cliente", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "cliente" */ '../views/clientes'),
+        component: () => import(/* webpackChunkName: "cliente" */ '../views/compras/clientes'),
         
       },
       {
-        path: 'app/clientes/cadastro',
+        path: 'clientes/cadastro',
         name: 'clienteCadastro',
         beforeEnter: protectRoute,
-        meta: {permissao: "cliente"},
+        meta: {permissao: "cliente", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "cliente" */ '../views/clientes/cadastro.vue'),
+        component: () => import(/* webpackChunkName: "cliente" */ '../views/compras/clientes/cadastro.vue'),
       },
       {
-        path: 'app/configuracoes',
+        path: 'configuracoes',
         name: 'configuracoes',
         beforeEnter: protectRoute,
-        meta: {permissao: "configuracao"},
+        meta: {permissao: "configuracao", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "configuracoes" */ '../views/configuracoes/configuracoes'),
+        component: () => import(/* webpackChunkName: "configuracoes" */ '../views/compras/configuracoes/configuracoes'),
         
       },
       {
-        path: 'app/filiais',
+        path: 'filiais',
         name: 'filiais',
         beforeEnter: protectRoute,
-        meta: {permissao: "filial"},
+        meta: {permissao: "filial", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -69,43 +73,43 @@ const routes = [
         
       },
       {
-        path: 'app/fornecedores',
+        path: 'fornecedores',
         name: 'fornecedores',
         beforeEnter: protectRoute,
-        meta: {permissao: "fornecedor"},
+        meta: {permissao: "fornecedor", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores'),
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/compras/fornecedores'),
         
       },
       {
-        path: 'app/fornecedores/cadastro',
+        path: 'fornecedores/cadastro',
         name: 'fornecedorCadastro',
         beforeEnter: protectRoute,
-        meta: {permissao: "fornecedor"},
+        meta: {permissao: "fornecedor", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores/cadastro.vue'),
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/compras/fornecedores/cadastro.vue'),
         
       },
       {
-        path: 'app/fornecedores/produtos',
+        path: 'fornecedores/produtos',
         name: 'fornecedorProdutos',
         beforeEnter: protectRoute,
-        meta: {permissao: "fornecedor"},
+        meta: {permissao: "fornecedor", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/fornecedores/produtosindex.vue'),
+        component: () => import(/* webpackChunkName: "fornecedor" */ '../views/compras/fornecedores/produtosindex.vue'),
         
       },
       {
-        path: 'app/perfil',
+        path: 'perfil',
         name: 'perfil',
         beforeEnter: protectRoute,
-        meta: {permissao: "perfil"},
+        meta: {permissao: "perfil", sistema: 1},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -113,9 +117,9 @@ const routes = [
         
       },
       {
-        path: 'app/perfil/cadastro',
+        path: 'perfil/cadastro',
         name: 'perfilCadastro',
-        meta: {permissao: "perfil"},
+        meta: {permissao: "perfil", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -124,107 +128,219 @@ const routes = [
         props: route => ({ query: route.query.id })
       },
       {
-        path: 'app/recorrencias',
+        path: 'recorrencias',
         name: 'recorrencias',
-        meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencia|recorrencias_view_others_users", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/recorrencias')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/compras/recorrencias')
       },
       {
-        path: 'app/recorrencias/cadastro',
+        path: 'recorrencias/cadastro',
         name: 'recorrenciaCadastro',
-        meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencia|recorrencias_view_others_users", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/recorrencias/cadastro')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/compras/recorrencias/cadastro')
       },
       {
-        path: 'app/recorrencias/edicao/:codigo',
+        path: 'recorrencias/edicao/:codigo',
         name: 'recorrenciaEdicao',
-        meta: {permissao:"recorrencia|recorrencias_view_others_users"},
+        meta: {permissao:"recorrencia|recorrencias_view_others_users", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/recorrencias/cadastro')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/compras/recorrencias/cadastro')
       },
       {
-        path: 'app/requisicoes',
+        path: 'requisicoes',
         name: 'requisicoes',
-        meta: {permissao:"aprova_requisicao|requisicao|requisicao_all_users"},
+        meta: {permissao:"aprova_requisicao|requisicao|requisicao_all_users", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/compras/requisicoes')
       },
       {
-        path: 'app/requisicoes/cadastro',
+        path: 'requisicoes/cadastro',
         name: 'requisicaoCadastro',
-        meta: {permissao:"requisicao"},
+        meta: {permissao:"requisicao", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes/cadastro')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/compras/requisicoes/cadastro')
       },
       {
-        path: 'app/requisicoes/edicao/:requisicao',
+        path: 'requisicoes/edicao/:requisicao',
         name: 'requisicaoEdicao',
-        meta: {permissao:"aprova_requisicao|requisicao|requisicao_all_users"},
+        meta: {permissao:"aprova_requisicao|requisicao|requisicao_all_users", sistema: 1},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/requisicoes/edicao')
+        component: () => import(/* webpackChunkName: "requisicoes" */ '../views/compras/requisicoes/edicao')
+      },
+      {
+        path: 'usuarios',
+        name: 'comprasUsuarios',
+        meta: {permissao: "usuario", sistema: 1},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/compras/usuarios')
+      },
+      {
+        path: 'usuarios/cadastro',
+        name: 'comprasUsuarioCadastro',
+        meta: {permissao: "usuario", sistema: 1},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/compras/usuarios/cadastro')
       },
       
-      {
-        path: 'app/usuarios',
-        name: 'usuarios',
-        meta: {permissao: "usuario"},
-        beforeEnter: protectRoute,
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios')
-      },
-      {
-        path: 'app/usuarios/cadastro',
-        name: 'usuarioCadastro',
-        meta: {permissao: "usuario"},
-        beforeEnter: protectRoute,
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "usuarios" */ '../views/usuarios/cadastro')
-      },
+    ]
+  },
+  {
+    path: "/reembolso",
+    component: () => import("../views/indexReembolso"), //webpackChunkName app
+    children: [
       {
         path: '',
         name: 'reembolso',
         component: HomeView,
+        meta: {sistema: 2},
+        beforeEnter: protectRoute,
+      },
+      {
+        path: 'clientes',
+        name: 'reembolsoClientes',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 2},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "perfil" */ '../views/reembolso/clientes'),
+        
+      },
+      {
+        path: 'clientes/cadastro',
+        name: 'reembolsoCadastroCliente',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 2},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "perfil" */ '../views/reembolso/clientes/cadastro'),
+        
+      },
+      {
+        path: 'perfil',
+        name: 'reembolsoPerfil',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 2},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "perfil" */ '../views/perfil'),
+        
+      },
+      {
+        path: 'perfil/cadastro',
+        name: 'reembolsoPerfilCadastro',
+        meta: {permissao: "livre", sistema: 2},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "pages" */ '../views/pages/acessoNegado.vue')
+        component: () => import(/* webpackChunkName: "perfil" */ '../views/perfil/cadastro.vue'),
+        props: route => ({ query: route.query.id })
+      },
+      {
+        path: 'solicitacoes',
+        name: 'solicitacao',
+        meta: {permissao: "livre", sistema: 2},
+        beforeEnter: protectRoute,
+        //meta: {permissao: "categorias"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "reembolso_solicitacao" */ '../views/reembolso/solicitacoes'),
+        
+      },
+      {
+        path: 'solicitacao',
+        name: 'solicitacaoCadastro',
+        meta: {permissao: "livre", sistema: 2},
+        beforeEnter: protectRoute,
+        //meta: {permissao: "categorias"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "reembolso_solicitacao" */ '../views/reembolso/solicitacoes/cadastro.vue'),
+        
+      },
+      {
+        path: 'tipo-despesa',
+        name: 'tipoDespesa',
+        meta: {permissao: "livre", sistema: 2},
+        beforeEnter: protectRoute,
+        //meta: {permissao: "categorias"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "reembolso_tipodespesa" */ '../views/reembolso/tipos_despesa'),
+      },
+      {
+        path: 'usuarios',
+        name: 'reembolsoUsuarios',
+        meta: {permissao: "livre"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/reembolso/usuarios')
+      },
+      {
+        path: 'usuarios/cadastro',
+        name: 'reembolsoUsuarioCadastro',
+        meta: {permissao: "livre"},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/reembolso/usuarios/cadastro')
       },
     ]
   },
   {
+    path: '/app/acessonegado',
+    name: 'acessonegado',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "pages" */ '../views/pages/acessoNegado.vue')
+  },
+  {
     path: "/app/requisicoes/aprovar/:token",
     name: "aprovar",
-    component: () => import('../views/requisicoes/aprovar')
+    meta: { sistema: 1},
+    component: () => import('../views/compras/requisicoes/aprovar')
   },
   {
     path: "/app/agradecimento",
     name: "agradecimento",
-    component: () => import('../views/requisicoes/agradecimento')
+    meta: { sistema: 1},
+    component: () => import('../views/compras/requisicoes/agradecimento')
   },
   {
     path: "/login",
@@ -254,16 +370,27 @@ const routes = [
 ]
 
 
-function protectRoute(to, from, next)
+async function protectRoute(to, from, next)
 {
-  console.log("rota:",  to)
+  
   let authStore = useAuthStore();
   if (!authStore.isAuthenticated()) next({ name: 'login' })
 
+  //checa se a rota que esta acesso é do sistema atual que esta
+  if (to.meta.sistema != undefined && to.meta.sistema != authStore.sistema.id ) {
+    //não é o mesmo sistema, checar se o usuario tem acesso ao sistema
+    let sistema = authStore.user.sistemas.filter(c => c.id == to.meta.sistema)[0];
+    
+    if (sistema != undefined)
+      await authStore.setSistema(sistema)
+    else 
+      next({name: "acessonegado"})
+  }
 
   if (to.meta.permissao != undefined && !authStore.hasPermissao(to.meta.permissao)) 
     next({name: "acessonegado"})
-  else next()
+  else 
+    next()
 }
 
 

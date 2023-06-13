@@ -36,9 +36,9 @@ namespace wca.compras.services
             return _mapper.Map<PerfilDto>(data);
         }
 
-        public async Task<IList<ListItem>> GetToList()
+        public async Task<IList<ListItem>> GetToList(int sistemaId)
         {
-            var itens = await _rm.PerfilRepository.SelectByCondition(p => p.Ativo == true)
+            var itens = await _rm.PerfilRepository.SelectByCondition(p => p.SistemaId == sistemaId && p.Ativo == true)
                 .OrderBy(p => p.Nome)
                 .ToListAsync();
 
@@ -107,9 +107,9 @@ namespace wca.compras.services
 
         }
 
-        public async Task<Pagination<PerfilDto>> Paginate(int page, int pageSize = 10, string termo = "")
+        public async Task<Pagination<PerfilDto>> Paginate(int sistemaId, int page, int pageSize = 10, string termo = "")
         {
-            var query = _rm.PerfilRepository.SelectAll();
+            var query = _rm.PerfilRepository.SelectByCondition(q =>  q.SistemaId.Equals(sistemaId));
 
             if (!string.IsNullOrEmpty(termo))
             {

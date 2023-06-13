@@ -5,7 +5,8 @@
       <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
-      <v-btn block color="orange" rounded="lg" class="text-capitalize">
+      <v-btn block color="orange" rounded="lg" class="text-capitalize"
+      @click="router.push({ name: 'solicitacaoCadastro' })">
         <b>Nova Solicitação</b>
       </v-btn>
       <br />
@@ -28,23 +29,7 @@
       <v-btn variant="text" class="text-capitalize" color="primary">
         <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
         {{ usuario.nome }}
-        <v-menu activator="parent">
-          <v-list :lines="false" density="compact" nav>
-            <v-list-item class="text-primary" v-for="sistema in authStore.user.sistemas.filter(x => x.id != authStore.sistema.id)" @click="authStore.setSistema(sistema)">
-              <template v-slot:prepend>
-                <v-icon :icon="sistema.icon" size="small"></v-icon>
-              </template>
-              <v-list-item-title>{{ sistema.descricao }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item class="text-primary" @click="logout()">
-              <template v-slot:prepend>
-                <v-icon icon="mdi-export" size="small"></v-icon>
-              </template>
-              <v-list-item-title v-text="'Sair'"></v-list-item-title>
-            </v-list-item>
-
-          </v-list>
-        </v-menu>
+        <header-user-menu/>
       </v-btn>
     </v-app-bar>
 
@@ -67,6 +52,7 @@
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "vue-router";
+import headerUserMenu from "@/components/headerUserMenu.vue";
 //VARIABLES
 const drawer = ref(true);
 const menuItems = ref([
@@ -78,26 +64,32 @@ const menuItems = ref([
   },
   {
     title: "Clientes",
-    value: 1,
-    route: "/reembolso",
+    value: 2,
+    route: "/reembolso/clientes",
     permissao: "livre"
   },
   {
-    title: "Projetos",
-    value: 1,
-    route: "/reembolso",
+    title: "Perfil",
+    value: 3,
+    route: "/reembolso/perfil",
     permissao: "livre"
   },
   {
     title: "Solicitações",
-    value: 1,
-    route: "/reembolso",
+    value: 4,
+    route: "/reembolso/solicitacoes",
     permissao: "livre"
   },
   {
     title: "Tipos Despesa",
-    value: 1,
-    route: "/reembolso",
+    value: 5,
+    route: "/reembolso/tipo-despesa",
+    permissao: "livre"
+  },
+  {
+    title: "Usuários",
+    value: 6,
+    route: "/reembolso/usuarios",
     permissao: "livre"
   },
   

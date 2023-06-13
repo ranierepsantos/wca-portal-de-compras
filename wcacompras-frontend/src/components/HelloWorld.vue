@@ -1,11 +1,13 @@
 <template>
   <div class="hello">
     <img src="../assets/images/logoWCA.png" alt="" class="mt-10" />
+    <p class="text-primary text-center"><b>{{ authStore.sistema.descricao.toUpperCase() }}</b></p>
   </div>
 </template>
 
 <script setup>
-const props = defineProps(["msg"]);
+  import { useAuthStore } from '@/store/auth.store';
+  const authStore = useAuthStore();
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

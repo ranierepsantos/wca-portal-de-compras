@@ -27,6 +27,8 @@ namespace wca.compras.data.DataAccess
         public DbSet<RecorrenciaLog> RecorrenciaLogs { get; set; }
         public DbSet<Configuracao> Configuracoes { get; set; }
         public DbSet<ProdutoIcmsEstado> ProdutoIcmsEstados { get; set; }
+        public DbSet<Sistema> Sistemas { get; set; }
+        public DbSet<UsuarioSistemaPerfil> UsuarioSistemaPerfil { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -95,6 +97,29 @@ namespace wca.compras.data.DataAccess
             );
 
             modelBuilder.Entity<ProdutoIcmsEstado>().HasKey(pi => new { pi.ProdutoId, pi.UF });
+
+            modelBuilder.Entity<Sistema>().HasData(
+                new Sistema() { Id= 1, Nome= "Compras", Descricao = "Sistema de compras de insumos"  },
+                new Sistema() { Id= 2, Nome= "Reembolso", Descricao = "Sistema de solicitação de reembolso"  }
+            );
+
+            modelBuilder.Entity<UsuarioSistemaPerfil>().HasKey(en => new { en.UsuarioId, en.SistemaId, en.PerfilId});
+
+            modelBuilder.Entity<UsuarioSistemaPerfil>()
+                .HasOne(en => en.Usuario)
+                .WithMany(us => us.UsuarioSistemaPerfil)
+                .HasForeignKey(en => en.UsuarioId);
+
+            modelBuilder.Entity<UsuarioSistemaPerfil>()
+                .HasOne(en => en.Sistema)
+                .WithMany(us => us.UsuarioSistemaPerfil)
+                .HasForeignKey(en => en.SistemaId);
+
+            modelBuilder.Entity<UsuarioSistemaPerfil>()
+                .HasOne(en => en.Perfil)
+                .WithMany(us => us.UsuarioSistemaPerfil)
+                .HasForeignKey(en => en.PerfilId); 
+
         }
     }
 }

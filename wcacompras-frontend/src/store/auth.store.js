@@ -52,7 +52,6 @@ export const useAuthStore = defineStore("auth", {
         this.sistema.descricao = sistema.descricao
         await this.getPerfilSistema()
         localStorage.setItem("sistema", JSON.stringify(this.sistema));
-        this.$router.push({name: this.sistema.nome.toLowerCase()})
     },
 
     finishSession() {

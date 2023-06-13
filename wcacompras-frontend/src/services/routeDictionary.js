@@ -29,12 +29,12 @@ export const route = {
 
     perfilCreate: "Perfil",
     perfilUpdate: "Perfil",
-    perfilPaginate: "Perfil/Paginate/{pageSize}/{page}",
-    perfilToList: "Perfil/ToList",
+    perfilPaginate: "Perfil/Paginate/{sistemaId}/{pageSize}/{page}",
+    perfilToList: "Perfil/ToList/{sistemaId}",
     perfilGetWithPermissions: "Perfil/{id}",
     perfilGetByUserAndSistemaWithPermissions: "Perfil/{usuarioId}/{sistemaId}",
-    permissaoToList: "Permissao/ToList",
-    permissaoAll: "Permissao/all",
+    permissaoToList: "Permissao/ToList/{sistemaId}",
+    permissaoAll: "Permissao/all/{sistemaId}",
 
     produtoCreate: "Fornecedor/Produto",
     produtoUpdate: "Fornecedor/Produto",
@@ -72,10 +72,10 @@ export const route = {
     tipoFornecimentoPaginate: "TipoFornecimento/Paginate/{pageSize}/{page}",
 
     usuarioCreate: "Usuario",
-    usuarioGetById: "Usuario/{id}",
+    usuarioGetById: "Usuario/{id}/{sistemaId}",
     usuarioRemove: "Usuario",
-    usuarioUpdate: "Usuario",
-    usuarioPaginate: "Usuario/Paginate/{pageSize}/{page}",
-    usuarioToList: "Usuario/ToList",
+    usuarioUpdate: "Usuario/{sistemaId}",
+    usuarioPaginate: "Usuario/Paginate/{sistemaId}/{pageSize}/{page}",
+    usuarioToList: "Usuario/ToList/{sistemaId}",
     
 }

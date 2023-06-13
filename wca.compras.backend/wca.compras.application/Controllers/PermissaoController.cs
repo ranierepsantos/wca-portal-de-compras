@@ -20,59 +20,19 @@ namespace wca.compras.webapi.Controllers
         }
 
         [HttpGet]
-        [Route("all")]
-        public async Task<ActionResult<IList<PermissaoDto>>> GetAll()
+        [Route("all/{sistemaId}")]
+        public async Task<ActionResult<IList<PermissaoDto>>> GetAll(int sistemaId)
         {
-            var items = await service.GetAll();
+            var items = await service.GetAll(sistemaId);
             return Ok(items);
         }
 
         [HttpGet]
-        [Route("ToList")]
-        public async Task<ActionResult<IList<ListItem>>> List()
+        [Route("ToList/{sistemaId}")]
+        public async Task<ActionResult<IList<ListItem>>> List(int sistemaId)
         {
-            var items = await service.GetToList();
+            var items = await service.GetToList(sistemaId);
             return Ok(items);
         }
-
-
-        [HttpPost]
-        public async Task<ActionResult<PermissaoDto>> Create(CreatePermissaoDto createPermissao)
-        {
-            var permission = await service.Create(createPermissao);
-            return Ok(permission);
-        }
-
-        [HttpPut]
-        public async Task<ActionResult> Update([FromBody] UpdatePermissaoDto updatePermissaoDto)
-        {
-            
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest();
-                }
-                var result = await service.Update(updatePermissaoDto);
-                if (result == null)
-                {
-                    return NotFound($"Permissão íd: {updatePermissaoDto.Id}, não localizado!"); 
-                }
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
-
-        [HttpGet]
-        [Route("Paginate/{pageSize}/{page}")]
-        public ActionResult<Pagination<PermissaoDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
-        {
-            var items =  service.Paginate(page, pageSize,termo);
-            return Ok(items);
-        }
-
     }
 }

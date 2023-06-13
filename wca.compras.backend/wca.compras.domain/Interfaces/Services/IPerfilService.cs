@@ -13,9 +13,9 @@ namespace wca.compras.domain.Interfaces.Services
 
         Task<PerfilPermissoesDto> GetByUserAndSistemaWithPermissoes(int usuarioId, int sistemaId);
 
-        public Task<IList<ListItem>> GetToList();
+        public Task<IList<ListItem>> GetToList(int sistemaId);
 
-        public Task<Pagination<PerfilDto>> Paginate(int page = 1, int pageSize = 10, string termo = "");
+        public Task<Pagination<PerfilDto>> Paginate(int sistemaId, int page = 1, int pageSize = 10, string termo = "");
 
     }
 }

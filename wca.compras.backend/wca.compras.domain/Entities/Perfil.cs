@@ -27,7 +27,16 @@ namespace wca.compras.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
-        public IList<Permissao> Permissao { get; set; } = new List<Permissao>();    
-        
+        [Column("sistema_id")]
+        public int? SistemaId { get; set; }
+
+        public IList<Permissao> Permissao { get; set; } = new List<Permissao>();
+
+        [JsonIgnore]
+        public IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil { get; set; } = new List<UsuarioSistemaPerfil>();
+
+        [JsonIgnore]
+        public Sistema Sistema { get; set; }
+
     }
 }

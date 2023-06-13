@@ -55,6 +55,7 @@ import perfilService from "../../services/perfil.service";
 import handleErrors from "../../helpers/HandleErrors"
 import { useRouter } from "vue-router";
 import Breadcrumbs from "@/components/breadcrumbs.vue";
+import { useAuthStore } from "@/store/auth.store";
 //DATA
 const router = useRouter()
 const page = ref(1);
@@ -77,7 +78,11 @@ watch(filter, () => getItems());
 //METHODS
 function editar(id)
 {
-  router.push({ name: "perfilCadastro", query: { id: id } })
+  let routeName = "perfilCadastro"
+
+  if (useAuthStore().sistema.id == 2) routeName= "reembolsoPerfilCadastro"
+
+  router.push({ name: routeName, query: { id: id } })
 }
 
 async function enableDisable(item)

@@ -702,10 +702,7 @@ namespace wca.compras.services
             {
                 var query = _rm.UsuarioRepository.SelectAll()
                             .Include(u => u.Cliente)
-                            .Include(u => u.Perfil)
-                            .ThenInclude(p => p.Permissao)
-                            .Where(c => c.Perfil.Permissao.Any(p => p.Regra == "aprova_requisicao") && 
-                                        c.Cliente.Any(c =>  c.Id == requisicao.ClienteId));
+                            .Where(c => c.Cliente.Any(c =>  c.Id == requisicao.ClienteId));
 
                 var usuarios = await query.ToListAsync();
 

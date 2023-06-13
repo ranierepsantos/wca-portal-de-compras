@@ -53,9 +53,11 @@ namespace wca.compras.webapi.Controllers
         /// Atualiza informações do Usuário
         /// </summary>
         /// <returns>Usuario</returns>
+        /// <param name="sistemaId"></param>
         /// <param name="updateUsuario"></param>
         [HttpPut]
-        public async Task<ActionResult> Update([FromBody] UpdateUsuarioDto updateUsuario)
+        [Route("{sistemaId}")]
+        public async Task<ActionResult> Update(int sistemaId, [FromBody] UpdateUsuarioDto updateUsuario)
         {
             try
             {
@@ -64,7 +66,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var result = await _usuarioService.Update(filial, updateUsuario);
+                var result = await _usuarioService.Update(sistemaId, filial, updateUsuario);
                 if (result == null) return NotFound();
                 return NoContent();
             }
@@ -103,16 +105,20 @@ namespace wca.compras.webapi.Controllers
         /// <summary>
         /// Retorna Usuario por paginação
         /// </summary>
+        /// <param name="sistemaId"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="page"></param>
+        /// <param name="termo"></param>
         /// <returns>Perfil</returns>
         [HttpGet]
-        [Route("Paginate/{pageSize}/{page}")]
-        public async Task<ActionResult<Pagination<UsuarioDto>>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        [Route("Paginate/{sistemaId}/{pageSize}/{page}")]
+        public async Task<ActionResult<Pagination<UsuarioDto>>> Paginate(int sistemaId, int pageSize = 10, int page = 1, string? termo = "")
         {
             
             try
             {
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = _usuarioService.Paginate(filial, page, pageSize, termo);
+                var items = _usuarioService.Paginate(filial, sistemaId, page, pageSize, termo);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -127,13 +133,13 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>items</returns>
         [HttpGet]
-        [Route("ToList")]
-        public async Task<ActionResult<IList<ListItem>>> List()
+        [Route("ToList/{sistemaId}")]
+        public async Task<ActionResult<IList<ListItem>>> List(int sistemaId)
         {
             try
             {
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = await _usuarioService.GetToList(filial);
+                var items = await _usuarioService.GetToList(filial, sistemaId);
                 return Ok(items);
             }
             catch (ArgumentException ex)
@@ -148,9 +154,10 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>Cliente</returns>
         /// <param name="id"></param>
+        /// <param name="sistemaId"></param>
         [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<UsuarioDto>> Get(int id)
+        [Route("{id}/{sistemaId}")]
+        public async Task<ActionResult<UsuarioDto>> Get(int id, int sistemaId)
         {
             try
             {
@@ -161,7 +168,7 @@ namespace wca.compras.webapi.Controllers
 
                 int filial = 1; // int.Parse(User.FindFirst("Filial").Value);
 
-                var result = await _usuarioService.GetById(filial, id);
+                var result = await _usuarioService.GetById(filial, id, sistemaId);
                 if (result == null)
                 {
                     return NotFound($"Usuário íd: {id}, não localizado!");

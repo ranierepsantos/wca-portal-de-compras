@@ -469,7 +469,13 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("nome");
 
+                    b.Property<int?>("SistemaId")
+                        .HasColumnType("int")
+                        .HasColumnName("sistema_id");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SistemaId");
 
                     b.ToTable("Perfil");
                 });
@@ -1191,15 +1197,9 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("password");
 
-                    b.Property<int?>("PerfilId")
-                        .HasColumnType("int")
-                        .HasColumnName("perfil_id");
-
                     b.HasKey("Id");
 
                     b.HasIndex("FilialId");
-
-                    b.HasIndex("PerfilId");
 
                     b.ToTable("Usuarios");
                 });
@@ -1329,6 +1329,24 @@ namespace wca.compras.data.Migrations
                         .HasForeignKey("FornecedorId");
 
                     b.Navigation("Fornecedor");
+                });
+
+            modelBuilder.Entity("wca.compras.domain.Entities.Perfil", b =>
+                {
+                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
+                        .WithMany()
+                        .HasForeignKey("SistemaId");
+
+                    b.Navigation("Sistema");
+                });
+
+            modelBuilder.Entity("wca.compras.domain.Entities.Permissao", b =>
+                {
+                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
+                        .WithMany()
+                        .HasForeignKey("SistemaId");
+
+                    b.Navigation("Sistema");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.Produto", b =>
@@ -1495,13 +1513,7 @@ namespace wca.compras.data.Migrations
                         .WithMany()
                         .HasForeignKey("FilialId");
 
-                    b.HasOne("wca.compras.domain.Entities.Perfil", "Perfil")
-                        .WithMany()
-                        .HasForeignKey("PerfilId");
-
                     b.Navigation("Filial");
-
-                    b.Navigation("Perfil");
                 });
 
             modelBuilder.Entity("wca.compras.domain.Entities.UsuarioSistemaPerfil", b =>

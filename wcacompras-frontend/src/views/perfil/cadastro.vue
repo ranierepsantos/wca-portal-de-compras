@@ -58,9 +58,11 @@ import handleErrors from "../../helpers/HandleErrors"
 import { useRoute } from "vue-router";
 import breadCrumbs from '@/components/breadcrumbs.vue';
 import router from "@/router"
+import { useAuthStore } from "@/store/auth.store";
 
 // VARIABLES
 let route = useRoute();
+let authStore = useAuthStore();
 let swal = inject("$swal");
 let valid = ref(true);
 let isBusy = ref(false)
@@ -76,9 +78,10 @@ let perfil = ref({
     nome: '',
     descricao: '',
     ativo: true,
+    sistemaId:  authStore.sistema.id,
     permissao: []
 })
-
+let routeName = "";
 //VUE METHODS
 onMounted(async () =>
 {
@@ -87,6 +90,17 @@ onMounted(async () =>
         await getPerfil(route.query.id)
     }
     await getPermissoes();
+
+    //set routeName to Perfil
+    if (authStore.sistema.id == 1) //compras
+        routeName = "perfil"
+    else if (authStore.sistema.id == 2) //reembolso
+        routeName = "reembolsoPerfil"
+        
+
+
+
+
 })
 
 // METHODS
@@ -150,7 +164,7 @@ async function salvar()
                 showConfirmButton: false,
                 timer: 2000,
             })
-            router.push({ name: "perfil" })
+            router.push({ name: routeName })
         }
 
     } catch (error)

@@ -107,7 +107,7 @@ namespace wca.compras.webapi.Controllers
         /// <param name="sistemaId"></param>
         [HttpGet]
         [Route("{usuarioId}/{sistemaId}")]
-        public async Task<ActionResult<PerfilPermissoesDto>> GetWithPeGetByUserAndSistemaWithPermissions(int usuarioId, int sistemaId)
+        public async Task<ActionResult<PerfilPermissoesDto>> GetByUserAndSistemaWithPermissions(int usuarioId, int sistemaId)
         {
             try
             {
@@ -133,12 +133,13 @@ namespace wca.compras.webapi.Controllers
         /// <summary>
         /// Retorna lista de perfil ativos para preenchimento de Listas e Combos
         /// </summary>
+        /// <param name="sistemaId"></param>
         /// <returns>Perfil com permissões</returns>
         [HttpGet]
-        [Route("ToList")]
-        public async Task<ActionResult<IList<ListItem>>> List()
+        [Route("ToList/{sistemaId}")]
+        public async Task<ActionResult<IList<ListItem>>> List(int sistemaId)
         {
-            var items = await service.GetToList();
+            var items = await service.GetToList(sistemaId);
             return Ok(items);
         }
 
@@ -147,10 +148,10 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>Perfil</returns>
         [HttpGet]
-        [Route("Paginate/{pageSize}/{page}")]
-        public async Task<ActionResult<Pagination<PerfilDto>>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        [Route("Paginate/{sistemaId}/{pageSize}/{page}")]
+        public async Task<ActionResult<Pagination<PerfilDto>>> Paginate(int sistemaId, int pageSize = 10, int page = 1, string? termo = "")
         {
-            var items = await service.Paginate(page, pageSize, termo);
+            var items = await service.Paginate(sistemaId, page, pageSize, termo);
             return Ok(items);
         }
     }

@@ -10,7 +10,7 @@
         </div>
         <v-row justify="center">
           <v-col cols="auto" v-for="sistema in authStore.user.sistemas">
-            <v-btn :height="buttonHeight" min-width="164" @click="authStore.setSistema(sistema)">
+            <v-btn :height="buttonHeight" min-width="164" @click="router.push({name: sistema.nome.toLowerCase()})">
               <v-icon
                 :icon="sistema.icon"
                 size="x-large"
@@ -46,15 +46,15 @@ import { useAuthStore } from "@/store/auth.store";
 const logoWCA = ref(require("@/assets/images/logoWCA.png"));
 
 const authStore = useAuthStore();
+const router = useRouter();
+
 let buttonHeight = 90;
 //VUE FUNCTIONS
 
 onBeforeMount (() => {
-  if (authStore.user.sistemas.length == 1) {
-    authStore.setSistema (authStore.user.sistemas[0])
-  }else {
-    console.log("há mais de 1 sistema")
-  }
+  if (authStore.user.sistemas.length == 1) 
+    router.push({name: authStore.user.sistemas[0].nome.toLowerCase()})
+  
 }) 
 
 //FUNCTIONS
