@@ -87,15 +87,15 @@ defineProps({
         uf: "",
         ativo: true,
         filialId: null,
-      };
+      };''
     },
-    filias: {
+  },
+  filiais: {
         type: Array,
         default: function() {
             return []
         }
     }
-  },
 });
 const authStore = useAuthStore();
 
