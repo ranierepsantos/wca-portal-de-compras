@@ -450,8 +450,8 @@ async function salvarContato() {
             }
         }
         if (index == -1){
-            clienteContatoId += -1
-            clienteContato.value.id = clienteContatoId;
+            clienteContatoId.value += -1
+            clienteContato.value.id = clienteContatoId.value;
             cliente.value.clienteContatos.push({ ...clienteContato.value })
         }
             
