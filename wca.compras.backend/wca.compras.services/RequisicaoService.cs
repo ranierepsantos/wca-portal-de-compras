@@ -96,8 +96,9 @@ namespace wca.compras.services
                 {
                     RequisicaoId = data.Id,
                     Evento = mensagemEvento,
-                    DataHora= DateTime.Now
+                    DataHora = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"))
                 };
+                
 
 
                 await CreateRequisicaoHistorico(reqH);
