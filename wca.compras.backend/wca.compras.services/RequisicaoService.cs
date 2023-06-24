@@ -17,6 +17,7 @@ namespace wca.compras.services
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         private readonly List<Configuracao> _configuracoes;
+        private readonly TimeZoneInfo _timeZoneBrasilia;
 
         public RequisicaoService(IMapper mapper, 
             IRepositoryManager repositoryManager,
@@ -25,7 +26,7 @@ namespace wca.compras.services
             _mapper = mapper;
             _rm = repositoryManager;
             _emailService = emailService;
-
+            _timeZoneBrasilia = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
             _configuracoes = _rm.ConfiguracaoRepository.SelectAll().ToList();
 
         }
@@ -96,7 +97,7 @@ namespace wca.compras.services
                 {
                     RequisicaoId = data.Id,
                     Evento = mensagemEvento,
-                    DataHora = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"))
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc (DateTime.UtcNow, _timeZoneBrasilia)
                 };
                 
 
@@ -284,7 +285,7 @@ namespace wca.compras.services
                 {
                     RequisicaoId = requisicaoId,
                     Evento = evento,
-                    DataHora = DateTime.Now
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
                 };
 
                 await CreateRequisicaoHistorico(reqH);
@@ -363,8 +364,8 @@ namespace wca.compras.services
                 {
                     RequisicaoId = data.Id,
                     Evento = $"Requisição <b>CANCELADA</b> por {nomeUsuario}.",
-                    DataHora = DateTime.Now
-                };
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
+                };  
 
                 await CreateRequisicaoHistorico(reqH);
 
@@ -437,7 +438,7 @@ namespace wca.compras.services
                 await _rm.SaveAsync();
 
                 await CreateRequisicaoHistorico(new RequisicaoHistorico() {
-                    DataHora = DateTime.Now,
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia),
                     Evento = $"Requisição alterada por {updateRequisicaoDto.NomeUsuario}",
                     RequisicaoId = data.Id
                 });
@@ -593,7 +594,7 @@ namespace wca.compras.services
             {
                 RequisicaoId = requisicao.Id,
                 Evento = $"Requisição <b>FINALIZADA</b> por {usuarioNome}, Data Entrega: {requisicao.DataEntrega} Nota Fiscal: {requisicao.NotaFiscal}",
-                DataHora = DateTime.Now
+                DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
             };
 
             await CreateRequisicaoHistorico(reqH);
@@ -684,7 +685,7 @@ namespace wca.compras.services
                 {
                     RequisicaoId = requisicao.Id,
                     Evento = $"Solicitação de aprovação enviada ao fornecedor!",
-                    DataHora = DateTime.Now
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
                 };
 
                 await CreateRequisicaoHistorico(reqH);
@@ -737,7 +738,7 @@ namespace wca.compras.services
                 {
                     RequisicaoId = requisicao.Id,
                     Evento = $"Solicitação de aprovação enviada para aprovação do administrador!",
-                    DataHora = DateTime.Now
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
                 };
 
                 await CreateRequisicaoHistorico(reqH);
@@ -794,7 +795,7 @@ namespace wca.compras.services
                 {
                     RequisicaoId = requisicao.Id,
                     Evento = $"Solicitação de aprovação enviada para aprovação do Cliente!",
-                    DataHora = DateTime.Now
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
                 };
 
                 await CreateRequisicaoHistorico(reqH);
