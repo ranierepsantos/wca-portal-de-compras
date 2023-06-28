@@ -365,6 +365,9 @@ namespace wca.compras.services
                 if (filialId > 1)
                     query = query.Where(c => c.FilialId == filialId);
 
+
+                query = query.Include(ic => ic.FornecedorContatos);
+
                 var baseData = await query.FirstOrDefaultAsync();
                 
                 if (baseData == null)
