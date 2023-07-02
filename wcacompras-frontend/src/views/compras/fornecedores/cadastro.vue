@@ -193,13 +193,11 @@ import { onMounted, ref, inject } from 'vue';
 import { useRoute } from "vue-router";
 import { useAuthStore } from "@/store/auth.store";
 import breadCrumbs from '@/components/breadcrumbs.vue';
-import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import router from "@/router"
 import handleErrors from "@/helpers/HandleErrors"
 import fornecedorService from '@/services/fornecedor.service';
 import filialService from "@/services/filial.service";
 import { mask } from "maska"
-import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 
 // VARIABLES
 const authStore = useAuthStore()
@@ -234,7 +232,6 @@ const fornecedorContato = ref({
     aprovaPedido: false
 });
 const filiais = ref([]);
-const fornecimentos = ref([]);
 const emailRules = ref([
     (v) => !!v || "Campo é obrigatório",
     (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
@@ -316,19 +313,6 @@ async function getFilialToList()
     }
 }
 
-async function getTipoFornecimentoToList() 
-{
-    try
-    {
-        let response = await tipoFornecimentoService.toList();
-        fornecimentos.value = response.data;
-    } catch (error)
-    {
-        console.log("getTipoFornecimentoToList.error:", error);
-        handleErrors(error)
-    }
-}
-
 async function removerContato(contato)
 {
     let options = {
@@ -356,7 +340,7 @@ async function salvar()
     try
     {
         isBusy.value = true
-        isContatoValido.value = fornecedor.value.fornecedorContatos.find(c => c.aprovaPedido == true) != undefined;
+        isContatoValido.value = true; //fornecedor.value.fornecedorContatos.find(c => c.aprovaPedido == true) != undefined;
         const { valid } = await fornecedorForm.value.validate()
         if (valid && isContatoValido.value)
         {

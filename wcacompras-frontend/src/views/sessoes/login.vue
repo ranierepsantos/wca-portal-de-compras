@@ -42,7 +42,10 @@ async function authenticate(loginData) {
     isBusy.value = true;
     let response = await authStore.authenticate(loginData);
     if (response.authenticated == true) {
-      router.push({ name: "sistemas" });
+      if (authStore.user.sistemas.length == 1) 
+        router.push({name: authStore.user.sistemas[0].nome.toLowerCase()})
+      else
+        router.push({ name: "sistemas" });
     } else {
       swal({
         toast: true,

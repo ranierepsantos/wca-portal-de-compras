@@ -4,7 +4,7 @@ import { useAuthStore} from '@/store/auth.store'
 const routes = [
   {
     path: "/",
-    redirect: "compras"
+    redirect: "sistemas"
   },
   {
     path: "/compras",

@@ -33,7 +33,6 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
-        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
         IList<FornecedorContatoDto> FornecedorContatos
     );
 
@@ -54,7 +53,6 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
-        [Required(ErrorMessage = "O campo é obrigatório!"), MinLength(1, ErrorMessage = "Não pode ser nulo ou vazio!")]
         IList<FornecedorContatoDto> FornecedorContatos
     );
 

@@ -55,9 +55,10 @@ namespace wca.compras.services
 
         public async Task<PerfilPermissoesDto> GetByUserAndSistemaWithPermissoes(int usuarioId, int sistemaId)
         {
-            var data = await _rm.PerfilRepository.SelectAll()
-                .Include(us => us.UsuarioSistemaPerfil.Where(c => c.UsuarioId == usuarioId && c.SistemaId == sistemaId))
-                .Include(pm => pm.Permissao.Where(c => c.SistemaId == sistemaId)).FirstOrDefaultAsync();
+            var data = await _rm.PerfilRepository.SelectByCondition(c => c.SistemaId == sistemaId)
+                .Include(pm => pm.Permissao)
+                .Where(q => q.UsuarioSistemaPerfil.Where(c => c.UsuarioId == usuarioId && c.SistemaId == sistemaId).Count() > 0)
+                .FirstOrDefaultAsync();
 
             return _mapper.Map<PerfilPermissoesDto>(data);
         }

@@ -87,8 +87,9 @@
                 <!-- COMENTÁRIO -->
                 <v-row class="mt-2">
                     <v-col cols="10" offset="1">
-                        <v-textarea variant="outlined" label="Comentário" class="text-primary" v-model="comentario">
+                        <v-textarea variant="outlined" label="Comentário" class="text-primary" v-model="comentario" :hide-details="true">
                         </v-textarea>
+                        <small class="text-error" v-show="!hasComentario">Comentário é obrigatório</small>
                     </v-col>
                 </v-row>
                 <!-- BOTÕES DE APROVAÇÃO / RECUSA -->
@@ -158,6 +159,7 @@ const requisicao = ref({
 });
 const comentario = ref("")
 const token = ref("");
+let hasComentario = ref(true);
 //VUE METHODS
 onMounted(async () => {
     token.value = route.params.token;
@@ -200,7 +202,13 @@ async function getRequisicaoData() {
 
 async function aprovarReprovar(isAprovado) {
     try {
+        
+        if(comentario.value.trim() =="") {
+            hasComentario.value = false
+            return
+        }
         isSaving.value = true;
+        hasComentario.value = true
         let data = {
             id: 0,
             aprovado: isAprovado,
