@@ -26,7 +26,7 @@
             &nbsp;{{ user.nome }}
           </td>
           <td class="text-left">{{ getPerfilName(user.usuarioSistemaPerfil[0].perfilId) }}</td>
-          <td class="text-left" v-show="authStore.user.filial == 1">{{ user.filial?.nome }}</td>
+          <td class="text-left" v-show="authStore.user.filial == 1">{{ getFilialName(user.filialid) }}</td>
           <td class="text-center">
             <v-icon :icon="user.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="user.ativo ? 'success' : 'error'"></v-icon>
@@ -53,13 +53,13 @@
 
 <script setup>
 import { ref, onMounted, watch, inject } from "vue";
-import userService from "@/services/user.service";
 import perfilService from "@/services/perfil.service";
 import filialService from "@/services/filial.service";
 import handleErrors from "@/helpers/HandleErrors"
 import { useAuthStore } from "@/store/auth.store";
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
+import { useUsuarioStore } from "@/store/reembolso/usuario.store";
 
 //DATA
 const page = ref(1);
@@ -72,7 +72,7 @@ const filiais = ref([]);
 const swal = inject("$swal");
 const authStore = useAuthStore();
 const filter = ref("");
-
+const usuarioStore = useUsuarioStore()
 
 //VUE METHODS
 onMounted(async () =>
@@ -106,7 +106,8 @@ async function enableDisable(item)
     {
       let data = { ...item }
       data.ativo = !data.ativo
-      await userService.update(data);
+      //await userService.update(data);
+      usuarioStore.update(data)
       await getItems()
 
       swal.fire({
@@ -177,14 +178,23 @@ async function getFilialToList()
   }
 }
 
+function getFilialName(filialId)
+{
+  let filial = filiais.value.filter((p) => p.value == filialId)[0];
+  
+  return filial ==undefined ? "" : filial.text;
+}
+
+
 async function getItems()
 {
   try
   {
     isBusy.value = true;
-    let response = await userService.paginate(pageSize, page.value, filter.value)
-    users.value = response.data.items;
-    totalPages.value = response.data.totalPages;
+    let data = await usuarioStore.getPaginate(page.value, pageSize, filter.value);
+    console.log("usuarios.data", data)
+    users.value = data.items;
+    totalPages.value = data.totalPages;
   } catch (error)
   {
     console.log("usuários.error:", error.response);

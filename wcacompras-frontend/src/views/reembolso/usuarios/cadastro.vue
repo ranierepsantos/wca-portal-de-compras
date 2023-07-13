@@ -73,6 +73,53 @@
                         ></v-select>
                       </v-col>
                     </v-row>
+                    <v-row v-show="isColaborador">
+                      <v-col>
+                        <v-select
+                          label="Cliente"
+                          :items="clientes"
+                          variant="outlined"
+                          color="primary"
+                          item-title="text"
+                          item-value="value"
+                          density="compact"
+                          v-model ="colaboradorClienteId"
+                        ></v-select>
+                      </v-col>
+                    </v-row>
+                    <v-row v-show="isColaborador">
+                      <v-col>
+                        <v-text-field
+                          label="Cargo"
+                          v-model="usuario.cargo"
+                          type="text"
+                          variant="outlined"
+                          color="primary"
+                          density="compact"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col>
+                        <v-select
+                          label="Gestor"
+                          :items="gestores"
+                          variant="outlined"
+                          color="primary"
+                          item-title="text"
+                          item-value="value"
+                          v-model="usuario.usuarioGestor"
+                          density="compact"
+                        ></v-select>
+                      </v-col>
+                    </v-row>
+                    
+                    <box-transfer 
+                      :list-origem="clientes" 
+                      :list-destino="usuario.cliente"
+                      list-origem-titulo = "Selecione os clientes"
+                      list-destino-titulo = "Clientes do usuário"
+                      v-show="!isColaborador"
+                    />
+
                   </v-window-item>
                 </v-window>
               </v-card-text>
@@ -94,43 +141,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
-import userService from "@/services/user.service";
+import { ref, onMounted, watch, inject,computed } from "vue";
 import perfilService from "@/services/perfil.service";
 import filialService from "@/services/filial.service";
-import clienteService from "@/services/cliente.service";
 import handleErrors from "@/helpers/HandleErrors";
 import { useAuthStore } from "@/store/auth.store";
 import { useRoute } from "vue-router";
 import router from "@/router"
 import Breadcrumbs from "@/components/breadcrumbs.vue";
-import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
+import { Usuario, useUsuarioStore } from "@/store/reembolso/usuario.store";
+import { useClienteStore } from "@/store/reembolso/cliente.store";
 
 //DATA
 const isBusy = ref(false);
 const listPerfil = ref([]);
 const filiais = ref([]);
 const clientes = ref([]);
+const gestores = ref([]);
 const swal = inject("$swal");
 const route = useRoute();
 const tab = ref(null);
-const usuario = ref({
-  id: 0,
-  nome: "",
-  email: "",
-  ativo: true,
-  filialid: null,
-  perfilid: null,
-  cliente: [],
-  tipoFornecimento: [],
-  usuarioSistemaPerfil: []
-});
+const usuario = ref(new Usuario());
 let filialUsuario = 0;
 const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
+const usuarioStore = useUsuarioStore();
+const PERFILCOLABORADOR = 5002
+const colaboradorClienteId = ref(null)
 
 //VUE METHODS
 onMounted(async () => {
@@ -138,7 +178,7 @@ onMounted(async () => {
   clearData();
   await getFilialToList();
   await getPerfilToList();
-  await getTipoFornecimentoToList();
+  await getClienteToList();
   if (parseInt(route.query.id) > 0) {
     await getUsuario(route.query.id);
   }
@@ -148,20 +188,31 @@ onMounted(async () => {
 watch(
   () => usuario.value.filialid,
   async (filialid, oldValue) => {
-    clientes.value = [];
-    await getClienteToList(filialid);
-    clientesListRemove();
     if (filialid != filialUsuario) {
       usuario.value.cliente = [];
       filialUsuario = filialid;
     }
   }
 );
+watch(() => colaboradorClienteId.value, async(clienteId) => {
+  await getGestorToList(clienteId)
+  let cliente = clientes.value.filter(q => q.value== clienteId)[0]
+  if (cliente) 
+    usuario.value.cliente.push(cliente)
+})
+
+const isColaborador = computed(() => {
+  if (usuario.value.usuarioSistemaPerfil.length >0) 
+    return usuario.value.usuarioSistemaPerfil[0].perfilId == PERFILCOLABORADOR
+  else  {
+    return false
+  }
+    
+})
 
 //METHODS
 function setPerfilUsuario(perfilId) {
   let index = -1;
-  console.log("usuario->",usuario.value);
   if ( usuario.value.usuarioSistemaPerfil.length > 0) {
     index = usuario.value.usuarioSistemaPerfil.findIndex(c => c.sistemaId == authStore.sistema.id)
   }
@@ -174,16 +225,13 @@ function setPerfilUsuario(perfilId) {
       "perfilId": perfilId 
     });
   }
-}
-
-function clientesListRemove(removerTodos = false) {
-  if (removerTodos == true) clientes.value.splice(0, clientes.value.length);
-  else {
-    usuario.value.cliente.forEach((cliente) => {
-      let index = clientes.value.findIndex((c) => c.value == cliente.value);
-      if (index > -1) clientes.value.splice(index, 1);
-    });
+  
+  if (perfilId != PERFILCOLABORADOR) {
+    colaboradorClienteId.value = null
+    gestores.value = []
   }
+
+
 }
 
 function getSistemaPerfil(sistemaId) {
@@ -191,8 +239,7 @@ function getSistemaPerfil(sistemaId) {
   if (usuario.value.usuarioSistemaPerfil != undefined && usuario.value.usuarioSistemaPerfil.length> 0)
     perfilUsuario = usuario.value.usuarioSistemaPerfil.filter(c => c.sistemaId == sistemaId)[0]
   
-  return perfilUsuario == undefined? null: perfilUsuario.perfilId;
-  
+    return perfilUsuario == undefined? null: perfilUsuario.perfilId;
 }
 
 async function salvar() {
@@ -201,9 +248,9 @@ async function salvar() {
     if (valid) {
       let data = usuario.value;
       if (data.id == 0) {
-        await userService.create(data);
+        await usuarioStore.add(data);
       } else {
-        await userService.update(data);
+        await usuarioStore.update(data);
       }
 
       swal.fire({
@@ -223,31 +270,40 @@ async function salvar() {
 }
 
 async function clearData() {
-  usuario.value = {
-    id: 0,
-    nome: "",
-    email: "",
-    ativo: true,
-    filialid: authStore.user.filial,
-    perfilid: null,
-    cliente: [],
-    tipoFornecimento: [],
-    usuarioSistemaPerfil: []
-  };
+  usuario.value = new Usuario();
   filialUsuario = authStore.user.filial;
+  usuario.value.filialId = filialUsuario
   await getClienteToList(filialUsuario);
+}
+
+function clientesListRemove(removerTodos = false) {
+  if (removerTodos == true) clientes.value.splice(0, clientes.value.length);
+  else {
+    usuario.value.cliente.forEach((cliente) => {
+      let index = clientes.value.findIndex((c) => c.value == cliente.value);
+      if (index > -1) clientes.value.splice(index, 1);
+    });
+  }
 }
 
 async function getClienteToList(filial) {
   try {
-    let response = await clienteService.toList(filial);
-    clientes.value = response.data;
+    //let response = await clienteService.toList(filial);
+    clientes.value = useClienteStore().toComboList()
   } catch (error) {
     console.log("getClienteToList.error:", error);
     handleErrors(error);
   }
 }
 
+async function getGestorToList(clienteId) {
+  try {
+    gestores.value = usuarioStore.toComboListGestorByCliente(clienteId)
+  } catch (error) {
+    console.log("getGestorToList.error:", error);
+    handleErrors(error);
+  }
+}
 async function getPerfilToList() {
   try {
     let response = await perfilService.toList();
@@ -268,24 +324,18 @@ async function getFilialToList() {
   }
 }
 
-async function getTipoFornecimentoToList() {
-  try {
-    let response = await tipoFornecimentoService.toList();
-    tipos.value = response.data;
-  } catch (error) {
-    console.log("getTipoFornecimentoToList.error:", error);
-    handleErrors(error);
-  }
-}
-
 async function getUsuario(usuarioId) {
   try {
     isBusy.value = true;
-    let response = await userService.getById(usuarioId);
-    filialUsuario = response.data.filialid;
-    usuario.value = response.data;
-    tiposListRemove();
-    clientesListRemove();
+    //let response = await userService.getById(usuarioId);
+    usuario.value = await usuarioStore.getById(usuarioId);
+    filialUsuario = usuario.value.filialid;
+    if (usuario.value.usuarioSistemaPerfil[0].perfilId == PERFILCOLABORADOR) {
+      colaboradorClienteId.value = usuario.value.cliente[0].value
+    }else {
+      clientesListRemove()
+    }
+    
   } catch (error) {
     console.log("getUsuario.error:", error);
     handleErrors(error);
@@ -293,17 +343,6 @@ async function getUsuario(usuarioId) {
     isBusy.value = false;
   }
 }
-
-function tiposListRemove(removerTodos = false) {
-  if (removerTodos == true) tipos.value.splice(0, clientes.value.length);
-  else {
-    usuario.value.tipoFornecimento.forEach((tipo) => {
-      let index = tipos.value.findIndex((c) => c.value == tipo.value);
-      if (index > -1) tipos.value.splice(index, 1);
-    });
-  }
-}
-
 </script>
 
 <style scoped>

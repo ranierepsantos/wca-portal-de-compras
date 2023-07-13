@@ -21,6 +21,7 @@
                         </v-row>
                         <v-divider class="mt-2"></v-divider>
                         <!-- CONTATOS -->
+<!--                         
                         <v-row class="mt-2">
                             <v-col>
                                 <h3 class="text-left text-grey">CONTATOS</h3>
@@ -67,7 +68,9 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </v-table>
+                        </v-table> 
+-->
+
                     </v-form>
                 </v-card-text>
                 <v-card-text class="text-right">

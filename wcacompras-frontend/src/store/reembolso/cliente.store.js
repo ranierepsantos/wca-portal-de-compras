@@ -106,9 +106,14 @@ export const useClienteStore = defineStore("cliente", {
         localStorage.setItem("reembolso-clientes", JSON.stringify(this.clientes))
         return true;
     },
-    toComboList() {
+    toComboList(filial = 0)  {
+
         let list = []
-        this.clientes.forEach(item => {
+        let lista = this.clientes
+        if (filial != 0){
+            lista = lista.filter(q => q.filialId == filial)
+        }
+        lista.forEach(item => {
             list.push ({text: item.nome, value: item.id})
         })
         return list;

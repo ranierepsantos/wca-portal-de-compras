@@ -96,11 +96,6 @@ onMounted(async () =>
         routeName = "perfil"
     else if (authStore.sistema.id == 2) //reembolso
         routeName = "reembolsoPerfil"
-        
-
-
-
-
 })
 
 // METHODS

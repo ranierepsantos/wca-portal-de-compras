@@ -300,6 +300,7 @@ import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
 import { formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
+import { useUsuarioStore, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 import {
   Despesa,
   Solicitacao,
@@ -331,7 +332,14 @@ const formButtons = ref([]);
 
 //VUE FUNCTIONS
 onMounted(async () => {
-  solicitacao.value.colaborador = authStore.user.nome;
+
+  let usuario = useUsuarioStore().repository.filter(q => q.usuarioSistemaPerfil.filter(qy => qy.perfilId == IDPERFILCOLABORADOR).length> 0)[0]
+
+
+  solicitacao.value.colaborador = usuario.nome;
+  solicitacao.value.cargo = usuario.cargo
+  //solicitacao.value.gestor = usuario.usuario
+  
   if (parseInt(route.query.id) > 0) {
     await getSolicitacao(route.query.id);
     if (solicitacao.value.status != 2 && solicitacao.value.status !=1)
