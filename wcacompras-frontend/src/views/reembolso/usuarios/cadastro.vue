@@ -73,7 +73,7 @@
                         ></v-select>
                       </v-col>
                     </v-row>
-                    <v-row v-show="isColaborador">
+                    <v-row v-show="isColaborador || isGestor">
                       <v-col>
                         <v-select
                           label="Cliente"
@@ -117,7 +117,7 @@
                       :list-destino="usuario.cliente"
                       list-origem-titulo = "Selecione os clientes"
                       list-destino-titulo = "Clientes do usuário"
-                      v-show="!isColaborador"
+                      v-show="!isColaborador && !isGestor"
                     />
 
                   </v-window-item>
@@ -151,7 +151,7 @@ import router from "@/router"
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
-import { Usuario, useUsuarioStore } from "@/store/reembolso/usuario.store";
+import { Usuario, useUsuarioStore, IDPERFILGESTOR, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 
 //DATA
@@ -169,7 +169,6 @@ const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
 const usuarioStore = useUsuarioStore();
-const PERFILCOLABORADOR = 5002
 const colaboradorClienteId = ref(null)
 
 //VUE METHODS
@@ -203,7 +202,16 @@ watch(() => colaboradorClienteId.value, async(clienteId) => {
 
 const isColaborador = computed(() => {
   if (usuario.value.usuarioSistemaPerfil.length >0) 
-    return usuario.value.usuarioSistemaPerfil[0].perfilId == PERFILCOLABORADOR
+    return usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILCOLABORADOR
+  else  {
+    return false
+  }
+    
+})
+
+const isGestor = computed(() => {
+  if (usuario.value.usuarioSistemaPerfil.length >0) 
+    return usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILGESTOR
   else  {
     return false
   }
@@ -226,7 +234,7 @@ function setPerfilUsuario(perfilId) {
     });
   }
   
-  if (perfilId != PERFILCOLABORADOR) {
+  if (perfilId != IDPERFILCOLABORADOR) {
     colaboradorClienteId.value = null
     gestores.value = []
   }
@@ -262,6 +270,7 @@ async function salvar() {
         showConfirmButton: false,
         timer: 2000,
       });
+      router.push({name: "reembolsoUsuarios"})
     }
   } catch (error) {
     console.log("usuários.error:", error);
@@ -330,7 +339,8 @@ async function getUsuario(usuarioId) {
     //let response = await userService.getById(usuarioId);
     usuario.value = await usuarioStore.getById(usuarioId);
     filialUsuario = usuario.value.filialid;
-    if (usuario.value.usuarioSistemaPerfil[0].perfilId == PERFILCOLABORADOR) {
+    if (usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILCOLABORADOR ||
+        usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILGESTOR) {
       colaboradorClienteId.value = usuario.value.cliente[0].value
     }else {
       clientesListRemove()

@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { paginate } from "@/helpers/functions";
 
 export class Cliente {
-    idControl = 0
+    clienteID = 0
 
     constructor (data = undefined) {
         if (data ==undefined) {
@@ -42,8 +42,8 @@ export class Cliente {
     salvarContato(contato) {
         let index = -1        
         if (contato.id == 0) {
-            this.idControl +=-1
-            contato.id = this.idControl
+            this.clienteID +=-1
+            contato.id = this.clienteID
         }else {
             index = this.clienteContatos.findIndex(q =>  q.id ==contato.id) 
         }
@@ -76,16 +76,17 @@ export class ClienteContato {
 
 export const useClienteStore = defineStore("cliente", {
   state: () => ({
-    idControl: 0,
+    clienteID: localStorage.getItem("reembolso-clientes-id") || 1,
     clientes: JSON.parse(localStorage.getItem("reembolso-clientes")) || [],
   }),
   actions: {
     
     addCliente (cliente) {
-        this.idControl++;
-        cliente.id = this.idControl;
+        this.clienteID++;
+        cliente.id = this.clienteID;
         this.clientes.push(cliente)
         localStorage.setItem("reembolso-clientes", JSON.stringify(this.clientes))
+        localStorage.setItem("reembolso-clientes-id", this.clienteID)
     },
     
     getClienteById (id) {

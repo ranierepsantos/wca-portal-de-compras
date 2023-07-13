@@ -56,7 +56,9 @@ export class Despesa {
         this.solicitacaoId = 0
         this.tipoDespesaId = null
         this.dataEvento = moment().format("YYYY-MM-DD")
-        this.fornecedor = ""
+        this.razaoSocial = ""
+        this.cnpj = ""
+        this.inscricaoEstadual = ""
         this.nroFiscal = ""
         this.valor= 0.0
         this.comprovanteImage = ""
@@ -76,7 +78,7 @@ export class Evento {
 
 export const useSolicitacaoStore = defineStore("solicitacao", {
   state: () => ({
-    idControl: 0,
+    idSolicitacao: localStorage.getItem("reembolso-solicitacoes-id") || 0,
     idDespesaControl:0,
     repository: JSON.parse(localStorage.getItem("reembolso-solicitacoes")) || [],
     tipoSolicitacao: [
@@ -85,22 +87,26 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     ],
     statusSolicitacao: [
         { value: -1, text: "Todos" },
-        { value: 0, text: "Solicitado", color: "warning" },
-        { value: 1, text: "Aguardando Despesas", color: "warning" },
-        { value: 2, text: "Aprovado", color: "success" },
-        { value: 3, text: "Rejeitado", color: "error" },
-        { value: 4, text: "Aguardando aprovação", color: "info" }
+        { value: 0, text: "Solicitado", color: "warning", notifica: "cliente" },
+        { value: 1, text: "Aguardando Prest. Contas", color: "gray", notifica: "usuario" },
+        { value: 2, text: "Aguardando faturamento", color: "info", notifica: "WCA" },
+        { value: 3, text: "Rejeitado", color: "error", notifica: "usuario" },
+        { value: 4, text: "Aguardando conferência", color: "info", notifica: "WCA" },
+        { value: 5, text: "Aguardando aprovação cliente", color: "warning", notifica: "cliente" },
+        { value: 6, text: "Faturado", color: "success", notifica: "WCA" }
+        
     ]
   }),
   actions: {
     
     add (data) {
-        this.idControl++;
-        data.id = this.idControl;
+        this.idSolicitacao++;
+        data.id = this.idSolicitacao;
         data = new Solicitacao(data)
         data.addEvento(new Evento(data.id, data.colaborador, `Solicitação de ${this.getTipoSolicitacao(data.tipoSolicitacao).text} criada!`))
         this.repository.push(data)
         localStorage.setItem("reembolso-solicitacoes",JSON.stringify(this.repository))
+        localStorage.setItem("reembolso-solicitacoes-id", this.idSolicitacao)
     },
     
     getById (id) {
@@ -125,9 +131,24 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         let data = this.statusSolicitacao.find(q => q.value == statusId)
         return data
     },
+    
     getTipoSolicitacao(codigo) {
         let data = this.tipoSolicitacao.find(q => q.value == codigo)
         return data
+    },
+
+    getToFaturamento(clienteId) {
+        let data = this.repository.filter(c => c.clienteId == clienteId && c.status == 2)
+        return data;
+    },
+
+    getByTipoAndUsuario(tipoSolicitacao, usuarioNome, status) {
+        console.log(tipoSolicitacao, usuarioNome, status);
+        let data = this.repository.filter(c => c.tipoSolicitacao == tipoSolicitacao 
+                                            && c.colaborador.toLowerCase() == usuarioNome.toLowerCase()
+                                            && status.includes(c.status))  
+        return data;
     }
+
   },
 });

@@ -9,16 +9,17 @@ export const despesaTipoModel = {
 
 export const useDespesaTipoStore = defineStore("despesaTipo", {
   state: () => ({
-    idControl: 0,
+    tipoDespesaID: localStorage.getItem("reembolso-tipodespesa-id") || 10000,
     repository: JSON.parse(localStorage.getItem("reembolso-tiposdespesa")) || []
   }),
   actions: {
     
     add (data) {
-        this.idControl++;
-        data.id = this.idControl;
+        this.tipoDespesaID++;
+        data.id = this.tipoDespesaID;
         this.repository.push(data)
         localStorage.setItem("reembolso-tiposdespesa", JSON.stringify(this.repository))
+        localStorage.setItem("reembolso-tipodespesa-id", this.tipoDespesaID)
     },
     
     getById (id) {

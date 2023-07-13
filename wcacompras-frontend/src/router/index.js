@@ -244,6 +244,30 @@ const routes = [
         
       },
       {
+        path: 'faturamento',
+        name: 'reembolsoFaturamento',
+        meta: {permissao: "livre", sistema: 2},
+        beforeEnter: protectRoute,
+        //meta: {permissao: "categorias"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "reembolso_solicitacao" */ '../views/reembolso/faturamento/index.vue'),
+        
+      },
+      {
+        path: 'faturamento/cadastro',
+        name: 'reembolsoFaturamentoCadastro',
+        meta: {permissao: "livre", sistema: 2},
+        beforeEnter: protectRoute,
+        //meta: {permissao: "categorias"},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "reembolso_solicitacao" */ '../views/reembolso/faturamento/cadastro.vue'),
+        
+      },
+      {
         path: 'filiais',
         name: 'reembolsoFiliais',
         beforeEnter: protectRoute,
@@ -254,7 +278,17 @@ const routes = [
         component: () => import(/* webpackChunkName: "filial" */ '../views/filiais'),
         
       },
-      
+      {
+        path: 'movimentacao-financeira',
+        name: 'reembolsoContaCorrente',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 2},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "usuarios" */ '../views/reembolso/usuarios/contacorrente'),
+        
+      },
       {
         path: 'perfil',
         name: 'reembolsoPerfil',

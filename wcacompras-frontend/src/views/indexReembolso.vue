@@ -6,12 +6,12 @@
       <br />
       <br />
       <v-btn block color="orange" rounded="lg" class="text-capitalize"
-      @click="router.push({ name: 'solicitacaoCadastro' })">
+      @click="router.push({ name: 'reembolsoSolicitacaoCadastro' })">
         <b>Nova Solicitação</b>
       </v-btn>
       <br />
       <v-list class="text-left" density="compact">
-        <v-list-item v-for="item in menuItems" :key="item.title" :value="item.value" active-color="info"
+        <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
           v-show="checkPermissao(item.permissao)">
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
@@ -59,11 +59,12 @@ import { ref, computed } from "vue";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
+import { compararValor } from "@/helpers/functions";
 //VARIABLES
 const drawer = ref(true);
 const menuItems = ref([
   {
-    title: "Home",
+    title: " Home",
     value: 1,
     route: "/reembolso",
     permissao: "livre"
@@ -108,6 +109,12 @@ const menuItems = ref([
     title: "Usuários",
     value: 7,
     route: "/reembolso/usuarios",
+    permissao: "livre"
+  },
+  {
+    title: "Movimentações Financeiras",
+    value: 9,
+    route: "/reembolso/movimentacao-financeira",
     permissao: "livre"
   },
   

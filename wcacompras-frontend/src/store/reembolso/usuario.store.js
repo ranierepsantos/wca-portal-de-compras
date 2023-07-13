@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { paginate } from "@/helpers/functions";
 import userService from "@/services/user.service";
+import moment from "moment";
 
 export const IDPERFILGESTOR = 5001
 export const IDPERFILCOLABORADOR = 5002
@@ -16,6 +17,7 @@ export class Usuario {
         this.cargo = data ? data.cargo: ""
         this.usuarioGestor = data? data.usuarioGestor: null
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
+        this.contaCorrente = data ? new ContaCorrente(data.contaCorrente) : new ContaCorrente()
     }
 
     alterarGestor (gestorId) {
@@ -32,31 +34,64 @@ class UsuarioGestor {
     }
 }
 
+export class ContaCorrente {
+    constructor (data = null) 
+    {
+        this.usuarioId = data? data.usuarioId : 0;
+        this.saldo = data? data.saldo : 0;
+        this.transacoes = data? data.transacoes: [];
+    }
+
+    adicionarTransacao(transacao) {
+        this.transacoes.push(transacao)
+        if (transacao.operador == "+")
+            this.saldo += parseFloat(transacao.valor)
+        else
+            this.saldo -= parseFloat(transacao.valor)
+    }
+
+    getSaldo() {
+        return this.saldo;
+    }
+    getTransacoes(){
+        return this.transacoes;
+    }
+}
+
+export class Transacao {
+    constructor(descricao, operador = "+", valor){
+        this.dataHora = moment().format("YYYY-MM-DDTHH:mm:ss")
+        this.descricao = descricao
+        this.operador = operador
+        this.valor = valor 
+    }
+}
+
 export const useUsuarioStore = defineStore("usuario", {
   state: () => ({
-    idControl: 11000,
+    idUsuario: localStorage.getItem("reembolso-usuario-id") || 11000,
     repository: JSON.parse(localStorage.getItem("reembolso-usuarios")) || []
   }),
   actions: {
     
     add (data) {
-        this.idControl++;
-        data.id = this.idControl;
+        this.idUsuario++;
+        data.id = this.idUsuario;
         this.repository.push(data)
         localStorage.setItem("reembolso-usuarios", JSON.stringify(this.repository))
+        localStorage.setItem("reembolso-usuarios-id", this.idUsuario)
     },
     
     async getById (id) {
         let data = this.repository.find(c => c.id == id)
-        console.log(`usuario.id ${id} ->`, data )
         return  new Usuario(data);
     },
 
     async getPaginate(pageNumber = 1, pageSize = 10, filter = "") {
-        console.log("repository.lenght", this.repository.length)
         if (this.repository.length == 0) {
             let response = await userService.paginate(pageSize, pageNumber, filter)
-            localStorage.setItem("reembolso-usuarios", JSON.stringify(response.data.items))
+            this.repository = response.data.items
+            localStorage.setItem("reembolso-usuarios", JSON.stringify(this.repository))
             return response.data
         }
         return paginate(this.repository, pageNumber, pageSize)
@@ -85,6 +120,18 @@ export const useUsuarioStore = defineStore("usuario", {
         let users = this.repository.filter(item => 
             item.cliente.filter(cli => cli.value == clienteId).length > 0 && 
             item.usuarioSistemaPerfil.filter(usp => usp.perfilId == IDPERFILGESTOR).length > 0);
+        
+            users.forEach(item => {
+            list.push ({text: item.nome, value: item.id})
+        })
+        return list;
+    },
+
+    toComboListColaboradorByCliente(clienteId) {
+        let list = []
+        let users = this.repository.filter(item => 
+            item.cliente.filter(cli => cli.value == clienteId).length > 0 && 
+            item.usuarioSistemaPerfil.filter(usp => usp.perfilId == IDPERFILCOLABORADOR).length > 0);
         
             users.forEach(item => {
             list.push ({text: item.nome, value: item.id})

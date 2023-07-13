@@ -41,18 +41,46 @@
                     color="primary"
                     density="compact"
                     v-model = "despesa.nroFiscal"
+                    :rules="[(v) => !!v || 'Campo é obrigatório']"
                   ></v-text-field>
                 </v-col>
               </v-row>
               <v-row>
                 <v-col>
                   <v-text-field
-                    label="Fornecedor"
+                    label="CNPJ"
                     type="text"
                     variant="outlined"
                     color="primary"
                     density="compact"
-                    v-model = "despesa.fornecedor"
+                    v-model = "despesa.cnpj"
+                    v-maska="'##.###.###/####-##'"
+                    :rules="[(v) => !!v || 'Campo é obrigatório']"
+                  ></v-text-field>
+                </v-col>
+                <v-col>
+                  <v-text-field
+                    label="Inscrição Estadual"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model = "despesa.inscricaoEstadual"
+                    v-maska="'###.###.###.###'"
+                    :rules="[(v) => !!v || 'Campo é obrigatório']"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Razão Social"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model = "despesa.razaoSocial"
+                    :rules="[(v) => !!v || 'Campo é obrigatório']"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -63,6 +91,7 @@
                     :number-decimal="2"
                     density="compact"
                     v-model="despesa.valor"
+                    :rules="[(v) => !!v || 'Campo é obrigatório']"
                   ></v-text-field-money>
                 </v-col>
               </v-row>
@@ -96,7 +125,9 @@ defineProps({
         solicitacaoId: 0,
         tipoDespesaId: null,
         dataEvento: "",
-        fornecedor: "",
+        cnpj: "",
+        inscricaoEstadual: "",
+        razaoSocial: "",
         nroFiscal: "",
         valor: 0.00,
         comprovanteImage: ""
