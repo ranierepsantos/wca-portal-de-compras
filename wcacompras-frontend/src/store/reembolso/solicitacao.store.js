@@ -78,7 +78,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
   state: () => ({
     idControl: 0,
     idDespesaControl:0,
-    repository: [],
+    repository: JSON.parse(localStorage.getItem("reembolso-solicitacoes")) || [],
     tipoSolicitacao: [
         {text: "Adiantamento", value: 2},
         {text: "Reembolso", value: 1}
@@ -100,6 +100,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         data = new Solicitacao(data)
         data.addEvento(new Evento(data.id, data.colaborador, `Solicitação de ${this.getTipoSolicitacao(data.tipoSolicitacao).text} criada!`))
         this.repository.push(data)
+        localStorage.setItem("reembolso-solicitacoes",JSON.stringify(this.repository))
     },
     
     getById (id) {
@@ -117,6 +118,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
             return false;
         }
         this.repository[index] = {...data};
+        localStorage.setItem("reembolso-solicitacoes",JSON.stringify(this.repository))
         return true;
     },
     getStatus(statusId) {
