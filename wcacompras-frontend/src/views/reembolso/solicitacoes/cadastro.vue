@@ -42,7 +42,7 @@
                 <v-btn
                   :color="solicitacaoStore.getStatus(solicitacao.status).color"
                   variant="tonal"
-                  density="compact"
+                  
                   class="text-center"
                 >
                   {{ solicitacaoStore.getStatus(solicitacao.status).text }}</v-btn
@@ -198,8 +198,10 @@
                     color="primary"
                     @click="editarDespesa(item)"
                     title="Editar"
-                    :disabled="isBusy"
+                    :disabled="isBusy || !canEdit"
                   ></v-btn>
+                  <v-btn icon="mdi-delete" variant="plain" color="error" @click="removerDespesa(item)" :disabled="isBusy || !canEdit">
+                  </v-btn>
                 </td>
               </tr>
             </tbody>
@@ -225,7 +227,11 @@
             </tfoot>
           </v-table>
         </v-card-text>
+
+        
       </v-card>
+      <!-- HISTORICO DA SOLICITAÇÃO -->
+      <historico :eventos="solicitacao.eventos.sort(compararValor('dataEvento', 'desc'))" style="margin-top: 15px;" v-show="solicitacao.id != 0"/>
       <!-- FORM PARA CADASTRO DE DESPESA -->
       <v-dialog
         v-model="openDespesaForm"
@@ -298,12 +304,15 @@ import {
   Despesa,
   Solicitacao,
   useSolicitacaoStore,
+  Evento
 } from "@/store/reembolso/solicitacao.store";
 import moment from "moment";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import { useDespesaTipoStore } from "@/store/reembolso/despesaTipo.store";
 import { computed } from "vue";
+import {compararValor} from "@/helpers/functions"
+import historico from "@/components/reembolso/historico.vue";
 
 const authStore = useAuthStore();
 const clienteStore = useClienteStore();
@@ -318,7 +327,6 @@ const clientes = clienteStore.toComboList();
 const swal = inject("$swal");
 const solicitacao = ref(new Solicitacao());
 const despesa = ref(new Despesa());
-const despesaId = ref(0);
 const formButtons = ref([]);
 
 //VUE FUNCTIONS
@@ -326,14 +334,15 @@ onMounted(async () => {
   solicitacao.value.colaborador = authStore.user.nome;
   if (parseInt(route.query.id) > 0) {
     await getSolicitacao(route.query.id);
-    if (solicitacao.value.status != 2 && solicitacao.value.status != 1)
+    if (solicitacao.value.status != 2 && solicitacao.value.status !=1)
       formButtons.value.push({
         text: "Aprovar / Reprovar",
         icon: "",
         event: "aprovar-click",
       });
   }
-  if (canEdit)
+  
+  if (solicitacao.value.status != 2)
     formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
 });
 
@@ -354,6 +363,9 @@ async function aprovarReprovar(isAprovado, comentario) {
     else 
       solicitacao.value.status = 2; //aprovado
 
+    let texto = `Solicitação  <b>${isAprovado ? 'APROVADA': 'REJEITADA'}</b>, status alterado para <b>${solicitacaoStore.getStatus(solicitacao.value.status).text.toUpperCase()}</b>. <br/> Comentário: ${comentario}`;
+    let evento = new Evento(solicitacao.value.id, authStore.user.nome, texto)
+    solicitacao.value.addEvento(evento)
     solicitacaoStore.update(solicitacao.value);
 
     // await requisicaoService.aprovar(data);
@@ -452,21 +464,38 @@ async function salvar() {
 }
 
 function salvarDespesa() {
-  let index = -1;
-  if (despesa.value.id != 0) {
-    index = solicitacao.value.despesas.findIndex((c) => {
-      return c.id == despesa.value.id;
-    });
-    if (index > -1) {
-      solicitacao.value.despesas[index] = { ...despesa.value };
-    }
-  }
-  if (index == -1) {
-    despesaId.value += -1;
-    despesa.value.id = despesaId.value;
-    solicitacao.value.despesas.push({ ...despesa.value });
-  }
+  // let index = -1;
+  // if (despesa.value.id != 0) {
+  //   index = solicitacao.value.despesas.findIndex((c) => {
+  //     return c.id == despesa.value.id;
+  //   });
+  //   if (index > -1) {
+  //     solicitacao.value.despesas[index] = { ...despesa.value };
+  //   }
+  // }
+  // if (index == -1) {
+  //   despesaId.value += -1;
+  //   despesa.value.id = despesaId.value;
+  //   solicitacao.value.despesas.push({ ...despesa.value });
+  // }
+  solicitacao.value.salvarDespesa(despesa.value)
   limparDadosDespesa();
   openDespesaForm.value = false;
+}
+
+async function removerDespesa(item) {
+  let options = {
+        title: "Confirma Exclusão?",
+        text: "Deseja realmente excluir o despesa: " + item.nroFiscal + "?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
+    }
+
+    let response = await swal.fire(options);
+    if (response.isConfirmed) {
+        solicitacao.value.removerDespesa(item)
+    }
 }
 </script>

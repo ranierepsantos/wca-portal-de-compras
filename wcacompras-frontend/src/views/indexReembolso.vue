@@ -26,6 +26,12 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
 
+      <v-btn class="text-none" stacked>
+      <v-badge content="2" color="error">
+        <v-icon>mdi-bell-outline</v-icon>
+      </v-badge>
+    </v-btn>
+
       <v-btn variant="text" class="text-capitalize" color="primary">
         <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
         {{ usuario.nome }}
@@ -70,31 +76,31 @@ const menuItems = ref([
   },
   {
     title: "Filiais",
-    value: 4,
+    value: 3,
     route: "/reembolso/filiais",
     permissao: "livre"
   },
   {
     title: "Perfil",
-    value: 3,
+    value: 4,
     route: "/reembolso/perfil",
     permissao: "livre"
   },
   {
     title: "Solicitações",
-    value: 4,
+    value: 5,
     route: "/reembolso/solicitacoes",
     permissao: "livre"
   },
   {
     title: "Tipos Despesa",
-    value: 5,
+    value: 6,
     route: "/reembolso/tipo-despesa",
     permissao: "livre"
   },
   {
     title: "Usuários",
-    value: 6,
+    value: 7,
     route: "/reembolso/usuarios",
     permissao: "livre"
   },

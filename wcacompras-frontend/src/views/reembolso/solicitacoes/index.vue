@@ -36,6 +36,8 @@
                     </td>
                     <td class="text-right">
                         <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item.id)"></v-btn>
+                        <v-btn icon="mdi-history" size="smaller" variant="plain" color="primary"
+                            title="Histórico" :disabled="isBusy" @click="showHistorico(item)"></v-btn>
                     </td>
                 </tr>
             </tbody>
@@ -47,6 +49,15 @@
                 </tr>
             </tfoot>
         </v-table>
+        <!--DIALOG PARA EXIBIR HISTÓRICO -->
+        <v-dialog
+        v-model="openHistorico"
+        max-width="900"
+        :absolute="false"
+        
+      >
+        <historico :eventos="solicitacaoEventos"/>
+      </v-dialog>
     </div>
 </template>
   
@@ -58,7 +69,7 @@ import router from "@/router";
 import moment from "moment";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-
+import historico from "@/components/reembolso/historico.vue";
 
 //DATA
 const page = ref(1);
@@ -70,6 +81,8 @@ const filter = ref("");
 const swal = inject("$swal");
 const solicitacaoStore = useSolicitacaoStore()
 const clienteStore = useClienteStore()
+const solicitacaoEventos = ref([])
+const openHistorico =ref(false)
 
 //VUE METHODS
 onMounted(async () =>
@@ -86,39 +99,10 @@ function editar(id)
     router.push({ name: "reembolsoSolicitacaoCadastro", query: { id: id } })
 }
 
-async function enableDisable(item)
+async function showHistorico(item)
 {
-    try
-    {
-        let text = item.ativo ? "Desativar" : "Ativar"
-
-        let options = {
-            title: text,
-            text: `Deseja realmente ${text.toLowerCase()} a solicitação: ${item.id}?`,
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim",
-            cancelButtonText: "Não",
-        }
-
-        let response = await swal.fire(options);
-        if (response.isConfirmed)
-        {
-            swal.fire({
-                toast: true,
-                icon: "success",
-                position: "top-end",
-                title: "Sucesso!",
-                text: "Alteração realizada!",
-                showConfirmButton: false,
-                timer: 2000,
-            })
-        }
-    } catch (error)
-    {
-        console.log("solicitacoes.enableDisable.error:", error);
-        handleErrors(error)
-    }
+    solicitacaoEventos.value = item.eventos
+    openHistorico.value = true
 }
 
 async function getItems()

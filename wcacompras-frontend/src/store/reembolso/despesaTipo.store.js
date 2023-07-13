@@ -10,7 +10,7 @@ export const despesaTipoModel = {
 export const useDespesaTipoStore = defineStore("despesaTipo", {
   state: () => ({
     idControl: 0,
-    repository: [],
+    repository: JSON.parse(localStorage.getItem("reembolso-tiposdespesa")) || []
   }),
   actions: {
     
@@ -18,6 +18,7 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
         this.idControl++;
         data.id = this.idControl;
         this.repository.push(data)
+        localStorage.setItem("reembolso-tiposdespesa", JSON.stringify(this.repository))
     },
     
     getById (id) {
@@ -35,6 +36,7 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
             return false;
         }
         this.repository[index] = {...data};
+        localStorage.setItem("reembolso-tiposdespesa", JSON.stringify(this.repository))
         return true;
     },
     toComboList() {

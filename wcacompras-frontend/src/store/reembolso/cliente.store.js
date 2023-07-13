@@ -17,8 +17,8 @@ export class Cliente {
             this.uf= ""
             this.ativo= true
             this.filialId= null
-            this.naoUltrapassarLimitePorRequisicao= false
-            this.valorLimiteRequisicao= 0 
+            this.naoUltrapassarLimite= false
+            this.valorLimite = 0 
             this.clienteContatos= []
         }else {
             this.id= data.id
@@ -32,8 +32,8 @@ export class Cliente {
             this.uf= data.uf
             this.ativo= data.ativo
             this.filialId= data.filialId
-            this.naoUltrapassarLimitePorRequisicao= data.naoUltrapassarLimitePorRequisicao
-            this.valorLimiteRequisicao= data.valorLimiteRequisicao 
+            this.naoUltrapassarLimite= data.naoUltrapassarLimite
+            this.valorLimite= data.valorLimite 
             this.clienteContatos= data.clienteContatos
         }
         
@@ -77,28 +77,23 @@ export class ClienteContato {
 export const useClienteStore = defineStore("cliente", {
   state: () => ({
     idControl: 0,
-    clientes: [],
+    clientes: JSON.parse(localStorage.getItem("reembolso-clientes")) || [],
   }),
   actions: {
     
     addCliente (cliente) {
-        debugger
         this.idControl++;
         cliente.id = this.idControl;
         this.clientes.push(cliente)
-        console.log("store.clientes:", this.clientes)
+        localStorage.setItem("reembolso-clientes", JSON.stringify(this.clientes))
     },
     
     getClienteById (id) {
-        debugger
         let model = this.clientes.find(c => c.id == id)
-        console.log(model)
-        
         return new Cliente(model);
     },
 
     getClientesByPaginate(pageNumber = 1, pageSize = 10) {
-        console.log("store.clientes:", this.clientes)
         return paginate(this.clientes, pageNumber, pageSize)
     },
 
@@ -108,6 +103,7 @@ export const useClienteStore = defineStore("cliente", {
             return false;
         }
         this.clientes[index] = {...cliente};
+        localStorage.setItem("reembolso-clientes", JSON.stringify(this.clientes))
         return true;
     },
     toComboList() {
