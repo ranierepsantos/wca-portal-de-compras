@@ -60,7 +60,7 @@
         :absolute="false"
         
       >
-        <historico :eventos="solicitacaoEventos"/>
+        <historico :eventos="solicitacaoEventos.sort(compararValor('dataEvento', 'desc'))"/>
       </v-dialog>
     </div>
 </template>
@@ -74,7 +74,7 @@ import moment from "moment";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import historico from "@/components/reembolso/historico.vue";
-import { formatToCurrencyBRL } from "@/helpers/functions";
+import { compararValor, formatToCurrencyBRL } from "@/helpers/functions";
 //DATA
 const page = ref(1);
 const pageSize = 10;
