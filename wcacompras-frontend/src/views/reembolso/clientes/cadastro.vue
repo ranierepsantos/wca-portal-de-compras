@@ -116,7 +116,7 @@
                                 </v-text-field>
                             </v-col>
                             <v-col>
-                                <v-checkbox v-model="clienteContato.aprovaPedido" label="Aprova Pedido?"
+                                <v-checkbox v-model="clienteContato.aprovaPedido" label="Aprova Solicitação?"
                                     color="primary"></v-checkbox>
                             </v-col>
                         </v-row>
@@ -139,48 +139,25 @@ import { onMounted, ref, inject } from 'vue';
 import { useRoute } from "vue-router";
 import { useAuthStore } from "@/store/auth.store";
 import breadCrumbs from '@/components/breadcrumbs.vue';
-import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import router from "@/router"
 import handleErrors from "@/helpers/HandleErrors"
-import clienteService from '@/services/cliente.service';
 import filialService from "@/services/filial.service";
 import { mask } from "maska"
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import Periodo from '@/components/Periodo.vue';
 import ClienteDadosBasicosForm from '@/components/clienteDadosBasicosForm.vue';
+import {Cliente, ClienteContato, useClienteStore } from '@/store/reembolso/cliente.store';
 
 // VARIABLES
 //const mask = new Mask({ mask: [, "(##) ####-####"] })
 const authStore = useAuthStore()
+const clienteStore = useClienteStore()
 const swal = inject("$swal")
 const route = useRoute()
 const isBusy = ref(false)
 const clienteForm = ref(null)
 const contatoForm = ref(null)
-const cliente = ref({
-    id: 0,
-    nome: "",
-    cnpj: "",
-    inscricaoEstadual: "",
-    endereco: "",
-    numero: "",
-    cep: "",
-    cidade: "",
-    uf: "",
-    ativo: true,
-    filialId: null,
-    naoUltrapassarLimitePorRequisicao: false,
-    valorLimiteRequisicao: 0
-});
-const clienteContato = ref({
-    id: 0,
-    clienteId: 0,
-    nome: "",
-    email: "",
-    telefone: "",
-    celular: "",
-    aprovaPedido: false
-})
+const cliente = ref(new Cliente());
+const clienteContato = ref(new ClienteContato())
 const isContatoValido= ref(true)
 const contatoDialog = ref(false)
 const dialogTitle = "Novo Contato"
@@ -189,7 +166,6 @@ const emailRules = ref([
     (v) => !!v || "Campo é obrigatório",
     (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",
 ]);
-const clienteContatoId = ref(0);
 
 //VUE FUNCTIONS
 
@@ -197,21 +173,13 @@ onMounted(async () => {
     await getFilialToList()
     cliente.value.filialId = authStore.user.filial;
     if (parseInt(route.query.id) > 0) {
-        await getCliente(1)
+        await getCliente(route.query.id)
     }
 });
 
 //METHODS
 function clearContato() {
-    clienteContato.value = {
-        id: 0,
-        clienteId: cliente.value.id,
-        nome: "",
-        email: "",
-        telefone: "",
-        celular: "",
-        aprovaPedido: false
-    }
+    clienteContato.value = new ClienteContato()
 }
 
 function closeContatoDialog() {
@@ -230,22 +198,7 @@ function editarContato(contato) {
 async function getCliente(clienteId) {
     try {
         isBusy.value = true
-        
-        let data = {
-            id: 1, 
-            nome: "Cliente Reembolso A",
-            cnpj: "01.123.123/0001-01" , 
-            ativo: true,
-            inscricaoEstadual: "01.123.123-1",
-            endereco: "Rua Cliente A",
-            numero: "123",
-            cep: "01234-567",
-            cidade: "São Paulo",
-            uf: "SP",
-            filialId: 1,
-            naoUltrapassarLimite: true,
-            valorLimite: 5000.00
-        }
+        let data = clienteStore.getClienteById(clienteId)
         cliente.value = data;
     } catch (error) {
         console.log("getCliente.error:", error);
@@ -277,10 +230,11 @@ async function removerContato(contato) {
 
     let response = await swal.fire(options);
     if (response.isConfirmed) {
-        let index = cliente.value.clienteContatos.findIndex(c => { return c.id == contato.id })
-        if (index > -1) {
-            cliente.value.clienteContatos.splice(index, 1);
-        }
+        // let index = cliente.value.clienteContatos.findIndex(c => { return c.id == contato.id })
+        // if (index > -1) {
+        //     cliente.value.clienteContatos.splice(index, 1);
+        // }
+        cliente.value.removerContato(contato)
     }
 }
 
@@ -299,12 +253,11 @@ async function salvar() {
             //         contato.id = 0;
             // })
 
-            // if (cliente.value.id == 0) {
-
-            //     await clienteService.create(data)
-            // }
-            // else
-            //     await clienteService.update(data)
+            if (cliente.value.id == 0) {
+                clienteStore.addCliente(data)
+            }
+            else
+                clienteStore.updateCliente(data)
 
             swal.fire({
                 toast: true,
@@ -329,19 +282,19 @@ async function salvar() {
 async function salvarContato() {
     const { valid } = await contatoForm.value.validate()
     if (valid) {
-        let index = -1;
-        if (clienteContato.value.id != 0) {
-            index = cliente.value.clienteContatos.findIndex(c => { return c.id == clienteContato.value.id })
-            if (index > -1) {
-                cliente.value.clienteContatos[index] = { ...clienteContato.value }
-            }
-        }
-        if (index == -1){
-            clienteContatoId += -1
-            clienteContato.value.id = clienteContatoId;
-            cliente.value.clienteContatos.push({ ...clienteContato.value })
-        }
-            
+        // let index = -1;
+        // if (clienteContato.value.id != 0) {
+        //     index = cliente.value.clienteContatos.findIndex(c => { return c.id == clienteContato.value.id })
+        //     if (index > -1) {
+        //         cliente.value.clienteContatos[index] = { ...clienteContato.value }
+        //     }
+        // }
+        // if (index == -1){
+        //     clienteContatoId.value += -1
+        //     clienteContato.value.id = clienteContatoId.value;
+        //     cliente.value.clienteContatos.push({ ...clienteContato.value })
+        // }
+        cliente.value.salvarContato(clienteContato.value)
         closeContatoDialog()
     }
 }

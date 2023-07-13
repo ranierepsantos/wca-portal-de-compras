@@ -21,10 +21,10 @@
                 <v-col>
                     <v-select
                   label="Tipo Despesa"
-                  :items="[{id: 1, nome: 'Hospedagem'}, {id: 2, nome: 'Transporte'},{id: 3, nome: 'Alimentação'}]"
+                  :items="comboTipoDespea"
                   density="compact"
-                  item-title="nome"
-                  item-value="id"
+                  item-title="text"
+                  item-value="value"
                   variant="outlined"
                   color="primary"
                   v-model = "despesa.tipoDespesaId"
@@ -103,6 +103,10 @@ defineProps({
       };
     }
   },
+  comboTipoDespea: {
+    type: Array,
+    default: function() {return []}
+  }
 });
 const emit = defineEmits(['changeImage'])
 

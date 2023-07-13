@@ -69,6 +69,12 @@ const menuItems = ref([
     permissao: "livre"
   },
   {
+    title: "Filiais",
+    value: 4,
+    route: "/reembolso/filiais",
+    permissao: "livre"
+  },
+  {
     title: "Perfil",
     value: 3,
     route: "/reembolso/perfil",

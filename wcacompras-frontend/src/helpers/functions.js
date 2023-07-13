@@ -7,9 +7,15 @@ export const status = [
     { value: 4, text: "Cancelado", color: "error" }
 ]
 
+
 export const tipoRecorrencia = [
     { value: 0, text: "Semanal" },
     { value: 1, text: "Mensal" },
+]
+
+export const tipoReembolso = [
+    { value: 2, text: "Adiantamento" },
+    { value: 1, text: "Reembolso" },
 ]
 
 export const periodosDia = ['Manhã','Tarde','Noite']
@@ -174,3 +180,17 @@ export const retornarValorTotalProduto = function (produto)
 export const formatToCurrencyBRL = function (valor) {
     return parseFloat(valor).toLocaleString("pt-BR", {style: "currency", currency: "BRL"})
 }
+
+export const paginate = (items, page = 1, perPage = 10) => {
+    let offset = perPage * (page - 1);
+    let totalPages = Math.ceil(items.length / perPage);
+    let paginatedItems = items.slice(offset, perPage * page);
+
+    return {
+        previousPage: page - 1 ? page - 1 : null,
+        nextPage: (totalPages > page) ? page + 1 : null,
+        total: items.length,
+        totalPages: totalPages,
+        items: paginatedItems
+    };
+};

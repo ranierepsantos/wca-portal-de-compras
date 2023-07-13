@@ -91,11 +91,11 @@ defineProps({
     },
   },
   filiais: {
-        type: Array,
-        default: function() {
-            return []
-        }
-    }
+      type: Array,
+      default: function() {
+          return []
+      }
+  }
 });
 const authStore = useAuthStore();
 

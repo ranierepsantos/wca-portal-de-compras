@@ -52,16 +52,16 @@
   
 <script setup>
 import { ref, onMounted, watch, inject } from "vue";
-//import clienteService from "@/services/cliente.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
-
+import { useClienteStore } from "@/store/reembolso/cliente.store";
 //DATA
 const page = ref(1);
-const pageSize = 5;
+const pageSize = 10;
 const isBusy = ref(false);
 const totalPages = ref(1);
+const clienteStore = useClienteStore();
 const clientes = ref([]);
 const filter = ref("");
 const swal = inject("$swal");
@@ -99,15 +99,28 @@ async function enableDisable(item)
         let response = await swal.fire(options);
         if (response.isConfirmed)
         {
-            swal.fire({
-                toast: true,
-                icon: "success",
-                position: "top-end",
-                title: "Sucesso!",
-                text: "Alteração realizada!",
-                showConfirmButton: false,
-                timer: 2000,
-            })
+           item.ativo = !item.ativo;
+           if (clienteStore.updateCliente(item) == true) {
+                swal.fire({
+                    toast: true,
+                    icon: "success",
+                    position: "top-end",
+                    title: "Sucesso!",
+                    text: "Alteração realizada!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+           }else {
+                swal.fire({
+                    toast: true,
+                    icon: "error",
+                    position: "top-end",
+                    title: "Ops!",
+                    text: "Houve algum problema ao ativar/desativar!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                })
+           }
         }
     } catch (error)
     {
@@ -122,18 +135,9 @@ async function getItems()
     {
         isBusy.value = true;
         //let response = await clienteService.paginate(pageSize, page.value, filter.value);
-
-        let clientesData = [
-            {id: 1, nome: "Cliente Reembolso A", cnpj: "01.123.123/0001-01" , ativo: true},
-            {id: 2, nome: "Cliente Reembolso B", cnpj: "02.123.123/0002-02" ,ativo: true},
-            {id: 3, nome: "Cliente Reembolso C", cnpj: "03.123.123/0003-03" ,ativo: true},
-            {id: 4, nome: "Cliente Reembolso D", cnpj: "04.123.123/0004-04" ,ativo: true},
-            {id: 5, nome: "Cliente Reembolso E", cnpj: "05.123.123/0005-05" ,ativo: true},
-
-        ];
-
-        clientes.value = clientesData;
-        totalPages.value = 1;
+        let response = clienteStore.getClientesByPaginate(page.value, pageSize);
+        clientes.value = response.items;
+        totalPages.value = response.totalPages;
     } catch (error)
     {
         console.log("clientes.getItems.error:", error.response);

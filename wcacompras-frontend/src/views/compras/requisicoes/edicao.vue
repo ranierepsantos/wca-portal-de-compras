@@ -313,7 +313,7 @@
         </v-dialog>
         <!-- FORM PARA APROVAR / REJEITAR PEDIDO-->
         <v-dialog v-model="openAprovacaoForm" max-width="700" :absolute="false" persistent>
-            <v-form ref="formAprovacao">
+            <!-- <v-form ref="formAprovacao">
                 <v-card>
                     <v-row>
                         <v-col>
@@ -346,7 +346,14 @@
                         </v-row>
                     </v-card-text>
                 </v-card>
-            </v-form>
+            </v-form> -->
+            <aprovar-rejeitar-form 
+                title="PEDIDO - APROVAR / REJEITAR"
+                @aprovar-click = "aprovarReprovar(true, $event)"
+                @reprovar-click = "aprovarReprovar(false, $event)"
+                @close-form = "openAprovacaoForm = false"
+                :is-running-event ="isSaving"
+            />
         </v-dialog>
 
 
@@ -367,6 +374,7 @@ import endereco from "@/components/endereco.vue";
 import Periodo from '@/components/Periodo.vue';
 import { useRoute } from "vue-router";
 import moment from 'moment'
+import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
 
 const DESTINOEMAIL = {
     CLIENTE: 1,
@@ -450,8 +458,6 @@ let finalizarData = ref({
     notaFiscal: null,
     dataEntrega: moment().format("YYYY-MM-DD")
 })
-const formAprovacao = ref(null);
-const comentario = ref("")
 const isSaving = ref(false)
 
 //VUE METHODS
@@ -561,33 +567,28 @@ function adicionarProdutoRequisicao(item) {
     calcularOrcamentoTotais()
 }
 
-async function aprovarReprovar(isAprovado) {
+async function aprovarReprovar(isAprovado, comentario) {
     try {
-        let { valid } = await formAprovacao.value.validate();
-        if (valid)
-        {
-            isSaving.value = true;
-            let data = {
-                id: requisicao.value.id,
-                aprovado: isAprovado,
-                comentario: comentario.value,
-                token: "TELAEDICAO",
-                nomeUsuario: authStore.user.nome
-            }
-            await requisicaoService.aprovar(data);
-            await getRequisicaoData(data.id);
-            openAprovacaoForm.value = false;
-            swal.fire({
-                toast: true,
-                icon: "success",
-                index: "top-end",
-                title: "Sucesso!",
-                text: (isAprovado ? "Aprovação": "Rejeição") + " realizada com sucesso!",
-                showConfirmButton: false,
-                timer: 2000,
-            })
-
+        isSaving.value = true;
+        let data = {
+            id: requisicao.value.id,
+            aprovado: isAprovado,
+            comentario: comentario,
+            token: "TELAEDICAO",
+            nomeUsuario: authStore.user.nome
         }
+        await requisicaoService.aprovar(data);
+        await getRequisicaoData(data.id);
+        openAprovacaoForm.value = false;
+        swal.fire({
+            toast: true,
+            icon: "success",
+            index: "top-end",
+            title: "Sucesso!",
+            text: (isAprovado ? "Aprovação": "Rejeição") + " realizada com sucesso!",
+            showConfirmButton: false,
+            timer: 2000,
+        })
     } catch (error) {
         console.log("aprovarReprovar.error:", error);
         handleErrors(error)

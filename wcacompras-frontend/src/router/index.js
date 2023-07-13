@@ -63,7 +63,7 @@ const routes = [
       },
       {
         path: 'filiais',
-        name: 'filiais',
+        name: 'comprasFiliais',
         beforeEnter: protectRoute,
         meta: {permissao: "filial", sistema: 1},
         // route level code-splitting
@@ -244,6 +244,18 @@ const routes = [
         
       },
       {
+        path: 'filiais',
+        name: 'reembolsoFiliais',
+        beforeEnter: protectRoute,
+        meta: {permissao: "filial", sistema: 1},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "filial" */ '../views/filiais'),
+        
+      },
+      
+      {
         path: 'perfil',
         name: 'reembolsoPerfil',
         beforeEnter: protectRoute,
@@ -267,7 +279,7 @@ const routes = [
       },
       {
         path: 'solicitacoes',
-        name: 'solicitacao',
+        name: 'reembolsoSolicitacoes',
         meta: {permissao: "livre", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
@@ -279,7 +291,7 @@ const routes = [
       },
       {
         path: 'solicitacao',
-        name: 'solicitacaoCadastro',
+        name: 'reembolsoSolicitacaoCadastro',
         meta: {permissao: "livre", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},

@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using wca.compras.crosscutting.Mapping;
+using System.Reflection;
 using wca.compras.domain.Email;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.services;
@@ -24,25 +23,8 @@ namespace wca.compras.crosscutting.DependencyInjection
             services.AddTransient<IRequisicaoService, RequisicaoService>();
             services.AddTransient<IRecorrenciaService, RecorrenciaService>();
             services.AddTransient<IConfiguracaoService, ConfiguracaoService>();
-
-            var autoMapperConfig = new MapperConfiguration(
-                config =>
-                {
-                    config.AddProfile(new PerfilProfile());
-                    config.AddProfile(new PermissaoProfile());
-                    config.AddProfile(new UsuarioProfile());
-                    config.AddProfile(new ClienteProfile());
-                    config.AddProfile(new FilialProfile());
-                    config.AddProfile(new TipoFornecimentoProfile());
-                    config.AddProfile(new FornecedorProfile());
-                    config.AddProfile(new RequisicaoProfile());
-                    config.AddProfile(new RecorrenciaProfile());
-                    config.AddProfile(new SistemaProfile());
-
-                }
-             );
-            IMapper mapper = autoMapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             //Configuração do e-mail
             services.AddSingleton(serviceProvider =>

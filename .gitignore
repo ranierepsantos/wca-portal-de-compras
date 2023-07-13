@@ -127,3 +127,5 @@ wca.compras.backend/wca.compras.functions/__azurite_db_queue_extent__.json
 wca.compras.backend/wca.compras.functions/__azurite_db_table__.json
 wca.compras.backend/__azurite_db_blob__.json
 wca.compras.backend/__azurite_db_blob_extent__.json
+/wca.reembolso.backend/*/obj/
+/wca.reembolso.backend/*/bin/

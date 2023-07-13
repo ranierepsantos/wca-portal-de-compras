@@ -81,6 +81,7 @@
 import { ref, onMounted, watch, inject } from "vue";
 import handleErrors from "@/helpers/HandleErrors"
 import Breadcrumbs from "@/components/breadcrumbs.vue";
+import { useDespesaTipoStore, despesaTipoModel } from "@/store/reembolso/despesaTipo.store";
 
 //DATA
 const page = ref(1);
@@ -92,11 +93,8 @@ const filter = ref("");
 const dialogTitle = ref("Nova data");
 const dialog = ref(false);
 const swal = inject("$swal");
-const model = ref({
-  id: 0,
-  nome: "",
-  ativo: true
-});
+const model = ref({...despesaTipoModel});
+const despesaTipoStore = useDespesaTipoStore();
 
 const form = ref(null)
 
@@ -116,18 +114,14 @@ watch(filter, () => getItems());
 function clearModel()
 {
   dialogTitle.value = "Novo Tipo";
-  model.value = {
-    id: 0,
-    nome: "",
-    ativo: true
-  };
+  model.value = {...despesaTipoModel};
 }
 
 function closeDialog()
 {
   dialog.value = false;
   form.value.reset()
-  clearData();
+  clearModel();
 }
 
 function editar(item)
@@ -157,7 +151,8 @@ async function enableDisable(item)
     {
       let data = { ...item }
       data.ativo = !data.ativo
-      await tipoService.update(data);
+      despesaTipoStore.update(data)
+
       await getItems()
 
       swal.fire({
@@ -182,15 +177,10 @@ async function getItems()
   try
   {
     isBusy.value = true;
-    //let response = await tipoService.paginate(pageSize, page.value, filter.value);
-    // tableData.value = response.data.items;
-    // totalPages.value = response.data.totalPages;
-    tableData.value = [
-      {id: 1, nome: "Hospedagem", ativo: true},
-      {id: 2, nome: "Transporte", ativo: true},
-      {id: 3, nome: "Alimentação", ativo: true}
-    ]
-    totalPages.value = 1
+    let response = despesaTipoStore.getPaginate(page.value, pageSize)
+    tableData.value = response.items;
+    totalPages.value = response.totalPages;
+
   } catch (error)
   {
     console.log("tipoDespesa.error:", error.response);
@@ -208,13 +198,13 @@ async function salvar()
     let { valid } = await form.value.validate();
     if (valid)
     {
-      let data = model.value;
+      let data = {...model.value};
       if (data.id == 0)
       {
-        await tipoService.create(data);
+        await despesaTipoStore.add(data)
       } else
       {
-        await tipoService.update(data);
+        await despesaTipoStore.update(data);
       }
       await getItems();
       closeDialog();
