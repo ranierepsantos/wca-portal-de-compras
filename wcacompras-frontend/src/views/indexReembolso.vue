@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" app color="primary"
+    <v-navigation-drawer v-model="drawer" app color="teal-darken-4"
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px">
       <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
