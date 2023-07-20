@@ -57,6 +57,11 @@ export default {
     enviarEmail(requisicaoId, destinoEmail)
     {
         return api.put(route.requisicaoEnviarEmail.replace("{requisicaoId}", requisicaoId).replace("{destinoEmail}", destinoEmail));
-    }
+    },
+
+    gerarRelatorio(filters)
+    {
+        return api.get(route.requisicaoGerarRelatorio, {params: { ...filters }, responseType: 'blob'});
+    },
 
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Net;
 using wca.compras.domain.Dtos;
+using wca.compras.domain.Email;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
@@ -195,12 +197,16 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS)
+        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
+                if (dataInicio > dataFim || (dataInicio != null && dataFim is null) || (dataFim != null && dataInicio is null))
+                {
+                    return BadRequest(error: new { message = "Data início ou fim inválida!" });
+                }
                 int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = service.Paginate(filial, page, pageSize, clienteId, fornecedorId, usuarioId, status);
+                var items = service.Paginate(filial, page, pageSize, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -209,6 +215,37 @@ namespace wca.compras.webapi.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("GerarRelatorio")]
+        [Authorize("Bearer")]
+        public async Task<ActionResult> ExportExcel(int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS
+            , DateTime? dataInicio = null, DateTime? dataFim = null)
+        {
+            try
+            {
+                if (dataInicio > dataFim || (dataInicio != null && dataFim is null) || (dataFim != null && dataInicio is null))
+                {
+                    return BadRequest(error: new { message = "Data início ou fim inválida!"});
+                }
+
+                int filial = 1; //int.Parse(User.FindFirst("Filial").Value);
+
+                Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim);
+                if (st == null)
+                    return NoContent();
+
+                return new FileStreamResult(st, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"Requisicoes_relatorio.xlsx" };
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+            
+        }
+
+
 
         /// <summary>
         /// Altera o status da requisição para Cancelado
@@ -308,7 +345,7 @@ namespace wca.compras.webapi.Controllers
         /// <param name="destinoEmail"></param>
         [HttpPut]
         [Route("SolicitarAprovacao/{requisicaoId}/{destinoEmail}")]
-        //[Authorize("Bearer")]
+        [Authorize("Bearer")]
         public async Task<ActionResult> SolicitarAprovacaoFornecedor(int requisicaoId, EnumRequisicaoDestinoEmail destinoEmail)
         {
             try

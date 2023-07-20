@@ -1,9 +1,9 @@
 <template>
     <div>
         <bread-crumbs :title="(hasRequisicaoAllUsersPermission ? 'Requisições' : 'Minhas Requisições')"
-            @novoClick="router.push({ name: 'requisicaoCadastro' })" custom-button-text="Exportar Dados"
-            @customClick="editar('novo')" :custom-button-show="false" 
-            :show-button="authStore.hasPermissao('requisicao')"
+            @novoClick="router.push({ name: 'requisicaoCadastro' })" :show-button="authStore.hasPermissao('requisicao')"
+            :buttons="headerButtons"
+            @gerar-relatorio-click="gerarRelatorio()"
             />
         <v-row>
             <v-col cols="3">
@@ -27,7 +27,22 @@
             </v-col>
         </v-row>
         <v-row>
-            <v-col cols="12" class="text-right">
+            <v-col>
+                <v-text-field label="Data Início" v-model="filter.dataInicio" type="date"
+                variant="outlined" color="primary"
+                density="compact"></v-text-field>
+            </v-col>
+            <v-col>
+                <v-text-field label="Data Fim" v-model="filter.dataFim" type="date"
+                variant="outlined" color="primary"
+                density="compact"></v-text-field>
+            </v-col>
+            <v-col cols="8" class="text-right">
+                <v-btn color="primary" variant="outlined" class="text-capitalize" @click="getItems()">
+                    <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
+                    <b>Aplicar Filtros</b>
+                </v-btn>
+                &nbsp;
                 <v-btn color="info" variant="outlined" class="text-capitalize" @click="clearFilters()">
                     <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
                     <b>Limpar Filtros</b>
@@ -87,7 +102,7 @@
 </template>
   
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import { ref, onMounted, watch, inject, computed } from "vue";
 import requisicaoService from "@/services/requisicao.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
@@ -96,7 +111,8 @@ import { useAuthStore } from "@/store/auth.store";
 import clienteService from "@/services/cliente.service";
 import userService from "@/services/user.service";
 import fornecedorService from "@/services/fornecedor.service";
-import { status } from "@/helpers/functions"
+import { realizarDownload, status } from "@/helpers/functions"
+import moment from "moment";
 
 //DATA
 const authStore = useAuthStore();
@@ -114,10 +130,18 @@ const filter = ref({
     clienteId: null,
     fornecedorId: null,
     usuarioId: null,
-    status: -1
+    status: -1,
+    dataInicio: null,
+    dataFim: null
 });
 
 //VUE METHODS
+const headerButtons = computed(() => {
+    let buttons = [];
+    buttons.push({ text: 'Gerar relatório', icon: 'mdi-microsoft-excel', event: 'GerarRelatorioClick' })
+    return buttons;
+})
+
 onMounted(async () =>
 {
     hasRequisicaoAllUsersPermission.value = authStore.hasPermissao('requisicao_all_users')
@@ -138,7 +162,7 @@ onMounted(async () =>
 });
 
 watch(page, () => getItems());
-watch(filter.value, () => getItems());
+//watch(filter.value, () => getItems());
 
 //METHODS
 function clearFilters()
@@ -147,6 +171,9 @@ function clearFilters()
     filter.value.fornecedorId = null
     filter.value.usuarioId = hasRequisicaoAllUsersPermission.value ? null : authStore.user.id
     filter.value.status = -1
+    filter.value.dataInicio = null
+    filter.value.dataFim = null
+    getItems();
 }
 async function duplicar(item)
 {
@@ -200,6 +227,30 @@ function editar(id)
 {
     router.push({ name: "requisicaoEdicao", params: { requisicao: id } })
 }
+
+async function gerarRelatorio()
+{
+    try
+    {
+        isBusy.value = true;
+        let response = await requisicaoService.gerarRelatorio(filter.value);
+        console.log("gerarRelatorio", response)
+        if (response.status == 200) {
+            let nomeArquivo = `requisicao_relatorio_${moment().format("DDMMYYYY_HHmmSS")}.xlsx`
+            await new Promise(r => setTimeout(r, 1000));
+            realizarDownload(response, nomeArquivo, response.headers.getContentType());
+        }
+        
+    } catch (error)
+    {
+        console.log("requisicoes.gerarRelatorio.error:", error.response);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
+    }
+}
+
 
 async function getClienteListByUser() 
 {

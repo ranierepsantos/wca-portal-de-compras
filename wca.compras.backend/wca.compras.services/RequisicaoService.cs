@@ -11,7 +11,7 @@ using wca.compras.domain.Util;
 
 namespace wca.compras.services
 {
-    public class RequisicaoService: IRequisicaoService
+    public class RequisicaoService : IRequisicaoService
     {
         private readonly IRepositoryManager _rm;
         private readonly IEmailService _emailService;
@@ -19,7 +19,7 @@ namespace wca.compras.services
         private readonly List<Configuracao> _configuracoes;
         private readonly TimeZoneInfo _timeZoneBrasilia;
 
-        public RequisicaoService(IMapper mapper, 
+        public RequisicaoService(IMapper mapper,
             IRepositoryManager repositoryManager,
             IEmailService emailService)
         {
@@ -30,13 +30,13 @@ namespace wca.compras.services
             _configuracoes = _rm.ConfiguracaoRepository.SelectAll().ToList();
 
         }
-                
+
         public async Task<RequisicaoDto> Create(CreateRequisicaoDto createRequisicaoDto, string urlOrigin = "")
         {
             try
             {
                 var data = _mapper.Map<Requisicao>(createRequisicaoDto);
-                
+
                 _rm.RequisicaoRepository.Attach(data);
 
                 foreach (var item in createRequisicaoDto.RequisicaoItens)
@@ -83,7 +83,7 @@ namespace wca.compras.services
                     data.RequerAutorizacaoWCA = false;
                 }
 
-                if (data.RequerAutorizacaoCliente == false && data.RequerAutorizacaoWCA ==false) 
+                if (data.RequerAutorizacaoCliente == false && data.RequerAutorizacaoWCA == false)
                     data.Status = EnumStatusRequisicao.APROVADO;
 
                 await _rm.SaveAsync();
@@ -97,22 +97,25 @@ namespace wca.compras.services
                 {
                     RequisicaoId = data.Id,
                     Evento = mensagemEvento,
-                    DataHora = TimeZoneInfo.ConvertTimeFromUtc (DateTime.UtcNow, _timeZoneBrasilia)
+                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
                 };
-                
+
 
 
                 await CreateRequisicaoHistorico(reqH);
-                                
-                if (data.RequerAutorizacaoCliente == true ) {
+
+                if (data.RequerAutorizacaoCliente == true)
+                {
                     await solicitarAprovacaoCliente(urlOrigin, data);
                 }
-                
-                if (data.RequerAutorizacaoWCA == true ) {
+
+                if (data.RequerAutorizacaoWCA == true)
+                {
                     await solicitarAprovacaoWCA(urlOrigin, data);
                 }
-                
-                if (data.RequerAutorizacaoWCA == false && data.RequerAutorizacaoCliente ==false) {
+
+                if (data.RequerAutorizacaoWCA == false && data.RequerAutorizacaoCliente == false)
+                {
                     await solicitarAprovacaoFornecedor(urlOrigin, data);
                 }
 
@@ -136,11 +139,11 @@ namespace wca.compras.services
 
                 query = query.Include("Usuario")
                              .Include(r => r.Cliente)
-                             .ThenInclude(c =>  c.ClienteOrcamentoConfiguracao)
+                             .ThenInclude(c => c.ClienteOrcamentoConfiguracao)
                              .Include("Fornecedor")
                              .Include("RequisicaoItens")
                              .Include(r => r.RequisicaoHistorico);
-                               
+
 
                 var data = await query.FirstOrDefaultAsync();
 
@@ -157,9 +160,9 @@ namespace wca.compras.services
         {
             try
             {
-               var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
-                    .SelectByCondition(c => c.TokenAprovador == tokenAprovacao)
-                    .FirstOrDefaultAsync();
+                var requisicaoAprovacao = await _rm.RequisicaoAprovacaoRepository
+                     .SelectByCondition(c => c.TokenAprovador == tokenAprovacao)
+                     .FirstOrDefaultAsync();
 
                 if (requisicaoAprovacao == null || !requisicaoAprovacao.Ativo)
                     throw new Exception("Token inválido e/ou expirado!");
@@ -178,13 +181,13 @@ namespace wca.compras.services
                 string localEntrega = $"{data.Endereco}, {data.Numero} - CEP: {data.Cep} - {data.Cidade} / {data.UF}";
 
                 var dto = new RequisicaoAprovacaoDto(
-                    data.Id, 
-                    data.ValorTotal, 
-                    data.TaxaGestao, 
+                    data.Id,
+                    data.ValorTotal,
+                    data.TaxaGestao,
                     data.Destino,
                     data.Cliente,
-                    _mapper.Map<ListItem>(data.Usuario), 
-                    _mapper.Map<IList<RequisicaoItemDto>>(data.RequisicaoItens), 
+                    _mapper.Map<ListItem>(data.Usuario),
+                    _mapper.Map<IList<RequisicaoItemDto>>(data.RequisicaoItens),
                     requisicaoAprovacao.NomeAprovador,
                     localEntrega,
                     data.PeriodoEntrega
@@ -198,7 +201,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto, string urlOrigin) 
+        public async Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto, string urlOrigin)
         {
             try
             {
@@ -223,7 +226,7 @@ namespace wca.compras.services
                         item.DataRevogacao = DateTime.UtcNow;
                         _rm.RequisicaoAprovacaoRepository.Update(item);
                     }
-                    
+
                     alterarStatus = requisicaoAprovacao.AlteraStatus;
                     requisicaoId = requisicaoAprovacao.RequisicaoId;
                     tipoAprovador = requisicaoAprovacao.TipoAprovador;
@@ -252,19 +255,20 @@ namespace wca.compras.services
                      *  -- CANCELADO  - NÃO ALTERAR
                      *  -- FINALIZADO - NÃO ALTERAR
                      *  -- REJEITADO  - NÃO ALTERAR
-                    */  
+                    */
                     if (data.Status == EnumStatusRequisicao.AGUARDANDO)
                     {
                         // SOMENTE ALTERAR SE:
                         // solicitação por alterar status
                         // não requer aprovação do cliente ou WCA
-                        if (alterarStatus && 
-                            data.RequerAutorizacaoCliente == false && 
+                        if (alterarStatus &&
+                            data.RequerAutorizacaoCliente == false &&
                             data.RequerAutorizacaoWCA == false)
                         {
                             data.Status = EnumStatusRequisicao.APROVADO;
                         }
-                    }else
+                    }
+                    else
                     {
                         evento = $"APROVAÇÃO realizado por {aprovarRequisicaoDto.NomeUsuario}, NÃO ACATADA, motivo: requisição com status: ";
                         evento += data.Status switch
@@ -278,9 +282,9 @@ namespace wca.compras.services
                     }
                 }
                 _rm.RequisicaoRepository.Update(data);
-                
+
                 await _rm.SaveAsync();
-                
+
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = requisicaoId,
@@ -291,7 +295,7 @@ namespace wca.compras.services
                 await CreateRequisicaoHistorico(reqH);
 
                 //verificar se envia solicitação de aprovação do fornecedor, caso a  aprovação seja por cliente/wca
-                if (tipoAprovador != EnumTipoAprovador.FORNECEDOR && 
+                if (tipoAprovador != EnumTipoAprovador.FORNECEDOR &&
                     !data.RequerAutorizacaoCliente && !data.RequerAutorizacaoWCA)
                 {
                     await solicitarAprovacaoFornecedor(urlOrigin, data);
@@ -305,7 +309,7 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<RequisicaoDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS)
+        public Pagination<RequisicaoDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
@@ -326,14 +330,17 @@ namespace wca.compras.services
                 if (status != EnumStatusRequisicao.TODOS)
                     query = query.Where(c => c.Status == status);
 
+                if (dataInicio != null && dataFim != null)
+                    query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao <= dataFim);
+
 
                 query = query.Include("Usuario")
                              .Include("Cliente")
                              .Include("Fornecedor");
-                             
+
 
                 var pagination = Pagination<RequisicaoDto>.ToPagedList(_mapper, query, page, pageSize);
-                
+
                 return pagination;
             }
             catch (Exception ex)
@@ -347,7 +354,7 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id,true);
+                var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id, true);
 
                 if (filialId > 1)
                     query = query.Where(c => c.FilialId == filialId);
@@ -357,15 +364,15 @@ namespace wca.compras.services
                 if (data == null) return false;
 
                 data.Status = EnumStatusRequisicao.CANCELADO;
-                
+
                 await _rm.SaveAsync();
-                
+
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
                 {
                     RequisicaoId = data.Id,
                     Evento = $"Requisição <b>CANCELADA</b> por {nomeUsuario}.",
                     DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
-                };  
+                };
 
                 await CreateRequisicaoHistorico(reqH);
 
@@ -402,9 +409,9 @@ namespace wca.compras.services
                 data.RequisicaoItens.ToList().ForEach(produto =>
                 {
                     bool hasProduto = updateRequisicaoDto.RequisicaoItens.Where(p => p.Id == produto.Id).FirstOrDefault() != null;
-                    if (hasProduto == false )
+                    if (hasProduto == false)
                     {
-                        var item = _rm.RequisicaoItemRepository.SelectByCondition(c =>  c.Id == produto.Id).FirstOrDefault();
+                        var item = _rm.RequisicaoItemRepository.SelectByCondition(c => c.Id == produto.Id).FirstOrDefault();
                         if (item != null) _rm.RequisicaoItemRepository.Delete(item);
                     }
                 });
@@ -434,10 +441,11 @@ namespace wca.compras.services
                     data.Status = EnumStatusRequisicao.AGUARDANDO;
                 }
                 _rm.RequisicaoRepository.Update(data);
-                
+
                 await _rm.SaveAsync();
 
-                await CreateRequisicaoHistorico(new RequisicaoHistorico() {
+                await CreateRequisicaoHistorico(new RequisicaoHistorico()
+                {
                     DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia),
                     Evento = $"Requisição alterada por {updateRequisicaoDto.NomeUsuario}",
                     RequisicaoId = data.Id
@@ -488,9 +496,7 @@ namespace wca.compras.services
                 //filesDirectory = Path.Combine(filesDirectory, "excel");
                 var excelFile = "Files/excel/WCAPedidoFornecedor.xlsx"; //Path.Combine(filesDirectory, "WCAPedidoFornecedor.xlsx");
 
-                var saveFile = $"WCAPedido_{requisicaoId}.xlsx";
-
-                string localEntrega = $"{requisicao.Endereco}, {requisicao.Numero} - CEP: {requisicao.CEP} - {requisicao.Cidade} / {requisicao.UF}"; ;
+                string localEntrega = $"{requisicao.Endereco}, {requisicao.Numero} - CEP: {requisicao.CEP} - {requisicao.Cidade} / {requisicao.UF}";
 
                 var workbook = new XLWorkbook(excelFile);
                 var ws = workbook.Worksheet(1);
@@ -530,7 +536,7 @@ namespace wca.compras.services
         public async Task<RequisicaoDuplicarResponse> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin)
         {
             var query = _rm.RequisicaoRepository.SelectByCondition(c => c.Id == requisicaoId);
-                query = query.Include(r => r.RequisicaoItens);
+            query = query.Include(r => r.RequisicaoItens);
 
             var requisicao = await query.FirstOrDefaultAsync();
 
@@ -541,7 +547,7 @@ namespace wca.compras.services
             //Replicar os produtos, somente os que existem na base
             List<RequisicaoItemDto> itens = new List<RequisicaoItemDto>();
             string message = "";
-            foreach(var reqItem in requisicao.RequisicaoItens)
+            foreach (var reqItem in requisicao.RequisicaoItens)
             {
                 var produto = await _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId && c.Codigo == reqItem.Codigo).FirstOrDefaultAsync();
 
@@ -552,20 +558,21 @@ namespace wca.compras.services
                     reqItem.Valor = produto.Valor;
                     reqItem.TaxaGestao = produto.TaxaGestao;
                     reqItem.PercentualIPI = produto.PercentualIPI;
-                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao + (produto.Valor * produto.PercentualIPI/100)) * reqItem.Quantidade;
+                    reqItem.ValorTotal = (produto.Valor + produto.TaxaGestao + (produto.Valor * produto.PercentualIPI / 100)) * reqItem.Quantidade;
                     RequisicaoItemDto item = _mapper.Map<RequisicaoItemDto>(reqItem);
                     itens.Add(item);
-                }else
+                }
+                else
                 {
-                    message += $"Produto {reqItem.Codigo} - {reqItem.Nome}. <br/>" ;
+                    message += $"Produto {reqItem.Codigo} - {reqItem.Nome}. <br/>";
                 }
             }
 
             // Criar o pedido
-            CreateRequisicaoDto novoPedido = new CreateRequisicaoDto( (int) requisicao.FilialId, (int) requisicao.ClienteId,
-                (int) requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,
+            CreateRequisicaoDto novoPedido = new CreateRequisicaoDto((int)requisicao.FilialId, (int)requisicao.ClienteId,
+                (int)requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,
                 requisicao.Endereco, requisicao.Numero, requisicao.Cep, requisicao.Cidade, requisicao.UF, usuarioId,
-                usuarioNome,itens,false, false,requisicao.ValorIcms, requisicao.PeriodoEntrega          
+                usuarioNome, itens, false, false, requisicao.ValorIcms, requisicao.PeriodoEntrega
             );
 
             var data = await Create(novoPedido, urlOrigin);
@@ -607,7 +614,7 @@ namespace wca.compras.services
         {
             try
             {
-                Requisicao requisicao = await _rm.RequisicaoRepository.SelectByCondition(c =>  c.Id == requisicaoId).FirstOrDefaultAsync();
+                Requisicao requisicao = await _rm.RequisicaoRepository.SelectByCondition(c => c.Id == requisicaoId).FirstOrDefaultAsync();
 
                 if (requisicao == null) { return false; }
 
@@ -615,7 +622,7 @@ namespace wca.compras.services
                     await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
                 else
                     await solicitarAprovacaoCliente(urlOrigin, requisicao, false);
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -625,6 +632,90 @@ namespace wca.compras.services
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }
+
+
+        public async Task<Stream> ExportToExcel(int filialId, int clienteId, int fornecedorId, int usuarioId, 
+            EnumStatusRequisicao status = EnumStatusRequisicao.TODOS,
+            DateTime? dataInicio = null, DateTime? dataFim = null)
+        {
+            try
+            {
+                var query = _rm.RequisicaoRepository.SelectAll();
+
+                if (filialId > 1)
+                    query = query.Where(c => c.FilialId == filialId);
+
+                if (clienteId > 0)
+                    query = query.Where(c => c.ClienteId == clienteId);
+
+                if (fornecedorId > 0)
+                    query = query.Where(c => c.FornecedorId == fornecedorId);
+
+                if (usuarioId > 0)
+                    query = query.Where(c => c.UsuarioId == usuarioId);
+
+                if (status != EnumStatusRequisicao.TODOS)
+                    query = query.Where(c => c.Status == status);
+                if (dataInicio !=null && dataFim !=null)
+                {
+                    query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao<= dataFim);
+                }
+
+                query = query.Include("Usuario")
+                             .Include("Cliente")
+                             .Include("Fornecedor")
+                             .Include("RequisicaoItens");
+
+                var requisicoes = await query.ToListAsync();
+
+                if (requisicoes.Count == 0) return null;
+
+
+                var excelFile = "Files/excel/modelo_relatorio_requisicoes.xlsx";
+                var workbook = new XLWorkbook(excelFile);
+                var ws = workbook.Worksheet(1); 
+                
+                var row = 3;
+
+                foreach (var requisicao in requisicoes)
+                {
+                    foreach (var item in requisicao.RequisicaoItens)
+                    {
+                        ws.Cell($"B{row}").SetValue(requisicao.Id);
+                        ws.Cell($"C{row}").SetValue(requisicao.Usuario.Nome);
+                        ws.Cell($"D{row}").SetValue(requisicao.Cliente.Nome);
+
+                        string localEntrega = $"{requisicao.Endereco}, {requisicao.Numero} - CEP: {requisicao.Cep} - {requisicao.Cidade} / {requisicao.UF}";
+                        ws.Cell($"E{row}").SetValue(localEntrega);
+                        ws.Cell($"F{row}").SetValue(requisicao.Cliente.CNPJ);
+
+                        ws.Cell($"G{row}").SetValue(item.Nome);
+                        ws.Cell($"H{row}").SetValue(item.Quantidade);
+                        ws.Cell($"I{row}").SetValue(item.Valor);
+                        ws.Cell($"J{row}").SetValue(item.PercentualIPI);
+                        ws.Cell($"K{row}").SetValue(item.Icms);
+                        ws.Cell($"L{row}").SetValue(item.Valor * item.PercentualIPI/100);
+                        ws.Cell($"M{row}").SetValue(item.ValorTotal - item.TaxaGestao);
+                        ws.Cell($"N{row}").SetValue(item.TaxaGestao);
+                        ws.Cell($"O{row}").SetValue(item.TaxaGestao * item.Quantidade);
+                        ws.Cell($"P{row}").SetValue(item.ValorTotal);
+                        row++;
+                    }
+                }
+
+                Stream spreadsheetStream = new MemoryStream();
+                workbook.SaveAs(spreadsheetStream);
+                spreadsheetStream.Position = 0;
+
+                return spreadsheetStream;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.ExportToExcel.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
 
         #region Private Functions
         private async Task CreateRequisicaoHistorico(RequisicaoHistorico historico)
@@ -641,7 +732,7 @@ namespace wca.compras.services
             }
         }
 
-        private async Task solicitarAprovacaoFornecedor (string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
+        private async Task solicitarAprovacaoFornecedor(string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
         {
             try
             {
@@ -652,7 +743,7 @@ namespace wca.compras.services
                     if (config.Valor == "false") return;
 
                 }
-                
+
                 IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
@@ -678,7 +769,7 @@ namespace wca.compras.services
                     bodyHtml += "pedido<p><br/>";
                     bodyHtml += $"<p style='text-align: center;'><a href='{link}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
 
-                    _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email },bodyHtml);
+                    _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email }, bodyHtml);
                 }
 
                 RequisicaoHistorico reqH = new RequisicaoHistorico()
@@ -704,7 +795,7 @@ namespace wca.compras.services
             {
                 var query = _rm.UsuarioRepository.SelectAll()
                             .Include(u => u.Cliente)
-                            .Where(c => c.Cliente.Any(c =>  c.Id == requisicao.ClienteId));
+                            .Where(c => c.Cliente.Any(c => c.Id == requisicao.ClienteId));
 
                 var usuarios = await query.ToListAsync();
 
@@ -762,7 +853,7 @@ namespace wca.compras.services
                     if (config.Valor == "false") return;
 
                 }
-                
+
                 IList<ClienteContato> contatos = await _rm.ClienteContatoRepository.SelectByCondition(c => c.ClienteId == requisicao.ClienteId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
@@ -831,14 +922,14 @@ namespace wca.compras.services
 
             var categorias = await _rm.TipoFornecimentoRepository.SelectByCondition(c => c.Ativo).ToListAsync();
 
-            foreach(var categoria in categorias)
+            foreach (var categoria in categorias)
             {
                 QuantidadePorTipo.Add(categoria.Id, 0);
             }
 
             foreach (var item in result)
             {
-                foreach(int key in QuantidadePorTipo.Keys)
+                foreach (int key in QuantidadePorTipo.Keys)
                 {
                     QuantidadePorTipo[key] += item.RequisicaoItens.Where(c => c.TipoFornecimentoId == key).Count() > 0 ? 1 : 0;
                 }
@@ -856,7 +947,8 @@ namespace wca.compras.services
 
             Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.datacorte");
 
-            if (config != null) {
+            if (config != null)
+            {
                 var diaCorte = int.Parse(config.Valor);
 
                 if (diaHoje > diaCorte)
@@ -875,7 +967,7 @@ namespace wca.compras.services
                     }
                 }
             }
-            
+
             return (dataCorteIni, dataCorteFim);
         }
 
