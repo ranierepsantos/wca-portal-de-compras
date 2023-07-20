@@ -664,7 +664,7 @@ namespace wca.compras.services
                 query = query.Include("Usuario")
                              .Include("Cliente")
                              .Include("Fornecedor")
-                             .Include("RequisicaoItens");
+                             .Include("RequisicaoItens").OrderBy(o => o.Id);
 
                 var requisicoes = await query.ToListAsync();
 
@@ -694,8 +694,8 @@ namespace wca.compras.services
                         ws.Cell($"I{row}").SetValue(item.Valor);
                         ws.Cell($"J{row}").SetValue(item.PercentualIPI);
                         ws.Cell($"K{row}").SetValue(item.Icms);
-                        ws.Cell($"L{row}").SetValue(item.Valor * item.PercentualIPI/100);
-                        ws.Cell($"M{row}").SetValue(item.ValorTotal - item.TaxaGestao);
+                        ws.Cell($"L{row}").SetValue(item.Valor * (1 + item.PercentualIPI/100));
+                        ws.Cell($"M{row}").SetValue(item.ValorTotal - (item.TaxaGestao * item.Quantidade));
                         ws.Cell($"N{row}").SetValue(item.TaxaGestao);
                         ws.Cell($"O{row}").SetValue(item.TaxaGestao * item.Quantidade);
                         ws.Cell($"P{row}").SetValue(item.ValorTotal);
