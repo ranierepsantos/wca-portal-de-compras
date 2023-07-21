@@ -138,7 +138,7 @@ const filter = ref({
 //VUE METHODS
 const headerButtons = computed(() => {
     let buttons = [];
-    //buttons.push({ text: 'Gerar relatório', icon: 'mdi-microsoft-excel', event: 'GerarRelatorioClick' })
+    buttons.push({ text: 'Gerar relatório', icon: 'mdi-microsoft-excel', event: 'GerarRelatorioClick' })
     return buttons;
 })
 
