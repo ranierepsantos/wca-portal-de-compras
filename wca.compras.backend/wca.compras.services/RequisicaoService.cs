@@ -695,7 +695,7 @@ namespace wca.compras.services
                         ws.Cell($"J{row}").SetValue(item.PercentualIPI);
                         ws.Cell($"K{row}").SetValue(item.Icms);
                         ws.Cell($"L{row}").SetValue(item.Valor * (1 + item.PercentualIPI/100));
-                        ws.Cell($"M{row}").SetValue(item.ValorTotal - (item.TaxaGestao * item.Quantidade));
+                        ws.Cell($"M{row}").SetValue((item.Valor * (1 + item.PercentualIPI / 100)) * item.Quantidade);
                         ws.Cell($"N{row}").SetValue(item.TaxaGestao);
                         ws.Cell($"O{row}").SetValue(item.TaxaGestao * item.Quantidade);
                         ws.Cell($"P{row}").SetValue(item.ValorTotal);
