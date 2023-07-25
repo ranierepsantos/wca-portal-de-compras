@@ -58,7 +58,7 @@
 
                 <!--TABELA DE EXIBIÇÃO DOS PRODUTOS -->
                 <v-row class="mt-2">
-                    <v-col cols="10" offset="1">
+                    <v-col cols="12">
                         <v-table class="elevation-2">
                             <thead>
                                 <tr>
@@ -66,8 +66,13 @@
                                     <th class="text-center text-grey">PRODUTO</th>
                                     <th class="text-center text-grey">VALOR</th>
                                     <th class="text-center text-grey">QUANTIDADE</th>
-                                    <th class="text-center text-grey">U. M.</th>
-                                    <th class="text-center text-grey">TOTAL</th>
+                                    <th class="text-center text-grey">%IPI</th>
+                                    <th class="text-center text-grey">%ICMS</th>
+                                    <th class="text-center text-grey">VALOR COM IPI</th>
+                                    <th class="text-center text-grey">TOTAL GERAL</th>
+                                    <th class="text-center text-grey">GESTÃO UNIT.</th>
+                                    <th class="text-center text-grey">GESTÃO TOTAL</th>
+                                    <th class="text-center text-grey">TOTAL GERAL COM GESTÃO</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,7 +81,12 @@
                                     <td class="text-left">{{ item.nome }}</td>
                                     <td class="text-right">{{ item.valor.toFixed(2) }}</td>
                                     <td class="text-center">{{ item.quantidade }}</td>
-                                    <td class="text-center">{{ item.unidadeMedida }}</td>
+                                    <td class="text-right">{{ (item.ipi||0).toFixed(2)  }}% </td>
+                                    <td class="text-right">{{ (item.icms||0).toFixed(2)  }}% </td>
+                                    <td class="text-right">{{ (item.valor * (1 + (item.ipi||0) /100)).toFixed(2) }}</td>
+                                    <td class="text-right">{{ ((item.valor * (1 + (item.ipi||0) /100))* item.quantidade).toFixed(2) }}</td>
+                                    <td class="text-right">{{ (item.taxaGestao ||0).toFixed(2) }}</td>
+                                    <td class="text-right">{{ ((item.taxaGestao ||0) * item.quantidade).toFixed(2)}}</td>
                                     <td class="text-right">{{ (item.valorTotal).toFixed(2) }}
                                     </td>
                                 </tr>

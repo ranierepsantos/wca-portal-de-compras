@@ -514,8 +514,13 @@ namespace wca.compras.services
                     ws.Cell($"B{row}").SetValue(item.Nome);
                     ws.Cell($"C{row}").SetValue(item.Valor);
                     ws.Cell($"D{row}").SetValue(item.Quantidade);
-                    ws.Cell($"E{row}").SetValue(item.UnidadeMedida);
-                    ws.Cell($"F{row}").SetValue(item.ValorTotal);
+                    ws.Cell($"E{row}").SetValue(item.PercentualIPI);
+                    ws.Cell($"F{row}").SetValue(item.Icms);
+                    ws.Cell($"G{row}").SetValue(item.Valor * (1 + item.PercentualIPI / 100));
+                    ws.Cell($"H{row}").SetValue((item.Valor * (1 + item.PercentualIPI / 100)) * item.quantidade);
+                    ws.Cell($"I{row}").SetValue(item.TaxaGestao);
+                    ws.Cell($"J{row}").SetValue(item.TaxaGestao * item.Quantidade);
+                    ws.Cell($"K{row}").SetValue(item.ValorTotal);
                     row++;
                 }
                 Stream spreadsheetStream = new MemoryStream();
