@@ -127,5 +127,13 @@ wca.compras.backend/wca.compras.functions/__azurite_db_queue_extent__.json
 wca.compras.backend/wca.compras.functions/__azurite_db_table__.json
 wca.compras.backend/__azurite_db_blob__.json
 wca.compras.backend/__azurite_db_blob_extent__.json
-/wca.reembolso.backend/*/obj/
-/wca.reembolso.backend/*/bin/
+/wca.reembolso.backend/.vs/
+/wca.reembolso.backend/wca.reembolso.application/bin/
+/wca.reembolso.backend/wca.reembolso.application/obj/
+/wca.reembolso.backend/wca.reembolso.domain/obj/
+/wca.reembolso.backend/wca.reembolso.webapi/bin/
+/wca.reembolso.backend/wca.reembolso.webapi/obj/
+/wca.reembolso.backend/wca.reembolso.infrastruture/obj/
+/wca.reembolso.backend/wca.reembolso.infrastruture/bin/
+/wca.reembolso.backend/wca.reembolso.domain/bin/
+/wca.reembolso.backend/wca.reembolso.webapi/appsettings.Development.json
