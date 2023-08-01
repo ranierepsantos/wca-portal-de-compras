@@ -39,8 +39,8 @@
                 <box-transfer 
                   :list-origem="tipos" 
                   :list-destino="usuario.tipoFornecimento"
-                  list-origem-titulo = "Selecione as categorias"
-                  list-destino-titulo = "Categorias do usuário"
+                  list-origem-titulo = "Selecione as categorias de compra"
+                  list-destino-titulo = "Categorias de compra do usuário"
                   style="margin-bottom: 5px;"
                 />
             
@@ -178,6 +178,7 @@ async function salvar() {
         showConfirmButton: false,
         timer: 2000,
       });
+      router.push({name: "comprasUsuarios"})
     }
   } catch (error) {
     console.log("usuários.error:", error);
