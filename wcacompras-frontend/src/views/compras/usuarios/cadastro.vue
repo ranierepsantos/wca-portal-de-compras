@@ -39,8 +39,8 @@
                 <box-transfer 
                   :list-origem="tipos" 
                   :list-destino="usuario.tipoFornecimento"
-                  list-origem-titulo = "Selecione as categorias"
-                  list-destino-titulo = "Categorias do usuário"
+                  list-origem-titulo = "Selecione as categorias de compra"
+                  list-destino-titulo = "Categorias de compra do usuário"
                   style="margin-bottom: 5px;"
                 />
             
@@ -96,6 +96,7 @@ let filialUsuario = 0;
 const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
+const perfil = ref(null);
 
 //VUE METHODS
 onMounted(async () => {
@@ -114,16 +115,17 @@ watch(
   async (filialid, oldValue) => {
     clientes.value = [];
     await getClienteToList(filialid);
-    clientesListRemove();
+    
     if (filialid != filialUsuario) {
       usuario.value.cliente = [];
       filialUsuario = filialid;
     }
+    clientesListRemove();
   }
 );
 
 //METHODS
-function setPerfilUsuario(perfilId) {
+async function setPerfilUsuario(perfilId) {
   let index = -1;
   if ( usuario.value.usuarioSistemaPerfil.length > 0) {
     index = usuario.value.usuarioSistemaPerfil.findIndex(c => c.sistemaId == authStore.sistema.id)
@@ -137,6 +139,8 @@ function setPerfilUsuario(perfilId) {
       "perfilId": perfilId 
     });
   }
+
+  perfil.value = await perfilService.getWithPermissions(perfilId);
 }
 
 function clientesListRemove(removerTodos = false) {
@@ -203,6 +207,12 @@ async function clearData() {
 
 async function getClienteToList(filial) {
   try {
+    console.log("getClienteToList.Perfil", perfil.value)
+    if (perfil.value && filial == 1) {
+      let admCliente = perfil.value.permissao.filter(q => q.regra == "clientes_administrador")[0];
+      if (admCliente) filial = 0;
+    }
+     
     let response = await clienteService.toList(filial);
     clientes.value = response.data;
   } catch (error) {
@@ -245,6 +255,13 @@ async function getUsuario(usuarioId) {
   try {
     isBusy.value = true;
     let response = await userService.getById(usuarioId);
+    
+    let perfilUsuario = response.data.usuarioSistemaPerfil.filter(c => c.sistemaId == authStore.sistema.id)[0]
+    let perfilResponse = await perfilService.getWithPermissions(perfilUsuario.perfilId);
+    perfil.value = perfilResponse.data
+    
+    console.log("Perfil:", perfil.value);
+
     filialUsuario = response.data.filialid;
     usuario.value = response.data;
     tiposListRemove();
