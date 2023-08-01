@@ -800,45 +800,46 @@ namespace wca.compras.services
             {
                 var query = _rm.UsuarioRepository.SelectAll()
                             .Include(u => u.Cliente)
-                            .Where(c => c.Cliente.Any(c => c.Id == requisicao.ClienteId));
+                            .Where(c => c.Ativo == true && c.Cliente.Any(c => c.Id == requisicao.ClienteId));
 
                 var usuarios = await query.ToListAsync();
+                
+                if (usuarios.Count > 0) {
+                    var requisicaoToken = randomTokenString();
 
-                var requisicaoToken = randomTokenString();
-
-                foreach (var contato in usuarios)
-                {
-                    RequisicaoAprovacao req = new RequisicaoAprovacao()
+                    foreach (var contato in usuarios)
                     {
-                        NomeAprovador = contato.Nome,
+                        RequisicaoAprovacao req = new RequisicaoAprovacao()
+                        {
+                            NomeAprovador = contato.Nome,
+                            RequisicaoId = requisicao.Id,
+                            TokenRequisicao = requisicaoToken,
+                            TokenAprovador = randomTokenString(),
+                            AlteraStatus = true,
+                            TipoAprovador = EnumTipoAprovador.WCA
+                        };
+                        _rm.RequisicaoAprovacaoRepository.Create(req);
+                        await _rm.SaveAsync();
+
+                        var link = $"{urlOrigin}/app/requisicoes/aprovar/{req.TokenAprovador}";
+
+                        var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido para.<br/>";
+                        bodyHtml += "aprovar. Clique no botão abaixo para acessar o <br/>";
+                        bodyHtml += "pedido<p><br/>";
+                        bodyHtml += $"<p style='text-align: center;'><a href='{link}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
+
+                        _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email }, bodyHtml);
+                    }
+
+                    RequisicaoHistorico reqH = new RequisicaoHistorico()
+                    {
                         RequisicaoId = requisicao.Id,
-                        TokenRequisicao = requisicaoToken,
-                        TokenAprovador = randomTokenString(),
-                        AlteraStatus = true,
-                        TipoAprovador = EnumTipoAprovador.WCA
+                        Evento = $"Solicitação de aprovação enviada para aprovação do administrador!",
+                        DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
                     };
-                    _rm.RequisicaoAprovacaoRepository.Create(req);
-                    await _rm.SaveAsync();
 
-                    var link = $"{urlOrigin}/app/requisicoes/aprovar/{req.TokenAprovador}";
-
-                    var bodyHtml = "<p style='color:grey; text-align: center;font-size:36px'>Você recebeu um novo pedido para.<br/>";
-                    bodyHtml += "aprovar. Clique no botão abaixo para acessar o <br/>";
-                    bodyHtml += "pedido<p><br/>";
-                    bodyHtml += $"<p style='text-align: center;'><a href='{link}' style='font: bold 18px Arial; text-decoration: none;background-color: #000066; color: white; padding: 1em 1.5em; border-radius: 5%;'>Acessar pedido</a></p>";
-
-                    _emailService.SendRequisicaoParaAprovacao(new string[] { contato.Email }, bodyHtml);
+                    await CreateRequisicaoHistorico(reqH);
                 }
-
-                RequisicaoHistorico reqH = new RequisicaoHistorico()
-                {
-                    RequisicaoId = requisicao.Id,
-                    Evento = $"Solicitação de aprovação enviada para aprovação do administrador!",
-                    DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia)
-                };
-
-                await CreateRequisicaoHistorico(reqH);
-
             }
             catch (Exception ex)
             {
