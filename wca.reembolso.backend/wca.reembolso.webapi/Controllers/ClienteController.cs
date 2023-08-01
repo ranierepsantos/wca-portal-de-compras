@@ -35,13 +35,34 @@ namespace wca.reembolso.webapi.Controllers
 
             if (result.IsError) { return Problem(result.Errors); }
 
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         [HttpGet("ToPaginate")]
         public async Task<IActionResult> ToPaginate([FromQuery] ClientePaginateQuery querie)
         {
             var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("ToComboList")]
+        public async Task<IActionResult> ToComboList([FromQuery] ClienteToComboListQuerie querie)
+        {
+            var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+
+        [HttpPut]
+        public async Task<IActionResult> Update(ClienteUpdateCommand cliente)
+        {
+            var result = await _mediator.Send(cliente);
 
             if (result.IsError) { return Problem(result.Errors); }
 

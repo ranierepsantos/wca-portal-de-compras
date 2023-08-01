@@ -55,6 +55,10 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("varchar(150)")
                         .HasColumnName("endereco");
 
+                    b.Property<int>("FilialId")
+                        .HasColumnType("int")
+                        .HasColumnName("filial_id");
+
                     b.Property<string>("InscricaoEstadual")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")

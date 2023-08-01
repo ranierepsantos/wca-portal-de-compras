@@ -11,8 +11,8 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    [Migration("20230725033649_CreateTable_Clientes")]
-    partial class CreateTable_Clientes
+    [Migration("20230801025219_Initial_CreateTable_Clientes")]
+    partial class Initial_CreateTable_Clientes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,6 +57,10 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)")
                         .HasColumnName("endereco");
+
+                    b.Property<int>("FilialId")
+                        .HasColumnType("int")
+                        .HasColumnName("filial_id");
 
                     b.Property<string>("InscricaoEstadual")
                         .HasMaxLength(20)
