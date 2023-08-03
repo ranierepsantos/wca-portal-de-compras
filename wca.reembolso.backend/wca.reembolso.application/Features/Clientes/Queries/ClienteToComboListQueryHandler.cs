@@ -36,7 +36,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
             if (request.FilialId > 0)
                 query = query.Where(q => q.FilialId.Equals(request.FilialId));
 
-            var items = await query.OrderBy(q => q.Nome).ToListAsync();
+            var items = await query.Where(q =>  q.Ativo).OrderBy(q => q.Nome).ToListAsync();
 
             return _mapper.Map<List<ListItem>>(items);
 
