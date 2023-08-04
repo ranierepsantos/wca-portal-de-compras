@@ -61,7 +61,7 @@ namespace wca.compras.services
 
                         foreach (var item in cliente.ClienteOrcamentoConfiguracao)
                         {
-                            if (item.Ativo && comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                            if (item.Ativo && comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes && item.QuantidadeMes > 0)
                             {
                                 if (item.AprovadoPor == EnumAprovadoPor.WCA)
                                     data.RequerAutorizacaoWCA = true;
