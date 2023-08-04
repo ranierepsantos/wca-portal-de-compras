@@ -11,4 +11,11 @@ namespace wca.reembolso.domain.Common.Enum
         Consumo =  1,
         Distancia = 2
     }
+
+    public enum EnumNotificaQuem
+    {
+        WCA =1,
+        Cliente = 2,
+        Usuario = 3
+    }
 }
