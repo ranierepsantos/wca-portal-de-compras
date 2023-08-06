@@ -1,9 +1,4 @@
 ﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Features.Clientes.Commands;
 using wca.reembolso.application6.Common;
 using wca.reembolso.domain.Entities;

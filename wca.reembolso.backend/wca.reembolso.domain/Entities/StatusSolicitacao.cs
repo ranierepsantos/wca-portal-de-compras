@@ -18,7 +18,9 @@ namespace wca.reembolso.domain.Entities
 
         [Column("notifica")]
         public EnumNotificaQuem Notifica { get; set; }
-
+        
+        [Column("template_notificacao")]
+        public string? TemplateNotificacao { get; set; } = string.Empty;
     }
 
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20230805220227_AlterDatabase_CreateTable")]
+    partial class AlterDatabase_CreateTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -387,10 +390,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(150)")
                         .HasColumnName("texto");
-
-                    b.Property<string>("TemplateNotificacao")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("template_notificacao");
 
                     b.HasKey("Id");
 

@@ -18,4 +18,5 @@ namespace wca.reembolso.domain.Common.Enum
         Cliente = 2,
         Usuario = 3
     }
+    
 }

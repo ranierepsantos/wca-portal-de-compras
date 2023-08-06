@@ -2,26 +2,27 @@
 using Microsoft.AspNetCore.Mvc;
 using wca.reembolso.application.Features.Clientes.Commands;
 using wca.reembolso.application.Features.Clientes.Queries;
+using wca.reembolso.application.Features.Solicitacaos.Queries;
+using wca.reembolso.application.Features.Solicitacoes.Commands;
+using wca.reembolso.application.Features.Solicitacoes.Queries;
 
 namespace wca.reembolso.webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     
-    public class ClienteController : ApiController
+    public class SolicitacaoController : ApiController
     {
         private readonly IMediator _mediator;
 
-        public ClienteController(IMediator mediator)
+        public SolicitacaoController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetById([FromQuery] ClienteByIdQuerie command) 
+        public async Task<IActionResult> GetById([FromQuery] SolicitacaoByIdQuerie command) 
         {
-            //int filial = int.Parse(User.FindFirst("Filial").Value);
-
             var result = await _mediator.Send(command);
         
             if (result.IsError) { return Problem(result.Errors); }
@@ -30,9 +31,9 @@ namespace wca.reembolso.webapi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ClienteCreateCommand cliente)
+        public async Task<IActionResult> Create(SolicitacaoCreateCommand createCommand)
         {
-            var result = await _mediator.Send(cliente);
+            var result = await _mediator.Send(createCommand);
 
             if (result.IsError) { return Problem(result.Errors); }
 
@@ -40,7 +41,7 @@ namespace wca.reembolso.webapi.Controllers
         }
 
         [HttpGet("Paginar")]
-        public async Task<IActionResult> ToPaginate([FromQuery] ClientePaginateQuery querie)
+        public async Task<IActionResult> ToPaginate([FromQuery] SolicitacaoPaginateQuery querie)
         {
             var result = await _mediator.Send(querie);
 
@@ -48,30 +49,19 @@ namespace wca.reembolso.webapi.Controllers
 
             return Ok(result.Value);
         }
-
-        [HttpGet("ToComboList")]
-        public async Task<IActionResult> ToComboList([FromQuery] ClienteToComboListQuerie querie)
-        {
-            var result = await _mediator.Send(querie);
-
-            if (result.IsError) { return Problem(result.Errors); }
-
-            return Ok(result.Value);
-        }
-
 
         [HttpPut]
-        public async Task<IActionResult> Update(ClienteUpdateCommand cliente)
+        public async Task<IActionResult> Update(SolicitacaoUpdateCommand updateCommand)
         {
-            var result = await _mediator.Send(cliente);
+            var result = await _mediator.Send(updateCommand);
 
             if (result.IsError) { return Problem(result.Errors); }
 
             return Ok(result.Value);
         }
 
-        [HttpGet("ListarClientesPorUsuario")]
-        public async Task<IActionResult> ListClientesByUsuario([FromQuery] ClienteByUserIdQuerie querie)
+        [HttpGet("ListarPorColaboradorGestor")]
+        public async Task<IActionResult> ListarPorColaboradorGestor([FromQuery] SolicitacaoByColaboradorOrGestorQuerie querie)
         {
             var result = await _mediator.Send(querie);
 
@@ -80,14 +70,16 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpPost("RelacionarClienteUsuario")]
-        public async Task<IActionResult> RelacionarClienteUsuario(ClienteUsuarioAttachCommand clienteUsuario)
+        [HttpGet("ListarStatusSolicitacao")]
+        public async Task<IActionResult> ListarStatusSolicitacao()
         {
-            var result = await _mediator.Send(clienteUsuario);
+            var result = await _mediator.Send(new StatusSolicitacaoGetAllQuery());
 
             if (result.IsError) { return Problem(result.Errors); }
 
             return Ok(result.Value);
+
+
         }
     }
 }
