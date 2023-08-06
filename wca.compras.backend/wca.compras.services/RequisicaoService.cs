@@ -749,7 +749,7 @@ namespace wca.compras.services
 
                 }
 
-                IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.FornecedorId == requisicao.FornecedorId).ToListAsync();
+                IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.AprovaPedido && c.FornecedorId == requisicao.FornecedorId).ToListAsync();
 
                 var requisicaoToken = randomTokenString();
 
@@ -802,6 +802,14 @@ namespace wca.compras.services
                             .Include(u => u.Cliente)
                             .Where(c => c.Ativo == true && c.Cliente.Any(c => c.Id == requisicao.ClienteId));
 
+                query = query.Include(u => u.UsuarioSistemaPerfil)
+                    .ThenInclude(up => up.Perfil)
+                    .ThenInclude(p => p.Permissao)
+                    .Where(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == 1
+                             && c.Perfil.Permissao.Where(pm => pm.Regra.Equals("aprova_requisicao")).Count() > 0
+                          ).Count() > 0
+                    );
+
                 var usuarios = await query.ToListAsync();
                 
                 if (usuarios.Count > 0) {
@@ -852,7 +860,7 @@ namespace wca.compras.services
         {
             try
             {
-                //Verificar se esta configurado para enviar solicitação ao Fornecedor
+                //Verificar se esta configurado para enviar solicitação
                 if (checkConfiguracao == true)
                 {
                     Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.cliente");
@@ -860,7 +868,9 @@ namespace wca.compras.services
 
                 }
 
-                IList<ClienteContato> contatos = await _rm.ClienteContatoRepository.SelectByCondition(c => c.ClienteId == requisicao.ClienteId).ToListAsync();
+                IList<ClienteContato> contatos = await _rm.ClienteContatoRepository.SelectByCondition(c => c.AprovaPedido && c.ClienteId == requisicao.ClienteId).ToListAsync();
+
+                if (contatos.Count == 0) return;
 
                 var requisicaoToken = randomTokenString();
 
