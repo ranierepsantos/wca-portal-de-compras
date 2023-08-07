@@ -118,7 +118,16 @@ namespace wca.compras.data.DataAccess
             modelBuilder.Entity<UsuarioSistemaPerfil>()
                 .HasOne(en => en.Perfil)
                 .WithMany(us => us.UsuarioSistemaPerfil)
-                .HasForeignKey(en => en.PerfilId); 
+                .HasForeignKey(en => en.PerfilId);
+
+            modelBuilder.Entity<UsuarioReembolsoComplemento>()
+                .HasKey(pi => pi.UsuarioId);
+
+            modelBuilder.Entity<UsuarioReembolsoComplemento>()
+                .HasOne(en => en.Usuario)
+                .WithOne(us => us.UsuarioReembolsoComplemento);
+                
+
 
         }
     }

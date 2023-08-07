@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { paginate } from "@/helpers/functions";
+import clienteService from "@/services/reembolso/cliente.service";
 
 export class Cliente {
     clienteID = 0
@@ -7,6 +7,7 @@ export class Cliente {
     constructor (data = undefined) {
         if (data ==undefined) {
             this.id= 0
+            this.filialId= null
             this.nome= ""
             this.cnpj= ""
             this.inscricaoEstadual= ""
@@ -16,12 +17,10 @@ export class Cliente {
             this.cidade= ""
             this.uf= ""
             this.ativo= true
-            this.filialId= null
-            this.naoUltrapassarLimite= false
             this.valorLimite = 0 
-            this.clienteContatos= []
         }else {
             this.id= data.id
+            this.filialId= data.filialId
             this.nome= data.nome
             this.cnpj= data.cnpj
             this.inscricaoEstadual= data.inscricaoEstadual
@@ -31,93 +30,36 @@ export class Cliente {
             this.cidade= data.cidade
             this.uf= data.uf
             this.ativo= data.ativo
-            this.filialId= data.filialId
-            this.naoUltrapassarLimite= data.naoUltrapassarLimite
             this.valorLimite= data.valorLimite 
-            this.clienteContatos= data.clienteContatos
         }
-        
-    }
-
-    salvarContato(contato) {
-        let index = -1        
-        if (contato.id == 0) {
-            this.clienteID +=-1
-            contato.id = this.clienteID
-        }else {
-            index = this.clienteContatos.findIndex(q =>  q.id ==contato.id) 
-        }
-        if (index == -1)
-            this.clienteContatos.push(contato);
-        else 
-            this.clienteContatos[index] = contato;
-    }
-
-    removerContato(contato) {
-        let index = this.clienteContatos.findIndex(c => c.id == contato.id)
-        if (index > -1) {
-            this.clienteContatos.splice(index, 1);
-        }
-    }
-}
-
-export class ClienteContato {
-    
-    constructor() {
-        this.id= 0,
-        this.clienteId= 0,
-        this.nome= "",
-        this.email= "",
-        this.telefone= "",
-        this.celular= "",
-        this.aprovaPedido= false
     }
 }
 
 export const useClienteStore = defineStore("cliente", {
-  state: () => ({
-    clienteID: localStorage.getItem("reembolso-clientes-id") || 1,
-    clientes: JSON.parse(localStorage.getItem("reembolso-clientes")) || [],
-  }),
   actions: {
-    
-    addCliente (cliente) {
-        this.clienteID++;
-        cliente.id = this.clienteID;
-        this.clientes.push(cliente)
-        localStorage.setItem("reembolso-clientes", JSON.stringify(this.clientes))
-        localStorage.setItem("reembolso-clientes-id", this.clienteID)
+    async addCliente (cliente) {
+        let response = await clienteService.create(cliente);
+        return response.data;
     },
     
-    getClienteById (id) {
-        let model = this.clientes.find(c => c.id == id)
+    async getClienteById (id) {
+        let model = (await clienteService.getById(id)).data;
         return new Cliente(model);
     },
 
-    getClientesByPaginate(pageNumber = 1, pageSize = 10) {
-        return paginate(this.clientes, pageNumber, pageSize)
+    async getClientesByPaginate(filial, pageNumber = 1, pageSize = 10, termo ="") {
+        let response  = await clienteService.paginate(filial, pageSize, pageNumber, termo)
+        return response.data;
     },
 
-    updateCliente (cliente) {
-        let index = this.clientes.findIndex(q => q.id == cliente.id)
-        if (index == -1) {
-            return false;
-        }
-        this.clientes[index] = {...cliente};
-        localStorage.setItem("reembolso-clientes", JSON.stringify(this.clientes))
-        return true;
+    async updateCliente (cliente) {
+        let response = await clienteService.update(cliente);
+        return response.data;
     },
-    toComboList(filial = 0)  {
-
-        let list = []
-        let lista = this.clientes
-        if (filial != 0){
-            lista = lista.filter(q => q.filialId == filial)
-        }
-        lista.forEach(item => {
-            list.push ({text: item.nome, value: item.id})
-        })
-        return list;
+    
+    async toComboList(filial = 0)  {
+        let response = await clienteService.toList(filial);
+        return response.data;
     }
   },
 });

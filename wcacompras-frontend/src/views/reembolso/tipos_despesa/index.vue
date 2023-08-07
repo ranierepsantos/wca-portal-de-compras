@@ -22,6 +22,32 @@
               </v-col>
             </v-row>
             <v-row>
+              <v-col>
+                <v-select
+                  label="Tipo"
+                  :items="despesaTipoStore.tipoDespesaTipo"
+                  density="compact"
+                  item-title="text"
+                  item-value="value"
+                  variant="outlined"
+                  color="primary"
+                  v-model="model.tipo"
+                  :rules="[(v) => !!v || 'Campo obrigatório']"
+                ></v-select>
+              </v-col>
+              <v-col>
+                <v-text-field-money
+                  label-text="Valor por Km percorrido"
+                  v-model="model.valor"
+                  color="primary"
+                  :number-decimal="2"
+                  prefix="R$"
+                  :disabled="model.tipo != 2"
+                ></v-text-field-money>
+              </v-col>
+              
+            </v-row>
+            <v-row>
               <v-col cols="6">
                 <v-checkbox v-show="model.id > 0" v-model="model.ativo" label="Ativo" color="primary"></v-checkbox>
               </v-col>
@@ -43,6 +69,8 @@
       <thead>
         <tr>
           <th class="text-left text-grey">NOME</th>
+          <th class="text-left text-grey">TIPO</th>
+          <th class="text-center text-grey">VALOR</th>
           <th class="text-center text-grey">ATIVO</th>
           <th></th>
         </tr>
@@ -53,6 +81,8 @@
             <v-icon icon="mdi-shape-outline"></v-icon>
             &nbsp;{{ item.nome }}
           </td>
+          <td class="text-left">{{ item.tipo }}</td>
+          <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
           <td class="text-center">
             <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="item.ativo ? 'success' : 'error'"></v-icon>
@@ -81,11 +111,13 @@
 import { ref, onMounted, watch, inject } from "vue";
 import handleErrors from "@/helpers/HandleErrors"
 import Breadcrumbs from "@/components/breadcrumbs.vue";
-import { useDespesaTipoStore, despesaTipoModel } from "@/store/reembolso/despesaTipo.store";
+import { useDespesaTipoStore, TipoDespesa } from "@/store/reembolso/despesaTipo.store";
+import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
+import { formatToCurrencyBRL } from "@/helpers/functions";
 
 //DATA
 const page = ref(1);
-const pageSize = 10;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const tableData = ref([]);
@@ -93,7 +125,7 @@ const filter = ref("");
 const dialogTitle = ref("Nova data");
 const dialog = ref(false);
 const swal = inject("$swal");
-const model = ref({...despesaTipoModel});
+const model = ref(new TipoDespesa());
 const despesaTipoStore = useDespesaTipoStore();
 
 const form = ref(null)
@@ -114,7 +146,7 @@ watch(filter, () => getItems());
 function clearModel()
 {
   dialogTitle.value = "Novo Tipo";
-  model.value = {...despesaTipoModel};
+  model.value = new TipoDespesa();
 }
 
 function closeDialog()
@@ -177,7 +209,7 @@ async function getItems()
   try
   {
     isBusy.value = true;
-    let response = despesaTipoStore.getPaginate(page.value, pageSize)
+    let response = await despesaTipoStore.getPaginate(page.value, pageSize)
     tableData.value = response.items;
     totalPages.value = response.totalPages;
 

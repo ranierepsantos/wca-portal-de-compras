@@ -5,10 +5,10 @@
       color="primary"
       indeterminate
       :height="5"
-      v-show="isBusy"
+      v-show="isBusy || isSaving"
     ></v-progress-linear>
     <v-container class="justify-center">
-      <v-card>
+      <v-card v-show="!isBusy">
         <v-card-text>
           <v-form @submit.prevent="salvar()" ref="userForm">
             <usuario-form :user="usuario" :list-filial="filiais"></usuario-form>
@@ -91,7 +91,7 @@
                       <v-col>
                         <v-text-field
                           label="Cargo"
-                          v-model="usuario.cargo"
+                          v-model="usuario.usuarioReembolsoComplemento.cargo"
                           type="text"
                           variant="outlined"
                           color="primary"
@@ -106,7 +106,7 @@
                           color="primary"
                           item-title="text"
                           item-value="value"
-                          v-model="usuario.usuarioGestor"
+                          v-model="usuario.usuarioReembolsoComplemento.gestorId"
                           density="compact"
                         ></v-select>
                       </v-col>
@@ -155,7 +155,8 @@ import { Usuario, useUsuarioStore, IDPERFILGESTOR, IDPERFILCOLABORADOR } from "@
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 
 //DATA
-const isBusy = ref(false);
+const isBusy = ref(true);
+const isSaving = ref(false);
 const listPerfil = ref([]);
 const filiais = ref([]);
 const clientes = ref([]);
@@ -177,7 +178,6 @@ onMounted(async () => {
   clearData();
   await getFilialToList();
   await getPerfilToList();
-  await getClienteToList();
   if (parseInt(route.query.id) > 0) {
     await getUsuario(route.query.id);
   }
@@ -194,10 +194,16 @@ watch(
   }
 );
 watch(() => colaboradorClienteId.value, async(clienteId) => {
-  await getGestorToList(clienteId)
+  
   let cliente = clientes.value.filter(q => q.value== clienteId)[0]
   if (cliente) 
+  {
+    usuario.value.cliente = []
     usuario.value.cliente.push(cliente)
+  }
+    
+  
+  await getGestorToList(clienteId)
 })
 
 const isColaborador = computed(() => {
@@ -254,6 +260,7 @@ async function salvar() {
   try {
     let { valid } = await userForm.value.validate();
     if (valid) {
+      isSaving.value = true;
       let data = usuario.value;
       if (data.id == 0) {
         await usuarioStore.add(data);
@@ -275,7 +282,7 @@ async function salvar() {
   } catch (error) {
     console.log("usuários.error:", error);
     handleErrors(error);
-  }
+  } finally { isSaving.value = false;}
 }
 
 async function clearData() {
@@ -298,7 +305,8 @@ function clientesListRemove(removerTodos = false) {
 async function getClienteToList(filial) {
   try {
     //let response = await clienteService.toList(filial);
-    clientes.value = useClienteStore().toComboList()
+    clientes.value = await useClienteStore().toComboList()
+    console.log("getClienteToList",clientes.value);
   } catch (error) {
     console.log("getClienteToList.error:", error);
     handleErrors(error);
@@ -307,7 +315,7 @@ async function getClienteToList(filial) {
 
 async function getGestorToList(clienteId) {
   try {
-    gestores.value = usuarioStore.toComboListGestorByCliente(clienteId)
+    gestores.value = []//usuarioStore.toComboListGestorByCliente(clienteId)
   } catch (error) {
     console.log("getGestorToList.error:", error);
     handleErrors(error);

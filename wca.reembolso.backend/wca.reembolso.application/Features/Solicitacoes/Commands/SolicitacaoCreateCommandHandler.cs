@@ -8,6 +8,7 @@ using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application.Features.Solicitacoes.Common;
 using wca.reembolso.application.Features.Solicitacoes.Behaviors;
 using wca.reembolso.domain.Entities;
+using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Commands
 {
@@ -32,12 +33,14 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         private readonly IRepository<Solicitacao> _reposistory;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoCreateCommandHandler> _logger;
+        private readonly IMediator _mediator;
 
-        public SolicitacaoCreateCommandHandler(IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger)
+        public SolicitacaoCreateCommandHandler(IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger, IMediator mediator)
         {
             _reposistory = reposistory;
             _mapper = mapper;
             _logger = logger;
+            _mediator = mediator;
         }
 
         async Task<ErrorOr<SolicitacaoResponse>> IRequestHandler<SolicitacaoCreateCommand, ErrorOr<SolicitacaoResponse>>.Handle(SolicitacaoCreateCommand request, CancellationToken cancellationToken)
@@ -58,6 +61,10 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             _reposistory.Create(dado);
 
             await _reposistory.SaveChangesAsync();
+
+            //Criar evento
+            var querie = new SolicitacaoHistorioCreateCommand(dado.Id, $"Solicitação criada!");
+            await _mediator.Send ( querie );
 
             //3. mapear para SolicitacaoResponse
             return _mapper.Map<SolicitacaoResponse>(dado);

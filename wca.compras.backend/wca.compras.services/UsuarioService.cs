@@ -41,13 +41,15 @@ namespace wca.compras.services
                     data.Cliente.Add(cli);
                 }
 
-                foreach (var item in usuario.TipoFornecimento)
+                if (usuario.TipoFornecimento != null)
                 {
-                    var categoria = _mapper.Map<TipoFornecimento>(item);
-                    _rm.TipoFornecimentoRepository.Attach(categoria);
-                    data.TipoFornecimento.Add(categoria);
+                    foreach (var item in usuario.TipoFornecimento)
+                    {
+                        var categoria = _mapper.Map<TipoFornecimento>(item);
+                        _rm.TipoFornecimentoRepository.Attach(categoria);
+                        data.TipoFornecimento.Add(categoria);
+                    }
                 }
-
                 await _rm.SaveAsync();
 
                 return _mapper.Map<UsuarioDto>(data);
@@ -136,7 +138,8 @@ namespace wca.compras.services
                     query = query.Where(u => u.FilialId == filialId);
                 }
                 
-                query = query.Include("UsuarioSistemaPerfil");
+                query = query.Include("UsuarioSistemaPerfil")
+                    .Include("UsuarioReembolsoComplemento");
 
                 //Retorna dados especificos do sistema
                 if (sistemaId == 1 ) //compras
@@ -163,6 +166,9 @@ namespace wca.compras.services
                 if (sistemaId == 1)
                 {
                     await UpdateComprasRelacoes(baseData, usuario);
+                }else if (sistemaId ==2 && usuario.UsuarioReembolsoComplemento != null)
+                {
+                        baseData.UsuarioReembolsoComplemento = usuario.UsuarioReembolsoComplemento;
                 }
                 
 
@@ -272,7 +278,10 @@ namespace wca.compras.services
 
         private async Task<Usuario> GetDataToReembolso(IQueryable<Usuario> query)
         {
+            query = query.Include(ic => ic.UsuarioReembolsoComplemento);
+
             var data = await query.FirstOrDefaultAsync();
+            
             return data;
         }
 
