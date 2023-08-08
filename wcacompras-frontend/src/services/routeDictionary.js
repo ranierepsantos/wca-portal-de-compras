@@ -78,5 +78,5 @@ export const route = {
     usuarioUpdate: "Usuario/{sistemaId}",
     usuarioPaginate: "Usuario/Paginate/{sistemaId}/{pageSize}/{page}",
     usuarioToList: "Usuario/ToList/{sistemaId}",
-    
+    usuarioToListByPerfil: "Usuario/ToListByPerfil/{perfilId}",
 }

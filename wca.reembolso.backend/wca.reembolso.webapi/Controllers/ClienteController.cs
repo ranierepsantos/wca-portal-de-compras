@@ -89,5 +89,15 @@ namespace wca.reembolso.webapi.Controllers
 
             return Ok(result.Value);
         }
+
+        [HttpGet("ListarUsuariosPorCliente")]
+        public async Task<IActionResult> ListClientesByUsuario([FromQuery] ClienteUsersByClienteQuerie querie)
+        {
+            var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
     }
 }

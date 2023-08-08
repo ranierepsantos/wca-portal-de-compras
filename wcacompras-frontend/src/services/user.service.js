@@ -39,5 +39,11 @@ export default {
     {
         return api.get(route.usuarioToList.replace("{sistemaId}", authStore.sistema.id));
     },
+
+
+    toListByPerfil(perfilId) {
+        return api.get(route.usuarioToListByPerfil.replace("{perfilId}", perfilId));
+    }
+    
     
 }

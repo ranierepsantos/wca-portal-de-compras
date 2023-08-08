@@ -35,7 +35,7 @@
           color="primary"
           item-title="text"
           item-value="value"
-          v-model="user.filialid"
+          v-model="user.filialId"
           :disabled="authStore.user.filial != 1"
           :rules="[(v) => !!v || 'Filial é obrigatório']"
           density="compact"
@@ -60,13 +60,7 @@ defineProps({
   user: {
     type: Object,
     default: function () {
-      return {
-        id: 0,
-        nome: "",
-        email: "",
-        ativo: true,
-        filialid: null
-      };
+      return new Usuario();
     },
   },
   listFilial: {
