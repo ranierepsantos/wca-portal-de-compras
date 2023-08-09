@@ -53,17 +53,20 @@ namespace wca.compras.services
                                            .FirstOrDefaultAsync();
 
                     //verificar o foi excedido a quantidade de pedidos determinadas pro mês
-                    if (cliente?.ClienteOrcamentoConfiguracao.Count() > 0)
+                    if (cliente?.ClienteOrcamentoConfiguracao.Count > 0)
                     {
                         var (dataIni, dataFim) = getDataCorte();
-
                         var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, dataIni, dataFim);
+                        
+                        var categoriasRequisicao = createRequisicaoDto.RequisicaoItens.Select(p => p.TipoFornecimentoId).Distinct().ToList();
 
-                        foreach (var item in cliente.ClienteOrcamentoConfiguracao)
+                        for (int idx = 0; idx <= categoriasRequisicao.Count - 1; idx++)
                         {
-                            if (item.Ativo && comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes && item.QuantidadeMes > 0)
+                            var config = cliente.ClienteOrcamentoConfiguracao.Where(q => q.TipoFornecimentoId == categoriasRequisicao[idx]).FirstOrDefault();
+                            
+                            if (config != null && config.Ativo && config.QuantidadeMes < comprasMes[config.TipoFornecimentoId] && config.QuantidadeMes > 0)
                             {
-                                if (item.AprovadoPor == EnumAprovadoPor.WCA)
+                                if (config.AprovadoPor == EnumAprovadoPor.WCA)
                                     data.RequerAutorizacaoWCA = true;
                                 else
                                     data.RequerAutorizacaoCliente = true;
@@ -75,7 +78,6 @@ namespace wca.compras.services
                     {
                         data.RequerAutorizacaoWCA = true;
                     }
-
                 }
 
                 if (!string.IsNullOrEmpty(createRequisicaoDto.UsuarioAutorizador))
