@@ -2,15 +2,9 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Contracts.Persistence;
+using wca.reembolso.application.Features.Clientes.Behaviors;
 using wca.reembolso.application.Features.Clientes.Common;
-using wca.reembolso.application.Features.Clientes.Validation;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Clientes.Commands
@@ -45,7 +39,7 @@ namespace wca.reembolso.application.Features.Clientes.Commands
         {
             _logger.LogInformation("CreateClienteCommandHandler - validation");
             //1. validar dados
-            CreateClienteCommandValidator validator = new CreateClienteCommandValidator();
+            CreateClienteCommandBehavior validator = new CreateClienteCommandBehavior();
             var validationResult = validator.Validate(request);
             if (!validationResult.IsValid)
             {

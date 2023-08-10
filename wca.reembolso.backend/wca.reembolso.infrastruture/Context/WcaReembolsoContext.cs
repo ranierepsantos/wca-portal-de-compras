@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.infrastruture.Context
@@ -15,5 +10,13 @@ namespace wca.reembolso.infrastruture.Context
         }
 
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<UsuarioClientes> UsuariosClientes { get;set; }
+        public DbSet<TipoDespesa> TipoDespesas { get;set; }
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UsuarioClientes>().HasKey(pk => new { pk.UsuarioId, pk.ClienteId });
+        }
     }
 }

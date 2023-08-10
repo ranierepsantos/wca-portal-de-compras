@@ -27,6 +27,12 @@ namespace wca.reembolso.infrastruture.Persistence
            return _context.Set<T>().AsNoTracking();
         }
 
+        public async Task<int> ExecuteCommandAsync(string command)
+        {
+            int result = await _context.Database.ExecuteSqlRawAsync(command);
+            return result;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

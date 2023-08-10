@@ -9,12 +9,7 @@ using wca.reembolso.application.Features.Clientes.Common;
 namespace wca.reembolso.application.Features.Clientes.Queries
 {
 
-    public record ClientePaginateQuery (
-        int FilialId = 1,
-        int Page = 1,
-        int PageSize = 10,
-        string Termo = ""
-    ): IRequest<ErrorOr<Pagination<ClienteResponse>>>;
+    public record ClientePaginateQuery : PaginationQuery, IRequest<ErrorOr<Pagination<ClienteResponse>>>;
     public sealed class ClienteToPaginateQueryHandle : 
         IRequestHandler<ClientePaginateQuery, ErrorOr<Pagination<ClienteResponse>>>
     {

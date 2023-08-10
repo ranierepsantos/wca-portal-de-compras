@@ -1,25 +1,37 @@
-﻿using ErrorOr;
+﻿using AutoMapper;
+using ErrorOr;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Clientes.Common;
 
 namespace wca.reembolso.application.Features.Clientes.Queries
 {
-
-    public record ClienteByUserIdQuerie(int UsuarioId): IRequest<ErrorOr<IList<ClienteResponse>>>;
-    public class ClienteByUserIdQuerieHandler : IRequestHandler<ClienteByUserIdQuerie, ErrorOr<ClienteResponse>>
+    public record ClienteByUserIdQuerie(int UsuarioId) : IRequest<ErrorOr<IList<ClienteResponse>>>;
+    public class ClienteByUserIdQueryHandler : IRequestHandler<ClienteByUserIdQuerie, ErrorOr<IList<ClienteResponse>>>
     {
-        public ClienteByUserIdQuerieHandler()
-        {
-        }
+        private IClienteRepository _reposistory;
+        private IMapper _mapper;
+        private ILogger<ClienteByUserIdQueryHandler> _logger;
 
-        public Task<ErrorOr<ClienteResponse>> Handle(ClienteByUserIdQuerie request, CancellationToken cancellationToken)
+        public ClienteByUserIdQueryHandler(IClienteRepository reposistory, IMapper mapper, ILogger<ClienteByUserIdQueryHandler> logger)
         {
-            throw new NotImplementedException();
+            _reposistory = reposistory;
+            _mapper = mapper;
+            _logger = logger;
+        }
+        public async Task<ErrorOr<IList<ClienteResponse>>> Handle(ClienteByUserIdQuerie request, CancellationToken cancellationToken)
+        {
+
+            var query = _reposistory.ToQuery();
+            query = query.Include("UsuarioClientes")
+                         .Where(q => q.UsuarioClientes.Where(sq => sq.UsuarioId == request.UsuarioId).Count() > 0);
+
+            var list = await query.ToListAsync();
+
+            return _mapper.Map<List<ClienteResponse>>(list);
+
         }
     }
 }

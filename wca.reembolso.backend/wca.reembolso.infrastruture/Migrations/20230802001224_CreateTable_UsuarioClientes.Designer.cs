@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -10,9 +11,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20230802001224_CreateTable_UsuarioClientes")]
+    partial class CreateTable_UsuarioClientes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,37 +90,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("clientes");
-                });
-
-            modelBuilder.Entity("wca.reembolso.domain.Entities.TipoDespesa", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("bit")
-                        .HasColumnName("ativo");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("nome");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int")
-                        .HasColumnName("tipo");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("money")
-                        .HasColumnName("valor");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TiposDespesa");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioClientes", b =>

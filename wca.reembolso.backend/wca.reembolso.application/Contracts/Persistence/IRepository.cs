@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,5 +16,7 @@ namespace wca.reembolso.application.Contracts.Persistence
         void Attach(T entity);
         IQueryable<T> ToQuery();
         Task SaveChangesAsync();
+        Task<int> ExecuteCommandAsync(string command);
+        
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,7 @@ namespace wca.reembolso.webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class ClienteController : ApiController
     {
         private readonly IMediator _mediator;
@@ -21,6 +23,8 @@ namespace wca.reembolso.webapi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetById([FromQuery] ClienteByIdQuerie command) 
         {
+            //int filial = int.Parse(User.FindFirst("Filial").Value);
+
             var result = await _mediator.Send(command);
         
             if (result.IsError) { return Problem(result.Errors); }
@@ -38,7 +42,7 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("ToPaginate")]
+        [HttpGet("Paginar")]
         public async Task<IActionResult> ToPaginate([FromQuery] ClientePaginateQuery querie)
         {
             var result = await _mediator.Send(querie);
@@ -63,6 +67,26 @@ namespace wca.reembolso.webapi.Controllers
         public async Task<IActionResult> Update(ClienteUpdateCommand cliente)
         {
             var result = await _mediator.Send(cliente);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("ListarClientesPorUsuario")]
+        public async Task<IActionResult> ListClientesByUsuario([FromQuery] ClienteByUserIdQuerie querie)
+        {
+            var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpPost("RelacionarClienteUsuario")]
+        public async Task<IActionResult> RelacionarClienteUsuario(ClienteUsuarioAttachCommand clienteUsuario)
+        {
+            var result = await _mediator.Send(clienteUsuario);
 
             if (result.IsError) { return Problem(result.Errors); }
 

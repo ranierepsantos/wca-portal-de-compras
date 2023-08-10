@@ -51,6 +51,7 @@ namespace wca.reembolso.domain.Entities
 
         [Column("valor_limite", TypeName = "money")]
         public decimal ValorLimite { get; set; } = decimal.Zero;
-
+        
+        public IList<UsuarioClientes> UsuarioClientes { get; set; } = new List<UsuarioClientes>();
     }
 }
