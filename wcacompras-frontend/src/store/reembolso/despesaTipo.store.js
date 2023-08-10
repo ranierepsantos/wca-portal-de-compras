@@ -1,25 +1,36 @@
 import { defineStore } from "pinia";
-import { paginate } from "@/helpers/functions";
+import api from "@/services/reembolso/tipodespesa.service"
 
-export const despesaTipoModel = {
-    id: 0,
-    nome: "",
-    ativo: true
+export class TipoDespesa {
+    constructor(data = null)
+    {
+        this.id     = data? data.id : 0;
+        this.nome   = data? data.nome : "";
+        this.ativo  = data? data.ativo: true
+        this.tipo   = data? data.tipo: 1,
+        this.valor  = data? data.valor: 0.0
+    }
 }
 
 export const useDespesaTipoStore = defineStore("despesaTipo", {
   state: () => ({
-    tipoDespesaID: localStorage.getItem("reembolso-tipodespesa-id") || 10000,
-    repository: JSON.parse(localStorage.getItem("reembolso-tiposdespesa")) || []
+    repository: [],
+    tipoDespesaTipo: [
+        {value: 1, text: "Consumo" },
+        {value: 2, text: "Distância" },
+    ]
   }),
   actions: {
     
-    add (data) {
-        this.tipoDespesaID++;
-        data.id = this.tipoDespesaID;
-        this.repository.push(data)
-        localStorage.setItem("reembolso-tiposdespesa", JSON.stringify(this.repository))
-        localStorage.setItem("reembolso-tipodespesa-id", this.tipoDespesaID)
+    async add (data) {
+        try {
+            
+            let response = await api.create(data);
+            console.log(response);
+
+        } catch (error) {
+            throw error
+        }  
     },
     
     getById (id) {
@@ -27,25 +38,24 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
         return data;
     },
 
-    getPaginate(pageNumber = 1, pageSize = 10) {
-        return paginate(this.repository, pageNumber, pageSize)
+    async getPaginate(pageNumber = 1, pageSize = 10, termo ="") {
+        let response = await api.paginate(pageSize, pageNumber, termo);
+        return response.data
     },
 
-    update (data) {
-        let index = this.repository.findIndex(q => q.id == data.id)
-        if (index == -1) {
-            return false;
-        }
-        this.repository[index] = {...data};
-        localStorage.setItem("reembolso-tiposdespesa", JSON.stringify(this.repository))
-        return true;
+    async update (data) {
+        try {
+            
+            let response = await api.update(data);
+            console.log(response);
+
+        } catch (error) {
+            throw error
+        }  
     },
-    toComboList() {
-        let list = []
-        this.repository.forEach(item => {
-            list.push ({text: item.nome, value: item.id})
-        })
-        return list;
+    async toComboList() {
+        let response = await api.toList(filial);
+        return response.data;
     }
   },
 });
