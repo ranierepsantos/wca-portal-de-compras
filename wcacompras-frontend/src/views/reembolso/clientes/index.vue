@@ -55,6 +55,7 @@ import { ref, onMounted, watch, inject } from "vue";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
+import { useAuthStore } from "@/store/auth.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 //DATA
 const page = ref(1);
@@ -65,6 +66,7 @@ const clienteStore = useClienteStore();
 const clientes = ref([]);
 const filter = ref("");
 const swal = inject("$swal");
+const authStore = useAuthStore();
 
 //VUE METHODS
 onMounted(async () =>
@@ -99,28 +101,17 @@ async function enableDisable(item)
         let response = await swal.fire(options);
         if (response.isConfirmed)
         {
-           item.ativo = !item.ativo;
-           if (clienteStore.updateCliente(item) == true) {
-                swal.fire({
-                    toast: true,
-                    icon: "success",
-                    position: "top-end",
-                    title: "Sucesso!",
-                    text: "Alteração realizada!",
-                    showConfirmButton: false,
-                    timer: 2000,
-                })
-           }else {
-                swal.fire({
-                    toast: true,
-                    icon: "error",
-                    position: "top-end",
-                    title: "Ops!",
-                    text: "Houve algum problema ao ativar/desativar!",
-                    showConfirmButton: false,
-                    timer: 2000,
-                })
-           }
+            item.ativo = !item.ativo;
+            await clienteStore.updateCliente(item) 
+            swal.fire({
+                toast: true,
+                icon: "success",
+                position: "top-end",
+                title: "Sucesso!",
+                text: "Alteração realizada!",
+                showConfirmButton: false,
+                timer: 2000,
+            })
         }
     } catch (error)
     {
@@ -135,7 +126,8 @@ async function getItems()
     {
         isBusy.value = true;
         //let response = await clienteService.paginate(pageSize, page.value, filter.value);
-        let response = clienteStore.getClientesByPaginate(page.value, pageSize);
+        let response = await clienteStore.getClientesByPaginate(authStore.user.filial, page.value, pageSize, filter.value);
+        console.log(response);
         clientes.value = response.items;
         totalPages.value = response.totalPages;
     } catch (error)

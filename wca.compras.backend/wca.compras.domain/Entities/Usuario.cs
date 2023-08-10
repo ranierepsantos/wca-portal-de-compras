@@ -40,5 +40,7 @@ namespace wca.compras.domain.Entities
         public IList<TipoFornecimento> TipoFornecimento { get; set; }  = new List<TipoFornecimento>();
 
         public IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil { get; set; } = new List<UsuarioSistemaPerfil>();
+
+        public UsuarioReembolsoComplemento UsuarioReembolsoComplemento { get;set; }
     }
 }

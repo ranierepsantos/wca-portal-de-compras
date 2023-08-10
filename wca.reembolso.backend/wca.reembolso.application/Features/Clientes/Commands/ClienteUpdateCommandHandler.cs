@@ -28,6 +28,7 @@ namespace wca.reembolso.application.Features.Clientes.Commands
         string CEP,
         string Cidade,
         string UF,
+        bool Ativo,
         decimal ValorLimite
     ) : IRequest<ErrorOr<ClienteResponse>>;
 

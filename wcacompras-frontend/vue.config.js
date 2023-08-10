@@ -10,6 +10,14 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: true,
         logLevel: 'error'
+      },
+      '^/reembolsoapi': {
+        //target: 'https://wca-backend.azurewebsites.net/',
+        target: 'https://localhost:7235/api',
+        pathRewrite: {'^/reembolsoapi': ''},
+        changeOrigin: true,
+        secure: false,
+        logLevel: 'error'
       }
     }
   }

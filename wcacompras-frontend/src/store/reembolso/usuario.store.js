@@ -1,10 +1,12 @@
 import { defineStore } from "pinia";
 import { paginate } from "@/helpers/functions";
 import userService from "@/services/user.service";
+import clienteService from "@/services/reembolso/cliente.service";
 import moment from "moment";
 
 export const IDPERFILGESTOR = 5001
 export const IDPERFILCOLABORADOR = 5002
+
 export class Usuario {
     
     constructor(data = undefined) {
@@ -14,23 +16,16 @@ export class Usuario {
         this.ativo = data ? data.ativo: true
         this.filialid = data ? data.filialid: null
         this.cliente = data? data.cliente: []
-        this.cargo = data ? data.cargo: ""
-        this.usuarioGestor = data? data.usuarioGestor: null
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
-        this.contaCorrente = data ? new ContaCorrente(data.contaCorrente) : new ContaCorrente()
-    }
-
-    alterarGestor (gestorId) {
-        let usuarioGestor = new UsuarioGestor(this.id, gestorId)
-        this.usuarioGestor = []
-        this.usuarioGestor.push(usuarioGestor)
+        this.usuarioReembolsoComplemento = data? data.usuarioReembolsoComplemento ?? new UsuarioReembolsoComplemento() : new UsuarioReembolsoComplemento()
     }
 }
 
-class UsuarioGestor {
-    constructor(usuarioId, gestorId) {
-        this.usuarioId = usuarioId
-        this.gestorId = gestorId
+class UsuarioReembolsoComplemento {
+    constructor(data = undefined) {
+        this.usuarioId = data? data.usuarioId: null;
+        this.gestorId = data? data.gestorId: null;
+        this.cargo = data? data.cargo: "";
     }
 }
 
@@ -68,43 +63,70 @@ export class Transacao {
 }
 
 export const useUsuarioStore = defineStore("usuario", {
-  state: () => ({
-    idUsuario: localStorage.getItem("reembolso-usuario-id") || 11000,
-    repository: JSON.parse(localStorage.getItem("reembolso-usuarios")) || []
-  }),
   actions: {
     
-    add (data) {
-        this.idUsuario++;
-        data.id = this.idUsuario;
-        this.repository.push(data)
-        localStorage.setItem("reembolso-usuarios", JSON.stringify(this.repository))
-        localStorage.setItem("reembolso-usuarios-id", this.idUsuario)
+    async add (data) {
+
+        try {
+            let clientes = data.cliente.map(function (el) { return el.value; });
+
+            data.cliente = [];
+    
+            let response = await userService.create(data);
+
+            let userClientes = {
+                usuarioId: response.data.id,
+                clienteIds: clientes
+            }
+            
+            await clienteService.RelacionarClienteUsuario(userClientes);
+
+
+        } catch (error) {
+            throw error
+        }
     },
     
     async getById (id) {
-        let data = this.repository.find(c => c.id == id)
-        return  new Usuario(data);
+        try {
+            let response = await userService.getById(id);
+            let data = response.data;
+            
+            response = await clienteService.getListByUser(data.id)
+            
+            data.cliente = response.data.map( item => {return { text: item.nome, value: item.id}})
+
+            let usuario = new Usuario(data);
+            return usuario;
+
+        } catch (error) {
+            throw error
+        }
     },
 
     async getPaginate(pageNumber = 1, pageSize = 10, filter = "") {
-        if (this.repository.length == 0) {
-            let response = await userService.paginate(pageSize, pageNumber, filter)
-            this.repository = response.data.items
-            localStorage.setItem("reembolso-usuarios", JSON.stringify(this.repository))
-            return response.data
-        }
-        return paginate(this.repository, pageNumber, pageSize)
+        let response = await userService.paginate(pageSize, pageNumber, filter)
+        return response.data
     },
 
-    update (data) {
-        let index = this.repository.findIndex(q => q.id == data.id)
-        if (index == -1) {
-            return false;
-        }
-        this.repository[index] = {...data};
-        localStorage.setItem("reembolso-usuarios", JSON.stringify(this.repository))
-        return true;
+    async update (data) {
+            
+            let clientes = data.cliente.map(function (el) { return el.value; });
+
+            data.cliente = [];
+
+            data.usuarioReembolsoComplemento.usuarioId = data.id;
+
+            await userService.update(data);
+
+
+            let userClientes = {
+                usuarioId: data.id,
+                clienteIds: clientes
+            }
+            
+        await clienteService.RelacionarClienteUsuario(userClientes);
+
     },
 
     toComboList() {

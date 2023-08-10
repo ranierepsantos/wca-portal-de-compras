@@ -57,12 +57,6 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             
             if (result.IsError) { return result.FirstError; }
 
-            // lancar notificação
-
-
-
-
-
             // return 
             return true;
         }

@@ -11,6 +11,7 @@ namespace wca.reembolso.application.Features.TiposDespesa.Common
         int Id,
         string Nome,
         EnumTipoDespesaTipo Tipo,
+        bool Ativo,
         decimal Valor
     );
 }
