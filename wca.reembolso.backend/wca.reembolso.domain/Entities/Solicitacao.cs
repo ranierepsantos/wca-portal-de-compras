@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using wca.reembolso.domain.Common.Enum;
 
 namespace wca.reembolso.domain.Entities
 {
@@ -43,11 +44,14 @@ namespace wca.reembolso.domain.Entities
         [Column("valor_despesa", TypeName = "money")]
         public decimal ValorDespesa { get;set; } = decimal.Zero;
 
-        [Column("StatusSolicitacaoId")]
-        public int Status { get; set; } = 0;
+        [Column("tipo_solicitacao")]
+        public EnumTipoSolicitacao TipoSolicitacao { get; set; } = EnumTipoSolicitacao.Reembolso;
 
-        public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
+        [Column("StatusSolicitacaoId")]
+        public int Status { get; set; } = 1;
+
         
+        public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();
     }
 }

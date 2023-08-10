@@ -16,7 +16,8 @@
                     <th class="text-center text-grey">DATA</th>
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">COLABORADOR</th>
-                    <th class="text-center text-grey">VALOR</th>
+                    <th class="text-center text-grey">VALOR ADIANTAMENTO</th>
+                    <th class="text-center text-grey">VALOR DESPESA</th>
                     <th class="text-left text-grey">TIPO SOLICITAÇÃO</th>
                     <th class="text-left text-grey">STATUS</th>
                     <th></th>
@@ -26,16 +27,15 @@
                 <tr v-for="item in solicitacoes" :key="item.id">
                     <th class="text-center">{{item.id}}</th>
                     <td class="text-center">{{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}</td>
-                    <td class="text-left">
-                        {{ clienteStore.getClienteById(item.clienteId).nome }}
-                    </td>
-                    <td class="text-left">{{ item.colaborador }}</td>
-                    <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
+                    <td class="text-left"> {{ item.cliente.nome }}</td>
+                    <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.colaboradorId).text }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valorAdiantamento) }}</td>
+                    <td class="text-right">{{ formatToCurrencyBRL(item.valorDespesa) }}</td>
                     <td class="text-left">{{ solicitacaoStore.getTipoSolicitacao(item.tipoSolicitacao).text }}</td>
                     <td class="text-left">
                         <v-btn :color="solicitacaoStore.getStatus(item.status).color" variant="tonal"
                             density="compact" class="text-center"> {{
-                                solicitacaoStore.getStatus(item.status).text
+                                solicitacaoStore.getStatus(item.status).status
                             }}</v-btn>    
                     </td>
                     <td class="text-right">
@@ -47,7 +47,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="8">
+                    <td colspan="9">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -72,25 +72,35 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import moment from "moment";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
-import { useClienteStore } from "@/store/reembolso/cliente.store";
 import historico from "@/components/reembolso/historico.vue";
 import { compararValor, formatToCurrencyBRL } from "@/helpers/functions";
 //DATA
 const page = ref(1);
-const pageSize = 10;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const solicitacoes = ref([]);
-const filter = ref("");
+const filter = ref({
+    filialId: null,
+    clienteId: null,
+    colaboradorId: null,
+    gestorId: null,
+    status: -1,
+    dataIni: null,
+    dataFim: null
+});
 const swal = inject("$swal");
 const solicitacaoStore = useSolicitacaoStore()
-const clienteStore = useClienteStore()
 const solicitacaoEventos = ref([])
 const openHistorico =ref(false)
 
 //VUE METHODS
 onMounted(async () =>
 {
+    await solicitacaoStore.loadUsuarios();
+    if (solicitacaoStore.statusSolicitacao.length ==0) {
+        await solicitacaoStore.loadListStatusSolicitacao()
+    }
     await getItems();
 });
 
@@ -105,7 +115,7 @@ function editar(id)
 
 async function showHistorico(item)
 {
-    solicitacaoEventos.value = item.eventos
+    solicitacaoEventos.value = item.solicitacaoHistorico;
     openHistorico.value = true
 }
 
@@ -114,14 +124,9 @@ async function getItems()
     try
     {
         isBusy.value = true;
-        let response = solicitacaoStore.getPaginate(page.value, pageSize)
+        let response = await solicitacaoStore.getPaginate(page.value, pageSize, filter)
+        console.log("solicitacao.index.getItems->",response)
         solicitacoes.value = response.items;
-
-        response.items.forEach(item => {
-            console.log(`tipo: ${item.tipoSolicitacao}, descricao: ${solicitacaoStore.getStatus(item.tipoSolicitacao)}`)
-        })
-
-
         totalPages.value = response.totalPages;
     } catch (error)
     {

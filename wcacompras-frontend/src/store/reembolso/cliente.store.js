@@ -60,6 +60,11 @@ export const useClienteStore = defineStore("cliente", {
     async toComboList(filial = 0)  {
         let response = await clienteService.toList(filial);
         return response.data;
+    },
+
+    async ListByUsuario(usuarioId) {
+        let response = await clienteService.getListByUser(usuarioId)
+        return response.data;
     }
   },
 });

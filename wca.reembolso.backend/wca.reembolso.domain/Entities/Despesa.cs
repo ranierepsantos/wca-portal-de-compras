@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace wca.reembolso.domain.Entities
 {
@@ -17,6 +11,9 @@ namespace wca.reembolso.domain.Entities
 
         [Column("solicitacao_id")]
         public int SolicitacaoId { get; set; }
+
+        [Column("data_evento", TypeName = "smalldatetime")]
+        public DateTime? DataEvento { get; set; } = DateTime.Today;
 
         [JsonIgnore]
         public Solicitacao? Solicitacao { get; set;}

@@ -1,4 +1,5 @@
-﻿using wca.reembolso.domain.Entities;
+﻿using wca.reembolso.application.Features.Clientes.Common;
+using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Common
 {
@@ -16,6 +17,8 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         decimal ValorAdiantamento,
         decimal ValorDespesa,
         int Status,
+        int TipoSolicitacao,
+        ClienteResponse Cliente,
         IList<Despesa> Despesa,
         IList<SolicitacaoHistorico> SolicitacaoHistorico
     );

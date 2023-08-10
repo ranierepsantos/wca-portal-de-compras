@@ -33,9 +33,9 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
         }  
     },
     
-    getById (id) {
-        let data = this.repository.find(c => c.id == id)
-        return data;
+    async getById (id) {
+        let data = await api.getById(id);
+        return new TipoDespesa(data);
     },
 
     async getPaginate(pageNumber = 1, pageSize = 10, termo ="") {
@@ -54,7 +54,7 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
         }  
     },
     async toComboList() {
-        let response = await api.toList(filial);
+        let response = await api.toList();
         return response.data;
     }
   },

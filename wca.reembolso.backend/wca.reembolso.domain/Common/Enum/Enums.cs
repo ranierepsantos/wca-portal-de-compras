@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace wca.reembolso.domain.Common.Enum
 {
+
+    public enum EnumTipoSolicitacao
+    {
+        Reembolso =1,
+        Adiantamento =2
+    }
     public enum EnumTipoDespesaTipo
     {
         Consumo =  1,
