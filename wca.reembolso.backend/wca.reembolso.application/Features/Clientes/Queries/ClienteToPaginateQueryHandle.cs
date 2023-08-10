@@ -2,12 +2,6 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Clientes.Common;
@@ -17,7 +11,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
 
     public record ClientePaginateQuery (
         int FilialId = 1,
-        int Page = 2,
+        int Page = 1,
         int PageSize = 10,
         string Termo = ""
     ): IRequest<ErrorOr<Pagination<ClienteResponse>>>;
@@ -39,6 +33,9 @@ namespace wca.reembolso.application.Features.Clientes.Queries
             ClientePaginateQuery request, CancellationToken cancellationToken)
         {
             var query = _reposistory.ToQuery();
+
+            if (request.FilialId > 1)
+                query = query.Where(q => q.FilialId.Equals(request.FilialId));
 
             if (!string.IsNullOrEmpty(request.Termo))
                 query = query.Where(q => q.Nome.Contains(request.Termo));

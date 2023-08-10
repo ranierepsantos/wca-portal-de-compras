@@ -10,12 +10,14 @@ using System.Text;
 using System.Threading.Tasks;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Clientes.Common;
+using wca.reembolso.application.Features.Clientes.Queries;
 using wca.reembolso.application.Features.Clientes.Validation;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Clientes.Commands
 {
-    public record ClienteCreateCommand (
+    public record ClienteUpdateCommand(
+        int id,
         int FilialId,
         string Nome,
         string CNPJ,
@@ -28,35 +30,43 @@ namespace wca.reembolso.application.Features.Clientes.Commands
         decimal ValorLimite
     ) : IRequest<ErrorOr<ClienteResponse>>;
 
-    public class ClienteCreateCommandHandler : IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>
+    public class ClienteUpdateCommandHandler : IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>
     {
-        private IClienteRepository _reposistory;
-        private IMapper _mapper;
-        private ILogger<ClienteCreateCommandHandler> _logger;
+        private readonly IClienteRepository _reposistory;
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+        private ILogger<ClienteUpdateCommandHandler> _logger;
 
-        public ClienteCreateCommandHandler(IClienteRepository reposistory, IMapper mapper, ILogger<ClienteCreateCommandHandler> logger)
+        public ClienteUpdateCommandHandler(IMediator mediator, IClienteRepository reposistory, IMapper mapper, ILogger<ClienteUpdateCommandHandler> logger)
         {
             _reposistory = reposistory;
             _mapper = mapper;
             _logger = logger;
+            _mediator = mediator;
         }
 
-        async Task<ErrorOr<ClienteResponse>> IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>.Handle(ClienteCreateCommand request, CancellationToken cancellationToken)
+        async Task<ErrorOr<ClienteResponse>> IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>.Handle(ClienteUpdateCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("CreateClienteCommandHandler - validation");
             //1. validar dados
-            CreateClienteCommandValidator validator = new CreateClienteCommandValidator();
+            UpdateClienteCommandValidator validator = new UpdateClienteCommandValidator();
             var validationResult = validator.Validate(request);
             if (!validationResult.IsValid)
             {
                 var errors = validationResult.Errors.ConvertAll(x => Error.Validation(x.PropertyName, x.ErrorMessage));
                 return errors;
             }
+            //1. localizar cliente
+            ClienteByIdQuerie querie = new ClienteByIdQuerie(request.id);
+            
+            var findResult = await _mediator.Send(querie);
+
+            if (findResult.IsError) return findResult;
 
             //2. mapear para cliente e adicionar
             Cliente cliente = _mapper.Map<Cliente>(request);
 
-            _reposistory.Create(cliente);
+            _reposistory.Update(cliente);
 
             await _reposistory.SaveChangesAsync();
 

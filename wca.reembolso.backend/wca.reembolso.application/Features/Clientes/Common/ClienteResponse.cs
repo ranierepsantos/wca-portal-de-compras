@@ -8,6 +8,7 @@ namespace wca.reembolso.application.Features.Clientes.Common
 {
     public record ClienteResponse (
         int Id,
+        int FilialId, 
         string Nome,
         string CNPJ,
         string InscricaoEstadual,

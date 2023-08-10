@@ -11,6 +11,9 @@ namespace wca.reembolso.domain.Entities
         [Column("id")]
         public int Id { get; set; }
 
+        [Column("filial_id")]
+        public int FilialId { get; set; } 
+
         [Required, MaxLength(150)]
         [Column("nome", TypeName = "varchar(150)")]
         public string Nome { get; set; }

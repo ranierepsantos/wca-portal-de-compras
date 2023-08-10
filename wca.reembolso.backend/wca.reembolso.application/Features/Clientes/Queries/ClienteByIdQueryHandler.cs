@@ -28,7 +28,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
             if (cliente == null)
             {
                 _logger.LogError($"Cliente não localizado!");
-                return Error.NotFound(description: $"Cliente id {request.id}, não localizado!");
+                return Error.NotFound(description: $"Cliente não localizado!");
             }
 
             return _mapper.Map<ClienteResponse>(cliente);

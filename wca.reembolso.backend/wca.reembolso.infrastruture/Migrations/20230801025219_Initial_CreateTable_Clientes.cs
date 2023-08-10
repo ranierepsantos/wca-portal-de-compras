@@ -5,7 +5,7 @@
 namespace wca.reembolso.infrastruture.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateTable_Clientes : Migration
+    public partial class Initial_CreateTable_Clientes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,6 +16,7 @@ namespace wca.reembolso.infrastruture.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    filial_id = table.Column<int>(type: "int", nullable: false),
                     nome = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
                     cnpj = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     inscricao_estadual = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
