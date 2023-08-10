@@ -93,8 +93,8 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         { value: 3, text: "Rejeitado", color: "error", notifica: "usuario" },
         { value: 4, text: "Aguardando conferência", color: "info", notifica: "WCA" },
         { value: 5, text: "Aguardando aprovação cliente", color: "warning", notifica: "cliente" },
-        { value: 6, text: "Faturado", color: "success", notifica: "WCA" }
-        
+        { value: 6, text: "Faturado", color: "success", notifica: "WCA" },
+        { value: 6, text: "Cancelado", color: "error", notifica: "usuario" }
     ]
   }),
   actions: {
