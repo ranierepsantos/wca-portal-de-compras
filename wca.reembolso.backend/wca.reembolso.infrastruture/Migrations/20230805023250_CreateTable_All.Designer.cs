@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20230805023250_CreateTable_All")]
+    partial class CreateTable_All
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,7 +90,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes");
+                    b.ToTable("clientes");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.ContaCorrente", b =>
@@ -242,33 +245,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.ToTable("FaturamentoItems");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.Notificacao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DataHora")
-                        .HasColumnType("smalldatetime")
-                        .HasColumnName("data_hora");
-
-                    b.Property<string>("Nota")
-                        .IsRequired()
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("nota");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_id");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notificacoes");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.Solicitacao", b =>
                 {
                     b.Property<int>("Id")
@@ -319,7 +295,10 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int")
-                        .HasColumnName("StatusSolicitacaoId");
+                        .HasColumnName("status_id");
+
+                    b.Property<int>("StatusSolicitacaoId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("ValorAdiantamento")
                         .HasColumnType("money")
@@ -332,6 +311,8 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
+
+                    b.HasIndex("StatusSolicitacaoId");
 
                     b.ToTable("Solicitacoes");
                 });
@@ -387,10 +368,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(150)")
                         .HasColumnName("texto");
-
-                    b.Property<string>("TemplateNotificacao")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("template_notificacao");
 
                     b.HasKey("Id");
 
@@ -531,7 +508,15 @@ namespace wca.reembolso.infrastruture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("wca.reembolso.domain.Entities.StatusSolicitacao", "StatusSolicitacao")
+                        .WithMany()
+                        .HasForeignKey("StatusSolicitacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Cliente");
+
+                    b.Navigation("StatusSolicitacao");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.SolicitacaoHistorico", b =>

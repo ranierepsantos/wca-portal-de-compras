@@ -8,10 +8,9 @@ namespace wca.reembolso.application.Common
 {
     public record PaginationQuery
     (   
-        int FilialId = 1,
+        int FilialId = 0,
         int Page = 1,
-        int PageSize = 10,
-        string Termo = ""
+        int PageSize = 10
     );
     
 }

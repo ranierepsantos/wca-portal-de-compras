@@ -12,6 +12,7 @@ using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Clientes.Behaviors;
 using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application.Features.Clientes.Queries;
+using wca.reembolso.application.Features.Solicitacoes.Behaviors;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Clientes.Commands

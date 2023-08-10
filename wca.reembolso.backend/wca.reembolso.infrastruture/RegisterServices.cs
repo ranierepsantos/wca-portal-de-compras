@@ -52,8 +52,20 @@ namespace wca.reembolso.infrastruture
             );
 
             services.AddScoped<IClienteRepository, ClienteRepository>();
-            services.AddScoped<IRepository<UsuarioClientes>, BaseRepository<UsuarioClientes>>();
+            services.AddScoped<IRepository<ContaCorrente>, BaseRepository<ContaCorrente>>();
+            services.AddScoped<IRepository<Despesa>, BaseRepository<Despesa>>();
+            services.AddScoped<IRepository<Faturamento>, BaseRepository<Faturamento>>();
+            services.AddScoped<IRepository<FaturamentoItem>, BaseRepository<FaturamentoItem>>();
+            services.AddScoped<IRepository<Notificacao>, BaseRepository<Notificacao>>();
+            services.AddScoped<IRepository<Solicitacao>, BaseRepository<Solicitacao>>();
+            services.AddScoped<IRepository<SolicitacaoHistorico>, BaseRepository<SolicitacaoHistorico>>();
+            services.AddScoped<IRepository<StatusSolicitacao>, BaseRepository<StatusSolicitacao>>();
             services.AddScoped<IRepository<TipoDespesa>, BaseRepository<TipoDespesa>>();
+            services.AddScoped<IRepository<Transacao>, BaseRepository<Transacao>>();
+            services.AddScoped<IRepository<UsuarioClientes>, BaseRepository<UsuarioClientes>>();
+
+
+
         }
     }
 }

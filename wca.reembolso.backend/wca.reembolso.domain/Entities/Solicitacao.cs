@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace wca.reembolso.domain.Entities
 {
@@ -42,9 +43,11 @@ namespace wca.reembolso.domain.Entities
         [Column("valor_despesa", TypeName = "money")]
         public decimal ValorDespesa { get;set; } = decimal.Zero;
 
-        [Column("status_id")]
+        [Column("StatusSolicitacaoId")]
         public int Status { get; set; } = 0;
 
-
+        public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
+        
+        public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();
     }
 }

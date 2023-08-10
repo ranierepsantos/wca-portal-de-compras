@@ -10,7 +10,7 @@ using wca.reembolso.domain.Entities;
 namespace wca.reembolso.application.Features.TiposDespesa.Queries
 {
 
-    public record TipoDespesaPaginateQuery: PaginationQuery, IRequest<ErrorOr<Pagination<TipoDespesaResponse>>>;
+    public record TipoDespesaPaginateQuery(string Termo = "") : PaginationQuery, IRequest<ErrorOr<Pagination<TipoDespesaResponse>>>;
     public sealed class TipoDespesaToPaginateQueryHandle :
         IRequestHandler<TipoDespesaPaginateQuery, ErrorOr<Pagination<TipoDespesaResponse>>>
     {

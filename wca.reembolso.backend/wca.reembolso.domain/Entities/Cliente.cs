@@ -5,7 +5,7 @@ using wca.reembolso.domain.Common.Interfaces;
 namespace wca.reembolso.domain.Entities
 {
 
-    [Table("clientes")]
+    [Table("Clientes")]
     public sealed class Cliente : IEntity
     {
         [Column("id")]

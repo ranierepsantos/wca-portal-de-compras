@@ -88,13 +88,14 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     statusSolicitacao: [
         { value: -1, text: "Todos" },
         { value: 0, text: "Solicitado", color: "warning", notifica: "cliente" },
-        { value: 1, text: "Aguardando Prest. Contas", color: "gray", notifica: "usuario" },
-        { value: 2, text: "Aguardando faturamento", color: "info", notifica: "WCA" },
+        { value: 1, text: "Aguardando Depósito", color: "info", notifica: "WCA" },
+        { value: 2, text: "Aguardando Prest. Contas", color: "gray", notifica: "usuario" },
         { value: 3, text: "Rejeitado", color: "error", notifica: "usuario" },
         { value: 4, text: "Aguardando conferência", color: "info", notifica: "WCA" },
         { value: 5, text: "Aguardando aprovação cliente", color: "warning", notifica: "cliente" },
-        { value: 6, text: "Faturado", color: "success", notifica: "WCA" },
-        { value: 6, text: "Cancelado", color: "error", notifica: "usuario" }
+        { value: 6, text: "Aguardando faturamento", color: "info", notifica: "WCA" },
+        { value: 7, text: "Faturado", color: "success", notifica: "WCA" },
+        { value: 8, text: "Cancelado", color: "error", notifica: "usuario" }
     ]
   }),
   actions: {

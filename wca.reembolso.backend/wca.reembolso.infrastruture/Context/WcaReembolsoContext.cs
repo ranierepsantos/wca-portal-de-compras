@@ -10,8 +10,18 @@ namespace wca.reembolso.infrastruture.Context
         }
 
         public DbSet<Cliente> Clientes { get; set; }
-        public DbSet<UsuarioClientes> UsuariosClientes { get;set; }
-        public DbSet<TipoDespesa> TipoDespesas { get;set; }
+        public DbSet<ContaCorrente> ContaCorrente { get; set; }
+        public DbSet<Despesa> Despesas { get; set; }
+        public DbSet<Faturamento> Faturamentos { get; set; }
+        public DbSet<FaturamentoItem> FaturamentoItems { get; set; }
+        public DbSet<Notificacao> Notificacoes { get; set; }
+        public DbSet<Solicitacao> Solicitacoes { get; set; }
+        public DbSet<SolicitacaoHistorico> SolicitacaoHistorico { get; set; }
+        public DbSet<StatusSolicitacao> StatusSolicitacao { get; set; }
+        public DbSet<TipoDespesa> TipoDespesas { get; set; }
+        public DbSet<Transacao> Transacoes { get; set; }
+        public DbSet<UsuarioClientes> UsuariosClientes { get; set; }
+        
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
