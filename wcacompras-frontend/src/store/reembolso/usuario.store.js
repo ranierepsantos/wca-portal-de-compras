@@ -14,8 +14,9 @@ export class Usuario {
         this.nome = data ? data.nome : ""
         this.email = data ? data.email: ""
         this.ativo = data ? data.ativo: true
-        this.filialid = data ? data.filialid: null
+        this.filialId = data ? data.filialId: null
         this.cliente = data? data.cliente: []
+        this.tipoFornecimento = data? data.tipoFornecimento?? []: []
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
         this.usuarioReembolsoComplemento = data? data.usuarioReembolsoComplemento ?? new UsuarioReembolsoComplemento() : new UsuarioReembolsoComplemento()
     }
@@ -23,7 +24,7 @@ export class Usuario {
 
 class UsuarioReembolsoComplemento {
     constructor(data = undefined) {
-        this.usuarioId = data? data.usuarioId: null;
+        this.usuarioId = data? data.usuarioId: 0;
         this.gestorId = data? data.gestorId: null;
         this.cargo = data? data.cargo: "";
     }
@@ -129,37 +130,26 @@ export const useUsuarioStore = defineStore("usuario", {
 
     },
 
-    toComboList() {
-        let list = []
-        this.repository.forEach(item => {
-            list.push ({text: item.nome, value: item.id})
-        })
-        return list;
+    async toComboList() {
+        let response = await userService.toList()
+        return response.data;
     },
 
-    toComboListGestorByCliente(clienteId) {
-        let list = []
-        let users = this.repository.filter(item => 
-            item.cliente.filter(cli => cli.value == clienteId).length > 0 && 
-            item.usuarioSistemaPerfil.filter(usp => usp.perfilId == IDPERFILGESTOR).length > 0);
+    async reembolsoToListByClientePerfil(clienteId, perfilId) {
+        debugger
+        let response = await userService.toListByPerfil(perfilId)
+        let usuarios = response.data;
         
-            users.forEach(item => {
-            list.push ({text: item.nome, value: item.id})
-        })
-        return list;
-    },
+        response = await clienteService.getListUsersByCliente(clienteId);
 
-    toComboListColaboradorByCliente(clienteId) {
-        let list = []
-        let users = this.repository.filter(item => 
-            item.cliente.filter(cli => cli.value == clienteId).length > 0 && 
-            item.usuarioSistemaPerfil.filter(usp => usp.perfilId == IDPERFILCOLABORADOR).length > 0);
-        
-            users.forEach(item => {
-            list.push ({text: item.nome, value: item.id})
-        })
-        return list;
-    },
+        let usersCliente = response.data;
 
+    
+        let list = usuarios.filter(user => 
+            {return usersCliente.includes(user.value) }
+        )
+
+        return list;
+    }
   },
 });

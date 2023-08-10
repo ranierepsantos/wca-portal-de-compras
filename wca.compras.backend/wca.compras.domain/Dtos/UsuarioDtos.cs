@@ -9,7 +9,7 @@ namespace wca.compras.domain.Dtos
         string Nome,
         string Email,
         bool Ativo,
-        int Filialid,
+        int FilialId,
         FilialDto Filial,
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
         IList<ListItem>? Cliente,

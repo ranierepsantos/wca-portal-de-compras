@@ -150,6 +150,26 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
+        /// Retorna lista de usuarios ativos para preenchimento de Listas e Combos
+        /// </summary>
+        /// <returns>items</returns>
+        [HttpGet]
+        [Route("ToListByPerfil/{perfilId}")]
+        public async Task<ActionResult<IList<ListItem>>> ListByPerfil( int perfilId)
+        {
+            try
+            {
+                var items = await _usuarioService.GetToListByPerfil(perfilId);
+                return Ok(items);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+
+        }
+
+        /// <summary>
         /// Busca cliente pelo Id
         /// </summary>
         /// <returns>Cliente</returns>

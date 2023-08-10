@@ -185,12 +185,13 @@ onMounted(async () => {
 });
 
 watch(
-  () => usuario.value.filialid,
+  () => usuario.value.filialId,
   async (filialid, oldValue) => {
     if (filialid != filialUsuario) {
       usuario.value.cliente = [];
       filialUsuario = filialid;
     }
+    await getClienteToList(filialUsuario)
   }
 );
 watch(() => colaboradorClienteId.value, async(clienteId) => {
@@ -201,8 +202,6 @@ watch(() => colaboradorClienteId.value, async(clienteId) => {
     usuario.value.cliente = []
     usuario.value.cliente.push(cliente)
   }
-    
-  
   await getGestorToList(clienteId)
 })
 
@@ -212,7 +211,6 @@ const isColaborador = computed(() => {
   else  {
     return false
   }
-    
 })
 
 const isGestor = computed(() => {
@@ -225,7 +223,7 @@ const isGestor = computed(() => {
 })
 
 //METHODS
-function setPerfilUsuario(perfilId) {
+async function setPerfilUsuario(perfilId) {
   let index = -1;
   if ( usuario.value.usuarioSistemaPerfil.length > 0) {
     index = usuario.value.usuarioSistemaPerfil.findIndex(c => c.sistemaId == authStore.sistema.id)
@@ -239,13 +237,16 @@ function setPerfilUsuario(perfilId) {
       "perfilId": perfilId 
     });
   }
+  if (perfilId == IDPERFILCOLABORADOR || perfilId == IDPERFILGESTOR) { 
+    usuario.value.cliente = []
+    await getClienteToList(filialUsuario)
+  }
   
   if (perfilId != IDPERFILCOLABORADOR) {
     colaboradorClienteId.value = null
     gestores.value = []
   }
-
-
+  clientesListRemove()
 }
 
 function getSistemaPerfil(sistemaId) {
@@ -289,7 +290,6 @@ async function clearData() {
   usuario.value = new Usuario();
   filialUsuario = authStore.user.filial;
   usuario.value.filialId = filialUsuario
-  await getClienteToList(filialUsuario);
 }
 
 function clientesListRemove(removerTodos = false) {
@@ -304,8 +304,7 @@ function clientesListRemove(removerTodos = false) {
 
 async function getClienteToList(filial) {
   try {
-    //let response = await clienteService.toList(filial);
-    clientes.value = await useClienteStore().toComboList()
+    clientes.value = await useClienteStore().toComboList(filial)
     console.log("getClienteToList",clientes.value);
   } catch (error) {
     console.log("getClienteToList.error:", error);
@@ -315,7 +314,7 @@ async function getClienteToList(filial) {
 
 async function getGestorToList(clienteId) {
   try {
-    gestores.value = []//usuarioStore.toComboListGestorByCliente(clienteId)
+    gestores.value = await usuarioStore.reembolsoToListByClientePerfil(clienteId, IDPERFILGESTOR);
   } catch (error) {
     console.log("getGestorToList.error:", error);
     handleErrors(error);
@@ -344,9 +343,8 @@ async function getFilialToList() {
 async function getUsuario(usuarioId) {
   try {
     isBusy.value = true;
-    //let response = await userService.getById(usuarioId);
     usuario.value = await usuarioStore.getById(usuarioId);
-    filialUsuario = usuario.value.filialid;
+    filialUsuario = usuario.value.filialId;
     if (usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILCOLABORADOR ||
         usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILGESTOR) {
       colaboradorClienteId.value = usuario.value.cliente[0].value

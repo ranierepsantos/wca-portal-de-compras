@@ -73,6 +73,7 @@ import Breadcrumbs from "@/components/breadcrumbs.vue";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
+import { Usuario } from "@/store/reembolso/usuario.store";
 
 //DATA
 const isBusy = ref(false);
@@ -81,17 +82,7 @@ const filiais = ref([]);
 const clientes = ref([]);
 const swal = inject("$swal");
 const route = useRoute();
-const usuario = ref({
-  id: 0,
-  nome: "",
-  email: "",
-  ativo: true,
-  filialid: null,
-  perfilid: null,
-  cliente: [],
-  tipoFornecimento: [],
-  usuarioSistemaPerfil: []
-});
+const usuario = ref(new Usuario());
 let filialUsuario = 0;
 const authStore = useAuthStore();
 const userForm = ref(null);
@@ -110,7 +101,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => usuario.value.filialid,
+  () => usuario.value.filialId,
   async (filialid, oldValue) => {
     clientes.value = [];
     await getClienteToList(filialid);
@@ -178,7 +169,7 @@ async function salvar() {
         showConfirmButton: false,
         timer: 2000,
       });
-      router.push({name: "comprasUsuarios"})
+      router.push({name:"comprasUsuarios"})
     }
   } catch (error) {
     console.log("usuários.error:", error);
@@ -187,17 +178,7 @@ async function salvar() {
 }
 
 async function clearData() {
-  usuario.value = {
-    id: 0,
-    nome: "",
-    email: "",
-    ativo: true,
-    filialid: authStore.user.filial,
-    perfilid: null,
-    cliente: [],
-    tipoFornecimento: [],
-    usuarioSistemaPerfil: []
-  };
+  usuario.value = new Usuario();
   filialUsuario = authStore.user.filial;
   await getClienteToList(filialUsuario);
 }
@@ -246,7 +227,7 @@ async function getUsuario(usuarioId) {
   try {
     isBusy.value = true;
     let response = await userService.getById(usuarioId);
-    filialUsuario = response.data.filialid;
+    filialUsuario = response.data.filialId;
     usuario.value = response.data;
     tiposListRemove();
     clientesListRemove();

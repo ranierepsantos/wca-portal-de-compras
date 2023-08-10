@@ -8,7 +8,8 @@ const rotas = {
     ToComboList: "Cliente/ToComboList",
     Paginar: "Cliente/Paginar",
     GetByUsuario: "Cliente/ListarClientesPorUsuario",
-    RelacionarClienteUsuario: "Cliente/RelacionarClienteUsuario"
+    RelacionarClienteUsuario: "Cliente/RelacionarClienteUsuario",
+    ListarUsuariosPorCliente: "Cliente/ListarUsuariosPorCliente"
 }
 
 
@@ -51,5 +52,9 @@ export default {
    
     RelacionarClienteUsuario(data) {
         return api.post(rotas.RelacionarClienteUsuario, data);
-    }
+    },
+    getListUsersByCliente (clienteId)
+    {
+        return api.get(rotas.ListarUsuariosPorCliente , {params: {clienteId: clienteId}});
+    },
 }
