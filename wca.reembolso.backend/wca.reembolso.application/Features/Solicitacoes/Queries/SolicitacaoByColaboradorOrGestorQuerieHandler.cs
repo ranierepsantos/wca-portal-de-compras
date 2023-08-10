@@ -9,7 +9,7 @@ using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Clientes.Queries
 {
-    public record SolicitacaoByColaboradorOrGestorQuerie(int ColaboradorId = 0, int GestorId =0) : IRequest<ErrorOr<IList<SolicitacaoResponse>>>;
+    public record SolicitacaoByColaboradorOrGestorQuerie(int ColaboradorId = 0, int GestorId =0, int[]? Status = null) : IRequest<ErrorOr<IList<SolicitacaoResponse>>>;
     public class SolicitacaoByColaboradorOrGestorQueryHandler : IRequestHandler<SolicitacaoByColaboradorOrGestorQuerie, ErrorOr<IList<SolicitacaoResponse>>>
     {
         private readonly IRepository<Solicitacao> _reposistory;
@@ -33,6 +33,13 @@ namespace wca.reembolso.application.Features.Clientes.Queries
             if (request.GestorId > 0)
                 query = query.Where(q => q.GestorId.Equals(request.ColaboradorId));
 
+            var status = request.Status ?? Array.Empty<int>();
+
+            if (status.Length > 0)
+            {
+                query = query.Where(q => status.Contains(q.Status));
+            }
+            
             var list = await query.ToListAsync();
 
             return _mapper.Map<List<SolicitacaoResponse>>(list);

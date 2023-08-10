@@ -18,8 +18,8 @@
                   label="Cliente"
                   :items="clientes"
                   density="compact"
-                  item-title="text"
-                  item-value="value"
+                  item-title="nome"
+                  item-value="id"
                   variant="outlined"
                   color="primary"
                   v-model="solicitacao.clienteId"
@@ -46,7 +46,7 @@
                   
                   class="text-center"
                 >
-                  {{ solicitacaoStore.getStatus(solicitacao.status).text }}</v-btn
+                  {{ solicitacaoStore.getStatus(solicitacao.status).status }}</v-btn
                 >
               </v-col>
             </v-row>
@@ -83,7 +83,7 @@
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  v-model="solicitacao.cargo"
+                  v-model="usuario.usuarioReembolsoComplemento.cargo"
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -93,7 +93,7 @@
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  v-model="solicitacao.localProjeto"
+                  v-model="solicitacao.projeto"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -146,7 +146,7 @@
         style="margin-top: 20px"
         v-show="
           solicitacao.tipoSolicitacao == 1 ||
-          (solicitacao.tipoSolicitacao == 2 && solicitacao.status != 0)
+          (solicitacao.tipoSolicitacao == 2 && solicitacao.status != 1)
         "
       >
         <v-card-title>
@@ -178,14 +178,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in solicitacao.despesas" :key="index">
+              <tr v-for="(item, index) in solicitacao.despesa" :key="index">
                 <td class="text-center">
                   {{ moment(item.dataEvento).format("DD/MM/YYYY") }}
                 </td>
                 <td class="text-center">
-                  {{ despesaTipoStore.getById(item.tipoDespesaId).nome }}
+                  {{ getDespesaTipo(item.tipoDespesaId).text }}
                 </td>
-                <td class="text-center">{{ item.nroFiscal }}</td>
+                <td class="text-center">{{ item.numeroFiscal }}</td>
                 <td class="text-left">{{ item.razaoSocial }}</td>
 
                 <td class="text-right">
@@ -232,7 +232,7 @@
         
       </v-card>
       <!-- HISTORICO DA SOLICITAÇÃO -->
-      <historico :eventos="solicitacao.eventos.sort(compararValor('dataEvento', 'desc'))" style="margin-top: 15px;" v-show="solicitacao.id != 0"/>
+      <historico :eventos="solicitacao.solicitacaoHistorico.sort(compararValor('dataEvento', 'desc'))" style="margin-top: 15px;" v-show="solicitacao.id != 0"/>
       <!-- FORM PARA CADASTRO DE DESPESA -->
       <v-dialog
         v-model="openDespesaForm"
@@ -301,7 +301,7 @@ import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
 import { formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { Transacao, useUsuarioStore, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
+import { Usuario, Transacao, useUsuarioStore, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 import {
   Despesa,
   Solicitacao,
@@ -315,7 +315,7 @@ import { useDespesaTipoStore } from "@/store/reembolso/despesaTipo.store";
 import { computed } from "vue";
 import {compararValor} from "@/helpers/functions"
 import historico from "@/components/reembolso/historico.vue";
-import { Usuario } from "@/store/reembolso/usuario.store";
+
 
 const authStore = useAuthStore();
 const clienteStore = useClienteStore();
@@ -326,37 +326,41 @@ const openDespesaForm = ref(false);
 const openAprovacaoForm = ref(false);
 const isRunningEvent = ref(false);
 const isBusy = ref(false);
-const clientes = clienteStore.toComboList();
+const clientes = ref([]);
 const swal = inject("$swal");
 const solicitacao = ref(new Solicitacao());
 const despesa = ref(new Despesa());
+const despesaTipos = ref([]);
+
 const formButtons = ref([]);
 const usuario = ref(new Usuario())
+const listUsuarios = ref([]);
 //VUE FUNCTIONS
 onMounted(async () => {
-
-  usuario.value =new Usuario(await useUsuarioStore().repository.filter(q => q.usuarioSistemaPerfil.filter(qy => qy.perfilId == IDPERFILCOLABORADOR).length> 0)[0])
-  solicitacao.value.colaborador = usuario.value.nome;
-  solicitacao.value.cargo = usuario.value.cargo
-  solicitacao.value.gestor = (await useUsuarioStore().getById(usuario.value.usuarioGestor)).nome
   
+  await solicitacaoStore.loadUsuarios()
+  usuario.value = await useUsuarioStore().getById(authStore.user.id);
+  clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
+  despesaTipos.value = await despesaTipoStore.toComboList();
+
   if (parseInt(route.query.id) > 0) {
     await getSolicitacao(route.query.id);
-    if ("0,4,5".includes(solicitacao.value.status)){
+    if ("1,5,6".includes(solicitacao.value.status)){
       formButtons.value.push({
         text: "Aprovar / Reprovar",
         icon: "",
         event: "aprovar-click",
       });
     }
-      
-    if ((solicitacao.value.tipoSolicitacao==2 && solicitacao.value.status == 1) || 
-        "4,5".includes(solicitacao.value.status)){
-        formButtons.value.push({ text: "Registrar Pagamento", icon: "", event: "registrarpgto-click" });
+    solicitacao.value.colaborador = solicitacaoStore.getUsuarioSolicitacao(solicitacao.value.colaboradorId).text
+    solicitacao.value.gestor = solicitacaoStore.getUsuarioSolicitacao(solicitacao.value.gestorId).text
+ 
+    if (solicitacao.value.tipoSolicitacao==2 && solicitacao.value.status == 2){
+      formButtons.value.push({ text: "Registrar Pagamento", icon: "", event: "registrarpgto-click" });
     }
   }else {
     //checar se o usuario já possui adiantamento em aberto
-    let adiantamento = await solicitacaoStore.getByTipoAndUsuario(2, usuario.value.nome, "0,1");
+    let adiantamento = await solicitacaoStore.getByTipoAndUsuario(2, authStore.user.id, [1,2,3,4,5]);
     if (adiantamento.length > 0) {
         swal.fire({
           toast: true,
@@ -446,7 +450,7 @@ async function aprovarReprovar(isAprovado, comentario) {
 function calcularTotalDespesa() {
   let valorTotalDespesa = 0;
 
-  solicitacao.value.despesas.forEach((item) => {
+  solicitacao.value.despesa.forEach((item) => {
     valorTotalDespesa += parseFloat(item.valor);
   });
   if (solicitacao.value.tipoSolicitacao == 1 ) solicitacao.value.valor = valorTotalDespesa;
@@ -458,11 +462,19 @@ function editarDespesa(item) {
   openDespesaForm.value = true;
 }
 
-function getSolicitacao(solicitacaoId) {
+function getDespesaTipo(id) {
+  return despesaTipos.value.find(q => q.value == id)
+}
+
+async function getSolicitacao(solicitacaoId) {
   try {
     isBusy.value = true;
-    let data = solicitacaoStore.getById(solicitacaoId);
+    let data = await solicitacaoStore.getById(solicitacaoId);
+    data.periodoInicial = data.periodoInicial.split('T')[0];
+    data.periodoFinal = data.periodoFinal.split('T')[0];
     solicitacao.value = data;
+  
+
   } catch (error) {
     console.log("getSolicitacao.error:", error);
     handleErrors(error);
@@ -484,7 +496,7 @@ async function salvar() {
     if (data.tipoSolicitacao == 1) {
       data.status = 4 //Aguardando Conferência
     }
-    if (data.tipoSolicitacao==2 && data.status == 1 &&  data.despesas.length > 0) {
+    if (data.tipoSolicitacao==2 && data.status == 1 &&  data.despesa.length > 0) {
       let options = {
             title: "Confirmação",
             text: "Finalizou o cadastro de despesa? O status será alterado!",

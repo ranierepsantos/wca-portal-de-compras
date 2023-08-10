@@ -35,10 +35,10 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             }
 
             var query = _reposistory.ToQuery();
+            query = query.Include(i => i.Cliente);
 
             if (request.FilialId > 1)
-                query = query.Include(i => i.Cliente)
-                        .Where(q => q.Cliente.FilialId.Equals(request.FilialId));
+             query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
             if (request.ColaboradorId > 0)
                 query = query.Where(q => q.ColaboradorId.Equals(request.ColaboradorId));
