@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Security.Cryptography;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
@@ -74,7 +74,7 @@ namespace wca.compras.services
                         }
                     }
                     //verificar se o pedido ultrapassa o valor limite 
-                    if (cliente.NaoUltrapassarLimitePorRequisicao && cliente.ValorLimiteRequisicao < data.ValorTotal)
+                    if (cliente.NaoUltrapassarLimitePorRequisicao && cliente.ValorLimiteRequisicao > 0 && cliente.ValorLimiteRequisicao < data.ValorTotal)
                     {
                         data.RequerAutorizacaoWCA = true;
                     }
@@ -695,7 +695,6 @@ namespace wca.compras.services
                         string localEntrega = $"{requisicao.Endereco}, {requisicao.Numero} - CEP: {requisicao.Cep} - {requisicao.Cidade} / {requisicao.UF}";
                         ws.Cell($"E{row}").SetValue(localEntrega);
                         ws.Cell($"F{row}").SetValue(requisicao.Cliente.CNPJ);
-
                         ws.Cell($"G{row}").SetValue(item.Nome);
                         ws.Cell($"H{row}").SetValue(item.Quantidade);
                         ws.Cell($"I{row}").SetValue(item.Valor);
@@ -706,6 +705,17 @@ namespace wca.compras.services
                         ws.Cell($"N{row}").SetValue(item.TaxaGestao);
                         ws.Cell($"O{row}").SetValue(item.TaxaGestao * item.Quantidade);
                         ws.Cell($"P{row}").SetValue(item.ValorTotal);
+                        Periodo periodos = JsonConvert.DeserializeObject<Periodo>(requisicao.PeriodoEntrega);
+                        string periodoEntrega = "";
+                        periodoEntrega += periodos.Domingo.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Domingo: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Segunda.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Segunda: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Terca.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Terça: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}": "";
+                        periodoEntrega += periodos.Quarta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quarta: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Quinta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quinta: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Sexta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sexta: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Sabado.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sabádo: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+
+                        ws.Cell($"Q{row}").SetValue(periodoEntrega);
                         row++;
                     }
                 }
