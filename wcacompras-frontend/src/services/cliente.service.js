@@ -35,5 +35,10 @@ export default {
     {
         return api.get(route.clienteListByAuthenticatedUser);
     },
+
+    importar(data)
+    {
+        return api.post(route.clienteImportar, data);
+    },
    
 }

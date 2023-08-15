@@ -59,7 +59,7 @@ import { useAuthStore } from "@/store/auth.store";
 //DATA
 const router = useRouter()
 const page = ref(1);
-const pageSize = 5;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const perfis = ref([]);

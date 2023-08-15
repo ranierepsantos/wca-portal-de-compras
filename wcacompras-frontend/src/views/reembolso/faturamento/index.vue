@@ -73,7 +73,7 @@ import historico from "@/components/reembolso/historico.vue";
 import { compararValor, formatToCurrencyBRL } from "@/helpers/functions";
 //DATA
 const page = ref(1);
-const pageSize = 10;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const faturamentos = ref([]);

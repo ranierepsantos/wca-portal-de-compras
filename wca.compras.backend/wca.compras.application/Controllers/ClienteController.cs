@@ -162,5 +162,21 @@ namespace wca.compras.webapi.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        [HttpPost]
+        [Route("ImportFromExcel")]
+        public async Task<ActionResult> ImportFromExcel([FromBody] ClienteImportacaoDto request)
+        {
+            try
+            {
+                await service.ImportarDadosClientes(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+
+        }
     }
 }

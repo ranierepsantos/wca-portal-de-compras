@@ -1,10 +1,19 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
+using MiniExcelLibs;
+using MiniExcelLibs.OpenXml;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Runtime.ConstrainedExecution;
+using System.Text;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
+using static ClosedXML.Excel.XLPredefinedFormat;
 
 namespace wca.compras.services
 {
@@ -219,6 +228,151 @@ namespace wca.compras.services
                 Console.WriteLine($"{this.GetType().Name}.GetByUser.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
+        }
+
+        public async Task<bool> ImportarDadosClientes(ClienteImportacaoDto clienteImportacaoDto)
+        {
+            try
+            {
+                // ler o arquivo
+                byte[] arquivo = Convert.FromBase64String(clienteImportacaoDto.Arquivo);
+                MemoryStream ms = new MemoryStream(arquivo);
+                var sheets = MiniExcel.GetSheetNames(ms);
+
+                var rows = MiniExcel.Query(ms, sheetName: sheets[1]).Skip(2).ToList();
+
+                IDictionary<string, object> categoryRow = rows[0];
+                IDictionary<string, object> categorias = new Dictionary<string, object>();
+
+                foreach (var key in categoryRow.Keys)
+                {
+                    if ((string.Compare(key, "J") > 0 || key.Length > 1) && categoryRow[key] != null)
+                    {
+                        categorias.Add(key, categoryRow[key]);
+                        Console.WriteLine($"{key} : {categoryRow[key]?.ToString()}");
+
+                        var tipo = await _rm.TipoFornecimentoRepository.SelectByCondition(q => 
+                                    q.Nome.ToLower().Equals(categoryRow[key].ToString().ToLower())).FirstOrDefaultAsync();
+                        if (tipo is null)
+                        {
+                            _rm.TipoFornecimentoRepository.Create(new TipoFornecimento() { Nome = categoryRow[key].ToString() });
+                            await _rm.SaveAsync();
+                        }
+                            
+                    }
+                }
+
+                var filiais = _rm.FilialRepository.SelectAll().ToList();
+                var tipos = _rm.TipoFornecimentoRepository.SelectAll().ToList();
+
+
+                string filialNome = "";
+                for (int idx = 2; idx < rows.Count; idx++)
+                {
+                    IDictionary<string, object> row = rows[idx];
+                    filialNome = row["E"]?.ToString() ?? "";
+
+                    string cep = row["H"]?.ToString();
+                    cep = cep?.Replace("s/n", "");
+                    if (cep?.Length > 9) cep = cep.Substring(0, 9);
+
+                    CreateClienteDto createCliente = new CreateClienteDto(
+                        Nome: row["B"]?.ToString(),
+                        CNPJ: row["C"]?.ToString(),
+                        InscricaoEstadual: row["D"]?.ToString(),
+                        Endereco: row["F"]?.ToString(),
+                        Numero: row["G"]?.ToString(),
+                        CEP: cep,
+                        Cidade: row["I"]?.ToString(),
+                        UF: row["J"]?.ToString(),
+                        Ativo: true,
+                        PeriodoEntrega: "",
+                        NaoUltrapassarLimitePorRequisicao: false,
+                        ValorLimiteRequisicao: 0,
+                        FilialId: filiais.Where(q => q.Nome.ToLower().Equals(filialNome.ToLower())).FirstOrDefault().Id,
+                        ClienteContatos: new List<ClienteContatoDto>(),
+                        ClienteOrcamentoConfiguracao: new List<ClienteOrcamentoConfiguracaoDto>()
+                    );
+
+                    var teste = await _rm.ClienteRepository.SelectByCondition(q => q.Nome.ToLower().Equals(createCliente.Nome) && q.CNPJ.Equals(createCliente.CNPJ)).FirstOrDefaultAsync();
+                    if (teste is null) { 
+                        // adicionar as configurações de orçamento
+                        foreach (string key in categorias.Keys)
+                        {
+                            (int codigo, int codigo1) = (0, 0);
+
+                            if (key.Length > 1)
+                            {
+                                codigo = (int)char.Parse(key.Substring(0, 1));
+                            }
+                            codigo1 = (int)(key.Length == 1 ? char.Parse(key.Substring(0, 1)) : char.Parse(key.Substring(1, 1)));
+
+                            string chave = key;
+                            Console.WriteLine("chave:" + chave);
+
+                            ClienteOrcamentoConfiguracao configuracao = new ClienteOrcamentoConfiguracao();
+
+                            configuracao.TipoFornecimentoId = tipos.Where(q => q.Nome.ToUpper() == categorias[chave].ToString().ToUpper()).First().Id;
+
+                            (codigo, codigo1, chave) = retornaChave(codigo, codigo1, true);
+                            configuracao.ValorPedido = decimal.Parse(row[chave]?.ToString());
+
+                            (codigo, codigo1, chave) = retornaChave(codigo, codigo1);
+                            configuracao.QuantidadeMes = int.Parse(row[chave]?.ToString());
+
+                            (codigo, codigo1, chave) = retornaChave(codigo, codigo1);
+                            configuracao.Tolerancia = decimal.Parse(row[chave]?.ToString());
+
+                            (codigo, codigo1, chave) = retornaChave(codigo, codigo1);
+                            configuracao.AprovadoPor = EnumAprovadoPor.WCA;
+                            if (row[chave].ToString().Equals("CLIENTE"))
+                            {
+                                configuracao.AprovadoPor = EnumAprovadoPor.Cliente;
+                                (codigo, codigo1, chave) = retornaChave(codigo, codigo1);
+                                var email = row[chave].ToString();
+                                if (createCliente.ClienteContatos.Where(q => q.Email.Equals(email)).FirstOrDefault() is null)
+                                {
+                                    var contato = new ClienteContato()
+                                    {
+                                        Nome = email.Split("@")[0],
+                                        Email = email,
+                                        AprovaPedido = true,
+                                    };
+                                    createCliente.ClienteContatos.Add(_mapper.Map<ClienteContatoDto>(contato));
+                                }
+                            }
+                            configuracao.Ativo = true;
+                            createCliente.ClienteOrcamentoConfiguracao.Add(_mapper.Map<ClienteOrcamentoConfiguracaoDto>(configuracao));
+                        }
+                        await Create(createCliente);
+                    }
+                }
+                ms.Close();
+                ms.Dispose();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ClienteService.ImportarDadosCliente.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        private (int, int, string)  retornaChave(int c1, int c2, bool firstTime = false)
+        {
+            if (!firstTime)
+            {
+                c2++;
+                if (c2 > 90)
+                {
+                    c2 = 65;
+                    if (c1 > 0) c1++;
+                    else c1 = 65;
+                }
+            }
+            
+            string chave = (c1 > 0 ? ((char)c1).ToString() : "") + ((char)c2).ToString();
+            return (c1, c2, chave);
         }
     }
 }
