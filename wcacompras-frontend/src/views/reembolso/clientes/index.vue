@@ -59,7 +59,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 //DATA
 const page = ref(1);
-const pageSize = 10;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const clienteStore = useClienteStore();

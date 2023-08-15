@@ -117,7 +117,7 @@ import moment from "moment";
 //DATA
 const authStore = useAuthStore();
 const page = ref(1);
-const pageSize = 10;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const requisicoes = ref([]);

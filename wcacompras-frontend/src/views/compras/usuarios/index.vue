@@ -63,7 +63,7 @@ import router from "@/router";
 
 //DATA
 const page = ref(1);
-const pageSize = 5;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const users = ref([]);

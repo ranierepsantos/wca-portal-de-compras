@@ -10,6 +10,7 @@ export const route = {
     clienteToList: "Cliente/ToList/{filial}",
     clientePaginate: "Cliente/Paginate/{pageSize}/{page}",
     clienteListByAuthenticatedUser: "Cliente/ListByAuthenticatedUser",
+    clienteImportar: "Cliente/ImportFromExcel",
 
     configuracaoGetAll: "configuracao",
     configuracaoUpdate: "configuracao",

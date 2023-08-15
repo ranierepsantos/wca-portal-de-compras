@@ -29,7 +29,6 @@ namespace wca.compras.domain.Dtos
         string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         string CNPJ,
-        [Required(ErrorMessage = "O campo é obrigatório!")]
         string InscricaoEstadual,
         string Endereco,
         string Numero,
@@ -52,7 +51,6 @@ namespace wca.compras.domain.Dtos
         string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")] 
         string CNPJ,
-        [Required(ErrorMessage = "O campo é obrigatório!")] 
         string InscricaoEstadual,
         string Endereco,
         string Numero,
@@ -76,8 +74,8 @@ namespace wca.compras.domain.Dtos
         string Nome,
         [Required(ErrorMessage = "O campo é obrigatório!")] 
         string Email,
-        string Telefone,
-        string Celular,
+        string? Telefone,
+        string? Celular,
         bool AprovaPedido
     );
 
@@ -92,5 +90,9 @@ namespace wca.compras.domain.Dtos
         decimal Tolerancia,
         EnumAprovadoPor AprovadoPor,
         bool Ativo = false
+    );
+
+    public record ClienteImportacaoDto(
+        [Required(ErrorMessage = "O campo é obrigatório!")] string Arquivo
     );
 }

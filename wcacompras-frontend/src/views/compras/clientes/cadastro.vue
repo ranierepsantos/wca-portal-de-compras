@@ -108,10 +108,10 @@
                                     </td>
                                     <td class="text-left">{{ item.email }}</td>
                                     <td class="text-right">
-                                        {{ mask(item.telefone, '["(##) #####-####", "(##) ####-####"]') }}
+                                        {{ mask(item.telefone ?? "", '["(##) #####-####", "(##) ####-####"]') }}
                                     </td>
                                     <td class="text-right">
-                                        {{ mask(item.celular, '["(##) #####-####", "(##) ####-####"]') }}
+                                        {{ mask(item.celular ?? "", '["(##) #####-####", "(##) ####-####"]') }}
                                     </td>
                                     <td class="text-center">
                                         <v-icon :icon="item.aprovaPedido ? 'mdi-check' : 'mdi-close'" variant="plain"

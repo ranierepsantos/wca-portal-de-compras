@@ -1,6 +1,10 @@
 <template>
     <div>
-        <bread-crumbs title="Clientes" @novoClick="editar('novo')" />
+        <bread-crumbs title="Clientes" @novoClick="editar('novo')" 
+        :buttons="[{text: 'Importar Clientes', icon:'mdi-upload', event:'importar-click'}]" 
+        @importar-click="importar()"
+        
+        />
         <v-row>
             <v-col cols="6">
                 <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact"
@@ -56,10 +60,11 @@ import clienteService from "@/services/cliente.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
+import { toBase64 } from "@/helpers/functions";
 
 //DATA
 const page = ref(1);
-const pageSize = 5;
+const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const clientes = ref([]);
@@ -179,6 +184,44 @@ async function getItems()
     {
         isBusy.value = false;
     }
+}
+
+async function importar()
+{
+    try
+    {
+        const { value: file } = await swal.fire({
+            title: 'Selecionar planilha',
+            input: 'file',
+            showCancelButton: true,
+            inputAttributes: {
+                'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel',
+                'aria-label': 'Selecione a planilha de clientes'
+            }
+        })
+
+        if (file)
+        {
+            isBusy.value = true
+            console.log(file.name);
+            var arquivo = await toBase64(file);
+            arquivo = arquivo.split(";")[1].replace('base64,', '');
+
+            let arquivoImportacao = {
+                arquivo: arquivo
+            }
+
+            await clienteService.importar(arquivoImportacao);
+
+            await getItems();
+
+        }
+    } catch (error)
+    {
+        console.log("importar.error:", error);
+        handleErrors(error)
+    } finally { isBusy.value = false }
+
 }
 </script>
   
