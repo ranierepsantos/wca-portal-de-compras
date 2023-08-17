@@ -1,54 +1,81 @@
 <template>
   <div>
-    <bread-crumbs
+  <v-app-bar elevation="1" :height="orcamento!=null ? 84: 0" >
+    <v-row style="margin: 1px 0 1px 0;">
+      <v-col v-show="cliente.naoUltrapassarLimitePorRequisicao">
+        <span style="font-size: 11px" class="text-grey text-left">
+          Valor Máximo Pedido
+        </span>
+        <v-progress-linear
+                  :color="
+                    (parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao) *  100 > 100
+                      ? 'red'
+                      : (parseFloat(valorTotalPedido) /
+                          cliente.valorLimiteRequisicao) *
+                          100 >
+                        60
+                      ? 'warning'
+                      : 'success'
+                  "
+                  :model-value="valorTotalPedido"
+                  :max="cliente.valorLimiteRequisicao"
+                  :height="7"
+                  title="Valor Máximo Pedido"
+                >
+                </v-progress-linear>
+                <span style="font-size: 11px" class="text-grey">
+                  {{ formatToCurrencyBRL(valorTotalPedido) }} /
+                  {{
+                    formatToCurrencyBRL(
+                      cliente.valorLimiteRequisicao.toFixed(2)
+                    )
+                  }}
+                </span>
+      </v-col>
+      <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
+        <span style="font-size: 11px" class="text-grey text-left">{{
+          config.nome
+        }}</span>
+        <v-progress-linear
+          :color="
+            config.percentual > 100
+              ? 'red'
+              : config.percentual > 60
+              ? 'warning'
+              : 'success'
+          "
+          :model-value="config.valorTotal"
+          :max="config.valorPedido * (1 + config.tolerancia / 100)+1"
+          :height="7"
+          :title="config.nome"
+        ></v-progress-linear>
+        <span style="font-size: 11px" class="text-grey"
+          >{{ formatToCurrencyBRL(config.valorTotal) }} /
+          {{
+            formatToCurrencyBRL(config.valorPedido * (1 + config.tolerancia / 100))
+          }}</span
+        >
+      </v-col>
+    </v-row>
+  </v-app-bar>
+  <bread-crumbs
       title="Nova Requisição"
       :show-button="false"
       :custom-button-show="true"
       custom-button-text="Salvar"
       @customClick="salvar()"
-      class="breadcrumb-fixed"
     />
     <v-progress-linear
       color="primary"
       indeterminate
       :height="5"
       v-show="isBusy"
-      class="mt-15 mb-3"
+      class="mt-1 mb-2"
     >
     </v-progress-linear>
-    <v-row :class="isBusy?'mt-2':'mt-12'">
     
-      <v-col cols="2" class="fixed-column-scroll" v-show="orcamento!=null">
-            <v-row v-for="config in orcamento" :key="config.tipoFornecimentoId">
-          <v-col>
-            <span style="font-size: 11px" class="text-grey text-left">{{
-              getTipoFornecimentoNome(config.tipoFornecimentoId)
-            }}</span>
-            <v-progress-linear
-              :color="
-                config.percentual > 100
-                  ? 'red'
-                  : config.percentual > 60
-                  ? 'warning'
-                  : 'success'
-              "
-              :model-value="config.valorTotal"
-              :max="config.valorPedido * (1 + config.tolerancia / 100)"
-              :height="7"
-              :title="getTipoFornecimentoNome(config.tipoFornecimentoId)"
-            ></v-progress-linear>
-            <span style="font-size: 11px" class="text-grey"
-              >{{ config.valorTotal.toFixed(2) }} /
-              {{
-                (config.valorPedido * (1 + config.tolerancia / 100)).toFixed(2)
-              }}</span
-            >
-          </v-col>
-        </v-row>
-
-      </v-col>
-      
-      <v-col :style="orcamento?'padding-left: 150px;':''">
+    <v-row >
+      <v-col>
         <v-form ref="formCadastro">
           <v-row>
             <v-col cols="5">
@@ -233,7 +260,9 @@
               <th class="text-center text-grey">VL. PRODUTO</th>
               <th class="text-center text-grey">QUANT.</th>
               <th class="text-center text-grey">TOTAL</th>
-              <th class="text-center text-grey"><v-icon icon="mdi-package-variant-minus"></v-icon></th>
+              <th class="text-center text-grey">
+                <v-icon icon="mdi-package-variant-minus"></v-icon>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -431,7 +460,7 @@ import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import clienteService from "@/services/cliente.service";
 import Periodo from "@/components/Periodo.vue";
 import endereco from "@/components/endereco.vue";
-import authService from "@/services/auth.service";
+
 //DATA
 const authStore = useAuthStore();
 const isBusy = ref(false);
@@ -520,14 +549,7 @@ watch(
   (clienteId) => {
     cliente.value = clientes.value.filter((c) => c.id == clienteId)[0];
 
-    orcamento.value = cliente.value.clienteOrcamentoConfiguracao.filter(
-      (c) => c.ativo == true
-    );
-    for (let idx = 0; idx < orcamento.value.length; idx++) {
-      orcamento.value[idx].valorTotal = 0;
-      orcamento.value[idx].percentual = 0;
-    }
-
+    
     requisicao.value.endereco = cliente.value.endereco;
     requisicao.value.numero = cliente.value.numero;
     requisicao.value.cep = cliente.value.cep;
@@ -616,7 +638,9 @@ function adicionarRemoverProduto(item) {
   } else {
     removeProdutoRequisicao(item);
   }
+  
 }
+
 function calcularOrcamentoTotais() {
   clearOrcamentoTotais();
   for (let idx = 0; idx < requisicao.value.requisicaoItens.length; idx++) {
@@ -670,6 +694,7 @@ async function getProdutosToList(fornecedorId) {
     );
     produtos.value = response.data;
 
+    carregarConfiguracaoCliente()
     for (
       let index = 0;
       index < requisicao.value.requisicaoItens.length;
@@ -690,11 +715,27 @@ async function getProdutosToList(fornecedorId) {
 }
 
 function getTipoFornecimentoNome(tipoId) {
-  let tipo = tipoFornecimento.value.filter((t) => t.value == tipoId);
-  if (tipo.length > 0) {
-    return tipo[0].text;
-  }
+  let tipo = tipoFornecimento.value.find((t) => t.value == tipoId);
+  if (tipo) {
+    return tipo.text;
+  } 
   return "";
+}
+
+function carregarConfiguracaoCliente() {
+    let configuracoes = cliente.value.clienteOrcamentoConfiguracao.filter(
+      (c) => c.ativo == true
+    );
+    for (let idx = 0; idx < configuracoes.length; idx++) {
+      configuracoes[idx].nome = getTipoFornecimentoNome(configuracoes[idx].tipoFornecimentoId)
+      configuracoes[idx].valorTotal = 0;
+      configuracoes[idx].percentual = 0;
+    }
+
+    let categorias = Array.from(new Set(produtos.value.map((item) => item.tipoFornecimentoId)))
+
+    orcamento.value =  configuracoes.filter((item) => categorias.includes(item.tipoFornecimentoId))
+
 }
 
 async function getTipoFornecimentoToList() {
@@ -806,7 +847,6 @@ async function salvar() {
 </script>
 
 <style scoped>
-
 .breadcrumb-fixed {
   position: fixed;
   top: 63px;
@@ -815,18 +855,18 @@ async function salvar() {
   background-color: #fff;
   color: #fff;
   left: auto;
-  z-index: 1;  
+  z-index: 1;
 }
 .fixed-column-scroll {
   position: fixed;
-  left: auto;
-  width: auto;
+  /* left: auto; */
+  width: 80%;
   background-color: #fff;
   color: #fff;
   padding: 5px;
-  max-height: 530px;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  /* max-height: 530px; */
+  /* overflow-y: scroll;
+  overflow-x: hidden; */
   z-index: 2;
 }
 
