@@ -238,8 +238,8 @@ namespace wca.compras.services
                 byte[] arquivo = Convert.FromBase64String(clienteImportacaoDto.Arquivo);
                 MemoryStream ms = new MemoryStream(arquivo);
                 var sheets = MiniExcel.GetSheetNames(ms);
-
-                var rows = MiniExcel.Query(ms, sheetName: sheets[1]).Skip(2).ToList();
+                string sheetName = "NORGE LABS";
+                var rows = MiniExcel.Query(ms, sheetName: sheetName).Skip(3).ToList();
 
                 IDictionary<string, object> categoryRow = rows[0];
                 IDictionary<string, object> categorias = new Dictionary<string, object>();
