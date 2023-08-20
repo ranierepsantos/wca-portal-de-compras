@@ -61,6 +61,7 @@ export const route = {
     requisicaoDuplicate: "Requisicao/Duplicate/{id}",
     requisicaoUpdate: "Requisicao",
     requisicaoPaginate: "Requisicao/Paginate/{pageSize}/{page}",
+    requisicaoPaginateByContextUser: "Requisicao/PaginateByUserContext/{pageSize}/{page}",
     requisicaoDownloadById: "Requisicao/ExportExcel/{id}",
     requisicaoDownloadByToken: "Requisicao/ExportExcel/{token}",
     requisicaoFinalizar: "Requisicao/FinalizarPedido",

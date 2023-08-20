@@ -50,7 +50,9 @@ namespace wca.compras.domain.Dtos
         bool Aprovado,
         string Comentario,
         string Token,
-        string NomeUsuario
+        string NomeUsuario,
+        bool WCA = false,
+        bool Cliente = false
     );
 
     public record FinalizarRequisicaoDto(

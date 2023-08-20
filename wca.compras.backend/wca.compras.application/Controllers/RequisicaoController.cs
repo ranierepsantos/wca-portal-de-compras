@@ -216,6 +216,34 @@ namespace wca.compras.webapi.Controllers
 
         }
 
+        /// <summary>
+        /// Retorna lista de Requisição por paginação
+        /// </summary>
+        /// <returns>RequisicaoDto</returns>
+        [HttpGet]
+        [Route("PaginateByUserContext/{pageSize}/{page}")]
+        [Authorize("Bearer")]
+        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        {
+            try
+            {
+                if (dataInicio > dataFim || (dataInicio != null && dataFim is null) || (dataFim != null && dataInicio is null))
+                {
+                    return BadRequest(error: new { message = "Data início ou fim inválida!" });
+                }
+                int filial = int.Parse(User.FindFirst("Filial").Value);
+                int logedUserId = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                var items = service.PaginateByContextUser(filial, logedUserId, page, pageSize, clienteId, usuarioId, fornecedorId,  status, dataInicio, dataFim);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+
+        }
+
+
         [HttpGet]
         [Route("GerarRelatorio")]
         [Authorize("Bearer")]

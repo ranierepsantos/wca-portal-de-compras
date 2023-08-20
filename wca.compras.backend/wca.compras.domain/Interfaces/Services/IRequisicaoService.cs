@@ -18,5 +18,7 @@ namespace wca.compras.domain.Interfaces.Services
         Task<RequisicaoDuplicarResponse> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin);
         Task<bool> FinalizarPedido(FinalizarRequisicaoDto finalizarRequisicaoDto, string usuarioNome);
         Task<bool> EnviarRequisicao(int requisicaoId, EnumRequisicaoDestinoEmail destino, string urlOrigin);
+
+        Pagination<RequisicaoDto> PaginateByContextUser(int filialId, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId = 0, int fornecedorId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null);
     }
 }

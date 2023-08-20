@@ -1,6 +1,6 @@
 <template>
     <div>
-        <bread-crumbs :title="(hasRequisicaoAllUsersPermission ? 'Requisições' : 'Minhas Requisições')"
+        <bread-crumbs :title="(hasPermissionAprovador ? 'Requisições' : 'Minhas Requisições')"
             @novoClick="router.push({ name: 'requisicaoCadastro' })" :show-button="authStore.hasPermissao('requisicao')"
             :buttons="headerButtons"
             @gerar-relatorio-click="gerarRelatorio()"
@@ -16,7 +16,7 @@
                     item-title="nome" item-value="id" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="3" v-show="hasRequisicaoAllUsersPermission">
+            <v-col cols="3" v-show="hasPermissionAprovador">
                 <v-select label="Usuário" v-model="filter.usuarioId" :items="usuarios" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
@@ -56,7 +56,7 @@
             <thead>
                 <tr>
                     <th class="text-center text-grey">PEDIDO</th>
-                    <th class="text-left text-grey" v-show="hasRequisicaoAllUsersPermission">USUÁRIO</th>
+                    <th class="text-left text-grey" v-show="hasPermissionAprovador">USUÁRIO</th>
                     <th class="text-center text-grey">DATA</th>
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">FORNECEDOR</th>
@@ -68,7 +68,7 @@
             <tbody>
                 <tr v-for="item in requisicoes" :key="item.id">
                     <td class="text-center"> # {{ item.id }}</td>
-                    <th class="text-left text-grey" v-show="hasRequisicaoAllUsersPermission">{{ item.usuario.text }}
+                    <th class="text-left text-grey" v-show="hasPermissionAprovador">{{ item.usuario.text }}
                     </th>
                     <td class="text-center">{{ new Date(item.dataCriacao).toLocaleDateString() }}</td>
                     <td class="text-left">{{ item.cliente.nome }}</td>
@@ -124,7 +124,7 @@ const requisicoes = ref([]);
 const clientes = ref([]);
 const fornecedores = ref([]);
 const usuarios = ref([]);
-const hasRequisicaoAllUsersPermission = ref(false)
+const hasPermissionAprovador = ref(false)
 const swal = inject("$swal");
 const filter = ref({
     clienteId: null,
@@ -144,18 +144,15 @@ const headerButtons = computed(() => {
 
 onMounted(async () =>
 {
-    hasRequisicaoAllUsersPermission.value = authStore.hasPermissao('requisicao_all_users')
+    hasPermissionAprovador.value = authStore.hasPermissao('aprova_requisicao') || authStore.hasPermissao('aprova_requisicao_cliente')
     let filial = 0
-    if (!hasRequisicaoAllUsersPermission.value)
+    if (!hasPermissionAprovador.value)
     {
         filter.value.usuarioId = authStore.user.id;
         filial = authStore.user.filial;
-        await getClienteListByUser();
     }
-    if (hasRequisicaoAllUsersPermission.value)
-    {
-        await getClienteToList(filial)
-    }
+    
+    await getClienteToList(filial);
     await getFornecedorToList(filial)
     await getUsuarioToList();
     await getItems();
@@ -169,7 +166,7 @@ function clearFilters()
 {
     filter.value.clienteId = null
     filter.value.fornecedorId = null
-    filter.value.usuarioId = hasRequisicaoAllUsersPermission.value ? null : authStore.user.id
+    filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
     filter.value.status = -1
     filter.value.dataInicio = null
     filter.value.dataFim = null
@@ -252,29 +249,21 @@ async function gerarRelatorio()
 }
 
 
-async function getClienteListByUser() 
-{
-    try
-    {
-        let response = await clienteService.getListByAuthenticatedUser();
-        let list = response.data;
-        list.forEach(elem => {
-            clientes.value.push({text: elem.nome, value: elem.id })
-        });
-        
-    } catch (error)
-    {
-        console.log("getClienteListByUser.error:", error);
-        handleErrors(error)
-    }
-}
-
 async function getClienteToList(filial)
 {
     try
     {
-        let response = await clienteService.toList(filial);
-        clientes.value = response.data;
+        //se tiver permissao para visualizar requisição de todos os usuários, lista todos os clientes
+        if (authStore.hasPermissao('requisicao_all_users')){
+            let response = await clienteService.toList(filial);
+            clientes.value = response.data;
+        }else {
+            let response = await clienteService.getListByAuthenticatedUser();
+            let list = response.data;
+            list.forEach(elem => {
+                clientes.value.push({text: elem.nome, value: elem.id })
+            });
+        }
     } catch (error)
     {
         console.log("getClienteToList.error:", error);
@@ -287,8 +276,14 @@ async function getItems()
     try
     {
         isBusy.value = true;
-        let response = await requisicaoService.paginate(pageSize, page.value, filter.value);
-        requisicoes.value = response.data.items;
+
+        let response =  null;
+        if (authStore.hasPermissao("requisicao_all_users"))
+            response = await requisicaoService.paginate(pageSize, page.value, filter.value);
+        else
+            response = await requisicaoService.paginateByUserContext(pageSize, page.value, filter.value);
+        
+            requisicoes.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)
     {

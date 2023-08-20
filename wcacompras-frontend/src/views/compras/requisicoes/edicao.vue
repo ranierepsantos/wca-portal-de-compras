@@ -220,8 +220,8 @@
               v-show="
                 getStatus(requisicao.status).text.toLowerCase() ==
                   'aguardando' &&
-                authStore.hasPermissao('aprova_requisicao') &&
-                requisicao.requerAutorizacaoWCA
+                ((authStore.hasPermissao('aprova_requisicao') && requisicao.requerAutorizacaoWCA)
+                ||(authStore.hasPermissao('aprova_requisicao_cliente') && requisicao.requerAutorizacaoCliente))
               "
             >
               <v-btn
@@ -233,13 +233,14 @@
                 Aprovar / Rejeitar
               </v-btn>
             </v-col>
+
             <v-col class="text-right">
               <v-btn
                 :disabled="requisicao.id == null"
                 :color="requisicao.id == null ? 'grey' : 'success'"
                 style="font-weight: bold"
                 @click="dialog = true"
-                v-show="requisicao.status == 1"
+                v-show="requisicao.status == 1 && authStore.hasPermissao('requisicao')"
               >
                 Finalizar Pedido
               </v-btn>
@@ -864,12 +865,15 @@ function adicionarProdutoRequisicao(item) {
 async function aprovarReprovar(isAprovado, comentario) {
   try {
     isSaving.value = true;
+    debugger
     let data = {
       id: requisicao.value.id,
       aprovado: isAprovado,
       comentario: comentario,
       token: "TELAEDICAO",
       nomeUsuario: authStore.user.nome,
+      WCA: authStore.hasPermissao("aprova_requisicao"),
+      Cliente: authStore.hasPermissao("aprova_requisicao_cliente")
     };
     await requisicaoService.aprovar(data);
     await getRequisicaoData(data.id);
@@ -1132,9 +1136,7 @@ async function salvar() {
       ) {
         data.requerAutorizacaoWCA = true;
       }
-      console.log("Autorização WCA:", data.requerAutorizacaoWCA);
-      console.log("Autorização Cliente:", data.requerAutorizacaoCliente);
-
+      
       if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
         if (!authStore.hasPermissao("aprova_requisicao")) {
           let result = await swal.fire({

@@ -271,5 +271,10 @@ namespace wca.compras.data.Repositories
             int result = await _context.Database.ExecuteSqlRawAsync(command);
             return result;
         }
+
+        public DbSet<T> GetDbSet<T>() where T : class
+        {
+            return _context.Set<T>();
+        }
     }
 }
