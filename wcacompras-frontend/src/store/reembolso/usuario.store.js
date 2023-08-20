@@ -136,7 +136,6 @@ export const useUsuarioStore = defineStore("usuario", {
     },
 
     async reembolsoToListByClientePerfil(clienteId, perfilId) {
-        debugger
         let response = await userService.toListByPerfil(perfilId)
         let usuarios = response.data;
         

@@ -865,7 +865,6 @@ function adicionarProdutoRequisicao(item) {
 async function aprovarReprovar(isAprovado, comentario) {
   try {
     isSaving.value = true;
-    debugger
     let data = {
       id: requisicao.value.id,
       aprovado: isAprovado,
@@ -920,7 +919,6 @@ function calcularOrcamentoTotais() {
 }
 
 function carregarConfiguracaoCliente() {
-  debugger
     let configuracoes = requisicao.value.cliente.clienteOrcamentoConfiguracao.filter(
       (c) => c.ativo == true
     );
