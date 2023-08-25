@@ -1,7 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using wca.reembolso.application.Features.Clientes.Commands;
-using wca.reembolso.application.Features.Clientes.Queries;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
 using wca.reembolso.application.Features.Solicitacoes.Queries;

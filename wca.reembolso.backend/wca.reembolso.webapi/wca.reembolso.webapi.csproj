@@ -20,4 +20,12 @@
     <ProjectReference Include="..\wca.reembolso.infrastruture\wca.reembolso.infrastruture.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Media\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Media\teste.png" />
+  </ItemGroup>
+
 </Project>

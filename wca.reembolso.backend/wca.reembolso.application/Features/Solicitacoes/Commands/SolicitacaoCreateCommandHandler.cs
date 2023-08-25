@@ -3,12 +3,11 @@ using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.application.Features.Clientes.Behaviors;
-using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application.Features.Solicitacoes.Common;
 using wca.reembolso.application.Features.Solicitacoes.Behaviors;
 using wca.reembolso.domain.Entities;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
+using wca.reembolso.application.Common;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Commands
 {
@@ -16,14 +15,14 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         int ClienteId,
         DateTime DataSolicitacao,
         int ColaboradorId,
-        int GestorId,
-        string ColaboradorCargo,
+        int? GestorId,
+        string? ColaboradorCargo,
         string Projeto,
         string Objetivo,
         DateTime? PeriodoInicial,
         DateTime? PeriodoFinal,
-        decimal ValorAdiantamento,
-        decimal ValorDespesa,
+        decimal? ValorAdiantamento,
+        decimal? ValorDespesa,
         int Status,
         IList<Despesa> Despesa
     ) : IRequest<ErrorOr<SolicitacaoResponse>>;
@@ -34,13 +33,14 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoCreateCommandHandler> _logger;
         private readonly IMediator _mediator;
-
+        
         public SolicitacaoCreateCommandHandler(IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger, IMediator mediator)
         {
             _reposistory = reposistory;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
+            
         }
 
         async Task<ErrorOr<SolicitacaoResponse>> IRequestHandler<SolicitacaoCreateCommand, ErrorOr<SolicitacaoResponse>>.Handle(SolicitacaoCreateCommand request, CancellationToken cancellationToken)
@@ -55,7 +55,16 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 return errors;
             }
 
-            //2. mapear para cliente e adicionar
+            //2.salvar as imagens das despesas
+            for (int idx = 0; idx < request.Despesa.Count; idx++)
+            {
+                if (HandleFile.IsBase64Image(request.Despesa[idx].ImagePath))
+                {
+                    request.Despesa[idx].ImagePath = HandleFile.SaveImage(request.Despesa[idx].ImagePath);
+                }
+            }
+
+            //3. mapear para cliente e adicionar
             Solicitacao dado = _mapper.Map<Solicitacao>(request);
 
             _reposistory.Create(dado);
