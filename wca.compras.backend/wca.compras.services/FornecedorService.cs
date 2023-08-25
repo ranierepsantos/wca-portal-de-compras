@@ -180,7 +180,7 @@ namespace wca.compras.services
                                 Codigo = rows[index].A.ToString(),
                                 FornecedorId = importProdutoDto.FornecedorId,
                                 Nome = rows[index].B,
-                                TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.Contains(rows[index].C)).Id,
+                                TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.ToLower().Contains(rows[index].C.ToLower())).Id,
                                 UnidadeMedida = rows[index].D,
                                 Valor = (decimal)rows[index].E,
                                 TaxaGestao = (decimal)rows[index].F,
