@@ -18,12 +18,12 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
     public sealed class SolicitacaoChangeStatusCommandHandler : IRequestHandler<SolicitacaoChangeStatusCommand, ErrorOr<bool>>
     {
-        private readonly IRepository<Solicitacao> _repository;
+        private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoChangeStatusCommandHandler> _logger;
         private readonly IMediator _mediator;
 
-        public SolicitacaoChangeStatusCommandHandler(IRepository<Solicitacao> repository, IMapper mapper, ILogger<SolicitacaoChangeStatusCommandHandler> logger, IMediator mediator)
+        public SolicitacaoChangeStatusCommandHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoChangeStatusCommandHandler> logger, IMediator mediator)
         {
             _repository = repository;
             _mapper = mapper;
@@ -46,9 +46,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             
             dado.Status = request.Status.Id;
 
-            _repository.Update(dado);
+            _repository.SolicitacaoRepository.Update(dado);
             
-            await _repository.SaveChangesAsync();
+            await _repository.SaveAsync();
 
             // cadastrar evento
             var eventoCommand = new SolicitacaoHistorioCreateCommand(dado.Id, request.Evento);

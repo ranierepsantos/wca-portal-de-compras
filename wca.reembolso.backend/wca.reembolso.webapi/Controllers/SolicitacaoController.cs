@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
 using wca.reembolso.application.Features.Solicitacoes.Queries;
@@ -89,5 +90,18 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
 
         }
+
+        
+        [HttpPost("RegistrarEvento")]
+        public async Task<IActionResult> RegistrarEvento([FromBody] SolicitacaoHistorioCreateCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
     }
 }

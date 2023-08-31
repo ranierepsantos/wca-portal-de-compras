@@ -11,28 +11,27 @@ namespace wca.reembolso.application.Features.Clientes.Queries
     public record ClienteUsersByClienteQuerie(int ClienteId) : IRequest<ErrorOr<IList<int>>>;
     public class ClienteUsersByClienteQueryHandler : IRequestHandler<ClienteUsersByClienteQuerie, ErrorOr<IList<int>>>
     {
-        private readonly IRepository<UsuarioClientes> _reposistory;
+        private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<ClienteUsersByClienteQueryHandler> _logger;
 
-        public ClienteUsersByClienteQueryHandler(IRepository<UsuarioClientes> reposistory, IMapper mapper, ILogger<ClienteUsersByClienteQueryHandler> logger)
+        public ClienteUsersByClienteQueryHandler(IRepositoryManager repository, IMapper mapper, ILogger<ClienteUsersByClienteQueryHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
         public async Task<ErrorOr<IList<int>>> Handle(ClienteUsersByClienteQuerie request, CancellationToken cancellationToken)
         {
-
             _logger.LogInformation("Listando usuários por cliente");
 
-
-            var query = _reposistory.ToQuery().Where(q => q.ClienteId.Equals(request.ClienteId));
+            var query = _repository.UsuarioClientesRepository.ToQuery()
+                        .Where(q => q.ClienteId.Equals(request.ClienteId));
             
             var list = await query.Select(q => new
             {
                 id = q.UsuarioId
-            }).ToListAsync();
+            }).ToListAsync(cancellationToken: cancellationToken);
 
             return list.Select(q => q.id).ToList();
 

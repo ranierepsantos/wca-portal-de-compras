@@ -5,27 +5,26 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Solicitacoes.Common;
-using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Queries
 {
     public record SolicitacaoByColaboradorOrGestorQuerie(int ColaboradorId = 0, int GestorId = 0, int[]? Status = null) : IRequest<ErrorOr<IList<SolicitacaoResponse>>>;
     public class SolicitacaoByColaboradorOrGestorQueryHandler : IRequestHandler<SolicitacaoByColaboradorOrGestorQuerie, ErrorOr<IList<SolicitacaoResponse>>>
     {
-        private readonly IRepository<Solicitacao> _reposistory;
+        private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoByColaboradorOrGestorQueryHandler> _logger;
 
-        public SolicitacaoByColaboradorOrGestorQueryHandler(IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoByColaboradorOrGestorQueryHandler> logger)
+        public SolicitacaoByColaboradorOrGestorQueryHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoByColaboradorOrGestorQueryHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
         public async Task<ErrorOr<IList<SolicitacaoResponse>>> Handle(SolicitacaoByColaboradorOrGestorQuerie request, CancellationToken cancellationToken)
         {
 
-            var query = _reposistory.ToQuery();
+            var query = _repository.SolicitacaoRepository.ToQuery();
 
             if (request.ColaboradorId > 0)
                 query = query.Where(q => q.ColaboradorId.Equals(request.ColaboradorId));
@@ -40,7 +39,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
                 query = query.Where(q => status.Contains(q.Status));
             }
 
-            var list = await query.ToListAsync();
+            var list = await query.ToListAsync(cancellationToken: cancellationToken);
 
             return _mapper.Map<List<SolicitacaoResponse>>(list);
 

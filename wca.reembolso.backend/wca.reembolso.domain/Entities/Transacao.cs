@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using wca.reembolso.domain.Common.Enum;
 
@@ -25,5 +26,9 @@ namespace wca.reembolso.domain.Entities
 
         [Column("valor", TypeName = "money")]
         public decimal Valor { get; set; } = decimal.Zero;
+
+        [NotMapped]
+        [JsonIgnore]
+        public ContaCorrente? ContaCorrente { get; set; }
     }
 }

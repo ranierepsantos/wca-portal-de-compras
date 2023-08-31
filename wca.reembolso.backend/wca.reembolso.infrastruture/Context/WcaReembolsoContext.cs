@@ -27,6 +27,14 @@ namespace wca.reembolso.infrastruture.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UsuarioClientes>().HasKey(pk => new { pk.UsuarioId, pk.ClienteId });
+
+            modelBuilder.Entity<ContaCorrente>()
+                .HasKey(pk => new { pk.UsuarioId });
+
+            modelBuilder.Entity<ContaCorrente>()
+                .HasMany(c => c.Transacoes)
+                .WithOne(t => t.ContaCorrente)
+                .HasPrincipalKey(t => t.UsuarioId);
         }
     }
 }

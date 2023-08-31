@@ -8,6 +8,7 @@ const rotas = {
     ListarPorColaboradorGestor: "Solicitacao/ListarPorColaboradorGestor",
     ListarStatusSolicitacao: "Solicitacao/ListarStatusSolicitacao",
     AlterarStatus: "Solicitacao/AlterarStatus",
+    RegistrarEvento: "Solicitacao/RegistrarEvento"
 }
 
 export default {
@@ -29,12 +30,19 @@ export default {
 
     ListarPorColaboradorGestor(colaboradorId = 0, gestorId = 0, status = [])
     {
-        let parametros = {
-            colaboradorId: colaboradorId,
-            gestorId: gestorId,
-            status: status
+        let config = {
+            params: {
+                colaboradorId: colaboradorId,
+                gestorId: gestorId,
+                status: status
+            },
+            paramsSerializer: {
+                indexes: null // by default: false
+            }
         }
-        return api.get(rotas.ListarPorColaboradorGestor, parametros);
+
+        
+        return api.get(rotas.ListarPorColaboradorGestor,config);
     },
 
     ListarStatusSolicitacao()
@@ -56,6 +64,9 @@ export default {
             status: filters.status
         }
         return api.get(rotas.Paginar, {params: parametros} );
+    },
+    registrarEvento(evento) {
+        return api.post(rotas.registrarEvento, evento);  
     }
     
 }

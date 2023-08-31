@@ -12,10 +12,10 @@ namespace wca.reembolso.application.Features.SolicitacaoHistoricos.Commands
     ): IRequest<ErrorOr<bool>>;
     public sealed class SolicitacaoHistoricoCreateCommandHandler : IRequestHandler<SolicitacaoHistorioCreateCommand, ErrorOr<bool>>
     {
-        private readonly IRepository<SolicitacaoHistorico> _repository;
+        private readonly IRepositoryManager _repository;
         private readonly ILogger<SolicitacaoHistoricoCreateCommandHandler> _logger;
 
-        public SolicitacaoHistoricoCreateCommandHandler(IRepository<SolicitacaoHistorico> repository, ILogger<SolicitacaoHistoricoCreateCommandHandler> logger)
+        public SolicitacaoHistoricoCreateCommandHandler(IRepositoryManager repository, ILogger<SolicitacaoHistoricoCreateCommandHandler> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -31,9 +31,9 @@ namespace wca.reembolso.application.Features.SolicitacaoHistoricos.Commands
                 Evento = request.Evento
             };
 
-            _repository.Create( evento );
+            _repository.SolicitacaoHistoricoRepository.Create( evento );
 
-            await _repository.SaveChangesAsync();
+            await _repository.SaveAsync();
 
             return true;
         }

@@ -14,22 +14,25 @@ namespace wca.reembolso.application.Features.TiposDespesa.Queries
 
     public sealed class TipoDespesaToComboListQueryHandler : IRequestHandler<TipoDespesaToComboListQuerie, ErrorOr<IList<TipoDespesaResponse>>>
     {
-        private IRepository<TipoDespesa> _reposistory;
-        private IMapper _mapper;
-        private ILogger<TipoDespesaToComboListQueryHandler> _logger;
+        private readonly IRepositoryManager _repository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<TipoDespesaToComboListQueryHandler> _logger;
 
-        public TipoDespesaToComboListQueryHandler(IRepository<TipoDespesa> reposistory, IMapper mapper, ILogger<TipoDespesaToComboListQueryHandler> logger)
+        public TipoDespesaToComboListQueryHandler(IRepositoryManager repository, IMapper mapper, ILogger<TipoDespesaToComboListQueryHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
 
         public async Task<ErrorOr<IList<TipoDespesaResponse>>> Handle(TipoDespesaToComboListQuerie request, CancellationToken cancellationToken)
         {
-            var query = _reposistory.ToQuery();
 
-            var items = await query.Where(q=> q.Ativo).OrderBy(q => q.Nome).ToListAsync();
+            _logger.LogInformation("Buscando tipo de despesa para lista/combo");
+
+            var query = _repository.TipoDespesaRepository.ToQuery();
+
+            var items = await query.Where(q=> q.Ativo).OrderBy(q => q.Nome).ToListAsync(cancellationToken: cancellationToken);
 
             return _mapper.Map<List<TipoDespesaResponse>>(items);
 

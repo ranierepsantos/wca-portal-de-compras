@@ -14,7 +14,6 @@ export class TipoDespesa {
 
 export const useDespesaTipoStore = defineStore("despesaTipo", {
   state: () => ({
-    repository: [],
     tipoDespesaTipo: [
         {value: 1, text: "Consumo" },
         {value: 2, text: "Distância" },

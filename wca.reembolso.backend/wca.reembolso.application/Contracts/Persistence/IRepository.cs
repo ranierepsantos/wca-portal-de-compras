@@ -15,7 +15,6 @@ namespace wca.reembolso.application.Contracts.Persistence
         void Delete(T entity);
         void Attach(T entity);
         IQueryable<T> ToQuery();
-        Task SaveChangesAsync();
         Task<int> ExecuteCommandAsync(string command);
         
     }

@@ -24,19 +24,20 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         decimal? ValorAdiantamento,
         decimal? ValorDespesa,
         int Status,
+        int TipoSolicitacao,
         IList<Despesa> Despesa
     ) : IRequest<ErrorOr<SolicitacaoResponse>>;
 
     public class SolicitacaoCreateCommandHandler : IRequestHandler<SolicitacaoCreateCommand, ErrorOr<SolicitacaoResponse>>
     {
-        private readonly IRepository<Solicitacao> _reposistory;
+        private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoCreateCommandHandler> _logger;
         private readonly IMediator _mediator;
         
-        public SolicitacaoCreateCommandHandler(IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger, IMediator mediator)
+        public SolicitacaoCreateCommandHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger, IMediator mediator)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
@@ -67,9 +68,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             //3. mapear para cliente e adicionar
             Solicitacao dado = _mapper.Map<Solicitacao>(request);
 
-            _reposistory.Create(dado);
+            _repository.SolicitacaoRepository.Create(dado);
 
-            await _reposistory.SaveChangesAsync();
+            await _repository.SaveAsync();
 
             //Criar evento
             var querie = new SolicitacaoHistorioCreateCommand(dado.Id, $"Solicitação criada!");

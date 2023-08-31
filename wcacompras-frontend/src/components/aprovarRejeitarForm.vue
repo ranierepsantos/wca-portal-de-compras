@@ -76,12 +76,16 @@ const oForm = ref(null)
 //functions
 
 const aprovarReprovar = async (isAproved) => {
+  let valido = true;
+  if (!isAproved) {
     let { valid } = await oForm.value.validate();
-    if (valid)
-    {
-        let evento = isAproved? 'aprovarClick': 'reprovarClick';
-        emit(evento, comentario.value) 
-    }
+    valido = valid;
+  }
+  if (valido)
+  {
+      let evento = isAproved? 'aprovarClick': 'reprovarClick';
+      emit(evento, comentario.value) 
+  }
 }
 
 </script>
