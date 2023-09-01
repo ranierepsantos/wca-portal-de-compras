@@ -1,10 +1,32 @@
 <template>
   <v-container class="justify-center">
     <v-card>
+      <v-breadcrumbs>
+        <div class="text-h6 text-primary">Detalhamento de Despesa</div>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          variant="outlined"
+          class="text-capitalize"
+          @click="emit('cancelaClick')"
+        >
+          <b>Cancelar</b>
+        </v-btn>
+
+        <v-btn
+          color="primary"
+          variant="outlined"
+          class="text-capitalize"
+          @click="submitData()"
+          style="margin-left: 5px"
+        >
+          <b>Salvar</b>
+        </v-btn>
+      </v-breadcrumbs>
       <v-card-text>
         <v-row>
           <v-col>
-            <v-form>
+            <v-form ref="despesaForm">
               <v-row>
                 <v-col>
                   <v-text-field
@@ -13,77 +35,149 @@
                     variant="outlined"
                     color="primary"
                     density="compact"
-                    v-model = "despesa.dataEvento"
+                    v-model="despesa.dataEvento"
                   ></v-text-field>
                 </v-col>
               </v-row>
               <v-row>
                 <v-col>
-                    <v-select
-                  label="Tipo Despesa"
-                  :items="comboTipoDespea"
-                  density="compact"
-                  item-title="text"
-                  item-value="value"
-                  variant="outlined"
-                  color="primary"
-                  v-model = "despesa.tipoDespesaId"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                ></v-select>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
-                  <v-text-field
-                    label="Nrº Nota/Cupom Fiscal"
-                    type="text"
+                  <v-select
+                    label="Tipo Despesa"
+                    :items="comboTipoDespea"
+                    density="compact"
+                    item-title="nome"
+                    item-value="id"
                     variant="outlined"
                     color="primary"
-                    density="compact"
-                    v-model = "despesa.nroFiscal"
-                    :rules="[(v) => !!v || 'Campo é obrigatório']"
-                  ></v-text-field>
+                    v-model="despesa.tipoDespesaId"
+                    :rules="[(v) => !!v || 'Campo obrigatório']"
+                  ></v-select>
                 </v-col>
               </v-row>
-              <v-row>
-                <v-col>
-                  <v-text-field
-                    label="CNPJ"
-                    type="text"
-                    variant="outlined"
-                    color="primary"
-                    density="compact"
-                    v-model = "despesa.cnpj"
-                    v-maska="'##.###.###/####-##'"
-                    :rules="[(v) => !!v || 'Campo é obrigatório']"
-                  ></v-text-field>
-                </v-col>
-                <v-col>
-                  <v-text-field
-                    label="Inscrição Estadual"
-                    type="text"
-                    variant="outlined"
-                    color="primary"
-                    density="compact"
-                    v-model = "despesa.inscricaoEstadual"
-                    v-maska="'###.###.###.###'"
-                    :rules="[(v) => !!v || 'Campo é obrigatório']"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
-                  <v-text-field
-                    label="Razão Social"
-                    type="text"
-                    variant="outlined"
-                    color="primary"
-                    density="compact"
-                    v-model = "despesa.razaoSocial"
-                    :rules="[(v) => !!v || 'Campo é obrigatório']"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
+              <div v-if="despesaTipo.tipo == 1">
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      label="Nrº Nota/Cupom Fiscal"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.numeroFiscal"
+                      :rules="
+                        despesaTipo.tipo == 1
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      label="CNPJ"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.cnpj"
+                      v-maska="'##.###.###/####-##'"
+                      :rules="
+                        despesaTipo.tipo == 1
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      label="Inscrição Estadual"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.inscricaoEstadual"
+                      v-maska="'###.###.###.###'"
+                      :rules="
+                        despesaTipo.tipo == 1
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      label="Razão Social"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.razaoSocial"
+                      :rules="
+                        despesaTipo.tipo == 1
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </div>
+              <div v-else>
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      label="Origem"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.origem"
+                      :rules="
+                        despesaTipo.tipo == 2
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      label="Destino"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.destino"
+                      :rules="
+                        despesaTipo.tipo == 2
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-text-field
+                      label="Km percorrido"
+                      type="text"
+                      variant="outlined"
+                      color="primary"
+                      density="compact"
+                      v-model="despesa.kmPercorrido"
+                      :rules="
+                        despesaTipo.tipo == 2
+                          ? [(v) => !!v || 'Campo é obrigatório']
+                          : []
+                      "
+                      @update:model-value="calcularValor()"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </div>
               <v-row>
                 <v-col>
                   <v-text-field-money
@@ -91,18 +185,54 @@
                     :number-decimal="2"
                     density="compact"
                     v-model="despesa.valor"
-                    :rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :rules="
+                      despesaTipo.tipo == 1
+                        ? [(v) => !!v || 'Campo é obrigatório']
+                        : []
+                    "
+                    :disabled="despesaTipo.tipo == 2"
                   ></v-text-field-money>
                 </v-col>
               </v-row>
-              
+              <v-row>
+                <v-col>
+                  <v-textarea
+                    variant="outlined"
+                    label="Motivo"
+                    class="text-primary"
+                    v-model="despesa.motivo"
+                    no-resize
+                    rows="3"
+                    :rules="[(v) => !!v || 'Campo obrigatório']"
+                  >
+                  </v-textarea>
+                </v-col>
+              </v-row>
             </v-form>
           </v-col>
-          <v-col >
-            <dropzone @drop.prevent="drop" @change="selectedFile" style="margin-left: auto; margin-right: auto;" v-show="despesa.comprovanteImage ==''"/>
-            <v-btn density="compact" icon="mdi-close" style="margin-bottom:3px; margin-right: 15px;" @click="clearImage()" v-show="despesa.comprovanteImage !=''"></v-btn>        
-            <div id="img-preview" style="margin-left: auto; margin-right: auto;" v-show="despesa.comprovanteImage !='' ">
-              <img :src="despesa.comprovanteImage" style="max-width: 320px; height:auto;"/>
+          <v-col v-show="despesaTipo.tipo==1">
+            <dropzone
+              @drop.prevent="drop"
+              @change="selectedFile"
+              style="margin-left: auto; margin-right: auto"
+              v-show="despesa.imagePath == ''"
+            />
+            <v-btn
+              density="compact"
+              icon="mdi-close"
+              style="margin-bottom: 3px; margin-right: 15px"
+              @click="clearImage()"
+              v-show="despesa.imagePath != ''"
+            ></v-btn>
+            <div
+              id="img-preview"
+              style="margin-left: auto; margin-right: auto"
+              v-show="despesa.imagePath != ''"
+            >
+              <img
+                :src="despesa.imagePath"
+                style="max-width: 320px; height: auto"
+              />
             </div>
           </v-col>
         </v-row>
@@ -113,51 +243,86 @@
 
 <script setup>
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import dropzone from "@/components/dropzone.vue"
+import dropzone from "@/components/dropzone.vue";
+import { Despesa } from "@/store/reembolso/solicitacao.store";
+import { watch } from "vue";
+import { computed } from "vue";
 import { ref } from "vue";
 
-defineProps({
+const props = defineProps({
   despesa: {
-    type: Object,
+    type: Despesa,
     default: function () {
-      return {
-        id: 0,
-        solicitacaoId: 0,
-        tipoDespesaId: null,
-        dataEvento: "",
-        cnpj: "",
-        inscricaoEstadual: "",
-        razaoSocial: "",
-        nroFiscal: "",
-        valor: 0.00,
-        comprovanteImage: ""
-      };
-    }
+      return new Despesa();
+    },
   },
   comboTipoDespea: {
     type: Array,
-    default: function() {return []}
-  }
+    default: function () {
+      return [];
+    },
+  },
 });
-const emit = defineEmits(['changeImage'])
+
+const despesaForm = ref(null);
+const emit = defineEmits(["cancelaClick", "changeImage", "changeValor", "saveClick"]);
 
 const dropzoneFile = ref("");
+const tipoEscolhido = ref({
+  tipo: 1,
+  valor: 0
+})
+
+watch( () => tipoEscolhido.value.tipo, (novoTipo) => {
+  if (novoTipo == 1) {
+    props.despesa.kmPercorrido = 0
+    props.despesa.destino = "";
+    props.despesa.origem = "";
+    
+  } else {
+    props.despesa.cnpj = ""
+    props.despesa.inscricaoEstadual = ""
+    props.despesa.razaoSocial= ""
+    props.despesa.nroFiscal = ""
+  }
+  props.despesa.valor = 0
+})
+
+const despesaTipo = computed(() => {
+  let _tipo = { tipo: 1,  valor: 0 }
+
+  if (props.despesa.tipoDespesaId > 0) {
+    let tipo = props.comboTipoDespea.find(
+      (q) => q.id == props.despesa.tipoDespesaId
+    );
+    _tipo  = tipo ? { tipo: tipo.tipo, valor: tipo.valor} : _tipo;
+  }
+  tipoEscolhido.value.tipo = _tipo.tipo
+  tipoEscolhido.value.valor = _tipo.valor
+  return _tipo;
+});
 
 
-function clearImage() {
-  dropzoneFile.value =""
-  emit("changeImage", dropzoneFile.value)
+
+function calcularValor() {
+    let valor = parseFloat(props.despesa.kmPercorrido) * parseFloat(tipoEscolhido.value.valor)
+    props.despesa.valor = valor;
 }
 
-function drop (e) {
-    dropzoneFile.value = e.dataTransfer.files[0];
-    getImgData()
-};
+function clearImage() {
+  dropzoneFile.value = "";
+  emit("changeImage", dropzoneFile.value);
+}
 
-function selectedFile () {
-    dropzoneFile.value = document.querySelector(".dropzoneFile").files[0];
-    getImgData()
-};
+function drop(e) {
+  dropzoneFile.value = e.dataTransfer.files[0];
+  getImgData();
+}
+
+function selectedFile() {
+  dropzoneFile.value = document.querySelector(".dropzoneFile").files[0];
+  getImgData();
+}
 
 function getImgData() {
   const files = dropzoneFile.value;
@@ -166,9 +331,16 @@ function getImgData() {
     fileReader.readAsDataURL(files);
     fileReader.addEventListener("load", function () {
       //imgPreview.style.display = "block"
-      emit("changeImage", this.result)
-    });    
+      emit("changeImage", this.result);
+    });
   }
 }
 
+async function submitData() {
+  let { valid } = await despesaForm.value.validate();
+  console.log("Form valido: ", valid);
+  if (valid) {
+    emit('saveClick')
+  }
+}
 </script>

@@ -7,9 +7,9 @@ using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Solicitacoes.Common;
 using wca.reembolso.domain.Entities;
 
-namespace wca.reembolso.application.Features.Clientes.Queries
+namespace wca.reembolso.application.Features.Solicitacoes.Queries
 {
-    public record SolicitacaoByColaboradorOrGestorQuerie(int ColaboradorId = 0, int GestorId =0, int[]? Status = null) : IRequest<ErrorOr<IList<SolicitacaoResponse>>>;
+    public record SolicitacaoByColaboradorOrGestorQuerie(int ColaboradorId = 0, int GestorId = 0, int[]? Status = null) : IRequest<ErrorOr<IList<SolicitacaoResponse>>>;
     public class SolicitacaoByColaboradorOrGestorQueryHandler : IRequestHandler<SolicitacaoByColaboradorOrGestorQuerie, ErrorOr<IList<SolicitacaoResponse>>>
     {
         private readonly IRepository<Solicitacao> _reposistory;
@@ -28,7 +28,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
             var query = _reposistory.ToQuery();
 
             if (request.ColaboradorId > 0)
-                query =query.Where(q => q.ColaboradorId.Equals(request.ColaboradorId));
+                query = query.Where(q => q.ColaboradorId.Equals(request.ColaboradorId));
 
             if (request.GestorId > 0)
                 query = query.Where(q => q.GestorId.Equals(request.ColaboradorId));
@@ -39,7 +39,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
             {
                 query = query.Where(q => status.Contains(q.Status));
             }
-            
+
             var list = await query.ToListAsync();
 
             return _mapper.Map<List<SolicitacaoResponse>>(list);

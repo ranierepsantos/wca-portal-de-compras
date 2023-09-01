@@ -11,7 +11,9 @@ const rotas = {
 }
 
 export default {
-
+    changeStatus (data) {
+        return api.put(rotas.AlterarStatus, data);
+    },
     create(data)
     {
         return api.post(rotas.Create, data);

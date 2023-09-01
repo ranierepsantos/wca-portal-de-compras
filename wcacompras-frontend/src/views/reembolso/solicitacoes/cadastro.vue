@@ -50,7 +50,7 @@
                 >
               </v-col>
             </v-row>
-            <v-row>
+            <v-row v-show="solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id">
               <v-col>
                 <v-text-field
                   label="Colaborador"
@@ -70,13 +70,13 @@
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
                   v-model="solicitacao.gestor"
+                  :readonly="true"
                 ></v-text-field>
               </v-col>
             </v-row>
             <v-row>
-              <v-col>
+              <v-col v-show="solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id">
                 <v-text-field
                   label="Cargo"
                   type="text"
@@ -84,6 +84,7 @@
                   color="primary"
                   density="compact"
                   v-model="usuario.usuarioReembolsoComplemento.cargo"
+                  :readonly="true"
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -171,8 +172,7 @@
               <tr>
                 <th class="text-center text-grey">DATA</th>
                 <th class="text-center text-grey">TIPO</th>
-                <th class="text-center text-grey">NOTA/CUPOM FISCAL</th>
-                <th class="text-left text-grey">RAZÃO SOCIAL</th>
+                <th class="text-center text-grey">DESCRICAO</th>
                 <th class="text-center text-grey">VALOR</th>
                 <th class="text-center text-grey"></th>
               </tr>
@@ -183,11 +183,17 @@
                   {{ moment(item.dataEvento).format("DD/MM/YYYY") }}
                 </td>
                 <td class="text-center">
-                  {{ getDespesaTipo(item.tipoDespesaId).text }}
+                  {{ getDespesaTipo(item.tipoDespesaId).nome }}
                 </td>
-                <td class="text-center">{{ item.numeroFiscal }}</td>
-                <td class="text-left">{{ item.razaoSocial }}</td>
+                <td class="text-center">{{ 
+                  getDespesaTipo(item.tipoDespesaId).tipo == 1 ?
+                  'Cupom/Nota:' + item.numeroFiscal + ' / ' + item.razaoSocial :
+                  item.origem + ' -> ' + item.destino
 
+
+                  
+                
+                }}</td>
                 <td class="text-right">
                   {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
                 </td>
@@ -199,9 +205,9 @@
                     color="primary"
                     @click="editarDespesa(item)"
                     title="Editar"
-                    :disabled="isBusy || !canEdit"
+                    :disabled="isBusy"
                   ></v-btn>
-                  <v-btn icon="mdi-delete" variant="plain" color="error" @click="removerDespesa(item)" :disabled="isBusy || !canEdit">
+                  <v-btn icon="mdi-delete" variant="plain" color="error" @click="removerDespesa(item)" :disabled="isBusy">
                   </v-btn>
                 </td>
               </tr>
@@ -220,7 +226,7 @@
                 <td class="text-right">
                   {{
                     formatToCurrencyBRL(
-                      solicitacao.valor - calcularTotalDespesa()
+                      solicitacao.valorAdiantamento - calcularTotalDespesa()
                     )
                   }}
                 </td>
@@ -240,37 +246,13 @@
         :absolute="false"
         persistent
       >
-        <v-card>
-          <v-breadcrumbs>
-            <div class="text-h6 text-primary">Detalhamento de Despesa</div>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="primary"
-              variant="outlined"
-              class="text-capitalize"
-              @click="openDespesaForm = false"
-            >
-              <b>Cancelar</b>
-            </v-btn>
-
-            <v-btn
-              color="primary"
-              variant="outlined"
-              class="text-capitalize"
-              @click="salvarDespesa()"
-              style="margin-left: 5px"
-            >
-              <b>Salvar</b>
-            </v-btn>
-          </v-breadcrumbs>
-          <div class="text-center">
-            <despesa-form
-              :despesa="despesa"
-              :combo-tipo-despea="despesaTipoStore.toComboList()"
-              @change-image="(image) => (despesa.comprovanteImage = image)"
-            ></despesa-form>
-          </div>
-        </v-card>
+        <despesa-form
+          :despesa="despesa"
+          :combo-tipo-despea="despesaTipos"
+          @change-image="(image) => (despesa.imagePath = image)"
+          @cancela-click="() => { limparDadosDespesa(); openDespesaForm = false }"
+          @save-click="salvarDespesa()"
+        ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
       <v-dialog
@@ -334,7 +316,7 @@ const despesaTipos = ref([]);
 
 const formButtons = ref([]);
 const usuario = ref(new Usuario())
-const listUsuarios = ref([]);
+
 //VUE FUNCTIONS
 onMounted(async () => {
   
@@ -374,9 +356,14 @@ onMounted(async () => {
         router.push({name: "reembolsoSolicitacoes"})
         return;
     }
+    solicitacao.value.colaboradorId = usuario.value.id;
+    solicitacao.value.colaborador = usuario.value.nome;
+    solicitacao.value.gestorId = usuario.value.usuarioReembolsoComplemento.gestorId
+    solicitacao.value.gestor = solicitacao.value.gestor = solicitacaoStore.getUsuarioSolicitacao(usuario.value.usuarioReembolsoComplemento.gestorId).text
+
   }
 
-  if (!"2,4,5,6".includes(solicitacao.value.status))
+  // if (!"2,4,5,6".includes(solicitacao.value.status))
     formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
     
 });
@@ -387,48 +374,55 @@ const canEdit = computed(() => !"2,4,5,6".includes(solicitacao.value.status));
 
 async function aprovarReprovar(isAprovado, comentario) {
   try {
+    debugger
     isRunningEvent.value = true;
 
     /**
-      { value: -1, text: "Todos" },
-      { value: 0, text: "Solicitado", color: "warning", notifica: "cliente" },
-      { value: 1, text: "Aguardando Prestação de Contas", color: "warning", notifica: "usuário" },
-      { value: 2, text: "Aguardando faturamento", color: "info", notifica: "WCA" },
-      { value: 3, text: "Rejeitado", color: "error", notifica: "usuario" },
-      { value: 4, text: "Aguardando conferência", color: "info", notifica: "WCA" },
-      { value: 5, text: "Aguardando aprovação cliente", color: "info", notifica: "cliente" },
-      { value: 6, text: "Faturado", color: "success", notifica: "" },
+      1 - Solicitado
+      2 - Aguardando Depósito
+      3 - Prestar Contas
+      4 - Rejeitado
+      5 - Aguardando Conferência
+      6 - Aguardando Aprovação Cliente
+      7 - Aguardando Faturamento
+      8 - Faturado
+      9 - Cancelado
     **/
-    if (!isAprovado) solicitacao.value.status = 3; //rejeitado
+    if (!isAprovado) solicitacao.value.status = 4; //rejeitado
     else {
       //tipoSolicitacao: Adiantamento, Status: Solicitado
-      if (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status == 0)
-        solicitacao.value.status = 1; //1- Aguardando Prestação de Contas  
-      //Status: 4 - Aguardando conferência
-      else if (solicitacao.value.status == 4)
-        solicitacao.value.status = 5; //5 - Aguardando Aprovação Cliente
-      //Status: 5 - Aguardando Aprovação Cliente
-      else if (solicitacao.value.status == 5){
-        solicitacao.value.status = 2; //2 - Aguardando Faturamento
-        if (solicitacao.value.tipoSolicitacao == 2)
-        {
-          //lançar valor das despesa na conta corrente do usuário
-          let transacao = new Transacao(`Despesas da solicitação ${solicitacao.value.id}`, "-", calcularTotalDespesa())
-          usuario.value.contaCorrente.adicionarTransacao(transacao)
-          useUsuarioStore().update(usuario.value);
-        }
+      if (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status == 1)
+        solicitacao.value.status = 2; //2 - Aguardando Depósito
+      //Status: 5 - Aguardando conferência
+      else if (solicitacao.value.status == 5)
+        solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
+      //Status: 6 - Aguardando Aprovação Cliente
+      else if (solicitacao.value.status == 6){
+        solicitacao.value.status = 7; //7 - Aguardando Faturamento
+        // if (solicitacao.value.tipoSolicitacao == 2)
+        // {
+        //   //lançar valor das despesa na conta corrente do usuário
+        //   let transacao = new Transacao(`Despesas da solicitação ${solicitacao.value.id}`, "-", calcularTotalDespesa())
+        //   usuario.value.contaCorrente.adicionarTransacao(transacao)
+        //   useUsuarioStore().update(usuario.value);
+        // }
       }
     }
     let reembolsoStatus = solicitacaoStore.getStatus(solicitacao.value.status);
-    let texto = `Solicitação  <b>${isAprovado ? 'APROVADA': 'REJEITADA'}</b>, status alterado para <b>${reembolsoStatus.text.toUpperCase()}</b>. <br/> Comentário: ${comentario}`;
-    let evento = new Evento(solicitacao.value.id, authStore.user.nome, texto)
+    let texto = `Solicitação  <b>${isAprovado ? 'APROVADA': 'REJEITADA'}</b> por ${authStore.user.nome}, status alterado para <b>${reembolsoStatus.status}</b>. <br/> Comentário: ${comentario}`;
     
-    solicitacao.value.addEvento(evento)
-    solicitacaoStore.update(solicitacao.value);
+    let solicitacaoStatus = {
+      solicitacaoId: solicitacao.value.id,
+      evento: texto,
+      status: reembolsoStatus
+    }
+
+    await solicitacaoStore.changeStatus(solicitacaoStatus)
+
     openAprovacaoForm.value = false;
 
     let mensagem = (isAprovado ? "Aprovação" : "Rejeição") + " realizada com sucesso!"
-    mensagem += reembolsoStatus.notifica !="" ? `<br/> Notificação enviada para ${reembolsoStatus.notifica}!`:""
+    //mensagem += reembolsoStatus.notifica !="" ? `<br/> Notificação enviada para ${reembolsoStatus.notifica}!`:""
 
     swal.fire({
       toast: true,
@@ -453,7 +447,7 @@ function calcularTotalDespesa() {
   solicitacao.value.despesa.forEach((item) => {
     valorTotalDespesa += parseFloat(item.valor);
   });
-  if (solicitacao.value.tipoSolicitacao == 1 ) solicitacao.value.valor = valorTotalDespesa;
+  if (solicitacao.value.tipoSolicitacao == 1 ) solicitacao.value.valorDespesa = valorTotalDespesa;
   return valorTotalDespesa;
 }
 
@@ -463,7 +457,7 @@ function editarDespesa(item) {
 }
 
 function getDespesaTipo(id) {
-  return despesaTipos.value.find(q => q.value == id)
+  return despesaTipos.value.find(q => q.id == id)
 }
 
 async function getSolicitacao(solicitacaoId) {
@@ -472,6 +466,9 @@ async function getSolicitacao(solicitacaoId) {
     let data = await solicitacaoStore.getById(solicitacaoId);
     data.periodoInicial = data.periodoInicial.split('T')[0];
     data.periodoFinal = data.periodoFinal.split('T')[0];
+    data.despesa.forEach(element => {
+      element.dataEvento = element.dataEvento.split('T')[0];
+    });
     solicitacao.value = data;
   
 
@@ -494,12 +491,12 @@ async function salvar() {
     //checar se o status esta aguardando despesa e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas 
     if (data.tipoSolicitacao == 1) {
-      data.status = 4 //Aguardando Conferência
+      data.status = 5 //Aguardando Conferência
     }
-    if (data.tipoSolicitacao==2 && data.status == 1 &&  data.despesa.length > 0) {
+    if (data.tipoSolicitacao == 2 && data.status == 3 &&  data.despesa.length > 0) {
       let options = {
             title: "Confirmação",
-            text: "Finalizou o cadastro de despesa? O status será alterado!",
+            html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Sim",
@@ -509,13 +506,14 @@ async function salvar() {
         let response = await swal.fire(options);
         if (response.isConfirmed)
         {
-          data.status = 4;
+          data.status = 5; //5 - aguardando conferência
         }
     }
-    if (data.id == 0) solicitacaoStore.add(data);
+    if (data.id == 0) 
+      await solicitacaoStore.add(data);
     else {
-      if (data.status == 3) data.status = 4
-      solicitacaoStore.update(data);
+      if (data.status == 4) data.status = 5 //5 - aguardando conferência
+      await solicitacaoStore.update(data);
     }
 
     swal.fire({
@@ -573,6 +571,7 @@ async function registrarPagto() {
 
 
 function salvarDespesa() {
+  console.log("despesa", despesa.value)
   solicitacao.value.salvarDespesa(despesa.value)
   limparDadosDespesa();
   openDespesaForm.value = false;
