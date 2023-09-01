@@ -6,9 +6,15 @@
       :buttons="formButtons"
       @aprovar-click="openAprovacaoForm = true"
       @salvar-click="salvar()"
-      @registrarpgto-click ="registrarPagto()"
+      @registrarpgto-click="registrarPagto()"
     />
-    <v-container class="justify-center">
+    <v-progress-linear
+      color="primary"
+      indeterminate
+      :height="5"
+      v-if="isBusy"
+    ></v-progress-linear>
+    <v-container class="justify-center" v-else>
       <v-card>
         <v-card-text>
           <v-form>
@@ -37,20 +43,26 @@
                   color="primary"
                   v-model="solicitacao.tipoSolicitacao"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
+                  :disabled="solicitacao.id > 0"
                 ></v-select>
               </v-col>
               <v-col v-show="solicitacao.id > 0">
                 <v-btn
                   :color="solicitacaoStore.getStatus(solicitacao.status).color"
                   variant="tonal"
-                  
                   class="text-center"
                 >
-                  {{ solicitacaoStore.getStatus(solicitacao.status).status }}</v-btn
+                  {{
+                    solicitacaoStore.getStatus(solicitacao.status).status
+                  }}</v-btn
                 >
               </v-col>
             </v-row>
-            <v-row v-show="solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id">
+            <v-row
+              v-show="
+                solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id
+              "
+            >
               <v-col>
                 <v-text-field
                   label="Colaborador"
@@ -76,14 +88,18 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col v-show="solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id">
+              <v-col
+                v-show="
+                  solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id
+                "
+              >
                 <v-text-field
                   label="Cargo"
                   type="text"
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  v-model="usuario.usuarioReembolsoComplemento.cargo"
+                  v-model="solicitacao.colaboradorCargo"
                   :readonly="true"
                 ></v-text-field>
               </v-col>
@@ -132,7 +148,7 @@
               <v-col v-show="solicitacao.tipoSolicitacao == 2">
                 <v-text-field-money
                   label-text="Valor Solicitação"
-                  v-model="solicitacao.valor"
+                  v-model="solicitacao.valorAdiantamento"
                   color="primary"
                   :number-decimal="2"
                   prefix="R$"
@@ -185,15 +201,16 @@
                 <td class="text-center">
                   {{ getDespesaTipo(item.tipoDespesaId).nome }}
                 </td>
-                <td class="text-center">{{ 
-                  getDespesaTipo(item.tipoDespesaId).tipo == 1 ?
-                  'Cupom/Nota:' + item.numeroFiscal + ' / ' + item.razaoSocial :
-                  item.origem + ' -> ' + item.destino
-
-
-                  
-                
-                }}</td>
+                <td class="text-center">
+                  {{
+                    getDespesaTipo(item.tipoDespesaId).tipo == 1
+                      ? "Cupom/Nota:" +
+                        item.numeroFiscal +
+                        " / " +
+                        item.razaoSocial
+                      : item.origem + " -> " + item.destino
+                  }}
+                </td>
                 <td class="text-right">
                   {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
                 </td>
@@ -207,7 +224,13 @@
                     title="Editar"
                     :disabled="isBusy"
                   ></v-btn>
-                  <v-btn icon="mdi-delete" variant="plain" color="error" @click="removerDespesa(item)" :disabled="isBusy">
+                  <v-btn
+                    icon="mdi-delete"
+                    variant="plain"
+                    color="error"
+                    @click="removerDespesa(item)"
+                    :disabled="isBusy"
+                  >
                   </v-btn>
                 </td>
               </tr>
@@ -234,11 +257,17 @@
             </tfoot>
           </v-table>
         </v-card-text>
-
-        
       </v-card>
       <!-- HISTORICO DA SOLICITAÇÃO -->
-      <historico :eventos="solicitacao.solicitacaoHistorico.sort(compararValor('dataEvento', 'desc'))" style="margin-top: 15px;" v-show="solicitacao.id != 0"/>
+      <historico
+        :eventos="
+          solicitacao.solicitacaoHistorico.sort(
+            compararValor('dataEvento', 'desc')
+          )
+        "
+        style="margin-top: 15px"
+        v-show="solicitacao.id != 0"
+      />
       <!-- FORM PARA CADASTRO DE DESPESA -->
       <v-dialog
         v-model="openDespesaForm"
@@ -250,7 +279,12 @@
           :despesa="despesa"
           :combo-tipo-despea="despesaTipos"
           @change-image="(image) => (despesa.imagePath = image)"
-          @cancela-click="() => { limparDadosDespesa(); openDespesaForm = false }"
+          @cancela-click="
+            () => {
+              limparDadosDespesa();
+              openDespesaForm = false;
+            }
+          "
           @save-click="salvarDespesa()"
         ></despesa-form>
       </v-dialog>
@@ -283,25 +317,27 @@ import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
 import { formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { Usuario, Transacao, useUsuarioStore, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
+import { Usuario, useUsuarioStore } from "@/store/reembolso/usuario.store";
 import {
   Despesa,
   Solicitacao,
   useSolicitacaoStore,
-  Evento
+  Evento,
 } from "@/store/reembolso/solicitacao.store";
 import moment from "moment";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import { useDespesaTipoStore } from "@/store/reembolso/despesaTipo.store";
 import { computed } from "vue";
-import {compararValor} from "@/helpers/functions"
+import { compararValor } from "@/helpers/functions";
 import historico from "@/components/reembolso/historico.vue";
+import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
 
 
 const authStore = useAuthStore();
 const clienteStore = useClienteStore();
 const despesaTipoStore = useDespesaTipoStore();
+const contaStore = useContaStore();
 const route = useRoute();
 const solicitacaoStore = useSolicitacaoStore();
 const openDespesaForm = ref(false);
@@ -315,35 +351,52 @@ const despesa = ref(new Despesa());
 const despesaTipos = ref([]);
 
 const formButtons = ref([]);
-const usuario = ref(new Usuario())
+const usuario = ref(new Usuario());
 
 //VUE FUNCTIONS
 onMounted(async () => {
-  
-  await solicitacaoStore.loadUsuarios()
-  usuario.value = await useUsuarioStore().getById(authStore.user.id);
-  clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
-  despesaTipos.value = await despesaTipoStore.toComboList();
+  try {
+    isBusy.value = true;
 
-  if (parseInt(route.query.id) > 0) {
-    await getSolicitacao(route.query.id);
-    if ("1,5,6".includes(solicitacao.value.status)){
-      formButtons.value.push({
-        text: "Aprovar / Reprovar",
-        icon: "",
-        event: "aprovar-click",
-      });
-    }
-    solicitacao.value.colaborador = solicitacaoStore.getUsuarioSolicitacao(solicitacao.value.colaboradorId).text
-    solicitacao.value.gestor = solicitacaoStore.getUsuarioSolicitacao(solicitacao.value.gestorId).text
- 
-    if (solicitacao.value.tipoSolicitacao==2 && solicitacao.value.status == 2){
-      formButtons.value.push({ text: "Registrar Pagamento", icon: "", event: "registrarpgto-click" });
-    }
-  }else {
-    //checar se o usuario já possui adiantamento em aberto
-    let adiantamento = await solicitacaoStore.getByTipoAndUsuario(2, authStore.user.id, [1,2,3,4,5]);
-    if (adiantamento.length > 0) {
+    await solicitacaoStore.loadUsuarios();
+    usuario.value = await useUsuarioStore().getById(authStore.user.id);
+    clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
+    despesaTipos.value = await despesaTipoStore.toComboList();
+
+    if (parseInt(route.query.id) > 0) {
+      await getSolicitacao(route.query.id);
+      if ("1,5,6".includes(solicitacao.value.status)) {
+        formButtons.value.push({
+          text: "Aprovar / Reprovar",
+          icon: "",
+          event: "aprovar-click",
+        });
+      }
+      solicitacao.value.colaborador = solicitacaoStore.getUsuarioSolicitacao(
+        solicitacao.value.colaboradorId
+      ).text;
+      solicitacao.value.gestor = solicitacaoStore.getUsuarioSolicitacao(
+        solicitacao.value.gestorId
+      ).text;
+
+      if (
+        solicitacao.value.tipoSolicitacao == 2 &&
+        solicitacao.value.status == 2
+      ) {
+        formButtons.value.push({
+          text: "Registrar Pagamento",
+          icon: "",
+          event: "registrarpgto-click",
+        });
+      }
+    } else {
+      //checar se o usuario já possui adiantamento em aberto
+      let adiantamento = await solicitacaoStore.getByTipoAndUsuario(
+        2,
+        authStore.user.id,
+        [1, 2, 3, 4, 5]
+      );
+      if (adiantamento.length > 0) {
         swal.fire({
           toast: true,
           icon: "warning",
@@ -353,19 +406,29 @@ onMounted(async () => {
           showConfirmButton: false,
           timer: 3000,
         });
-        router.push({name: "reembolsoSolicitacoes"})
+        router.push({ name: "reembolsoSolicitacoes" });
         return;
+      }
+      solicitacao.value.colaboradorId = usuario.value.id;
+      solicitacao.value.colaborador = usuario.value.nome;
+      solicitacao.value.colaboradorCargo =
+        usuario.value.usuarioReembolsoComplemento.cargo;
+      solicitacao.value.gestorId =
+        usuario.value.usuarioReembolsoComplemento.gestorId;
+      solicitacao.value.gestor = solicitacao.value.gestor =
+        solicitacaoStore.getUsuarioSolicitacao(
+          usuario.value.usuarioReembolsoComplemento.gestorId
+        ).text;
     }
-    solicitacao.value.colaboradorId = usuario.value.id;
-    solicitacao.value.colaborador = usuario.value.nome;
-    solicitacao.value.gestorId = usuario.value.usuarioReembolsoComplemento.gestorId
-    solicitacao.value.gestor = solicitacao.value.gestor = solicitacaoStore.getUsuarioSolicitacao(usuario.value.usuarioReembolsoComplemento.gestorId).text
 
-  }
-
-  // if (!"2,4,5,6".includes(solicitacao.value.status))
+    // if (!"2,4,5,6".includes(solicitacao.value.status))
     formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
-    
+  } catch (error) {
+    console.log("onMounted.error:", error);
+    handleErrors(error);
+  } finally {
+    isBusy.value = false;
+  }
 });
 
 const canEdit = computed(() => !"2,4,5,6".includes(solicitacao.value.status));
@@ -374,7 +437,7 @@ const canEdit = computed(() => !"2,4,5,6".includes(solicitacao.value.status));
 
 async function aprovarReprovar(isAprovado, comentario) {
   try {
-    debugger
+    debugger;
     isRunningEvent.value = true;
 
     /**
@@ -391,37 +454,41 @@ async function aprovarReprovar(isAprovado, comentario) {
     if (!isAprovado) solicitacao.value.status = 4; //rejeitado
     else {
       //tipoSolicitacao: Adiantamento, Status: Solicitado
-      if (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status == 1)
+      if (
+        solicitacao.value.tipoSolicitacao == 2 &&
+        solicitacao.value.status == 1
+      )
         solicitacao.value.status = 2; //2 - Aguardando Depósito
       //Status: 5 - Aguardando conferência
       else if (solicitacao.value.status == 5)
         solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
       //Status: 6 - Aguardando Aprovação Cliente
-      else if (solicitacao.value.status == 6){
+      else if (solicitacao.value.status == 6) {
         solicitacao.value.status = 7; //7 - Aguardando Faturamento
-        // if (solicitacao.value.tipoSolicitacao == 2)
-        // {
-        //   //lançar valor das despesa na conta corrente do usuário
-        //   let transacao = new Transacao(`Despesas da solicitação ${solicitacao.value.id}`, "-", calcularTotalDespesa())
-        //   usuario.value.contaCorrente.adicionarTransacao(transacao)
-        //   useUsuarioStore().update(usuario.value);
-        // }
+        // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
+        if (solicitacao.value.tipoSolicitacao == 1)
+          solicitacao.value.status = 2; //2 - Aguardando Depósito
       }
     }
     let reembolsoStatus = solicitacaoStore.getStatus(solicitacao.value.status);
-    let texto = `Solicitação  <b>${isAprovado ? 'APROVADA': 'REJEITADA'}</b> por ${authStore.user.nome}, status alterado para <b>${reembolsoStatus.status}</b>. <br/> Comentário: ${comentario}`;
-    
+    let texto = `Solicitação  <b>${
+      isAprovado ? "APROVADA" : "REJEITADA"
+    }</b> por ${authStore.user.nome}, status alterado para <b>${
+      reembolsoStatus.status
+    }</b>. <br/> Comentário: ${comentario}`;
+
     let solicitacaoStatus = {
       solicitacaoId: solicitacao.value.id,
       evento: texto,
-      status: reembolsoStatus
-    }
+      status: reembolsoStatus,
+    };
 
-    await solicitacaoStore.changeStatus(solicitacaoStatus)
+    await solicitacaoStore.changeStatus(solicitacaoStatus);
 
     openAprovacaoForm.value = false;
 
-    let mensagem = (isAprovado ? "Aprovação" : "Rejeição") + " realizada com sucesso!"
+    let mensagem =
+      (isAprovado ? "Aprovação" : "Rejeição") + " realizada com sucesso!";
     //mensagem += reembolsoStatus.notifica !="" ? `<br/> Notificação enviada para ${reembolsoStatus.notifica}!`:""
 
     swal.fire({
@@ -447,7 +514,8 @@ function calcularTotalDespesa() {
   solicitacao.value.despesa.forEach((item) => {
     valorTotalDespesa += parseFloat(item.valor);
   });
-  if (solicitacao.value.tipoSolicitacao == 1 ) solicitacao.value.valorDespesa = valorTotalDespesa;
+  
+  solicitacao.value.valorDespesa = valorTotalDespesa;
   return valorTotalDespesa;
 }
 
@@ -457,26 +525,21 @@ function editarDespesa(item) {
 }
 
 function getDespesaTipo(id) {
-  return despesaTipos.value.find(q => q.id == id)
+  return despesaTipos.value.find((q) => q.id == id);
 }
 
 async function getSolicitacao(solicitacaoId) {
   try {
-    isBusy.value = true;
     let data = await solicitacaoStore.getById(solicitacaoId);
-    data.periodoInicial = data.periodoInicial.split('T')[0];
-    data.periodoFinal = data.periodoFinal.split('T')[0];
-    data.despesa.forEach(element => {
-      element.dataEvento = element.dataEvento.split('T')[0];
+    data.periodoInicial = data.periodoInicial.split("T")[0];
+    data.periodoFinal = data.periodoFinal.split("T")[0];
+    data.despesa.forEach((element) => {
+      element.dataEvento = element.dataEvento.split("T")[0];
     });
     solicitacao.value = data;
-  
-
   } catch (error) {
     console.log("getSolicitacao.error:", error);
     handleErrors(error);
-  } finally {
-    isBusy.value = false;
   }
 }
 
@@ -486,33 +549,34 @@ function limparDadosDespesa() {
 
 async function salvar() {
   try {
-    isBusy.value = true;
     let data = { ...solicitacao.value };
     //checar se o status esta aguardando despesa e se há despesa lançadas
-    //verificar se finalizou o cadastro de despesas 
+    //verificar se finalizou o cadastro de despesas
     if (data.tipoSolicitacao == 1) {
-      data.status = 5 //Aguardando Conferência
+      data.status = 5; //Aguardando Conferência
     }
-    if (data.tipoSolicitacao == 2 && data.status == 3 &&  data.despesa.length > 0) {
+    if (
+      data.tipoSolicitacao == 2 &&
+      data.status == 3 &&
+      data.despesa.length > 0
+    ) {
       let options = {
-            title: "Confirmação",
-            html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim",
-            cancelButtonText: "Não",
-        }
+        title: "Confirmação",
+        html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
+      };
 
-        let response = await swal.fire(options);
-        if (response.isConfirmed)
-        {
-          data.status = 5; //5 - aguardando conferência
-        }
+      let response = await swal.fire(options);
+      if (response.isConfirmed) {
+        data.status = 5; //5 - aguardando conferência
+      }
     }
-    if (data.id == 0) 
-      await solicitacaoStore.add(data);
+    if (data.id == 0) await solicitacaoStore.add(data);
     else {
-      if (data.status == 4) data.status = 5 //5 - aguardando conferência
+      if (data.status == 4) data.status = 5; //5 - aguardando conferência
       await solicitacaoStore.update(data);
     }
 
@@ -530,66 +594,91 @@ async function salvar() {
     console.log("solicitacao.cadastro.salvar.erro", error);
     handleErrors(error);
   } finally {
-    isBusy.value = false;
   }
 }
 
 async function registrarPagto() {
+  try {
+    let valor =
+      solicitacao.value.tipoSolicitacao == 2
+        ? solicitacao.value.valorAdiantamento
+        : solicitacao.value.valorDespesa;
 
-  
-  let options = {
-            title: "Confirmação",
-            text: `Confirma o registro de pagamento no valor de ${formatToCurrencyBRL(solicitacao.value.valor)}?`,
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim",
-            cancelButtonText: "Não",
-        }
+    let options = {
+      title: "Confirmação",
+      text: `Confirma o registro de pagamento no valor de ${formatToCurrencyBRL(
+        valor
+      )}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    };
 
-  let response = await swal.fire(options);
+    let response = await swal.fire(options);
 
-  if (response.isConfirmed){
-    let transacao = new Transacao(`Adiantamento solicitação ${solicitacao.value.id}`, "+", solicitacao.value.valor)
-    usuario.value.contaCorrente.adicionarTransacao(transacao)
+    if (response.isConfirmed) {
+      let transacao = new Transacao(
+        `Crédito - solicitação ${solicitacao.value.id}`,
+        "+",
+        valor
+      );
 
-    useUsuarioStore().update(usuario.value);
+      await contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
 
-    let texto = `Pagamento realizado ao colaborador no valor ${formatToCurrencyBRL(solicitacao.value.valor)}!`
-    let evento = new Evento(solicitacao.value.id, authStore.user.nome, texto);
-    solicitacao.value.addEvento(evento)
-    swal.fire({
-      toast: true,
-      icon: "success",
-      index: "top-end",
-      title: "Sucesso!",
-      text: "Registro realizado com sucesso!",
-      showConfirmButton: false,
-      timer: 2000,
-    });
+      // se tipo = 1 - reembolso, enviar para 7 - aguardando faturamento, senão, 3 - prestar contas
+      let status = solicitacao.value.tipoSolicitacao == 1 ? 7 : 3;
+
+      let novoStatus = solicitacaoStore.getStatus(status);
+      
+      let texto = `${authStore.user.nome} registrou pagamento ao colaborador no valor ${formatToCurrencyBRL(
+        valor
+      )}!`;
+      
+
+      let solicitacaoStatus = {
+        solicitacaoId: solicitacao.value.id,
+        evento: texto,
+        status: novoStatus,
+      };
+
+      await solicitacaoStore.changeStatus(solicitacaoStatus);
+
+      swal.fire({
+        toast: true,
+        icon: "success",
+        index: "top-end",
+        title: "Sucesso!",
+        text: "Registro realizado com sucesso!",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    }
+  } catch (error) {
+    console.log("solicitacao.cadastro.registrarPagamento.erro", error);
+    handleErrors(error);
   }
 }
 
-
 function salvarDespesa() {
-  console.log("despesa", despesa.value)
-  solicitacao.value.salvarDespesa(despesa.value)
+  solicitacao.value.salvarDespesa(despesa.value);
   limparDadosDespesa();
   openDespesaForm.value = false;
 }
 
 async function removerDespesa(item) {
   let options = {
-        title: "Confirma Exclusão?",
-        text: "Deseja realmente excluir o despesa: " + item.nroFiscal + "?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sim",
-        cancelButtonText: "Não",
-    }
+    title: "Confirma Exclusão?",
+    text: "Deseja realmente excluir o despesa: " + item.nroFiscal + "?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sim",
+    cancelButtonText: "Não",
+  };
 
-    let response = await swal.fire(options);
-    if (response.isConfirmed) {
-        solicitacao.value.removerDespesa(item)
-    }
+  let response = await swal.fire(options);
+  if (response.isConfirmed) {
+    solicitacao.value.removerDespesa(item);
+  }
 }
 </script>

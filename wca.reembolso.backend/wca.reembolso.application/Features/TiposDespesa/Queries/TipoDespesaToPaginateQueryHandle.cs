@@ -14,13 +14,13 @@ namespace wca.reembolso.application.Features.TiposDespesa.Queries
     public sealed class TipoDespesaToPaginateQueryHandle :
         IRequestHandler<TipoDespesaPaginateQuery, ErrorOr<Pagination<TipoDespesaResponse>>>
     {
-        private IRepository<TipoDespesa> _reposistory;
-        private IMapper _mapper;
-        private ILogger<TipoDespesaToPaginateQueryHandle> _logger;
+        private readonly IRepositoryManager _repository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<TipoDespesaToPaginateQueryHandle> _logger;
         public TipoDespesaToPaginateQueryHandle(
-            IRepository<TipoDespesa> reposistory, IMapper mapper, ILogger<TipoDespesaToPaginateQueryHandle> logger)
+            IRepositoryManager repository, IMapper mapper, ILogger<TipoDespesaToPaginateQueryHandle> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -28,7 +28,7 @@ namespace wca.reembolso.application.Features.TiposDespesa.Queries
         public async Task<ErrorOr<Pagination<TipoDespesaResponse>>> Handle(
             TipoDespesaPaginateQuery request, CancellationToken cancellationToken)
         {
-            var query = _reposistory.ToQuery();
+            var query = _repository.TipoDespesaRepository.ToQuery();
 
             if (!string.IsNullOrEmpty(request.Termo))
                 query = query.Where(q => q.Nome.Contains(request.Termo));

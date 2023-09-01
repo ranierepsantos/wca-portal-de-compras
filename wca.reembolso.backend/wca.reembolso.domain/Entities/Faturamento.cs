@@ -24,8 +24,14 @@ namespace wca.reembolso.domain.Entities
         [Column("status")]
         public int Status { get; set; }
 
-        [Column("Valor", TypeName = "money")]
+        [Column("valor", TypeName = "money")]
         public decimal Valor { get; set; }
+
+        [Column("numero_po", TypeName ="varchar(20)")]
+        public string? NumeroPO { get; set; }
+
+        [Column("documento_po", TypeName = "varchar(200)")]
+        public string? DocumentoPO { get; set; }
 
         public IList<FaturamentoItem> FaturamentoItem { get; set; } = new List<FaturamentoItem>();
 

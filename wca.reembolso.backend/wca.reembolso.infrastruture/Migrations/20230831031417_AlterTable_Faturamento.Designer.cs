@@ -12,8 +12,8 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    [Migration("20230810114405_AlterTable_Despesas_AddColumn_DataEvento")]
-    partial class AlterTable_Despesas_AddColumn_DataEvento
+    [Migration("20230831031417_AlterTable_Faturamento")]
+    partial class AlterTable_Faturamento
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,11 +96,8 @@ namespace wca.reembolso.infrastruture.Migrations
             modelBuilder.Entity("wca.reembolso.domain.Entities.ContaCorrente", b =>
                 {
                     b.Property<int>("UsuarioId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("usuario_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioId"));
 
                     b.Property<decimal>("Saldo")
                         .HasColumnType("money")
@@ -206,6 +203,14 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("smalldatetime")
                         .HasColumnName("DataCriacao");
 
+                    b.Property<string>("DocumentoPO")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("documento_po");
+
+                    b.Property<string>("NumeroPO")
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("numero_po");
+
                     b.Property<int>("Status")
                         .HasColumnType("int")
                         .HasColumnName("status");
@@ -216,7 +221,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.Property<decimal>("Valor")
                         .HasColumnType("money")
-                        .HasColumnName("Valor");
+                        .HasColumnName("valor");
 
                     b.HasKey("Id");
 
@@ -245,6 +250,8 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FaturamentoId");
+
+                    b.HasIndex("SolicitacaoId");
 
                     b.ToTable("FaturamentoItems");
                 });
@@ -531,7 +538,15 @@ namespace wca.reembolso.infrastruture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("wca.reembolso.domain.Entities.Solicitacao", "Solicitacao")
+                        .WithMany()
+                        .HasForeignKey("SolicitacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Faturamento");
+
+                    b.Navigation("Solicitacao");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Solicitacao", b =>
@@ -556,9 +571,11 @@ namespace wca.reembolso.infrastruture.Migrations
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Transacao", b =>
                 {
-                    b.HasOne("wca.reembolso.domain.Entities.ContaCorrente", null)
+                    b.HasOne("wca.reembolso.domain.Entities.ContaCorrente", "ContaCorrente")
                         .WithMany("Transacoes")
                         .HasForeignKey("ContaCorrenteUsuarioId");
+
+                    b.Navigation("ContaCorrente");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioClientes", b =>

@@ -33,9 +33,5 @@ namespace wca.reembolso.infrastruture.Persistence
             return result;
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

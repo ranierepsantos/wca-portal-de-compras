@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Clientes.Common;
@@ -10,20 +11,20 @@ namespace wca.reembolso.application.Features.Clientes.Queries
     public record ClienteByIdQuerie(int id): IRequest<ErrorOr<ClienteResponse>>;
     public class ClienteByIdQueryHandler : IRequestHandler<ClienteByIdQuerie, ErrorOr<ClienteResponse>>
     {
-        private IClienteRepository _reposistory;
+        private IRepositoryManager _repository;
         private IMapper _mapper;
         private ILogger<ClienteByIdQueryHandler> _logger;
 
-        public ClienteByIdQueryHandler(IClienteRepository reposistory, IMapper mapper, ILogger<ClienteByIdQueryHandler> logger)
+        public ClienteByIdQueryHandler(IRepositoryManager repository, IMapper mapper, ILogger<ClienteByIdQueryHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
         public async Task<ErrorOr<ClienteResponse>> Handle(ClienteByIdQuerie request, CancellationToken cancellationToken)
         {
 
-            var cliente = await _reposistory.GetByIdAsync(request.id);
+            var cliente = await _repository.ClienteRepository.ToQuery().Where(q =>  q.Id.Equals( request.id)).FirstOrDefaultAsync(cancellationToken);
 
             if (cliente == null)
             {

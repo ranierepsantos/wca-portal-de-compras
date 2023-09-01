@@ -12,20 +12,21 @@ namespace wca.reembolso.application.Features.TiposDespesa.Queries
     public record TipoDespesaByIdQuerie(int Id) : IRequest<ErrorOr<TipoDespesaResponse>>;
     public class TipoDespesaByIdQueryHandler : IRequestHandler<TipoDespesaByIdQuerie, ErrorOr<TipoDespesaResponse>>
     {
-        private IRepository<TipoDespesa> _reposistory;
-        private IMapper _mapper;
-        private ILogger<TipoDespesaByIdQueryHandler> _logger;
+        private readonly IRepositoryManager _repository;
+        private readonly IMapper _mapper;
+        private readonly ILogger<TipoDespesaByIdQueryHandler> _logger;
 
-        public TipoDespesaByIdQueryHandler(IRepository<TipoDespesa> reposistory, IMapper mapper, ILogger<TipoDespesaByIdQueryHandler> logger)
+        public TipoDespesaByIdQueryHandler(IRepositoryManager reposistory, IMapper mapper, ILogger<TipoDespesaByIdQueryHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = reposistory;
             _mapper = mapper;
             _logger = logger;
         }
         public async Task<ErrorOr<TipoDespesaResponse>> Handle(TipoDespesaByIdQuerie request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Buscando tipo de despesa por id");
 
-            var tipoDespesa = await _reposistory.ToQuery()
+            var tipoDespesa = await _repository.TipoDespesaRepository.ToQuery()
                                     .Where(q => q.Id.Equals(request.Id))
                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 

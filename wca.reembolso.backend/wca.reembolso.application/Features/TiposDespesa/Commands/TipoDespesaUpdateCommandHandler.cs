@@ -25,9 +25,9 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly ILogger<TipoDespesaUpdateCommandHandler> _logger;
-        private readonly IRepository<TipoDespesa> _repository;
+        private readonly IRepositoryManager _repository;
 
-        public TipoDespesaUpdateCommandHandler(IMapper mapper, ILogger<TipoDespesaUpdateCommandHandler> logger, IRepository<TipoDespesa> repository, IMediator mediator)
+        public TipoDespesaUpdateCommandHandler(IMapper mapper, ILogger<TipoDespesaUpdateCommandHandler> logger, IRepositoryManager repository, IMediator mediator)
         {
             _mapper = mapper;
             _logger = logger;
@@ -59,8 +59,8 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
             TipoDespesa tipoDespesa = _mapper.Map<TipoDespesa>(request);
 
             //4. atualizar e salvar
-            _repository.Update(tipoDespesa);
-            await _repository.SaveChangesAsync();
+            _repository.TipoDespesaRepository.Update(tipoDespesa);
+            await _repository.SaveAsync();
 
             return _mapper.Map<TipoDespesaResponse>(tipoDespesa);
         }

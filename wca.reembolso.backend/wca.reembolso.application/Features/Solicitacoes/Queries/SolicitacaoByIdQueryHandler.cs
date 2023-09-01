@@ -12,23 +12,23 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
     public record SolicitacaoByIdQuerie(int Id): IRequest<ErrorOr<SolicitacaoResponse>>;
     public class SolicitacaoByIdQueryHandler : IRequestHandler<SolicitacaoByIdQuerie, ErrorOr<SolicitacaoResponse>>
     {
-        private readonly IRepository<Solicitacao> _reposistory;
+        private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoByIdQueryHandler> _logger;
 
-        public SolicitacaoByIdQueryHandler(IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoByIdQueryHandler> logger)
+        public SolicitacaoByIdQueryHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoByIdQueryHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
         public async Task<ErrorOr<SolicitacaoResponse>> Handle(SolicitacaoByIdQuerie request, CancellationToken cancellationToken)
         {
 
-            var dado = await _reposistory.ToQuery()
+            var dado = await _repository.SolicitacaoRepository.ToQuery()
                 .Include("Despesa")
                 .Include("SolicitacaoHistorico")
-                .Where(q => q.Id.Equals(request.Id)).FirstOrDefaultAsync();
+                .Where(q => q.Id.Equals(request.Id)).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (dado == null)
             {

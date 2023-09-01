@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.domain.Entities;
 using wca.reembolso.infrastruture.Context;
 using wca.reembolso.infrastruture.Persistence;
 
@@ -48,20 +47,8 @@ namespace wca.reembolso.infrastruture
                 options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
             );
 
-            services.AddScoped<IClienteRepository, ClienteRepository>();
-            services.AddScoped<IRepository<ContaCorrente>, BaseRepository<ContaCorrente>>();
-            services.AddScoped<IRepository<Despesa>, BaseRepository<Despesa>>();
-            services.AddScoped<IRepository<Faturamento>, BaseRepository<Faturamento>>();
-            services.AddScoped<IRepository<FaturamentoItem>, BaseRepository<FaturamentoItem>>();
-            services.AddScoped<IRepository<Notificacao>, BaseRepository<Notificacao>>();
-            services.AddScoped<IRepository<Solicitacao>, BaseRepository<Solicitacao>>();
-            services.AddScoped<IRepository<SolicitacaoHistorico>, BaseRepository<SolicitacaoHistorico>>();
-            services.AddScoped<IRepository<StatusSolicitacao>, BaseRepository<StatusSolicitacao>>();
-            services.AddScoped<IRepository<TipoDespesa>, BaseRepository<TipoDespesa>>();
-            services.AddScoped<IRepository<Transacao>, BaseRepository<Transacao>>();
-            services.AddScoped<IRepository<UsuarioClientes>, BaseRepository<UsuarioClientes>>();
-
-
+            services.AddScoped<IRepositoryManager, RepositoryManager>();
+            
 
         }
     }

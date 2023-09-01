@@ -1,34 +1,41 @@
 import { defineStore } from "pinia";
 import { paginate } from "@/helpers/functions";
 import moment from "moment";
+import api from "@/services/reembolso/api";
+
+const rotas = {
+    Paginar: "Faturamento/Paginar",
+    GetById: "Faturamento?Id={Id}"
+}
 
 
 export class Faturamento {
     constructor(data = undefined) {
-        this.id = data ? data.id : useFaturamentoStore().idFaturamento++;
-        this.dataCriacao = data ? data.dataCriacao: moment().format("YYYY-MM-DD");
-        this.usuario = data ? data.usuario: "";
+        this.id = data ? data.id : 0;
+        this.dataCriacao = data ? data.dataCriacao: moment().format("YYYY-MM-DD")
+        this.usuarioId = data ? data.usuarioId: null
         this.clienteId = data ? data.clienteId: null
+        this.status = data? data.status: 1
         this.valor = data ? data.valor: 0.00
-        this.status = data? data.status: 0
-        this.faturamentoItems = data? data.faturamentoItems: []
-        this.eventos = data? data.eventos: []
-        localStorage.setItem("reembolso-faturamento-id",useFaturamentoStore().idFaturamento)
+        this.numeroPO = data? data.numeroPO: null
+        this.documentoPO = data? data.documentoPO: null
+        this.faturamentoItem = data? data.faturamentoItem: []
+        //this.eventos = data? data.eventos: []
     }
 
     adicionarAlterarItem(faturamentoItem) {
         let index = -1        
-        index = this.faturamentoItems.findIndex(q =>  q.id == faturamentoItem.id) 
+        index = this.faturamentoItem.findIndex(q =>  q.id == faturamentoItem.id) 
         if (index == -1)
-            this.faturamentoItems.push(faturamentoItem);
+            this.faturamentoItem.push(faturamentoItem);
         else 
-            this.faturamentoItems[index] = faturamentoItem;
+            this.faturamentoItem[index] = faturamentoItem;
     }
 
     removerItem(faturamentoItem) {
-        let index = this.faturamentoItems.findIndex(c => c.id == faturamentoItem.id)
+        let index = this.faturamentoItem.findIndex(c => c.id == faturamentoItem.id)
         if (index > -1) {
-            this.faturamentoItems.splice(index, 1);
+            this.faturamentoItem.splice(index, 1);
         }
     }
 
@@ -40,11 +47,10 @@ export class Faturamento {
 
 export class FaturamentoItem {
     constructor(data = undefined) {
-        this.id = data ? data.id : useFaturamentoStore().faturamentoItemId++;
+        this.id = data ? data.id : 0;
         this.faturamentoId = data ? data.faturamentoId: null;
         this.solicitacaoId = data ? data.solicitacaoId: null;
         this.solicitacao = data ? data.solicitacao: null;
-        localStorage.setItem("reembolso-faturamentoItemid", useFaturamentoStore().faturamentoItemId)
     }
 }
 
@@ -60,9 +66,6 @@ export class FaturamentoEvento {
 
 export const useFaturamentoStore = defineStore("faturamento", {
   state: () => ({
-    faturamentoItemId: localStorage.getItem("reembolso-faturamentoItemid") || 11000, 
-    idFaturamento: localStorage.getItem("reembolso-faturamento-id") || 11000,
-    repository: JSON.parse(localStorage.getItem("reembolso-faturamento")) || [],
     faturamentoStatus: [
         { value: -1, text: "Todos" },
         { value: 0, text: "Novo", color: "info", notifica: "" },
@@ -73,21 +76,25 @@ export const useFaturamentoStore = defineStore("faturamento", {
     ]
   }),
   actions: {
-    
-    add (data) {
-        data.status = 1;
-        this.repository.push(data)
-        localStorage.setItem("reembolso-faturamento", JSON.stringify(this.repository))
-        localStorage.setItem("reembolso-faturamento-id", this.idFaturamento)
-    },
-    
     async getById (id) {
-        let data = this.repository.find(c => c.id == id)
-        return  new Faturamento(data);
+        let response = await api.get(rotas.GetById.replace("{Id}",id));
+        return  new Faturamento(response.data);
     },
 
-    async getPaginate(pageNumber = 1, pageSize = 10, filter = "") {
-        return paginate(this.repository, pageNumber, pageSize)
+    async getPaginate(page = 1, pageSize = 10, filters = "") {
+
+        let parametros = {
+            page: page,
+            pageSize: pageSize,
+            filialId: filters.filialId,
+            clienteId: filters.clienteId,
+            dataIni: filters.dataIni,
+            dataFim: filters.dataFim,
+            status: filters.status
+        }
+        let response = await api.get(rotas.Paginar, {params: parametros} );
+
+        return response.data;
     },
 
     update (data) {

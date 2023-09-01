@@ -15,10 +15,10 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
     public record StatusSolicitacaoGetAllQuery():IRequest<ErrorOr<IList<StatusSolicitacao>>>;
     public class StatusSolicitacaoGetAllQuerieHandle : IRequestHandler<StatusSolicitacaoGetAllQuery, ErrorOr<IList<StatusSolicitacao>>>
     {
-        private readonly IRepository<StatusSolicitacao> _repository;
+        private readonly IRepositoryManager _repository;
         private readonly ILogger<StatusSolicitacaoGetAllQuerieHandle> _logger;
 
-        public StatusSolicitacaoGetAllQuerieHandle(IRepository<StatusSolicitacao> repository, ILogger<StatusSolicitacaoGetAllQuerieHandle> logger)
+        public StatusSolicitacaoGetAllQuerieHandle(IRepositoryManager repository, ILogger<StatusSolicitacaoGetAllQuerieHandle> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -28,7 +28,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
         {
             _logger.LogInformation("Status Solicitação - GetAll");
 
-            var query = _repository.ToQuery().OrderBy(o => o.Id);
+            var query = _repository.StatusSolicitacaoRepository.ToQuery().OrderBy(o => o.Id);
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
 
