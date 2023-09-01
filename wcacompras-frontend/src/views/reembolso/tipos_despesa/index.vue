@@ -81,7 +81,7 @@
             <v-icon icon="mdi-shape-outline"></v-icon>
             &nbsp;{{ item.nome }}
           </td>
-          <td class="text-left">{{ item.tipo }}</td>
+          <td class="text-left">{{ getTipoDespesa(item.tipo).text }}</td>
           <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
           <td class="text-center">
             <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
@@ -114,6 +114,7 @@ import Breadcrumbs from "@/components/breadcrumbs.vue";
 import { useDespesaTipoStore, TipoDespesa } from "@/store/reembolso/despesaTipo.store";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import { formatToCurrencyBRL } from "@/helpers/functions";
+import { computed } from "vue";
 
 //DATA
 const page = ref(1);
@@ -221,6 +222,11 @@ async function getItems()
   {
     isBusy.value = false;
   }
+}
+
+function getTipoDespesa(tipo){
+  return despesaTipoStore.getTipoDespesa(tipo)
+
 }
 
 async function salvar()

@@ -56,6 +56,9 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
     async toComboList() {
         let response = await api.toList();
         return response.data;
+    },
+    getTipoDespesa(tipo) {
+        return this.tipoDespesaTipo.find(p => p.value == tipo)
     }
   },
 });
