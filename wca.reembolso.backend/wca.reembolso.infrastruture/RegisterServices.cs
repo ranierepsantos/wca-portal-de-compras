@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using wca.compras.domain.Security;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.domain.Entities;
 using wca.reembolso.infrastruture.Context;

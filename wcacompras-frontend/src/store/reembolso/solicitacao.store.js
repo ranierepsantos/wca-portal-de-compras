@@ -27,21 +27,20 @@ export class Solicitacao {
     salvarDespesa(despesa) {
         let index = -1        
         if (despesa.id == 0) {
-
             despesa.solicitacaoId = this.id
         }else {
-            index = this.despesas.findIndex(q =>  q.id == despesa.id) 
+            index = this.despesa.findIndex(q =>  q.id == despesa.id)
         }
         if (index == -1)
-            this.despesas.push(despesa);
+            this.despesa.push(despesa);
         else 
-            this.despesas[index] = despesa;
+            this.despesa[index] = despesa;
     }
 
     removerDespesa(despesa) {
-        let index = this.despesas.findIndex(c => c.id == despesa.id)
+        let index = this.despesa.findIndex(c => c.id == despesa.id)
         if (index > -1) {
-            this.despesas.splice(index, 1);
+            this.despesa.splice(index, 1);
         }
     }
 }
@@ -57,7 +56,7 @@ export class Despesa {
         this.inscricaoEstadual = ""
         this.numeroFiscal = ""
         this.valor= 0.0
-        this.ImagePath = ""
+        this.imagePath = ""
         this.motivo = ""
         this.origem =""
         this.destino = ""
@@ -102,7 +101,18 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         try {
             
             let response = await api.create(data);
-            console.log(response);
+            console.debug(response);
+
+        } catch (error) {
+            throw error
+        }  
+    },
+    
+    async changeStatus (data) {
+        try {
+            
+            let response = await api.changeStatus(data);
+            console.debug(response);
 
         } catch (error) {
             throw error
@@ -111,7 +121,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     
     async getById (id) {
         let response = await api.getById(id);
-        console.log("solicitacao.store.getById", response);
+        console.debug("solicitacao.store.getById", response);
         return new Solicitacao(response.data);
     },
 
@@ -119,7 +129,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         try {
             
             let response = await api.update(data);
-            console.log(response);
+            console.debug(response);
             return true;
         } catch (error) {
             throw error
@@ -178,7 +188,8 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     },
 
     getUsuarioSolicitacao(id) {
-        return this.usuarios.find(q => q.value == id)
+        let usuario =  this.usuarios.find(q => q.value == id)
+        return usuario || { value: 0, text: "" }
     }
 
   },

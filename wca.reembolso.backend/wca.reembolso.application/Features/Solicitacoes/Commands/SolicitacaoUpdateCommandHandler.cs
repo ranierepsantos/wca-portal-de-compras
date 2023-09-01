@@ -2,6 +2,7 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Behaviors;
@@ -44,7 +45,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         {
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - validation");
             
-            //1. validar dados
+            // validar dados
             var validator = new SolicitacaoUpdateCommandBehavior();
             var validationResult = validator.Validate(request);
             if (!validationResult.IsValid)
@@ -52,14 +53,17 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 var errors = validationResult.Errors.ConvertAll(x => Error.Validation(x.PropertyName, x.ErrorMessage));
                 return errors;
             }
-            //1. localizar cliente
+            // localizar cliente
             var querie = new SolicitacaoByIdQuerie(request.Id);
 
             var findResult = await _mediator.Send(querie);
 
             if (findResult.IsError) return findResult;
+
             var dado = _mapper.Map<Solicitacao>(findResult.Value);
 
+            // remover despesas que foram excluídas
+            _logger.LogInformation("SolicitacaoUpdateCommandHandler - removendo despesas que foram excluídas");
             List<Despesa> despesasRemover = dado.Despesa
                 .Where(x => request.Despesa.Where(q => q.Id == x.Id).Count() == 0)
                 .Where(x => x.Id != 0)
@@ -74,7 +78,30 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 }
             }
 
-            //2. mapear para cliente e adicionar
+            // excluir imagem de despesa que trocou de imagem
+            _logger.LogInformation("SolicitacaoUpdateCommandHandler - excluindo imagens que foram trocadas");
+            List<string> removerImagens = dado.Despesa
+                .Where(x => request.Despesa.Where(q => q.Id == x.Id && q.ImagePath != x.ImagePath).Count() > 0)
+                .Select(f => f.ImagePath)
+                .ToList();
+
+            for (int idx = 0; idx < removerImagens.Count; idx++)
+            {
+                HandleFile.DeleteFile(removerImagens[idx]);
+            }
+
+
+            // salvar imagens de despesas que trocaram imagem ou são novas
+            _logger.LogInformation("SolicitacaoUpdateCommandHandler - salvando imagens");
+            for (int idx = 0; idx < request.Despesa.Count; idx++)
+            {
+                if (HandleFile.IsBase64Image(request.Despesa[idx].ImagePath))
+                {
+                    request.Despesa[idx].ImagePath = HandleFile.SaveImage(request.Despesa[idx].ImagePath);
+                }
+            }
+
+            // mapear para cliente e adicionar
             _mapper.Map(request, dado);
             
             _reposistory.Update(dado);
