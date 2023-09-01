@@ -21,9 +21,9 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
     {
         private readonly IMapper _mapper;
         private readonly ILogger<TipoDespesaCreateCommandHandler> _logger;
-        private readonly IRepository<TipoDespesa> _repository;
+        private readonly IRepositoryManager _repository;
 
-        public TipoDespesaCreateCommandHandler(IMapper mapper, ILogger<TipoDespesaCreateCommandHandler> logger, IRepository<TipoDespesa> repository)
+        public TipoDespesaCreateCommandHandler(IMapper mapper, ILogger<TipoDespesaCreateCommandHandler> logger, IRepositoryManager repository)
         {
             _mapper = mapper;
             _logger = logger;
@@ -47,8 +47,8 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
             TipoDespesa tipoDespesa = _mapper.Map<TipoDespesa>(request);
 
             //3. criar e salvar
-            _repository.Create(tipoDespesa);
-            await _repository.SaveChangesAsync();
+            _repository.TipoDespesaRepository.Create(tipoDespesa);
+            await _repository.SaveAsync();
 
             return _mapper.Map<TipoDespesaResponse>(tipoDespesa);
         }

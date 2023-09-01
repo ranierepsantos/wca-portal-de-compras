@@ -11,8 +11,9 @@ namespace wca.reembolso.domain.Entities
     [Table("ContaCorrente")]
     public sealed class ContaCorrente
     {
-        [Key]
+        
         [Column("usuario_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int UsuarioId { get; set; }
 
         [Column("saldo", TypeName ="money")]

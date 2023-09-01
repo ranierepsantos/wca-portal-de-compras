@@ -99,8 +99,6 @@ const filial = ref({
   nome: "",
   ativo: true
 });
-const authStore = useAuthStore();
-
 const filialForm = ref(null)
 
 //VUE METHODS

@@ -12,8 +12,8 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    [Migration("20230805220227_AlterDatabase_CreateTable")]
-    partial class AlterDatabase_CreateTable
+    [Migration("20230827210847_Inicial_Migration")]
+    partial class Inicial_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,11 +96,8 @@ namespace wca.reembolso.infrastruture.Migrations
             modelBuilder.Entity("wca.reembolso.domain.Entities.ContaCorrente", b =>
                 {
                     b.Property<int>("UsuarioId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("usuario_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioId"));
 
                     b.Property<decimal>("Saldo")
                         .HasColumnType("money")
@@ -124,6 +121,10 @@ namespace wca.reembolso.infrastruture.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(20)")
                         .HasColumnName("cnpj");
+
+                    b.Property<DateTime?>("DataEvento")
+                        .HasColumnType("smalldatetime")
+                        .HasColumnName("data_evento");
 
                     b.Property<string>("Destino")
                         .IsRequired()
@@ -324,6 +325,10 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("int")
                         .HasColumnName("StatusSolicitacaoId");
 
+                    b.Property<int>("TipoSolicitacao")
+                        .HasColumnType("int")
+                        .HasColumnName("tipo_solicitacao");
+
                     b.Property<decimal>("ValorAdiantamento")
                         .HasColumnType("money")
                         .HasColumnName("valor_adiantamento");
@@ -390,6 +395,10 @@ namespace wca.reembolso.infrastruture.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(150)")
                         .HasColumnName("texto");
+
+                    b.Property<string>("TemplateNotificacao")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("template_notificacao");
 
                     b.HasKey("Id");
 
@@ -544,9 +553,11 @@ namespace wca.reembolso.infrastruture.Migrations
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Transacao", b =>
                 {
-                    b.HasOne("wca.reembolso.domain.Entities.ContaCorrente", null)
+                    b.HasOne("wca.reembolso.domain.Entities.ContaCorrente", "ContaCorrente")
                         .WithMany("Transacoes")
                         .HasForeignKey("ContaCorrenteUsuarioId");
+
+                    b.Navigation("ContaCorrente");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioClientes", b =>

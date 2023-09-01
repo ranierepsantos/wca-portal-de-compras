@@ -25,7 +25,7 @@
                     <td class="text-center">{{item.id}}</td>
                     <td class="text-center">{{ moment(item.dataCriacao).format("DD/MM/YYYY") }}</td>
                     <td class="text-left">
-                        {{ clienteStore.getClienteById(item.clienteId).nome }}
+                        {{ item.clienteNome }}
                     </td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
                     <td class="text-left">
@@ -112,7 +112,6 @@ async function getItems()
         isBusy.value = true;
         let response = await faturamentoStore.getPaginate(page.value, pageSize)
         faturamentos.value = response.items;
-
         totalPages.value = response.totalPages;
     } catch (error)
     {

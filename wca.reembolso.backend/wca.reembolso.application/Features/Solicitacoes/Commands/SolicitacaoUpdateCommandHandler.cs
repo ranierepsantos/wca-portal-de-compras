@@ -26,19 +26,17 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
     public class SolicitacaoUpdateCommandHandler : IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>
     {
-        private readonly IRepository<Solicitacao> _reposistory;
+        private readonly IRepositoryManager _repository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoUpdateCommandHandler> _logger;
-        private readonly IRepository<Despesa> _despesaRepository;
 
-        public SolicitacaoUpdateCommandHandler(IMediator mediator, IRepository<Solicitacao> reposistory, IMapper mapper, ILogger<SolicitacaoUpdateCommandHandler> logger, IRepository<Despesa> despesaRepository)
+        public SolicitacaoUpdateCommandHandler(IMediator mediator, IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoUpdateCommandHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
-            _despesaRepository = despesaRepository;
         }
 
         async Task<ErrorOr<SolicitacaoResponse>> IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>.Handle(SolicitacaoUpdateCommand request, CancellationToken cancellationToken)
@@ -56,7 +54,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             // localizar cliente
             var querie = new SolicitacaoByIdQuerie(request.Id);
 
-            var findResult = await _mediator.Send(querie);
+            var findResult = await _mediator.Send(querie, cancellationToken);
 
             if (findResult.IsError) return findResult;
 
@@ -65,23 +63,23 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             // remover despesas que foram excluídas
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - removendo despesas que foram excluídas");
             List<Despesa> despesasRemover = dado.Despesa
-                .Where(x => request.Despesa.Where(q => q.Id == x.Id).Count() == 0)
+                .Where(x => !request.Despesa.Where(q => q.Id == x.Id).Any())
                 .Where(x => x.Id != 0)
                 .ToList();
 
             foreach (var item in despesasRemover)
             {
-                var despesa = _despesaRepository.ToQuery().Where(q => q.Id.Equals(item.Id)).FirstOrDefault();
+                var despesa = _repository.DespesaRepository.ToQuery().Where(q => q.Id.Equals(item.Id)).FirstOrDefault();
                 if (despesa != null)
                 {
-                    _despesaRepository.Delete(despesa);
+                    _repository.DespesaRepository.Delete(despesa);
                 }
             }
 
             // excluir imagem de despesa que trocou de imagem
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - excluindo imagens que foram trocadas");
             List<string> removerImagens = dado.Despesa
-                .Where(x => request.Despesa.Where(q => q.Id == x.Id && q.ImagePath != x.ImagePath).Count() > 0)
+                .Where(x => request.Despesa.Where(q => q.Id == x.Id && q.ImagePath != x.ImagePath).Any())
                 .Select(f => f.ImagePath)
                 .ToList();
 
@@ -104,9 +102,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             // mapear para cliente e adicionar
             _mapper.Map(request, dado);
             
-            _reposistory.Update(dado);
+            _repository.SolicitacaoRepository.Update(dado);
 
-            await _reposistory.SaveChangesAsync();
+            await _repository.SaveAsync();
 
             //3. mapear para SolicitacaoResponse
             return _mapper.Map<SolicitacaoResponse>(dado);

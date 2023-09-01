@@ -271,7 +271,7 @@ const routes = [
         path: 'filiais',
         name: 'reembolsoFiliais',
         beforeEnter: protectRoute,
-        meta: {permissao: "filial", sistema: 1},
+        meta: {permissao: "livre"},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.

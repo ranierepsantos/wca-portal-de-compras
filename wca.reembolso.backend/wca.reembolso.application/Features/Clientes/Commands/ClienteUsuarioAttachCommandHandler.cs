@@ -13,12 +13,12 @@ namespace wca.reembolso.application.Features.Clientes.Commands
 
     public class ClienteUsuarioAttachCommandHandler : IRequestHandler<ClienteUsuarioAttachCommand, ErrorOr<bool>>
     {
-        private IRepository<UsuarioClientes> _reposistory;
+        private IRepositoryManager _repository;
         private ILogger<ClienteUsuarioAttachCommandHandler> _logger;
 
-        public ClienteUsuarioAttachCommandHandler(IRepository<UsuarioClientes> reposistory, ILogger<ClienteUsuarioAttachCommandHandler> logger)
+        public ClienteUsuarioAttachCommandHandler(IRepositoryManager repository, ILogger<ClienteUsuarioAttachCommandHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _logger = logger;
         }
 
@@ -26,7 +26,7 @@ namespace wca.reembolso.application.Features.Clientes.Commands
         {
             _logger.LogInformation("ClienteUsuarioAttachCommandHandler - início");
 
-            await _reposistory.ExecuteCommandAsync($"DELETE FROM UsuarioClientes WHERE usuario_id = {request.UsuarioId}");
+            await _repository.ExecuteCommandAsync($"DELETE FROM UsuarioClientes WHERE usuario_id = {request.UsuarioId}");
 
             _logger.LogInformation("ClienteUsuarioAttachCommandHandler - vinculando cliente x usuario");
 
@@ -36,9 +36,9 @@ namespace wca.reembolso.application.Features.Clientes.Commands
                     UsuarioId = request.UsuarioId,
                     ClienteId = request.ClienteIds[idx],
                 };
-                _reposistory.Create(usuarioCliente);
+                _repository.UsuarioClientesRepository.Create(usuarioCliente);
             }
-            await _reposistory.SaveChangesAsync();
+            await _repository.SaveAsync();
 
             return true;
         }

@@ -2,17 +2,10 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Clientes.Behaviors;
 using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application.Features.Clientes.Queries;
-using wca.reembolso.application.Features.Solicitacoes.Behaviors;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Clientes.Commands
@@ -34,12 +27,12 @@ namespace wca.reembolso.application.Features.Clientes.Commands
 
     public class ClienteUpdateCommandHandler : IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>
     {
-        private readonly IClienteRepository _reposistory;
+        private readonly IRepositoryManager _reposistory;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private ILogger<ClienteUpdateCommandHandler> _logger;
 
-        public ClienteUpdateCommandHandler(IMediator mediator, IClienteRepository reposistory, IMapper mapper, ILogger<ClienteUpdateCommandHandler> logger)
+        public ClienteUpdateCommandHandler(IMediator mediator, IRepositoryManager reposistory, IMapper mapper, ILogger<ClienteUpdateCommandHandler> logger)
         {
             _reposistory = reposistory;
             _mapper = mapper;
@@ -68,9 +61,9 @@ namespace wca.reembolso.application.Features.Clientes.Commands
             //2. mapear para cliente e adicionar
             Cliente cliente = _mapper.Map<Cliente>(request);
 
-            _reposistory.Update(cliente);
+            _reposistory.ClienteRepository.Update(cliente);
 
-            await _reposistory.SaveChangesAsync();
+            await _reposistory.SaveAsync();
 
             //3. mapear para clienteresponse
             return _mapper.Map<ClienteResponse>(cliente);

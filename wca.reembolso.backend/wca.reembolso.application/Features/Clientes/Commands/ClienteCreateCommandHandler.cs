@@ -24,13 +24,13 @@ namespace wca.reembolso.application.Features.Clientes.Commands
 
     public class ClienteCreateCommandHandler : IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>
     {
-        private IClienteRepository _reposistory;
+        private IRepositoryManager _repository;
         private IMapper _mapper;
         private ILogger<ClienteCreateCommandHandler> _logger;
 
-        public ClienteCreateCommandHandler(IClienteRepository reposistory, IMapper mapper, ILogger<ClienteCreateCommandHandler> logger)
+        public ClienteCreateCommandHandler(IRepositoryManager reposistory, IMapper mapper, ILogger<ClienteCreateCommandHandler> logger)
         {
-            _reposistory = reposistory;
+            _repository = reposistory;
             _mapper = mapper;
             _logger = logger;
         }
@@ -50,9 +50,9 @@ namespace wca.reembolso.application.Features.Clientes.Commands
             //2. mapear para cliente e adicionar
             Cliente cliente = _mapper.Map<Cliente>(request);
 
-            _reposistory.Create(cliente);
+            _repository.ClienteRepository.Create(cliente);
 
-            await _reposistory.SaveChangesAsync();
+            await _repository.SaveAsync();
 
             //3. mapear para clienteresponse
             return _mapper.Map<ClienteResponse>(cliente);

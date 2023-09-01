@@ -65,24 +65,9 @@ export class Despesa {
 }
 
 export class Evento {
-    constructor(solicitacaoId =0, usuario = "sistema", descricao ="") {
-        this.id = 0,
+    constructor(solicitacaoId =0, evento ="") {
         this.solicitacaoId = solicitacaoId,
-        this.dataEvento = moment().format("YYYY-MM-DDTHH:mm:ss"),
-        this.usuario = usuario
-        this.descricao = descricao
-    }
-}
-
-let ChangeStatusCommand ={
-    "solicitacaoId": 0,
-    "evento": "string",
-    "status": {
-        "id": 0,
-        "status": "string",
-        "color": "string",
-        "notifica": 1,
-        "templateNotificacao": "string"
+        this.evento = evento
     }
 }
 
@@ -181,6 +166,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     async getByTipoAndUsuario(tipoSolicitacao, colaboradorId, status) {
         
         let response = await api.ListarPorColaboradorGestor(colaboradorId, 0, status);
+        console.log(response)
         
         let data = response.data.filter(c => c.tipoSolicitacao == tipoSolicitacao)  
 
@@ -190,6 +176,10 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     getUsuarioSolicitacao(id) {
         let usuario =  this.usuarios.find(q => q.value == id)
         return usuario || { value: 0, text: "" }
+    },
+    
+    async registrarEvento(evento) {
+        return await api.registrarEvento(evento);
     }
 
   },

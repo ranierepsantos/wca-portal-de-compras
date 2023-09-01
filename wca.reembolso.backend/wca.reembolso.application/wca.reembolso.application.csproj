@@ -22,4 +22,9 @@
     <ProjectReference Include="..\wca.reembolso.domain\wca.reembolso.domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Faturamentos\Behaviors\" />
+    <Folder Include="Features\Faturamentos\Commands\" />
+  </ItemGroup>
+
 </Project>

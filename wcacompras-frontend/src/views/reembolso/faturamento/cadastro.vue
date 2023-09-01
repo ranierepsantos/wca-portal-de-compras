@@ -17,8 +17,8 @@
                   label="Cliente"
                   :items="clientes"
                   density="compact"
-                  item-title="text"
-                  item-value="value"
+                  item-title="nome"
+                  item-value="id"
                   variant="outlined"
                   color="primary"
                   v-model="faturamento.clienteId"
@@ -60,7 +60,7 @@
                 item-value="value"
                 variant="outlined"
                 color="primary"
-                v-model="filtro.colaborador"
+                v-model="filter.colaboradorId"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
               ></v-select>
             </v-col>
@@ -73,7 +73,7 @@
                 item-value="value"
                 variant="outlined"
                 color="primary"
-                v-model="filtro.gestor"
+                v-model="filter.gestorId"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
               ></v-select>
             </v-col>
@@ -84,7 +84,7 @@
                 variant="outlined"
                 color="primary"
                 density="compact"
-                v-model="filtro.periodoInicial"
+                v-model="filter.dataIni"
               ></v-text-field>
             </v-col>
             <v-col cols="2">
@@ -94,7 +94,7 @@
                 variant="outlined"
                 color="primary"
                 density="compact"
-                v-model="filtro.periodoFinal"
+                v-model="filter.dataFim"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -142,9 +142,7 @@
             </thead>
             <tbody>
               <template
-                v-for="(item, index) in faturamento.faturamentoItems.sort(
-                  compararValor('id')
-                )"
+                v-for="(item, index) in faturamento.faturamentoItem.sort(compararValor('id'))"
                 :key="index"
                 v-if="faturamento.status == 2"
               >
@@ -157,29 +155,25 @@
                       )
                     }}
                   </td>
-                  <td class="text-left">{{ item.solicitacao.colaborador }}</td>
-                  <td class="text-left">{{ item.solicitacao.gestor }}</td>
+                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.solicitacao.colaboradorId).text }}</td>
+                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.solicitacao.gestorId).text }}</td>
                   <td class="text-right">
                     {{
-                      formatToCurrencyBRL(parseFloat(item.solicitacao.valor))
+                      formatToCurrencyBRL(parseFloat(item.solicitacao.valorDespesa))
                     }}
                   </td>
                 </tr>
               </template>
-              <template
-                v-for="(item, index) in items.sort(compararValor('id'))"
-                :key="item.id"
-                v-else
-              >
+              <template v-for="(item) in items.sort(compararValor('id'))" :key="item.id" v-else>
                 <tr>
                   <td class="text-center">{{ item.id }}</td>
                   <td class="text-center">
                     {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
                   </td>
-                  <td class="text-left">{{ item.colaborador }}</td>
-                  <td class="text-left">{{ item.gestor }}</td>
+                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.colaboradorId).text }}</td>
+                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.gestorId).text }}</td>
                   <td class="text-right">
-                    {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
+                    {{ formatToCurrencyBRL(parseFloat(item.valorDespesa)) }}
                   </td>
                   <td class="text-center">
                     <v-btn
@@ -237,7 +231,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { formatToCurrencyBRL, compararValor } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import { Evento, useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
-import { useUsuarioStore } from "@/store/reembolso/usuario.store";
+import { IDPERFILCOLABORADOR, IDPERFILGESTOR, useUsuarioStore } from "@/store/reembolso/usuario.store";
 import {
   Faturamento,
   FaturamentoEvento,
@@ -270,9 +264,28 @@ const filtro = ref({
 });
 const selecionarTodosItens = ref(false);
 const formButtons = ref([]);
+
+const page = 1;
+const pageSize = 99999;
+const isBusy = ref(false);
+const filter = ref({
+    filialId: null,
+    clienteId: null,
+    colaboradorId: null,
+    gestorId: null,
+    status: 7,
+    dataIni: null,
+    dataFim: null
+});
+
+
+
+
+
 //VUE - FUNCTIONS
 onMounted(async () => {
-  clientes.value = clienteStore.toComboList(authStore.user.filialId);
+  clientes.value = await clienteStore.ListByUsuario(authStore.user.id);
+  await solicitacaoStore.loadUsuarios()
   if (parseInt(route.query.id) > 0) {
     await getById(route.query.id);
     if (faturamento.value.status == 1)
@@ -287,28 +300,31 @@ onMounted(async () => {
     formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
 });
 
-watch(
-  () => faturamento.value.clienteId,
-  (newValue, oldValue) => {
-    if (oldValue && newValue != oldValue)
-      faturamento.value.faturamentoItems = [];
+watch(() => faturamento.value.clienteId, 
+      async (newValue, oldValue) => {
+        if (oldValue && newValue != oldValue)
+          faturamento.value.faturamentoItem = [];
+        
+        clearFilters(faturamento.value.clienteId)
 
-    items.value = solicitacaoStore.getToFaturamento(
-      faturamento.value.clienteId
-    );
-    gestores.value = usuarioStore.toComboListGestorByCliente(
-      faturamento.value.clienteId
-    );
-    colaboradores.value = usuarioStore.toComboListColaboradorByCliente(
-      faturamento.value.clienteId
-    );
-  }
+        await getListGestoresByCliente(faturamento.value.clienteId)
+
+        await getListColaboradoresByCliente(faturamento.value.clienteId)        
+      }
 );
+
+watch(
+  () => filter.value,
+  async (newValue, oldValue) => {
+    await getSolicitacoes()
+  },
+  { deep: true }
+)
 
 const valorFaturamento = computed(() => {
   faturamento.value.valor = 0;
-  faturamento.value.faturamentoItems.forEach((item) => {
-    faturamento.value.valor += parseFloat(item.solicitacao.valor);
+  faturamento.value.faturamentoItem.forEach((item) => {
+    faturamento.value.valor += parseFloat(item.solicitacao.valorDespesa);
   });
   return faturamento.value.valor;
 });
@@ -336,7 +352,7 @@ async function aprovarReprovar(isAprovado, comentario) {
 
     //passa por cada solicitação e atualiza o status para Faturado
     if (isAprovado) {
-      faturamento.value.faturamentoItems.forEach((fitem) => {
+      faturamento.value.faturamentoItem.forEach((fitem) => {
         let sitem = new Solicitacao(fitem.solicitacao);
         sitem.status = 6; //faturado
         sitem.addEvento(new Evento(sitem.id, authStore.user.nome,`Solicitação Faturada, nº faturamento: ${faturamento.value.id}`));
@@ -368,11 +384,11 @@ function checkUncheckItem(item) {
   item.selected = !item.selected;
   addRemove(item);
   selecionarTodosItens.value =
-    faturamento.value.faturamentoItems.length == items.value.length;
+    faturamento.value.faturamentoItem.length == items.value.length;
 }
 
 function addRemove(solicitacao) {
-  let index = faturamento.value.faturamentoItems.findIndex(
+  let index = faturamento.value.faturamentoItem.findIndex(
     (q) => q.solicitacao.id == solicitacao.id
   );
 
@@ -386,8 +402,21 @@ function addRemove(solicitacao) {
     }
   } else {
     if (index != -1)
-      faturamento.value.removerItem(faturamento.value.faturamentoItems[index]);
+      faturamento.value.removerItem(faturamento.value.faturamentoItem[index]);
   }
+}
+
+function clearFilters(cliente)
+{
+    filter.value = {
+      filialId: null,
+      clienteId: cliente,
+      colaboradorId: null,
+      gestorId: null,
+      status: 7,
+      dataIni: null,
+      dataFim: null
+    }
 }
 
 async function getById(faturamentoId) {
@@ -402,6 +431,39 @@ async function getById(faturamentoId) {
     //isBusy.value = false;
   }
 }
+
+async function getListColaboradoresByCliente(clienteId) {
+  try {
+    colaboradores.value = await usuarioStore.reembolsoToListByClientePerfil(clienteId, IDPERFILCOLABORADOR);
+  } catch (error) {
+    console.debug("getListColaboradoresByCliente", error);
+    handleErrors(error)
+  }
+}
+
+async function getListGestoresByCliente(clienteId) {
+  try {
+    gestores.value = await usuarioStore.reembolsoToListByClientePerfil(clienteId, IDPERFILGESTOR);
+  } catch (error) {
+    console.debug("getListGestoresByCliente", error);
+    handleErrors(error)
+  }
+}
+
+async function getSolicitacoes () {
+
+  try {
+    //isBusy.value = true;
+    items.value = (await solicitacaoStore.getPaginate(page, pageSize, filter.value)).items;
+  } catch (error) {
+    console.error("getSolicitacoes.error:", error);
+    handleErrors(error);
+  } finally {
+    //isBusy.value = false;
+  }
+  
+}
+
 
 async function salvar() {
   try {

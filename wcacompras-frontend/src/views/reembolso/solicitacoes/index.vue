@@ -85,7 +85,7 @@ const filter = ref({
     clienteId: null,
     colaboradorId: null,
     gestorId: null,
-    status: -1,
+    status: 0,
     dataIni: null,
     dataFim: null
 });

@@ -13,13 +13,13 @@ namespace wca.reembolso.application.Features.Clientes.Queries
     public sealed class ClienteToPaginateQueryHandle : 
         IRequestHandler<ClientePaginateQuery, ErrorOr<Pagination<ClienteResponse>>>
     {
-        private IClienteRepository _reposistory;
+        private IRepositoryManager _repository;
         private IMapper _mapper;
         private ILogger<ClienteToPaginateQueryHandle> _logger;
         public ClienteToPaginateQueryHandle(
-            IClienteRepository reposistory, IMapper mapper, ILogger<ClienteToPaginateQueryHandle> logger)
+            IRepositoryManager repository, IMapper mapper, ILogger<ClienteToPaginateQueryHandle> logger)
         {
-            _reposistory = reposistory;
+            _repository = repository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -27,7 +27,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
         public async Task<ErrorOr<Pagination<ClienteResponse>>> Handle(
             ClientePaginateQuery request, CancellationToken cancellationToken)
         {
-            var query = _reposistory.ToQuery();
+            var query = _repository.ClienteRepository.ToQuery();
 
             if (request.FilialId > 1)
                 query = query.Where(q => q.FilialId.Equals(request.FilialId));
