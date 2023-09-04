@@ -23,15 +23,18 @@ jobs:
           include-prerelease: true
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build ./wca.compras.backend/wca.compras.application --configuration Release
+      
+      - name: listar pastas antes de publicar
+        run: ls ${{env.DOTNET_ROOT}}
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ./wca.compras.backend/wca.compras.application -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
-          name: .net-app
+          name: .wca.compras.backend
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
@@ -44,8 +47,8 @@ jobs:
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
-        with:
-          name: .net-app
+        #with:
+          #name: .net-app
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
