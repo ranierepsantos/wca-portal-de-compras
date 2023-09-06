@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Collections.Immutable;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -19,7 +21,7 @@ namespace wca.compras.services
             _mapper = mapper;
         }
 
-        public async Task<UsuarioDto> Create(CreateUsuarioDto usuario)
+        public async Task<UsuarioDto> Create(int sistemaId, CreateUsuarioDto usuario)
         {
             
             try
@@ -33,23 +35,10 @@ namespace wca.compras.services
                 data.Ativo = true;
 
                 _rm.UsuarioRepository.Attach(data);
-                
-                foreach(var item in usuario.Cliente)
-                {
-                    var cli = _mapper.Map<Cliente>(item);
-                    _rm.ClienteRepository.Attach(cli);
-                    data.Cliente.Add(cli);
-                }
 
-                if (usuario.TipoFornecimento != null)
-                {
-                    foreach (var item in usuario.TipoFornecimento)
-                    {
-                        var categoria = _mapper.Map<TipoFornecimento>(item);
-                        _rm.TipoFornecimentoRepository.Attach(categoria);
-                        data.TipoFornecimento.Add(categoria);
-                    }
-                }
+                if (sistemaId == 1) //1 - COMPRAS
+                    AddComprasRelacoes(data, usuario);
+                
                 await _rm.SaveAsync();
 
                 return _mapper.Map<UsuarioDto>(data);
@@ -62,16 +51,11 @@ namespace wca.compras.services
             
         }
 
-        public async Task<UsuarioDto> GetById(int filialId, int id, int sistemaId)
+        public async Task<UsuarioDto> GetById(int id, int sistemaId)
         {
             try
             {
                 var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id);
-
-                if (filialId > 1)
-                {
-                    query = query.Where(u => u.FilialId == filialId);
-                }
 
                 query = query.Include(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == sistemaId))
                              .Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
@@ -97,54 +81,50 @@ namespace wca.compras.services
 
         }
 
-        public async Task<bool> Remove(int filialId, int id, int sistemaId = 0)
+        public async Task<bool> Remove(int id, int sistemaId = 0)
         {
-            try
-            {
-                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id);
-
-                if (filialId > 1)
-                {
-                    query = query.Where(u => u.FilialId == filialId);
-                }
-                var baseData = await query.FirstOrDefaultAsync();
-
-                if (baseData == null)
-                {
-                    return false;
-                }
-                _rm.UsuarioRepository.Delete(baseData);
+            throw new NotImplementedException();
+            //try
+            //{
                 
-                await _rm.SaveAsync();
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Usuario.Remove.Error" + ex.Message);
-                throw new Exception(ex.ToString());
-            }
+            //    var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id);
+
+            //    var baseData = await query.FirstOrDefaultAsync();
+
+            //    if (baseData == null)
+            //    {
+            //        return false;
+            //    }
+            //    _rm.UsuarioRepository.Delete(baseData);
+                
+            //    await _rm.SaveAsync();
+
+            //    return true;
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Usuario.Remove.Error" + ex.Message);
+            //    throw new Exception(ex.ToString());
+            //}
             
         }
 
-        public async Task<UsuarioDto> Update(int sistemaId, int filialId, UpdateUsuarioDto usuario)
+        public async Task<UsuarioDto> Update(int sistemaId, UpdateUsuarioDto usuario)
         {
             try
             {
                 var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id, true);
 
-                if (filialId > 1)
-                {
-                    query = query.Where(u => u.FilialId == filialId);
-                }
-                
                 query = query.Include("UsuarioSistemaPerfil")
-                    .Include("UsuarioReembolsoComplemento");
+                             .Include("UsuarioReembolsoComplemento");
 
                 //Retorna dados especificos do sistema
                 if (sistemaId == 1 ) //compras
                 {
-                    query = query.Include("Cliente").Include("TipoFornecimento");
+                    query = query.Include("Cliente")
+                                 .Include("TipoFornecimento")
+                                 .Include("Filial");
                 }
                 
                 var baseData = await query.FirstOrDefaultAsync();
@@ -183,7 +163,6 @@ namespace wca.compras.services
 
                 baseData.Ativo = usuario.Ativo;
                 baseData.Email = usuario.Email;
-                baseData.FilialId = usuario.FilialId;
                 baseData.Nome = usuario.Nome;
                 
                 await _rm.SaveAsync();
@@ -197,26 +176,21 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<UsuarioDto> Paginate(int filialId, int sistemaId, int page, int pageSize = 10, string termo = "")
+        public Pagination<UsuarioDto> Paginate(int sistemaId, int page, int pageSize = 10, string termo = "", int[]? filial = null)
         {
             try
             {
                 var query = _rm.UsuarioRepository.SelectAll();
                 
-                if (filialId > 1)
-                {
-                    query = query.Where(u => u.FilialId == filialId);
-                }
-
                 if (!string.IsNullOrEmpty(termo))
                 {
                     query = query.Where(q => q.Nome.Contains(termo));
                 }
-                
-                if (filialId == 1)
+                if (filial?.Length > 0)
                 {
-                    query = query.Include("Filial");
+                    query = query.Where(q => q.Filial.Any(c => filial.Contains(c.Id)));
                 }
+
                 query = query.Include(q => q.UsuarioSistemaPerfil.Where(c=> c.SistemaId == sistemaId))
                              .Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
 
@@ -233,20 +207,20 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ListItem>> GetToList(int filialId, int sistemaId)
+        public async Task<IList<ListItem>> GetToList(int sistemaId, int[]? filial)
         {
             try
             {
                 var query = _rm.UsuarioRepository.SelectByCondition(c => c.Ativo == true);
 
-                if (filialId > 1)
-                {
-                    query = query.Where(c => c.FilialId == filialId);
-                }
-                
                 query = query.Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
 
-                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
+                if (filial?.Length> 0)
+                {
+                    query = query.Where(q => q.Filial.Any(c => filial.Contains(c.Id)));
+                }
+
+                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); 
 
                 return _mapper.Map<IList<ListItem>>(itens);
             }
@@ -287,6 +261,7 @@ namespace wca.compras.services
         private async Task<Usuario> GetDataToCompras(IQueryable<Usuario> query)
         {
             var data = await query.Include("Cliente")
+                                  .Include("Filial")
                                   .Include(u => u.TipoFornecimento)
                                   .FirstOrDefaultAsync();
             return data;
@@ -303,30 +278,83 @@ namespace wca.compras.services
 
         private async Task<bool> UpdateComprasRelacoes(Usuario usuario ,UpdateUsuarioDto updateUsuario) 
         {
-            
-            //Remover Cliente que foram retirados do relacionamento
-            usuario.Cliente.ToList().ForEach(cli =>
-            {
 
-                if (updateUsuario.Cliente.Where(p => p.Value == cli.Id).FirstOrDefault() == null)
+            //Remover Filiais que foram retiradas do relacionamento
+            if (updateUsuario.Filial != null)
+            {
+                List<Filial> filiais = usuario.Filial
+                .Where(x => !updateUsuario.Filial.Where(q => q.Value == x.Id).Any())
+                .Where(x => x.Id != 0)
+                .ToList();
+
+                foreach (Filial item in filiais)
                 {
-                    var cliente = usuario.Cliente.FirstOrDefault(p => p.Id == cli.Id);
-                    usuario.Cliente.Remove(cliente);
+                    usuario.Filial.Remove(item);
                 }
-            });
+            }
+
+            //Remover Cliente que foram retirados do relacionamento
+            if (updateUsuario.Cliente != null)
+            {
+                List<Cliente> clientes = usuario.Cliente
+                .Where(x => !updateUsuario.Cliente.Where(q => q.Value == x.Id).Any())
+                .Where(x => x.Id != 0)
+                .ToList();
+
+                foreach (Cliente item in clientes)
+                {
+                    usuario.Cliente.Remove(item);
+                }
+            }
+
+            //usuario.Cliente.ToList().ForEach(cli =>
+            //{
+
+            //    if (updateUsuario.Cliente.Where(p => p.Value == cli.Id).FirstOrDefault() == null)
+            //    {
+            //        var cliente = usuario.Cliente.FirstOrDefault(p => p.Id == cli.Id);
+            //        usuario.Cliente.Remove(cliente);
+            //    }
+            //});
 
             //Remover Tipo de Fornecimento que foram retirados do relacionamento
-            usuario.TipoFornecimento.ToList().ForEach(tipo =>
+
+            if (updateUsuario.TipoFornecimento != null)
             {
-                if (updateUsuario.TipoFornecimento.Where(p => p.Value == tipo.Id).FirstOrDefault() == null)
+                List<TipoFornecimento> list = usuario.TipoFornecimento
+                .Where(x => !updateUsuario.TipoFornecimento.Where(q => q.Value == x.Id).Any())
+                .Where(x => x.Id != 0)
+                .ToList();
+
+                foreach (var item in list)
                 {
-                    var tp = usuario.TipoFornecimento.FirstOrDefault(p => p.Id == tipo.Id);
-                    usuario.TipoFornecimento.Remove(tp);
+                    usuario.TipoFornecimento.Remove(item);
+                }
+            }
+
+            //usuario.TipoFornecimento.ToList().ForEach(tipo =>
+            //{
+            //    if (updateUsuario.TipoFornecimento.Where(p => p.Value == tipo.Id).FirstOrDefault() == null)
+            //    {
+            //        var tp = usuario.TipoFornecimento.FirstOrDefault(p => p.Id == tipo.Id);
+            //        usuario.TipoFornecimento.Remove(tp);
+            //    }
+            //});
+
+            //Adicionar Filiais caso tenha novas
+            updateUsuario.Filial?.ToList().ForEach(item =>
+            {
+                if (usuario.Filial.Where(p => p.Id == item.Value).FirstOrDefault() == null)
+                {
+                    var filial = _mapper.Map<Filial>(item);
+                    _rm.FilialRepository.Attach(filial);
+                    usuario.Filial.Add(filial);
                 }
             });
 
+
             //Adicionar cliente caso tenha novas
-            updateUsuario.Cliente.ToList().ForEach(cli =>
+            updateUsuario.Cliente?.ToList().ForEach(cli =>
             {
                 if (usuario.Cliente.Where(p => p.Id == cli.Value).FirstOrDefault() == null)
                 {
@@ -337,7 +365,7 @@ namespace wca.compras.services
             });
 
             //Adicionar Tipo Fornecimento caso tenha novas
-            updateUsuario.TipoFornecimento.ToList().ForEach(tip =>
+            updateUsuario.TipoFornecimento?.ToList().ForEach(tip =>
             {
                 if (usuario.TipoFornecimento.Where(p => p.Id == tip.Value).FirstOrDefault() == null)
                 {
@@ -350,5 +378,39 @@ namespace wca.compras.services
             return true;
         }
 
+
+        private void AddComprasRelacoes(Usuario usuario, CreateUsuarioDto createUsuario)
+        {
+
+            if (createUsuario.Filial != null)
+            {
+                foreach (var item in createUsuario.Filial)
+                {
+                    var filial = _mapper.Map<Filial>(item);
+                    _rm.FilialRepository.Attach(filial);
+                    usuario.Filial.Add(filial);
+                }
+            }
+
+            if (createUsuario.Cliente != null)
+            {
+                foreach (var item in createUsuario.Cliente)
+                {
+                    var cli = _mapper.Map<Cliente>(item);
+                    _rm.ClienteRepository.Attach(cli);
+                    usuario.Cliente.Add(cli);
+                }
+            }
+            
+            if (createUsuario.TipoFornecimento != null)
+            {
+                foreach (var item in createUsuario.TipoFornecimento)
+                {
+                    var categoria = _mapper.Map<TipoFornecimento>(item);
+                    _rm.TipoFornecimentoRepository.Attach(categoria);
+                    usuario.TipoFornecimento.Add(categoria);
+                }
+            }
+        }
     }
 }

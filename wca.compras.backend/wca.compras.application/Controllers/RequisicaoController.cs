@@ -113,9 +113,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.Update(filial, updateRequisicaoDto, Request.Headers["origin"]);
+                var result = await service.Update(updateRequisicaoDto, Request.Headers["origin"]);
                 if (result == null)
                 {
                     return NotFound($"Requisição íd: {updateRequisicaoDto.Id}, não localizado!");
@@ -145,9 +143,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.GetById(filial, id);
+                var result = await service.GetById(id);
                 if (result == null)
                 {
                     return NotFound($"Requisição íd: {id}, não localizado!");
@@ -197,7 +193,7 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, [FromQuery] int[]? filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
@@ -205,7 +201,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
+                
                 var items = service.Paginate(filial, page, pageSize, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim);
                 return Ok(items);
             }
@@ -223,7 +219,7 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("PaginateByUserContext/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize = 10, int page = 1,[FromQuery] int[] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
@@ -231,7 +227,6 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 int logedUserId = int.Parse(User.FindFirst("CodigoUsuario").Value);
                 var items = service.PaginateByContextUser(filial, logedUserId, page, pageSize, clienteId, usuarioId, fornecedorId,  status, dataInicio, dataFim);
                 return Ok(items);
@@ -247,7 +242,7 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("GerarRelatorio")]
         [Authorize("Bearer")]
-        public async Task<ActionResult> ExportExcel(int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS
+        public async Task<ActionResult> ExportExcel([FromQuery] int [] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS
             , DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
@@ -256,8 +251,6 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest(error: new { message = "Data início ou fim inválida!"});
                 }
-
-                int filial = 1; //int.Parse(User.FindFirst("Filial").Value);
 
                 Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim);
                 if (st == null)
@@ -289,9 +282,8 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 string nomeUsuario = User.FindFirst("UsuarioNome").Value;
-                var result = await service.Remove(filial, id, nomeUsuario);
+                var result = await service.Remove(id, nomeUsuario);
 
                 if (!result) return NotFound($"Requisição, não localizado!");
 
@@ -318,7 +310,6 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 string nomeUsuario = User.FindFirst("UsuarioNome").Value;
                 int usuarioId = int.Parse(User.FindFirst("CodigoUsuario").Value);
 
@@ -347,7 +338,6 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 string nomeUsuario = User.FindFirst("UsuarioNome").Value;
                 
                 var result = await service.FinalizarPedido(finalizarRequisicao, nomeUsuario);
@@ -386,7 +376,7 @@ namespace wca.compras.webapi.Controllers
                 var result = await service.EnviarRequisicao(requisicaoId, destinoEmail, Request.Headers["origin"]);
 
                 if (result == false)
-                    return NotFound();
+                    return NotFound("Não há e-mail cadastrado para envio!");
 
                 return NoContent();
             }

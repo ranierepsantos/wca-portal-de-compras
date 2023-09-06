@@ -6,27 +6,33 @@
             @gerar-relatorio-click="gerarRelatorio()"
             />
         <v-row>
-            <v-col cols="3">
+            <v-col>
+                <v-select label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
+            </v-col>
+            <v-col >
                 <v-select label="Clientes" v-model="filter.clienteId" :items="clientes" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col >
                 <v-select label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
-                    item-title="nome" item-value="id" variant="outlined" color="primary"
+                    item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="3" v-show="hasPermissionAprovador">
+            <v-col v-show="hasPermissionAprovador">
                 <v-select label="Usuário" v-model="filter.usuarioId" :items="usuarios" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
+            
+        </v-row>
+        <v-row>
             <v-col cols="2">
                 <v-select label="Status" v-model="filter.status" :items="status" density="compact" item-title="text"
                     item-value="value" variant="outlined" color="primary" :hide-details="true"></v-select>
             </v-col>
-        </v-row>
-        <v-row>
             <v-col>
                 <v-text-field label="Data Início" v-model="filter.dataInicio" type="date"
                 variant="outlined" color="primary"
@@ -37,7 +43,7 @@
                 variant="outlined" color="primary"
                 density="compact"></v-text-field>
             </v-col>
-            <v-col cols="8" class="text-right">
+            <v-col class="text-right">
                 <v-btn color="primary" variant="outlined" class="text-capitalize" @click="getItems()">
                     <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
                     <b>Aplicar Filtros</b>
@@ -113,6 +119,7 @@ import userService from "@/services/user.service";
 import fornecedorService from "@/services/fornecedor.service";
 import { realizarDownload, status } from "@/helpers/functions"
 import moment from "moment";
+import filialService from "@/services/filial.service";
 
 //DATA
 const authStore = useAuthStore();
@@ -122,11 +129,13 @@ const isBusy = ref(false);
 const totalPages = ref(1);
 const requisicoes = ref([]);
 const clientes = ref([]);
+const filiais = ref ([]);
 const fornecedores = ref([]);
 const usuarios = ref([]);
 const hasPermissionAprovador = ref(false)
 const swal = inject("$swal");
 const filter = ref({
+    filial: [],
     clienteId: null,
     fornecedorId: null,
     usuarioId: null,
@@ -145,25 +154,36 @@ const headerButtons = computed(() => {
 onMounted(async () =>
 {
     hasPermissionAprovador.value = authStore.hasPermissao('aprova_requisicao') || authStore.hasPermissao('aprova_requisicao_cliente')
-    let filial = 0
     if (!hasPermissionAprovador.value)
     {
         filter.value.usuarioId = authStore.user.id;
-        filial = authStore.user.filial;
     }
-    
-    await getClienteToList(filial);
-    await getFornecedorToList(filial)
+    await getFiliaisByUser();
+    await getClienteToList();
+    await getFornecedorToList()
     await getUsuarioToList();
     await getItems();
 });
 
 watch(page, () => getItems());
+watch(()=>filter.value.filial, async () => {
+    let _filiais = []
+    if (filter.value.filial!=null)_filiais.push(filter.value.filial)
+    filter.value.clienteId = null
+    filter.value.fornecedorId = null
+    filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
+    await getClienteToList(_filiais)
+    await getFornecedorToList(_filiais)
+    await getUsuarioToList(_filiais)
+
+})
+
 //watch(filter.value, () => getItems());
 
 //METHODS
 function clearFilters()
 {
+    filter.value.filial = null
     filter.value.clienteId = null
     filter.value.fornecedorId = null
     filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
@@ -248,13 +268,12 @@ async function gerarRelatorio()
     }
 }
 
-
-async function getClienteToList(filial)
+async function getClienteToList(filial = [])
 {
     try
     {
         //se tiver permissao para visualizar requisição de todos os usuários, lista todos os clientes
-        if (authStore.hasPermissao('requisicao_all_users')){
+        if (authStore.hasPermissao('requisicao_all_users') || filial.length > 0){
             let response = await clienteService.toList(filial);
             clientes.value = response.data;
         }else {
@@ -271,6 +290,23 @@ async function getClienteToList(filial)
     }
 }
 
+async function getFiliaisByUser() {
+    try
+    {
+        isBusy.value = true;
+        let response = await filialService.getListByAuthenticatedUser()
+        filiais.value = response.data;
+        
+    } catch (error)
+    {
+        console.log("clientes.getFiliaisByUser.error:", error.response);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
+    }
+}
+
 async function getItems()
 {
     try
@@ -278,12 +314,18 @@ async function getItems()
         isBusy.value = true;
 
         let response =  null;
-        if (authStore.hasPermissao("requisicao_all_users"))
-            response = await requisicaoService.paginate(pageSize, page.value, filter.value);
-        else
+        
+        if (authStore.hasPermissao("requisicao_all_users")){
+            let filtro = {...filter.value }
+
+            if (filtro.filial.length == 0)
+                filtro.filial = filiais.value.map(p => {return p.value })
+        
+                response = await requisicaoService.paginate(pageSize, page.value, filtro);
+        }else
             response = await requisicaoService.paginateByUserContext(pageSize, page.value, filter.value);
         
-            requisicoes.value = response.data.items;
+        requisicoes.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)
     {
@@ -300,11 +342,14 @@ function getStatus(codigo)
     return status.filter(s => s.value == codigo)[0]
 }
 
-async function getUsuarioToList()
+async function getUsuarioToList(filial = [])
 {
     try
     {
-        let response = await userService.toList();
+        if (filial.length == 0)
+            filial = filiais.value.map(p => {return p.value })
+
+        let response = await userService.toList(filial);
         usuarios.value = response.data;
     } catch (error)
     {
@@ -313,10 +358,13 @@ async function getUsuarioToList()
     }
 }
 
-async function getFornecedorToList(filial)
+async function getFornecedorToList(filial =[])
 {
     try
     {
+        if (filial.length == 0)
+            filial = filiais.value.map(p => {return p.value })
+
         let response = await fornecedorService.toList(filial);
         fornecedores.value = response.data;
     } catch (error)

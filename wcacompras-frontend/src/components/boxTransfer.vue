@@ -116,6 +116,7 @@ function remover() {
       props.listOrigem.push(element);
       let index = props.listDestino.findIndex((c) => c.value == element.value);
       if (index > -1) props.listDestino.splice(index, 1);
+      ordernarLista(props.listOrigem, "text");
     }
   });
 }

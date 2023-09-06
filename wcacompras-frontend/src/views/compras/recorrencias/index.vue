@@ -4,17 +4,22 @@
             @novoClick="router.push({ name: 'recorrenciaCadastro' })" custom-button-text="Exportar Dados"
             @customClick="editar('novo')" :custom-button-show="false" />
         <v-row>
-            <v-col cols="3">
+            <v-col>
+                <v-select label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true"></v-select>
+            </v-col>
+            <v-col>
                 <v-select label="Clientes" v-model="filter.clienteId" :items="clientes" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col>
                 <v-select label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
             </v-col>
-            <v-col cols="3" v-show="hasPermissionViewAllRecorrencia">
+            <v-col v-show="hasPermissionViewAllRecorrencia">
                 <v-select label="Usuário" v-model="filter.usuarioId" :items="usuarios" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
                     :hide-details="true"></v-select>
@@ -135,6 +140,7 @@ import userService from "@/services/user.service";
 import fornecedorService from "@/services/fornecedor.service";
 import { tipoRecorrencia, diasDaSemana } from "@/helpers/functions";
 import moment from "moment";
+import filialService from "@/services/filial.service";
 
 //DATA
 const authStore = useAuthStore();
@@ -147,6 +153,7 @@ const logPageSize = 10;
 const logTotalPages = ref(1);
 const recorrencias = ref([]);
 const clientes = ref([]);
+const filiais = ref ([]);
 const logs = ref([]);
 const showLogs = ref(false);
 const fornecedores = ref([]);
@@ -163,29 +170,33 @@ let idRecorrencia = 0;
 onMounted(async () =>
 {
     hasPermissionViewAllRecorrencia.value = authStore.hasPermissao('recorrencias_view_others_users')
-    let filial = 0
-    if (!hasPermissionViewAllRecorrencia.value)
-    {
-        filter.value.usuarioId = authStore.user.id;
-        filial = authStore.user.filial;
-        await getClienteListByUser();
-    }
-    if (hasPermissionViewAllRecorrencia.value)
-    {
-        await getClienteToList(filial)
-    }
-    await getFornecedorToList(filial)
+   
+    await getFiliaisByUser()
+    await getClienteToList()
+    await getFornecedorToList()
     await getUsuarioToList();
     await getItems();
 });
 
 watch(page, () => getItems());
 watch(logPage, () => getLogItems(idRecorrencia));
+watch(()=>filter.value.filial, async () => {
+    let _filiais = []
+    if (filter.value.filial!=null)_filiais.push(filter.value.filial)
+    filter.value.clienteId = null
+    filter.value.fornecedorId = null
+    
+    await getClienteToList(_filiais)
+    await getFornecedorToList(_filiais)
+    await getUsuarioToList(_filiais)
+
+})
 watch(filter.value, () => getItems());
 
 //METHODS
 function clearFilters()
 {
+    filter.value.filial = null
     filter.value.clienteId = null
     filter.value.fornecedorId = null
     filter.value.usuarioId = hasPermissionViewAllRecorrencia.value ? null : authStore.user.id
@@ -199,29 +210,21 @@ function editar(id)
 function getDiaSemana(dia) {
     return diasDaSemana.filter(t =>  t.value == dia)[0].text
 }
-async function getClienteListByUser() 
-{
-    try
-    {
-        let response = await clienteService.getListByAuthenticatedUser();
-        let list = response.data;
-        list.forEach(elem => {
-            clientes.value.push({text: elem.nome, value: elem.id })
-        });
-        
-    } catch (error)
-    {
-        console.log("getClienteListByUser.error:", error);
-        handleErrors(error)
-    }
-}
 
-async function getClienteToList(filial)
+async function getClienteToList(filial =[])
 {
     try
     {
-        let response = await clienteService.toList(filial);
-        clientes.value = response.data;
+        if (filial.length > 0){
+            let response = await clienteService.toList(filial);
+            clientes.value = response.data;
+        }else {
+            let response = await clienteService.getListByAuthenticatedUser();
+            let list = response.data;
+            list.forEach(elem => {
+                clientes.value.push({text: elem.nome, value: elem.id })
+            });
+        }
     } catch (error)
     {
         console.log("getClienteToList.error:", error);
@@ -229,10 +232,13 @@ async function getClienteToList(filial)
     }
 }
 
-async function getFornecedorToList(filial)
+async function getFornecedorToList(filial = [])
 {
     try
     {
+        if (filial.length == 0)
+            filial = filiais.value.map(p => {return p.value })
+
         let response = await fornecedorService.toList(filial);
         fornecedores.value = response.data;
     } catch (error)
@@ -241,6 +247,24 @@ async function getFornecedorToList(filial)
         handleErrors(error)
     }
 }
+
+async function getFiliaisByUser() {
+    try
+    {
+        isBusy.value = true;
+        let response = await filialService.getListByAuthenticatedUser()
+        filiais.value = response.data;
+        
+    } catch (error)
+    {
+        console.log("recorrencias.getFiliaisByUser.error:", error.response);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
+    }
+}
+
 
 async function getItems()
 {
@@ -282,11 +306,14 @@ async function getLogItems(recorrenciaId = idRecorrencia)
         handleErrors(error)
     } 
 }
-async function getUsuarioToList()
+async function getUsuarioToList(filial =[])
 {
     try
     {
-        let response = await userService.toList();
+        if (filial.length == 0)
+            filial = filiais.value.map(p => {return p.value })
+
+        let response = await userService.toList(filial);
         usuarios.value = response.data;
     } catch (error)
     {

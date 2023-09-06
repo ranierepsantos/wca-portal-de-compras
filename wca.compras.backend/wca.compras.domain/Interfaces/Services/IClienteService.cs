@@ -11,13 +11,13 @@ namespace wca.compras.domain.Interfaces.Services
     public interface IClienteService
     {
         public Task<ClienteDto> Create(CreateClienteDto cliente);
-        public Task<ClienteDto> Update(int filialId, UpdateClienteDto cliente);
-        public Task<bool> Remove(int filialId, int id);
-        public Task<IList<ClienteDto>> GetAll(int filialId);
-        public Task<ClienteDto> GetById(int filialId, int id);
-        public Pagination<ClienteDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "");
-        public Task<IList<ListItem>> GetToList(int filialId);
-        public Task<IList<ClienteDto>> GetByUser(int usuarioId);
+        public Task<ClienteDto> Update(UpdateClienteDto cliente);
+        public Task<bool> Remove(int id);
+        public Task<IList<ClienteDto>> GetAll();
+        public Task<ClienteDto> GetById(int id);
+        public Pagination<ClienteDto> Paginate(int[] filialId, int page = 1, int pageSize = 10, string termo = "");
+        public Task<IList<ListItem>> GetToList(int[] filialId);
+        public Task<IList<ClienteDto>> GetByUser(int usuarioId, int[]? filial = null);
 
         Task<bool> ImportarDadosClientes(ClienteImportacaoDto clienteImportacaoDto);
     }

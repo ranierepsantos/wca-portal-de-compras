@@ -11,9 +11,8 @@ namespace wca.compras.domain.Dtos
         string Expiration,
         string AccessToken,
         int UsuarioId,
-        int? FilialId,
         string UsuarioNome,
-        IList<SistemaDto> Sistemas
+        IList<SistemaDto>? Sistemas
     );
     
     public record ForgotPasswordRequest (

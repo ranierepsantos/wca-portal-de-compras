@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using wca.compras.domain.Interfaces;
 
 namespace wca.compras.domain.Entities
@@ -30,17 +24,15 @@ namespace wca.compras.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; }
         
-        [JsonIgnore]
-        public Filial Filial { get; set; }
+        //[Column("filial_id")]
+        //public int? FilialId { get; set; }
 
-        [Column("filial_id")]
-        public int? FilialId { get; set; }
-
+        public IList<Filial> Filial { get; set; } = new List<Filial>();
         public IList<Cliente> Cliente { get; set; } = new List<Cliente>();
         public IList<TipoFornecimento> TipoFornecimento { get; set; }  = new List<TipoFornecimento>();
 
         public IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil { get; set; } = new List<UsuarioSistemaPerfil>();
 
-        public UsuarioReembolsoComplemento UsuarioReembolsoComplemento { get;set; }
+        public UsuarioReembolsoComplemento? UsuarioReembolsoComplemento { get;set; }
     }
 }

@@ -2,11 +2,16 @@
   <div>
     <Breadcrumbs title="Usuários" @novoClick="router.push({name: 'comprasUsuarioCadastro'})" />
     <v-row>
-      <v-col cols="6">
-        <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact" variant="outlined"
-          color="info">
-        </v-text-field>
-      </v-col>
+        <v-col cols="5">
+            <v-select label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
+                item-title="text" item-value="value" variant="outlined" color="primary"
+                :hide-details="true" clearable></v-select>
+        </v-col>
+        <v-col cols="4">
+            <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter.termo" density="compact"
+                variant="outlined" color="info" clearable>
+            </v-text-field>
+        </v-col>
     </v-row>
     <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
     <v-table class="elevation-2">
@@ -14,7 +19,6 @@
         <tr>
           <th class="text-left text-grey">NOME</th>
           <th class="text-left text-grey">PERFIL</th>
-          <th class="text-left text-grey" v-show="authStore.user.filial == 1">FILIAL</th>
           <th class="text-center text-grey">ATIVO</th>
           <th></th>
         </tr>
@@ -26,7 +30,6 @@
             &nbsp;{{ user.nome }}
           </td>
           <td class="text-left">{{ getPerfilName(user.usuarioSistemaPerfil[0].perfilId) }}</td>
-          <td class="text-left" v-show="authStore.user.filial == 1">{{ user.filial?.nome }}</td>
           <td class="text-center">
             <v-icon :icon="user.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="user.ativo ? 'success' : 'error'"></v-icon>
@@ -42,7 +45,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td :colspan="authStore.user.filial == 1 ? 5 : 4">
+          <td colspan="4">
             <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>
@@ -70,8 +73,10 @@ const users = ref([]);
 const listPerfil = ref([]);
 const filiais = ref([]);
 const swal = inject("$swal");
-const authStore = useAuthStore();
-const filter = ref("");
+const filter = ref({
+    filial: [],
+    termo: ""
+});
 
 
 //VUE METHODS
@@ -83,7 +88,7 @@ onMounted(async () =>
 });
 
 watch(page, async () => await getItems());
-watch(filter, async () => await getItems());
+watch(() =>filter, () => getItems(), {deep: true});
 
 //METHODS
 async function enableDisable(item)
@@ -167,7 +172,7 @@ async function getFilialToList()
 {
   try
   {
-    let response = await filialService.toList();
+    let response = await filialService.getListByAuthenticatedUser();
     filiais.value = response.data;
   } catch (error)
   {
@@ -181,7 +186,10 @@ async function getItems()
   try
   {
     isBusy.value = true;
-    let response = await userService.paginate(pageSize, page.value, filter.value)
+    let filtro = {...filter.value}
+    if (!filtro.filial || filtro.filial.length ==0 ) filtro.filial = filiais.value.map(f => {return f.value})
+
+    let response = await userService.paginate(pageSize, page.value, filtro)
     users.value = response.data.items;
     totalPages.value = response.data.totalPages;
   } catch (error)

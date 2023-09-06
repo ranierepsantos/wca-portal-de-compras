@@ -13,7 +13,7 @@ namespace wca.compras.crosscutting.Mapping
             CreateMap<CreateFilialDto, Filial>();
             CreateMap<Filial, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome)).ReverseMap();
         }
     }
 }

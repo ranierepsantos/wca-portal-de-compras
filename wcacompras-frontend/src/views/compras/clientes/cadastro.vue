@@ -351,7 +351,7 @@ async function getCliente(clienteId) {
 
 async function getFilialToList() {
     try {
-        let response = await filialService.toList();
+        let response = await filialService.getListByAuthenticatedUser();
         filiais.value = response.data;
     } catch (error) {
         console.log("getFilialToList.error:", error);

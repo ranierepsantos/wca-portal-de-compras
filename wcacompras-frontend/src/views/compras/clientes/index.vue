@@ -1,14 +1,19 @@
 <template>
     <div>
         <bread-crumbs title="Clientes" @novoClick="editar('novo')" 
-        :buttons="[{text: 'Importar Clientes', icon:'mdi-upload', event:'importar-click'}]" 
+        :buttons="buttons" 
         @importar-click="importar()"
         
         />
         <v-row>
-            <v-col cols="6">
-                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact"
-                    variant="outlined" color="info">
+            <v-col cols="5">
+                <v-select label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true" clearable></v-select>
+            </v-col>
+            <v-col cols="4">
+                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter.termo" density="compact"
+                    variant="outlined" color="info" clearable>
                 </v-text-field>
             </v-col>
         </v-row>
@@ -57,10 +62,12 @@
 <script setup>
 import { ref, onMounted, watch, inject } from "vue";
 import clienteService from "@/services/cliente.service";
+import filialService from "@/services/filial.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { toBase64 } from "@/helpers/functions";
+import { useAuthStore } from "@/store/auth.store";
 
 //DATA
 const page = ref(1);
@@ -68,17 +75,26 @@ const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const clientes = ref([]);
-const filter = ref("");
+const filiais = ref ([]);
+const filter = ref({
+    filial: [],
+    termo: ""
+});
 const swal = inject("$swal");
+const buttons = ref([])
 
 //VUE METHODS
 onMounted(async () =>
 {
+    if (useAuthStore().hasPermissao("importar_clientes")){
+        buttons.value.push({text: 'Importar Clientes', icon:'mdi-upload', event:'importar-click'})
+    }
+    await getFiliaisByUser();
     await getItems();
 });
 
 watch(page, () => getItems());
-watch(filter, () => getItems());
+watch(() =>filter, () => getItems(), {deep: true});
 
 //METHODS
 function editar(id)
@@ -125,55 +141,32 @@ async function enableDisable(item)
         handleErrors(error)
     }
 }
-
-async function remove(item)
-{
+async function getFiliaisByUser() {
     try
     {
-        let options = {
-            title: "Confirma Exclusão?",
-            text: "Deseja realmente excluir o cliente: " + item.nome + "?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim",
-            cancelButtonText: "Não",
-        }
-
-        let response = await swal.fire(options);
-        if (response.isConfirmed)
-        {
-            await clienteService.remove(item.id);
-            if (users.value.length == 1)
-            {
-                page.value--;
-            } else
-            {
-                await getItems()
-            }
-
-            swal.fire({
-                toast: true,
-                icon: "success",
-                position: "top-end",
-                title: "Sucesso!",
-                text: "Exclusão realizada!",
-                showConfirmButton: false,
-                timer: 2000,
-            })
-        }
+        isBusy.value = true;
+        let response = await filialService.getListByAuthenticatedUser()
+        filiais.value = response.data;
+        
     } catch (error)
     {
-        console.log("clientes.remove.error:", error);
+        console.log("clientes.getFiliaisByUser.error:", error.response);
         handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
     }
 }
-
 async function getItems()
 {
     try
     {
         isBusy.value = true;
-        let response = await clienteService.paginate(pageSize, page.value, filter.value);
+        let filtro = {...filter.value}
+        if (!filtro.filial || filtro.filial.length ==0 ) filtro.filial = filiais.value.map(f => {return f.value})
+
+
+        let response = await clienteService.paginate(pageSize, page.value, filtro);
         clientes.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)
