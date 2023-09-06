@@ -5,7 +5,10 @@ const DEFAULTAPI = process.env.VUE_APP_API_URL;
 
 
 const api =  axios.create({
-  baseURL: DEFAULTAPI
+  baseURL: DEFAULTAPI,
+  paramsSerializer: {
+    indexes: null // by default: false
+  }
 });
 
 api.interceptors.request.use(async config =>

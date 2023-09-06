@@ -44,7 +44,7 @@ namespace wca.compras.webapi.Controllers
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
+                int filial = 1; //int.Parse(User.FindFirst("Filial").Value);
                 var items = await service.GetToList(filial);
                 return Ok(items);
             }
@@ -54,6 +54,27 @@ namespace wca.compras.webapi.Controllers
             }
             
         }
+
+        /// <summary>
+        /// Retorna lista de Clientes ativos relacionados ao usuário
+        /// </summary>
+        /// <returns>items</returns>
+        [HttpGet]
+        [Route("ListByAuthenticatedUser")]
+        public async Task<ActionResult<IList<ListItem>>> ListByAuthenticatedUser()
+        {
+            try
+            {
+                int codigoUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
+                var items = await service.GetToListByUser (codigoUsuario);
+                return Ok(items);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
 
         /// <summary>
         /// Cria uma nova filial

@@ -52,14 +52,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<RecorrenciaDto> GetById(int filialId, int id)
+        public async Task<RecorrenciaDto> GetById(int id)
         {
             try
             {
                 var query = _rm.RecorrenciaRepository.SelectByCondition(p => p.Id == id);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include("Usuario")
                              .Include("Cliente")
@@ -78,14 +75,14 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<RecorrenciaDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0)
+        public Pagination<RecorrenciaDto> Paginate(int[]? filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0)
         {
             try
             {
                 var query = _rm.RecorrenciaRepository.SelectAll();
 
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
+                if (filialId?.Length > 0)
+                    query = query.Where(c => filialId.Contains(c.FilialId));
 
                 if (clienteId > 0)
                     query = query.Where(c => c.ClienteId == clienteId);
@@ -113,19 +110,16 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<bool> Remove(int filialId, int id)
+        public async Task<bool> Remove(int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> EnabledDisabled(int filialId, EnabledRecorrenciaDto enabledRecorrenciaDto)
+        public async Task<bool> EnabledDisabled(EnabledRecorrenciaDto enabledRecorrenciaDto)
         {
             try
             {
                 var query = _rm.RecorrenciaRepository.SelectByCondition(p => p.Id == enabledRecorrenciaDto.Id, true);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 var data = await query.FirstOrDefaultAsync();
 
@@ -145,16 +139,12 @@ namespace wca.compras.services
         }
 
 
-        public async Task<RecorrenciaDto> Update(int filialId, UpdateRecorrenciaDto updateRecorrenciaDto)
+        public async Task<RecorrenciaDto> Update(UpdateRecorrenciaDto updateRecorrenciaDto)
         {
             try
             {
                 var query = _rm.RecorrenciaRepository.SelectByCondition(c => c.Id == updateRecorrenciaDto.Id);
 
-                if (filialId > 1)
-                {
-                    query = query.Where(c =>  c.FilialId == filialId); 
-                }
                 query = query.Include(n => n.RecorrenciaProdutos);
 
                 var baseData = await query.FirstOrDefaultAsync();
@@ -179,7 +169,7 @@ namespace wca.compras.services
 
                 await _rm.SaveAsync();
 
-                return await GetById(filialId, updateRecorrenciaDto.Id);
+                return await GetById(updateRecorrenciaDto.Id);
 
             }
             catch (Exception ex)

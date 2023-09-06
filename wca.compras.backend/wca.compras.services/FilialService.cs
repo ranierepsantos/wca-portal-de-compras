@@ -90,6 +90,26 @@ namespace wca.compras.services
             }
         }
 
+        public async Task<IList<ListItem>> GetToListByUser(int usuarioId)
+        {
+            try
+            {
+                var query = _rm.FilialRepository.SelectByCondition(c => c.Ativo == true);
+
+                query = query.Where(c => c.Usuario.Where(q => q.Id.Equals(usuarioId)).Any());
+
+                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
+
+                return _mapper.Map<IList<ListItem>>(itens);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"FilialService.GetToListByUser.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+
         public Pagination<FilialDto> Paginate(int page, int pageSize, string termo = "")
         {
             try

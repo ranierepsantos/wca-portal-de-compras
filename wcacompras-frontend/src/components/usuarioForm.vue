@@ -27,20 +27,6 @@
           density="compact"
         ></v-text-field>
       </v-col>
-      <v-col>
-        <v-select
-          label="Filial"
-          :items="listFilial"
-          variant="outlined"
-          color="primary"
-          item-title="text"
-          item-value="value"
-          v-model="user.filialId"
-          :disabled="authStore.user.filial != 1"
-          :rules="[(v) => !!v || 'Filial é obrigatório']"
-          density="compact"
-        ></v-select>
-      </v-col>
       <v-col cols="2" v-show="user.id > 0">
         <v-checkbox
           v-model="user.ativo"

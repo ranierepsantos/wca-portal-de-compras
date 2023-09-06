@@ -78,7 +78,14 @@
       <v-col>
         <v-form ref="formCadastro">
           <v-row>
-            <v-col cols="5">
+            <v-col>
+              <v-select label="Filiais" v-model="filterFilial" :items="filiais" density="compact"
+                item-title="text" item-value="value" variant="outlined" color="primary"
+                :hide-details="true"
+                clearable>
+              </v-select>
+            </v-col>
+            <v-col>
               <v-select
                 label="Clientes"
                 v-model="requisicao.clienteId"
@@ -90,16 +97,17 @@
                 color="primary"
                 :hide-details="false"
                 :rules="[(v) => !!v || 'Campo obrigatório']"
+                :disabled="filterFilial == null"
               ></v-select>
             </v-col>
-            <v-col cols="5">
+            <v-col>
               <v-select
                 label="Fornecedor"
                 v-model="requisicao.fornecedorId"
                 :items="fornecedores"
                 density="compact"
-                item-title="nome"
-                item-value="id"
+                item-title="text"
+                item-value="value"
                 variant="outlined"
                 color="primary"
                 :hide-details="false"
@@ -460,6 +468,7 @@ import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import clienteService from "@/services/cliente.service";
 import Periodo from "@/components/Periodo.vue";
 import endereco from "@/components/endereco.vue";
+import filialService from "@/services/filial.service";
 
 //DATA
 const authStore = useAuthStore();
@@ -493,12 +502,14 @@ const requisicao = ref({
   uf: "",
 });
 const clientes = ref([]);
+const filterFilial = ref(null);
 const fornecedores = ref([]);
 const destinos = ref([
   { value: 0, text: "Outros" },
   { value: 1, text: "Diretoria" },
 ]);
 const produtos = ref([]);
+const filiais = ref([])
 const hasProduto = ref(true);
 const swal = inject("$swal");
 const filter = ref("");
@@ -517,46 +528,62 @@ const cliente = ref({
 onMounted(async () => {
   requisicao.value.NomeUsuario = authStore.user.nome;
   requisicao.value.UsuarioId = authStore.user.id;
+  
+  await getFiliaisByUser();
   await getClienteListByUser();
-  await getFornecedorToList(authStore.user.filial);
   await getTipoFornecimentoToList();
 });
+
+watch(() => filterFilial.value, async (novoValor) => {
+  clientes.value = []
+  requisicao.value.clienteId = null
+  requisicao.value.fornecedorId = null
+    
+  await getClienteListByUser(novoValor ? [novoValor]: [])
+  
+  
+})
 
 watch(
   () => requisicao.value.fornecedorId,
   async (fornecedorId) => {
     requisicao.value.requisicaoItens = [];
-    await getProdutosToList(fornecedorId);
-
-    // let { value: icms } = await swal.fire({
-    //     title: 'Confirmar o percentual do ICMS:',
-    //     input: 'number',
-    //     inputValue: requisicao.value.icms,
-    //     confirmButtonText: 'SIM',
-    //     showCancelButton: false,
-    //     inputValidator: (value) => {
-    //         if (!value || value < 0) {
-    //             return 'Você deve informar um valor maior ou igual a 0'
-    //         }
-    //     }
-    // })
-    // requisicao.value.icms = icms;
+    produtos.value = []
+    if (fornecedorId)  await getProdutosToList(fornecedorId);
   }
 );
 
 watch(
   () => requisicao.value.clienteId,
-  (clienteId) => {
-    cliente.value = clientes.value.filter((c) => c.id == clienteId)[0];
+  async (clienteId) => {
 
-    
-    requisicao.value.endereco = cliente.value.endereco;
-    requisicao.value.numero = cliente.value.numero;
-    requisicao.value.cep = cliente.value.cep;
-    requisicao.value.cidade = cliente.value.cidade;
-    requisicao.value.uf = cliente.value.uf;
-    requisicao.value.periodoEntrega = JSON.parse(cliente.value.periodoEntrega);
-    openPeriodoForm.value = true;
+    cliente.value = clienteId ?  clientes.value.find((c) => c.id == clienteId): {
+      id: null,
+      valorLimiteRequisicao: 0,
+      naoUltrapassarLimitePorRequisicao: false,
+    };
+    fornecedores.value = []
+    requisicao.value.endereco = ""
+    requisicao.value.numero =""
+    requisicao.value.cep = ""
+    requisicao.value.cidade = ""
+    requisicao.value.uf = ""
+    requisicao.value.filialId = null
+    orcamento.value = null
+    if (cliente.value.id) {
+        await getFornecedorToList([cliente.value.filialId])
+        
+        requisicao.value.endereco = cliente.value.endereco;
+        requisicao.value.numero = cliente.value.numero;
+        requisicao.value.cep = cliente.value.cep;
+        requisicao.value.cidade = cliente.value.cidade;
+        requisicao.value.uf = cliente.value.uf;
+        requisicao.value.filialId = cliente.value.filialId
+        if (typeof cliente.value.periodoEntrega === Object)
+          requisicao.value.periodoEntrega = JSON.parse(cliente.value.periodoEntrega);
+
+        openPeriodoForm.value = true;
+    }
   }
 );
 
@@ -664,20 +691,40 @@ function clearOrcamentoTotais() {
     orcamento.value[idx].valorTotal = 0;
 }
 
-async function getClienteListByUser() {
+async function getClienteListByUser(filial = []) {
   try {
-    let response = await clienteService.getListByAuthenticatedUser();
-    clientes.value = response.data;
+      let  response = await clienteService.getListByAuthenticatedUser(filial.length > 0? filial : null);
+      clientes.value = response.data;
   } catch (error) {
-    console.log("getUsuarioToList.error:", error);
+    console.log("getClienteListByUser.error:", error);
     handleErrors(error);
   }
 }
 
-async function getFornecedorToList(filial) {
+async function getFiliaisByUser() {
+    try
+    {
+        isBusy.value = true;
+        let response = await filialService.getListByAuthenticatedUser()
+        filiais.value = response.data;
+        
+    } catch (error)
+    {
+        console.log("requisicao.getFiliaisByUser.error:", error.response);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
+    }
+}
+
+async function getFornecedorToList(filial=[]) {
   try {
-    let response = await fornecedorService.toList(filial);
-    fornecedores.value = response.data;
+      if (filial.length == 0)
+          filial = filiais.value.map(p => {return p.value })
+
+        let response = await fornecedorService.toList(filial);
+        fornecedores.value = response.data;
   } catch (error) {
     console.log("getUsuarioToList.error:", error);
     handleErrors(error);
@@ -723,9 +770,8 @@ function getTipoFornecimentoNome(tipoId) {
 }
 
 function carregarConfiguracaoCliente() {
-    let configuracoes = cliente.value.clienteOrcamentoConfiguracao.filter(
-      (c) => c.ativo == true
-    );
+  let configuracoes = cliente.value
+                    .clienteOrcamentoConfiguracao.filter((c) => c.ativo == true);
     for (let idx = 0; idx < configuracoes.length; idx++) {
       configuracoes[idx].nome = getTipoFornecimentoNome(configuracoes[idx].tipoFornecimentoId)
       configuracoes[idx].valorTotal = 0;

@@ -4,7 +4,6 @@ import authService from "@/services/auth.service";
 const modelUser = {
   id: 0,
   nome: "",
-  filial: 0,
   sistemas: [],
 };
 
@@ -81,12 +80,12 @@ export const useAuthStore = defineStore("auth", {
         )[0];
       }
 
-      if (permissao == "filial") {
-        return perm != undefined && this.user.filial == 1;
-      }
-      if (permissao == "perfil") {
-        return perm != undefined && this.user.filial == 1;
-      }
+      // if (permissao == "filial") {
+      //   return perm != undefined && this.user.filial == 1;
+      // }
+      // if (permissao == "perfil") {
+      //   return perm != undefined && this.user.filial == 1;
+      // }
       return perm != undefined;
     },
 
@@ -106,7 +105,6 @@ export const useAuthStore = defineStore("auth", {
     startSession(auth) {
       this.user.id = auth.usuarioId;
       this.user.nome = auth.usuarioNome;
-      this.user.filial = auth.filialId;
       this.user.sistemas = auth.sistemas;
       let expiration = new Date(auth.expiration).getTime();
       this.token = auth.accessToken;

@@ -4,15 +4,25 @@
             @customClick="salvar()" />
         <v-form ref="formCadastro">
             <v-row>
-                <v-col cols="5">
+                <v-col>
+              <v-select label="Filiais" v-model="filterFilial" :items="filiais" density="compact"
+                item-title="text" item-value="value" variant="outlined" color="primary"
+                :hide-details="true"
+                clearable>
+              </v-select>
+            </v-col>
+                <v-col >
                     <v-select label="Clientes" v-model="recorrencia.clienteId" :items="clientes" density="compact"
                         item-title="nome" item-value="id" variant="outlined" color="primary"
-                        :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
+                        :rules="[(v) => !!v || 'Campo obrigatório']"
+                        :disabled="filterFilial == null"
+                        ></v-select>
                 </v-col>
-                <v-col cols="5">
+                <v-col >
                     <v-select label="Fornecedor" v-model="recorrencia.fornecedorId" :items="fornecedores" density="compact"
-                        item-title="nome" item-value="id" variant="outlined" color="primary"
-                        :rules="[(v) => !!v || 'Campo obrigatório']"></v-select>
+                        item-title="text" item-value="value" variant="outlined" color="primary"
+                        :rules="[(v) => !!v || 'Campo obrigatório']"
+                        :disabled="recorrencia.clienteId == null"></v-select>
                 </v-col>
                 <v-col cols="2">
                     <v-select label="Destino:" v-model="recorrencia.destino" :items="destinos" density="compact"
@@ -184,6 +194,7 @@ import router from "@/router";
 import clienteService from "@/services/cliente.service";
 import Periodo from '@/components/Periodo.vue';
 import Endereco from "@/components/endereco.vue";
+import filialService from "@/services/filial.service";
 
 //DATA
 
@@ -204,7 +215,7 @@ const recorrencia = ref({
     id: 0,
     nome: "",
     ativo: true,
-    filialId: authStore.user.filial,
+    filialId: null,
     clienteId: null,
     fornecedorId: null,
     usuarioId: authStore.user.id,
@@ -214,7 +225,7 @@ const recorrencia = ref({
     recorrenciaProdutos: [],
     recorrenciaLogs: [],
     localEntrega: "",
-    periodoEntrega: periodoEntrega,
+    periodoEntrega: {...periodoEntrega},
     endereco: "",
     numero: "",
     cep: "",
@@ -229,6 +240,8 @@ const destinos = ref([
 ])
 const produtos = ref([]);
 const swal = inject("$swal");
+const filterFilial = ref(null);
+const filiais = ref([])
 const filter = ref("");
 const hasProduto = ref(true);
 const pageTitle = ref("Recorrência")
@@ -239,8 +252,9 @@ let clienteHasChange = true;
 onMounted(async () => {
     let recorrenciaId = route.params.codigo;
     recorrencia.value.UsuarioId = authStore.user.id;
+  
+    await getFiliaisByUser();
     await getClienteListByUser()
-    await getFornecedorToList(authStore.user.filial)
     if (recorrenciaId != undefined && recorrenciaId > 0) {
         pageTitle.value += " - Edição"
         clienteHasChange = false
@@ -254,23 +268,34 @@ onMounted(async () => {
 watch(() => recorrencia.value.fornecedorId, async (fornecedorId, oldFornecedor) => {
     if (oldFornecedor != null && oldFornecedor != fornecedorId)
         recorrencia.value.recorrenciaProdutos = []
-
-    await getProdutosToList(fornecedorId)
-
+        produtos.value = []
+        if (fornecedorId)  await getProdutosToList(fornecedorId);
 })
 
-watch(() => recorrencia.value.clienteId, (clienteId) => {
+watch(() => recorrencia.value.clienteId, async (clienteId) => {
     if (clienteHasChange == true) {
-        let cliente = clientes.value.filter(c => c.id == clienteId)[0];
+        let cliente = clientes.value.find(c => c.id == clienteId);
+        recorrencia.value.endereco = ""
+        recorrencia.value.numero =""
+        recorrencia.value.cep = ""
+        recorrencia.value.cidade = ""
+        recorrencia.value.uf = ""
+        recorrencia.value.filialId = null
+        recorrencia.value.periodoEntrega = {...periodoEntrega}
+        if (cliente) {
+            recorrencia.value.endereco = cliente.endereco
+            recorrencia.value.numero = cliente.numero
+            recorrencia.value.cep = cliente.cep
+            recorrencia.value.cidade = cliente.cidade
+            recorrencia.value.uf = cliente.uf
+            recorrencia.value.filialId = cliente.filialId
+            if (cliente.filialId != filterFilial.value) await getFornecedorToList(cliente.filialId);
 
-        recorrencia.value.endereco = cliente.endereco
-        recorrencia.value.numero = cliente.numero
-        recorrencia.value.cep = cliente.cep
-        recorrencia.value.cidade = cliente.cidade
-        recorrencia.value.uf = cliente.uf
-
-        recorrencia.value.periodoEntrega = JSON.parse(cliente.periodoEntrega)
-        openPeriodoForm.value = true
+            if (typeof cliente.periodoEntrega === Object)
+                recorrencia.value.periodoEntrega = JSON.parse(cliente.periodoEntrega)
+            openPeriodoForm.value = true
+        }
+        
     }
     clienteHasChange = true
 })
@@ -280,6 +305,16 @@ watch(filter, async () => {
     if (recorrencia.value.fornecedorId != null && recorrencia.value.fornecedorId > 0) {
         await getProdutosToList(recorrencia.value.fornecedorId)
     }
+})
+
+watch(() => filterFilial.value, async (novoValor) => {
+  clientes.value = []
+  recorrencia.value.clienteId = null
+  recorrencia.value.fornecedorId = null
+    
+  await getClienteListByUser(novoValor ? [novoValor]: [])
+  await getFornecedorToList(novoValor ? [novoValor]: []);
+  
 })
 
 const localEntrega = computed(() => {
@@ -316,14 +351,14 @@ function adicionarRemoverProduto(item) {
 
 }
 
-async function getClienteListByUser() {
-    try {
-        let response = await clienteService.getListByAuthenticatedUser();
-        clientes.value = response.data;
-    } catch (error) {
-        console.log("getUsuarioToList.error:", error);
-        handleErrors(error)
-    }
+async function getClienteListByUser(filial = []) {
+  try {
+      let  response = await clienteService.getListByAuthenticatedUser(filial.length > 0? filial : null);
+      clientes.value = response.data;
+  } catch (error) {
+    console.log("getClienteListByUser.error:", error);
+    handleErrors(error);
+  }
 }
 
 async function getFornecedorToList(filial) {
@@ -361,7 +396,7 @@ async function getRecorrencia(id) {
         if (response.data){
             let data = response.data
             if (data.periodoEntrega == null || data.periodoEntrega.trim() == "") {
-                data.periodoEntrega = periodoEntrega
+                data.periodoEntrega = {...periodoEntrega}
             } else {
                 data.periodoEntrega = JSON.parse(data.periodoEntrega)
             }
@@ -394,7 +429,6 @@ async function removeProdutoRecorrencia(item) {
         await getProdutosToList(recorrencia.value.fornecedorId)
         ordenarRecorrenciaProdutos()
     }
-    calcularOrcamentoTotais()
 }
 
 async function salvar() {
@@ -429,6 +463,23 @@ async function salvar() {
         handleErrors(error)
     } finally {
         isBusy.value = false
+    }
+}
+
+async function getFiliaisByUser() {
+    try
+    {
+        isBusy.value = true;
+        let response = await filialService.getListByAuthenticatedUser()
+        filiais.value = response.data;
+        
+    } catch (error)
+    {
+        console.log("recorrencia.getFiliaisByUser.error:", error.response);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
     }
 }
 

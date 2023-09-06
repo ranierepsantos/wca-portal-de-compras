@@ -23,5 +23,11 @@ export default {
         let url = route.filialPaginate.replace("{pageSize}", pageSize).replace("{page}", page)
         return api.get(url, {params: { termo: termo}} );
     },
+    
+    getListByAuthenticatedUser () 
+    {
+        return api.get(route.filialListByAuthenticatedUser);
+    },
+
    
 }

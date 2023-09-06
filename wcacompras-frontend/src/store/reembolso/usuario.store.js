@@ -12,7 +12,7 @@ export class Usuario {
         this.nome = data ? data.nome : ""
         this.email = data ? data.email: ""
         this.ativo = data ? data.ativo: true
-        this.filialId = data ? data.filialId: null
+        this.filial = data ? data.filial: []
         this.cliente = data? data.cliente: []
         this.tipoFornecimento = data? data.tipoFornecimento?? []: []
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
@@ -36,16 +36,23 @@ export const useUsuarioStore = defineStore("usuario", {
 
             try {
                 let clientes = data.cliente.map(function (el) { return el.value; });
+                let filiais  = data.filial.map(function (el) { return el.value; });
 
                 data.cliente = [];
 
                 let response = await userService.create(data);
+                
+                // relacionar filiais x usuario
+                let userFiliais = {
+                    usuarioId: response.data.id,
+                    filiais: filiais
+                }
 
+                // relacionar clientes x usuario
                 let userClientes = {
                     usuarioId: response.data.id,
                     clienteIds: clientes
                 }
-                
                 await clienteService.RelacionarClienteUsuario(userClientes);
 
 

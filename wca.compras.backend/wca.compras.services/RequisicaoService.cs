@@ -130,14 +130,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<RequisicaoDto> GetById(int filialId, int id)
+        public async Task<RequisicaoDto> GetById(int id)
         {
             try
             {
                 var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include("Usuario")
                              .Include(r => r.Cliente)
@@ -320,14 +317,14 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<RequisicaoDto> Paginate(int filialId, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public Pagination<RequisicaoDto> Paginate(int[] filials, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
                 var query = _rm.RequisicaoRepository.SelectAll();
 
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
+                if (filials.Length > 0)
+                    query = query.Where(c => filials.Contains(c.FilialId));
 
                 if (clienteId > 0)
                     query = query.Where(c => c.ClienteId == clienteId);
@@ -363,14 +360,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<bool> Remove(int filialId, int id, string nomeUsuario)
+        public async Task<bool> Remove(int id, string nomeUsuario)
         {
             try
             {
                 var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == id, true);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 var data = await query.FirstOrDefaultAsync();
 
@@ -400,14 +394,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<RequisicaoDto> Update(int filialId, UpdateRequisicaoDto updateRequisicaoDto, string urlOrigin = "")
+        public async Task<RequisicaoDto> Update(UpdateRequisicaoDto updateRequisicaoDto, string urlOrigin = "")
         {
             try
             {
                 var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == updateRequisicaoDto.Id);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include("RequisicaoItens");
 
@@ -497,7 +488,7 @@ namespace wca.compras.services
 
             try
             {
-                var requisicao = await GetById(1, requisicaoId);
+                var requisicao = await GetById(requisicaoId);
 
                 if (requisicao == null)
                 {
@@ -587,7 +578,7 @@ namespace wca.compras.services
             }
 
             // Criar o pedido
-            CreateRequisicaoDto novoPedido = new CreateRequisicaoDto((int)requisicao.FilialId, (int)requisicao.ClienteId,
+            CreateRequisicaoDto novoPedido = new((int)requisicao.FilialId, (int)requisicao.ClienteId,
                 (int)requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,
                 requisicao.Endereco, requisicao.Numero, requisicao.Cep, requisicao.Cidade, requisicao.UF, usuarioId,
                 usuarioNome, itens, false, false, requisicao.ValorIcms, requisicao.PeriodoEntrega
@@ -633,15 +624,16 @@ namespace wca.compras.services
             try
             {
                 Requisicao requisicao = await _rm.RequisicaoRepository.SelectByCondition(c => c.Id == requisicaoId).FirstOrDefaultAsync();
+                bool _retorno = false;
 
-                if (requisicao == null) { return false; }
+                if (requisicao == null) { return _retorno; }
 
                 if (destino == EnumRequisicaoDestinoEmail.FORNECEDOR)
-                    await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
+                  _retorno =  await solicitarAprovacaoFornecedor(urlOrigin, requisicao, false);
                 else
-                    await solicitarAprovacaoCliente(urlOrigin, requisicao, false);
+                  _retorno =  await solicitarAprovacaoCliente(urlOrigin, requisicao, false);
 
-                return true;
+                return _retorno;
             }
             catch (Exception ex)
             {
@@ -651,7 +643,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<Stream> ExportToExcel(int filialId, int clienteId, int fornecedorId, int usuarioId, 
+        public async Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, 
             EnumStatusRequisicao status = EnumStatusRequisicao.TODOS,
             DateTime? dataInicio = null, DateTime? dataFim = null)
         {
@@ -659,8 +651,8 @@ namespace wca.compras.services
             {
                 var query = _rm.RequisicaoRepository.SelectAll();
 
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
+                if (filials.Length > 0)
+                    query = query.Where(c => filials.Contains(c.FilialId));
 
                 if (clienteId > 0)
                     query = query.Where(c => c.ClienteId == clienteId);
@@ -744,7 +736,7 @@ namespace wca.compras.services
         }
 
 
-        public Pagination<RequisicaoDto> PaginateByContextUser(int filialId, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId =0, int fornecedorId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public Pagination<RequisicaoDto> PaginateByContextUser(int[] filials, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId =0, int fornecedorId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
         {
             try
             {
@@ -779,8 +771,10 @@ namespace wca.compras.services
                         .Include("Fornecedor")
                         .Include("Usuario");
 
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
+                if (filials != null && filials.Length > 0)
+                {
+                    query = query.Where(c => filials.Contains(c.FilialId));
+                }
 
                 if (clienteId > 0)
                     query = query.Where(c => c.ClienteId == clienteId);
@@ -829,7 +823,7 @@ namespace wca.compras.services
             }
         }
 
-        private async Task solicitarAprovacaoFornecedor(string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
+        private async Task<bool> solicitarAprovacaoFornecedor(string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
         {
             try
             {
@@ -837,11 +831,13 @@ namespace wca.compras.services
                 if (checkConfiguracao == true)
                 {
                     Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.fornecedor");
-                    if (config.Valor == "false") return;
+                    if (config.Valor == "false") return false;
 
                 }
 
                 IList<FornecedorContato> contatos = await _rm.FornecedorContatoRepository.SelectByCondition(c => c.AprovaPedido && c.FornecedorId == requisicao.FornecedorId).ToListAsync();
+
+                if (contatos.Count == 0) return false;
 
                 var requisicaoToken = randomTokenString();
 
@@ -877,6 +873,8 @@ namespace wca.compras.services
                 };
 
                 await CreateRequisicaoHistorico(reqH);
+
+                return true;
 
             }
             catch (Exception ex)
@@ -948,7 +946,7 @@ namespace wca.compras.services
             }
         }
 
-        private async Task solicitarAprovacaoCliente(string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
+        private async Task<bool> solicitarAprovacaoCliente(string urlOrigin, Requisicao requisicao, bool checkConfiguracao = true)
         {
             try
             {
@@ -956,7 +954,7 @@ namespace wca.compras.services
                 if (checkConfiguracao == true)
                 {
                     Configuracao? config = _configuracoes.FirstOrDefault(c => c.Chave == "requisicao.sendemail.cliente");
-                    if (config.Valor == "false") return;
+                    if (config.Valor == "false") return false;
 
                 }
 
@@ -983,7 +981,7 @@ namespace wca.compras.services
 
                 contatos = contatos.Distinct().ToList();
                 
-                if (contatos.Count == 0) return;
+                if (contatos.Count == 0) return false;
 
                 var requisicaoToken = randomTokenString();
 
@@ -1019,6 +1017,8 @@ namespace wca.compras.services
                 };
 
                 await CreateRequisicaoHistorico(reqH);
+                
+                return true;
 
             }
             catch (Exception ex)

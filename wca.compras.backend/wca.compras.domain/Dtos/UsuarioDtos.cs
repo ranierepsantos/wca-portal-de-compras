@@ -9,9 +9,8 @@ namespace wca.compras.domain.Dtos
         string Nome,
         string Email,
         bool Ativo,
-        int FilialId,
-        FilialDto Filial,
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
+        IList<ListItem>? Filial,
         IList<ListItem>? Cliente,
         IList<ListItem>? TipoFornecimento,
         UsuarioReembolsoComplemento? UsuarioReembolsoComplemento
@@ -24,8 +23,8 @@ namespace wca.compras.domain.Dtos
         [EmailAddress(ErrorMessage ="Infome um e-mail válido")]
         string Email,
         [Required(ErrorMessage ="O campo é obrigatório")]
-        int FilialId,
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
+        IList<ListItem>? Filial,
         IList<ListItem>? Cliente,
         IList<ListItem>? TipoFornecimento,
         UsuarioReembolsoComplemento? UsuarioReembolsoComplemento
@@ -40,9 +39,9 @@ namespace wca.compras.domain.Dtos
         [EmailAddress(ErrorMessage ="Infome um e-mail válido")]
         string Email,
         bool Ativo,
-        [Required(ErrorMessage ="O campo é obrigatório")]
-        int FilialId,
+        [MinLength(1, ErrorMessage ="Informe pelo menos 1 filial")]
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
+        IList<ListItem>? Filial,
         IList<ListItem>? Cliente,
         IList<ListItem>? TipoFornecimento,
         UsuarioReembolsoComplemento? UsuarioReembolsoComplemento
