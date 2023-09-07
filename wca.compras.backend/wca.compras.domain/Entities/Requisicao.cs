@@ -33,7 +33,7 @@ namespace wca.compras.domain.Entities
         public Usuario? Usuario { get; set; }
 
         [Column("filial_id")]
-        public int? FilialId { get; set; }
+        public int FilialId { get; set; }
 
         [JsonIgnore]
         public Filial? Filial { get; set; }

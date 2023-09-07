@@ -56,9 +56,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.Update(filial,clienteDto);
+                var result = await service.Update(clienteDto);
                 if (result == null)
                 {
                     return NotFound($"Perfil íd: {clienteDto.Id}, não localizado!");
@@ -87,9 +85,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.GetById(filial, id);
+                var result = await service.GetById(id);
                 if (result == null)
                 {
                     return NotFound($"Cliente íd: {id}, não localizado!");
@@ -108,8 +104,8 @@ namespace wca.compras.webapi.Controllers
         /// <returns>items</returns>
         /// <param name="filial"></param>
         [HttpGet]
-        [Route("ToList/{filial}")]
-        public async Task<ActionResult<IList<ListItem>>> List(int filial)
+        [Route("ToList")]
+        public async Task<ActionResult<IList<ListItem>>> List([FromQuery] int[] filial)
         {
             try
             {
@@ -128,11 +124,10 @@ namespace wca.compras.webapi.Controllers
         /// <returns>ClienteDto</returns>
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
-        public ActionResult<Pagination<ClienteDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        public ActionResult<Pagination<ClienteDto>> Paginate(int pageSize = 10, int page = 1, [FromQuery] int[]? filial = null,  string? termo = "")
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 var items = service.Paginate(filial, page, pageSize, termo);
                 return Ok(items);
             }
@@ -149,12 +144,12 @@ namespace wca.compras.webapi.Controllers
         /// <returns>items</returns>
         [HttpGet]
         [Route("ListByAuthenticatedUser")]
-        public async Task<ActionResult<IList<ClienteDto>>> ListByAuthenticatedUser()
+        public async Task<ActionResult<IList<ClienteDto>>> ListByAuthenticatedUser([FromQuery] int[]? filial = null)
         {
             try
             {
                 int codigoUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
-                var items = await service.GetByUser(codigoUsuario);
+                var items = await service.GetByUser(codigoUsuario, filial);
                 return Ok(items);
             }
             catch (ArgumentException ex)

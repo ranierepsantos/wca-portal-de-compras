@@ -28,7 +28,12 @@
                     ></v-select>
                   </v-col>
                 </v-row>
-                
+                <box-transfer 
+                  :list-origem="filiais" 
+                  :list-destino="usuario.filial"
+                  list-origem-titulo = "Selecione a filial"
+                  list-destino-titulo = "Filiais do usuário"
+                />
                 <box-transfer 
                   :list-origem="clientes" 
                   :list-destino="usuario.cliente"
@@ -39,8 +44,8 @@
                 <box-transfer 
                   :list-origem="tipos" 
                   :list-destino="usuario.tipoFornecimento"
-                  list-origem-titulo = "Selecione as categorias"
-                  list-destino-titulo = "Categorias do usuário"
+                  list-origem-titulo = "Selecione as categorias de compra"
+                  list-destino-titulo = "Categorias de compra do usuário"
                   style="margin-bottom: 5px;"
                 />
             
@@ -83,7 +88,7 @@ const clientes = ref([]);
 const swal = inject("$swal");
 const route = useRoute();
 const usuario = ref(new Usuario());
-let filialUsuario = 0;
+let filialUsuario = [];
 const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
@@ -101,16 +106,30 @@ onMounted(async () => {
 });
 
 watch(
-  () => usuario.value.filialId,
-  async (filialid, oldValue) => {
-    clientes.value = [];
-    await getClienteToList(filialid);
-    clientesListRemove();
-    if (filialid != filialUsuario) {
-      usuario.value.cliente = [];
-      filialUsuario = filialid;
+  () => usuario.value.filial,
+  async (newfilials) => {
+    if (newfilials.length> 0) {
+
+      let objA = JSON.parse(JSON.stringify(newfilials))
+      if (objA.length > 0) objA.forEach(e => delete e.selected)
+      let objB = JSON.parse(JSON.stringify(filialUsuario))
+      if (objB.length > 0) objB.forEach(e => delete e.selected)
+
+      if (JSON.stringify(objA) !== JSON.stringify(objB)) {
+        clientes.value = [];
+        await getClienteToList(newfilials.map(p =>  {return p.value}));
+        clientesListRemove();
+        let listIds = newfilials.map((p) =>{ return p.value})
+        let remove = filialUsuario.length>0 ? filialUsuario.filter(p => !listIds.includes(p.value)):[]
+        usuarioRemoveClienteFromFilial(remove.map(p => {return p.value}))
+        filialUsuario = JSON.parse(JSON.stringify(newfilials));
+      }
+    }else {
+      clientes.value = [];
+      usuarioRemoveClienteFromFilial(filiais.value.map(q =>  {return q.value}))
     }
-  }
+  },
+  {deep: true}
 );
 
 //METHODS
@@ -129,6 +148,17 @@ function setPerfilUsuario(perfilId) {
     });
   }
 }
+
+function usuarioRemoveClienteFromFilial(filialToRemove =[]) 
+{
+  let removeCliente = usuario.value.cliente.filter(q =>  filialToRemove.includes(q.filialId));
+  removeCliente.forEach(r => {
+    let index = usuario.value.cliente.findIndex(q =>  q.value == r.value);
+    usuario.value.cliente.splice(index, 1);
+  })
+ 
+}
+
 
 function clientesListRemove(removerTodos = false) {
   if (removerTodos == true) clientes.value.splice(0, clientes.value.length);
@@ -179,14 +209,17 @@ async function salvar() {
 
 async function clearData() {
   usuario.value = new Usuario();
-  filialUsuario = authStore.user.filial;
+  filialUsuario = [];
   await getClienteToList(filialUsuario);
 }
 
 async function getClienteToList(filial) {
   try {
-    let response = await clienteService.toList(filial);
-    clientes.value = response.data;
+    if (filial.length> 0) {
+      let response = await clienteService.toList(filial);
+      clientes.value = response.data;
+    }
+      
   } catch (error) {
     console.log("getClienteToList.error:", error);
     handleErrors(error);
@@ -227,15 +260,25 @@ async function getUsuario(usuarioId) {
   try {
     isBusy.value = true;
     let response = await userService.getById(usuarioId);
-    filialUsuario = response.data.filialId;
     usuario.value = response.data;
     tiposListRemove();
     clientesListRemove();
+    filiaisListRemove();
   } catch (error) {
     console.log("getUsuario.error:", error);
     handleErrors(error);
   } finally {
     isBusy.value = false;
+  }
+}
+
+function filiaisListRemove(removerTodos = false) {
+  if (removerTodos == true) tipos.value.splice(0, clientes.value.length);
+  else {
+    usuario.value.filial.forEach((tipo) => {
+      let index = filiais.value.findIndex((c) => c.value == tipo.value);
+      if (index > -1) filiais.value.splice(index, 1);
+    });
   }
 }
 

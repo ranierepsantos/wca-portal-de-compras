@@ -45,6 +45,12 @@ export default {
         return api.get(url, {params: { ...filters }} );
     },
 
+    paginateByUserContext(pageSize, page, filters)
+    {
+        let url = route.requisicaoPaginateByContextUser.replace("{pageSize}", pageSize).replace("{page}", page)
+        return api.get(url, {params: { ...filters }} );
+    },
+
     downloadById()
     {
         return api.get(route.requisicaoDownloadById, { responseType: 'blob'});

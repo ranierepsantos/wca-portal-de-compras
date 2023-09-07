@@ -45,9 +45,9 @@ namespace wca.compras.services
                 var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true)
                                         .Include(u => u.Filial)
                                         .FirstOrDefaultAsync();
-                if (authUser == null || !BC.Verify(login.Password, authUser.Password) || authUser.Filial.Ativo == false)
+                if (authUser == null || !BC.Verify(login.Password, authUser.Password))
                 {
-                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, 0, "", null);
+                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, "", null);
                 }
 
 
@@ -60,7 +60,7 @@ namespace wca.compras.services
 
                 if (sistemas is null)
                 {
-                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0,0, "", null);
+                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, "", null);
                 }
 
                 ClaimsIdentity identity = new ClaimsIdentity(
@@ -69,7 +69,7 @@ namespace wca.compras.services
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim("UsuarioNome", authUser.Nome),
                     new Claim("CodigoUsuario", authUser.Id.ToString()),
-                    new Claim("Filial",authUser.FilialId.ToString())
+                    //new Claim("Filial",authUser.FilialId.ToString())
                     }
                 );
 
@@ -201,7 +201,6 @@ namespace wca.compras.services
                 expirationDate.ToString("yyyy-MM-dd HH:mm:ss"),
                 token,
                 usuario.Id,
-                usuario.FilialId,
                 usuario.Nome,
                 sistemas
             );

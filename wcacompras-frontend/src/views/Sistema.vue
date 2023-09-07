@@ -38,7 +38,7 @@
   </v-row>
 </template>
 <script setup>
-import { ref, inject, onBeforeMount } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/store/auth.store";
 

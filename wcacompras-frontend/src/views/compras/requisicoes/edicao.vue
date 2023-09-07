@@ -1,5 +1,63 @@
 <template>
   <div>
+    <v-app-bar elevation="1" :height="orcamento!=null ? 84: 0" >
+    <v-row style="margin: 1px 0 1px 0;">
+      <v-col v-show="requisicao.cliente.naoUltrapassarLimitePorRequisicao">
+        <span style="font-size: 11px" class="text-grey text-left">
+          Valor Máximo Pedido
+        </span>
+        <v-progress-linear
+                  :color="
+                    (parseFloat(valorTotalPedido) / requisicao.cliente.valorLimiteRequisicao) *  100 > 100
+                      ? 'red'
+                      : (parseFloat(valorTotalPedido) /
+                      requisicao.cliente.valorLimiteRequisicao) *
+                          100 >
+                        60
+                      ? 'warning'
+                      : 'success'
+                  "
+                  :model-value="valorTotalPedido"
+                  :max="requisicao.cliente.valorLimiteRequisicao"
+                  :height="7"
+                  title="Valor Máximo Pedido"
+                >
+                </v-progress-linear>
+                <span style="font-size: 11px" class="text-grey">
+                  {{ formatToCurrencyBRL(valorTotalPedido) }} /
+                  {{
+                    formatToCurrencyBRL(
+                      requisicao.cliente.valorLimiteRequisicao.toFixed(2)
+                    )
+                  }}
+                </span>
+      </v-col>
+      <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
+        <span style="font-size: 11px" class="text-grey text-left">{{
+          config.nome
+        }}</span>
+        <v-progress-linear
+          :color="
+            config.percentual > 100
+              ? 'red'
+              : config.percentual > 60
+              ? 'warning'
+              : 'success'
+          "
+          :model-value="config.valorTotal"
+          :max="config.valorPedido * (1 + config.tolerancia / 100)+1"
+          :height="7"
+          :title="config.nome"
+        ></v-progress-linear>
+        <span style="font-size: 11px" class="text-grey"
+          >{{ formatToCurrencyBRL(config.valorTotal) }} /
+          {{
+            formatToCurrencyBRL(config.valorPedido * (1 + config.tolerancia / 100))
+          }}</span
+        >
+      </v-col>
+    </v-row>
+  </v-app-bar>
     <bread-crumbs
       :title="'Pedido #' + requisicao.id"
       :show-button="false"
@@ -9,47 +67,19 @@
       :buttons="headerButtons"
       @email-fornecedor-click="enviarEmail(DESTINOEMAIL.FORNECEDOR)"
       @email-cliente-click="enviarEmail(DESTINOEMAIL.CLIENTE)"
-      class="breadcrumb-fixed"
+      
     />
     <v-progress-linear
       color="primary"
       indeterminate
       :height="5"
       v-show="isBusy"
-      class="mt-15 mb-3"
+      class="mt-1 mb-2"
     >
     </v-progress-linear>
-    <v-row :class="isBusy?'mt-2':'mt-12'">
-      <v-col cols="2" class="fixed-column-scroll" v-show="orcamento != null">
-        <v-row v-for="config in orcamento" :key="config.tipoFornecimentoId">
-          <v-col>
-            <span style="font-size: 11px" class="text-grey text-left">{{
-              getTipoFornecimentoNome(config.tipoFornecimentoId)
-            }}</span>
-            <v-progress-linear
-              :color="
-                config.percentual > 100
-                  ? 'red'
-                  : config.percentual > 60
-                  ? 'warning'
-                  : 'success'
-              "
-              :model-value="config.valorTotal"
-              :max="config.valorPedido * (1 + config.tolerancia / 100)"
-              :height="7"
-              :title="getTipoFornecimentoNome(config.tipoFornecimentoId)"
-            ></v-progress-linear>
-            <span style="font-size: 11px" class="text-grey"
-              >{{ config.valorTotal.toFixed(2) }} /
-              {{
-                (config.valorPedido * (1 + config.tolerancia / 100)).toFixed(2)
-              }}</span
-            >
-          </v-col>
-        </v-row>
-      </v-col>
-
-      <v-col :style="orcamento ? 'padding-left: 150px;' : ''">
+    
+    <v-row >
+      <v-col>
         <v-form ref="formCadastro">
           <v-row>
             <v-col cols="5">
@@ -190,8 +220,8 @@
               v-show="
                 getStatus(requisicao.status).text.toLowerCase() ==
                   'aguardando' &&
-                authStore.hasPermissao('aprova_requisicao') &&
-                requisicao.requerAutorizacaoWCA
+                ((authStore.hasPermissao('aprova_requisicao') && requisicao.requerAutorizacaoWCA)
+                ||(authStore.hasPermissao('aprova_requisicao_cliente') && requisicao.requerAutorizacaoCliente))
               "
             >
               <v-btn
@@ -203,13 +233,14 @@
                 Aprovar / Rejeitar
               </v-btn>
             </v-col>
+
             <v-col class="text-right">
               <v-btn
                 :disabled="requisicao.id == null"
                 :color="requisicao.id == null ? 'grey' : 'success'"
                 style="font-weight: bold"
                 @click="dialog = true"
-                v-show="requisicao.status == 1"
+                v-show="requisicao.status == 1 && authStore.hasPermissao('requisicao')"
               >
                 Finalizar Pedido
               </v-btn>
@@ -703,6 +734,7 @@ onMounted(async () => {
   await getRequisicaoData(id);
   await getTipoFornecimentoToList();
   await getProdutosToList(requisicao.value.fornecedorId);
+  calcularOrcamentoTotais();
 });
 
 watch(filter, async () => {
@@ -839,6 +871,8 @@ async function aprovarReprovar(isAprovado, comentario) {
       comentario: comentario,
       token: "TELAEDICAO",
       nomeUsuario: authStore.user.nome,
+      WCA: authStore.hasPermissao("aprova_requisicao"),
+      Cliente: authStore.hasPermissao("aprova_requisicao_cliente")
     };
     await requisicaoService.aprovar(data);
     await getRequisicaoData(data.id);
@@ -882,6 +916,23 @@ function calcularOrcamentoTotais() {
           (1 + orcamento.value[index].tolerancia / 100))) *
       100;
   }
+}
+
+function carregarConfiguracaoCliente() {
+    let configuracoes = requisicao.value.cliente.clienteOrcamentoConfiguracao.filter(
+      (c) => c.ativo == true
+    );
+    console.log(configuracoes)
+    for (let idx = 0; idx < configuracoes.length; idx++) {
+      configuracoes[idx].nome = getTipoFornecimentoNome(configuracoes[idx].tipoFornecimentoId)
+      configuracoes[idx].valorTotal = 0;
+      configuracoes[idx].percentual = 0;
+    }
+
+    let categorias = Array.from(new Set(produtos.value.map((item) => item.tipoFornecimentoId)))
+
+    orcamento.value =  configuracoes.filter((item) => categorias.includes(item.tipoFornecimentoId))
+
 }
 
 async function enviarEmail(destinoEmail) {
@@ -948,6 +999,8 @@ async function getProdutosToList(fornecedorId, changeIcms = false) {
       filter.value
     );
     produtos.value = response.data;
+    
+    carregarConfiguracaoCliente()
 
     for (
       let index = 0;
@@ -984,12 +1037,13 @@ async function getRequisicaoData(id) {
     requisicao.value = data;
     requisicaoOriginal.value = JSON.parse(JSON.stringify(requisicao.value));
 
-    orcamento.value = requisicao.value.cliente.clienteOrcamentoConfiguracao;
-    for (let idx = 0; idx < orcamento.value.length; idx++) {
-      orcamento.value[idx].valorTotal = 0;
-      orcamento.value[idx].percentual = 0;
-    }
-    calcularOrcamentoTotais();
+    // orcamento.value = requisicao.value.cliente.clienteOrcamentoConfiguracao;
+    // for (let idx = 0; idx < orcamento.value.length; idx++) {
+    //   orcamento.value[idx].valorTotal = 0;
+    //   orcamento.value[idx].percentual = 0;
+    // }
+    
+    
   } catch (error) {
     console.log("getRequisicaoData.error:", error);
     handleErrors(error);
@@ -1005,10 +1059,10 @@ function getStatus(codigo) {
 }
 
 function getTipoFornecimentoNome(tipoId) {
-  let tipo = tipoFornecimento.value.filter((t) => t.value == tipoId);
-  if (tipo.length > 0) {
-    return tipo[0].text;
-  }
+  let tipo = tipoFornecimento.value.find((t) => t.value == tipoId);
+  if (tipo) {
+    return tipo.text;
+  } 
   return "";
 }
 
@@ -1080,9 +1134,7 @@ async function salvar() {
       ) {
         data.requerAutorizacaoWCA = true;
       }
-      console.log("Autorização WCA:", data.requerAutorizacaoWCA);
-      console.log("Autorização Cliente:", data.requerAutorizacaoCliente);
-
+      
       if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
         if (!authStore.hasPermissao("aprova_requisicao")) {
           let result = await swal.fire({

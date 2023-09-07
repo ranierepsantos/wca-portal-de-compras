@@ -30,19 +30,14 @@ export default {
 
     ListarPorColaboradorGestor(colaboradorId = 0, gestorId = 0, status = [])
     {
-        let config = {
+        let parametros ={
             params: {
                 colaboradorId: colaboradorId,
                 gestorId: gestorId,
                 status: status
-            },
-            paramsSerializer: {
-                indexes: null // by default: false
             }
         }
-
-        
-        return api.get(rotas.ListarPorColaboradorGestor,config);
+        return api.get(rotas.ListarPorColaboradorGestor, parametros);
     },
 
     ListarStatusSolicitacao()

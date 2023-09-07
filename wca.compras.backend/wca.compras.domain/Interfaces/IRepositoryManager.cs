@@ -1,4 +1,6 @@
-﻿using wca.compras.domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using wca.compras.domain.Entities;
 
 namespace wca.compras.domain.Interfaces
 {
@@ -27,5 +29,6 @@ namespace wca.compras.domain.Interfaces
 
         Task SaveAsync();
         Task<int> ExecuteCommandAsync(string command);
+        DbSet<T> GetDbSet<T>() where T : class;
     }
 }

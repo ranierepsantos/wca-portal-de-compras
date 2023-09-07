@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using MiniExcelLibs;
-using System.Linq;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
@@ -64,14 +62,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<FornecedorDto> GetById(int filialId, int id)
+        public async Task<FornecedorDto> GetById(int id)
         {
             try
             {
                 var query = _rm.FornecedorRepository.SelectByCondition(p => p.Id == id);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include("FornecedorContatos");
 
@@ -87,7 +82,7 @@ namespace wca.compras.services
             
         }
 
-        public async Task<ProdutoDto> GetProdutoById(int filialId, int fornecedorId, int id)
+        public async Task<ProdutoDto> GetProdutoById(int fornecedorId, int id)
         {
             try
             {
@@ -96,9 +91,6 @@ namespace wca.compras.services
                     .Include(p => p.ProdutoIcmsEstado)
                     .Include("Fornecedor");
 
-                if (filialId > 1)
-                    query = query.Where(c => c.Fornecedor.FilialId == filialId);
-                
                 var data = await query.FirstOrDefaultAsync();
 
                 return _mapper.Map<ProdutoDto>(data);
@@ -110,20 +102,19 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<FornecedorListDto>> GetToList(int filialId)
+        public async Task<IList<ListItem>> GetToList(int[] filialId)
         {
             try
             {
                 var query = _rm.FornecedorRepository.SelectByCondition(c => c.Ativo == true);
-
-                if (filialId > 0)
+                if (filialId.Length > 0)
                 {
-                    query = query.Where(c => c.FilialId == filialId);
+                    query = query.Where(c => filialId.Contains(c.FilialId));
                 }
 
                 var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 
-                return _mapper.Map<IList<FornecedorListDto>>(itens);
+                return _mapper.Map<IList<ListItem>>(itens);
             }
             catch (Exception ex)
             {
@@ -132,12 +123,12 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<bool> ImportProdutoFromExcel(int filialId, int fornecedorId, ImportProdutoDto importProdutoDto)
+        public async Task<bool> ImportProdutoFromExcel(int fornecedorId, ImportProdutoDto importProdutoDto)
         {
             try
             {
                 //checar se o usuario pode alterar dados do fornecedor
-                if ((await GetById(filialId, fornecedorId)) == null)
+                if ((await GetById(fornecedorId)) == null)
                 {
                     return false;
                 }
@@ -180,7 +171,7 @@ namespace wca.compras.services
                                 Codigo = rows[index].A.ToString(),
                                 FornecedorId = importProdutoDto.FornecedorId,
                                 Nome = rows[index].B,
-                                TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.Contains(rows[index].C)).Id,
+                                TipoFornecimentoId = categorias.FirstOrDefault(c => c.Nome.ToLower().Contains(rows[index].C.ToLower())).Id,
                                 UnidadeMedida = rows[index].D,
                                 Valor = (decimal)rows[index].E,
                                 TaxaGestao = (decimal)rows[index].F,
@@ -207,15 +198,15 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<FornecedorDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "")
+        public Pagination<FornecedorDto> Paginate(int[]? filialId, int page = 1, int pageSize = 10, string termo = "")
         {
             try
             {
                 var query = _rm.FornecedorRepository.SelectAll();
-                //Matriz (id: 1) retorna todos os dados
-                if (filialId > 1)
+                
+                if (filialId.Length > 0)
                 {
-                    query = query.Where(c => c.FilialId ==filialId);
+                    query = query.Where(c => filialId.Contains(c.FilialId));
                 }
 
                 if (!string.IsNullOrEmpty(termo))
@@ -237,19 +228,12 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<ProdutoDto> Paginate(int filialId, int fornecedorId, int page = 1, int pageSize = 10, string termo = "")
+        public Pagination<ProdutoDto> Paginate(int fornecedorId, int page = 1, int pageSize = 10, string termo = "")
         {
             try
             {
                 var query = _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId);
                 
-                //Matriz (id: 1) retorna todos os dados
-                if (filialId > 1)
-                {
-                    query = query.Include("Fornecedor");
-                    query = query.Where(c => c.Fornecedor.FilialId == filialId);
-                }
-
                 if (!string.IsNullOrEmpty(termo))
                 {
                     query = query.Where(q => q.Nome.Contains(termo) || q.Codigo.Contains(termo));
@@ -268,20 +252,12 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ProdutoWithIcmsDto>> ListProdutoByFornecedorWithIcms(int filialId, int fornecedorId, string uf, int usuarioId, string? termo = "")
+        public async Task<IList<ProdutoWithIcmsDto>> ListProdutoByFornecedorWithIcms(int fornecedorId, string uf, int usuarioId, string? termo = "")
         {
             try
             {
                 var query = _rm.ProdutoRepository.SelectByCondition(c => c.FornecedorId == fornecedorId);
                 query = query.Include(p => p.ProdutoIcmsEstado.Where(c => c.UF.Equals(uf.ToUpper())));
-
-
-                //Matriz (id: 1) retorna todos os dados
-                if (filialId > 1)
-                {
-                    query = query.Include("Fornecedor");
-                    query = query.Where(c => c.Fornecedor.FilialId == filialId);
-                }
 
                 //Filtrar somente produtos das categorias relacionadas ao usuário
                 query = query.Include(n => n.TipoFornecimento)
@@ -319,23 +295,18 @@ namespace wca.compras.services
         }
 
 
-        public Task<bool> Remove(int filialId, int id)
+        public Task<bool> Remove(int id)
         {
             throw new NotImplementedException();
         }
         
-        public async Task<bool> RemoveProduto(int filialId, int fornecedorId, int id)
+        public async Task<bool> RemoveProduto(int fornecedorId, int id)
         {
             try
             {
                 var query = _rm.ProdutoRepository
                     .SelectByCondition(c => c.Id == id && c.FornecedorId == fornecedorId)
                     .Include("Fornecedor");
-
-                if (filialId > 1)
-                {
-                    query = query.Where(c => c.Fornecedor.FilialId == filialId);
-                }
 
                 var baseData = await query.FirstOrDefaultAsync();
 
@@ -356,15 +327,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<FornecedorDto> Update(int filialId, UpdateFornecedorDto updateFornecedorDto)
+        public async Task<FornecedorDto> Update(UpdateFornecedorDto updateFornecedorDto)
         {
             try
             {
                 var query = _rm.FornecedorRepository.SelectByCondition(p => p.Id == updateFornecedorDto.Id);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
-
 
                 query = query.Include(ic => ic.FornecedorContatos);
 
@@ -399,15 +366,12 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<ProdutoDto> UpdateProduto(int filialId, UpdateProdutoDto updateProdutoDto)
+        public async Task<ProdutoDto> UpdateProduto(UpdateProdutoDto updateProdutoDto)
         {
             try
             {
                 var query = _rm.ProdutoRepository.SelectByCondition(p => p.Id == updateProdutoDto.Id, false)
                     .Include("Fornecedor");
-
-                if (filialId > 1)
-                    query = query.Where(c => c.Fornecedor.FilialId == filialId);
 
                 var baseData = await query.FirstOrDefaultAsync();
 

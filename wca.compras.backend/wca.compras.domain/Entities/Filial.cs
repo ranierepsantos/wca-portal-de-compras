@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using wca.compras.domain.Interfaces;
 
@@ -15,5 +16,8 @@ namespace wca.compras.domain.Entities
 
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
+
+        [JsonIgnore]
+        public IList<Usuario> Usuario { get; set; }
     }
 }

@@ -27,7 +27,8 @@ namespace wca.compras.webapi.Controllers
         /// <returns>Usuario</returns>
         /// <param name="createUsuario"></param>
         [HttpPost]
-        public async Task<ActionResult> Add([FromBody] CreateUsuarioDto createUsuario)
+        [Route("{sistemaId}")]
+        public async Task<ActionResult> Add(int sistemaId, [FromBody] CreateUsuarioDto createUsuario)
         {
             try
             {
@@ -36,7 +37,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                var result = await _usuarioService.Create(createUsuario);
+                var result = await _usuarioService.Create(sistemaId, createUsuario);
 
                 await _authenticationService.ForgotPassword(new ForgotPasswordRequest(createUsuario.Email), Request.Headers["origin"]);
                 
@@ -65,8 +66,8 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                var result = await _usuarioService.Update(sistemaId, filial, updateUsuario);
+                
+                var result = await _usuarioService.Update(sistemaId, updateUsuario);
                 if (result == null) return NotFound();
                 return NoContent();
             }
@@ -76,31 +77,30 @@ namespace wca.compras.webapi.Controllers
             }
         }
 
-        /// <summary>
-        /// Excluir Usuário
-        /// </summary>
-        /// <param name="id"></param>
-        [HttpDelete]
-        public async Task<ActionResult> Remove(int id)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest();
-                }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                var result = await _usuarioService.Remove(filial, id);
+        ///// <summary>
+        ///// Excluir Usuário
+        ///// </summary>
+        ///// <param name="id"></param>
+        //[HttpDelete]
+        //public async Task<ActionResult> Remove(int id)
+        //{
+        //    try
+        //    {
+        //        if (!ModelState.IsValid)
+        //        {
+        //            return BadRequest();
+        //        }
+        //        var result = await _usuarioService.Remove(id);
                 
-                if (!result) return NotFound();
+        //        if (!result) return NotFound();
 
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        //    }
+        //}
 
         /// <summary>
         /// Retorna Usuario por paginação
@@ -112,13 +112,12 @@ namespace wca.compras.webapi.Controllers
         /// <returns>Perfil</returns>
         [HttpGet]
         [Route("Paginate/{sistemaId}/{pageSize}/{page}")]
-        public async Task<ActionResult<Pagination<UsuarioDto>>> Paginate(int sistemaId, int pageSize = 10, int page = 1, string? termo = "")
+        public async Task<ActionResult<Pagination<UsuarioDto>>> Paginate(int sistemaId, int pageSize = 10, int page = 1, [FromQuery] string? termo = "", [FromQuery] int[]? filial = null)
         {
             
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = _usuarioService.Paginate(filial, sistemaId, page, pageSize, termo);
+                var items = _usuarioService.Paginate(sistemaId, page, pageSize, termo, filial);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -134,12 +133,11 @@ namespace wca.compras.webapi.Controllers
         /// <returns>items</returns>
         [HttpGet]
         [Route("ToList/{sistemaId}")]
-        public async Task<ActionResult<IList<ListItem>>> List(int sistemaId)
+        public async Task<ActionResult<IList<ListItem>>> List(int sistemaId, [FromQuery] int[]? filial)
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                var items = await _usuarioService.GetToList(filial, sistemaId);
+                var items = await _usuarioService.GetToList(sistemaId, filial);
                 return Ok(items);
             }
             catch (ArgumentException ex)
@@ -186,9 +184,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = 1; // int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await _usuarioService.GetById(filial, id, sistemaId);
+                var result = await _usuarioService.GetById(id, sistemaId);
                 if (result == null)
                 {
                     return NotFound($"Usuário íd: {id}, não localizado!");

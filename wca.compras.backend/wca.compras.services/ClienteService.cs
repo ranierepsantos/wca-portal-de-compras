@@ -1,19 +1,11 @@
 ﻿using AutoMapper;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using MiniExcelLibs;
-using MiniExcelLibs.OpenXml;
-using Newtonsoft.Json;
-using System.ComponentModel;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Util;
-using static ClosedXML.Excel.XLPredefinedFormat;
 
 namespace wca.compras.services
 {
@@ -58,15 +50,12 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ClienteDto>> GetAll(int filialId)
+        public async Task<IList<ClienteDto>> GetAll()
         {
             try
             {
                 IList<Cliente> clientes;
                 var query = _rm.ClienteRepository.SelectAll();
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 clientes = await query.OrderBy(c => c.Nome).ToArrayAsync();
 
@@ -79,14 +68,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<ClienteDto> GetById(int filialId, int id)
+        public async Task<ClienteDto> GetById(int id)
         {
             try
             {
                 var query = _rm.ClienteRepository.SelectByCondition(p => p.Id == id);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include(cc => cc.ClienteContatos)
                              .Include(co => co.ClienteOrcamentoConfiguracao);
@@ -103,16 +89,14 @@ namespace wca.compras.services
             
         }
 
-        public async Task<IList<ListItem>> GetToList(int filialId)
+        public async Task<IList<ListItem>> GetToList(int[] filiais)
         {
             try
             {
                 var query = _rm.ClienteRepository.SelectByCondition(c => c.Ativo == true);
 
-                if (filialId > 0)
-                {
-                    query = query.Where(c => c.FilialId == filialId);
-                }
+                if (filiais.Length > 0)
+                    query = query.Where(q => filiais.Contains(q.FilialId));
 
                 var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 
@@ -125,15 +109,15 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<ClienteDto> Paginate(int filialId, int page = 1, int pageSize = 10, string termo = "")
+        public Pagination<ClienteDto> Paginate(int[] filialId, int page = 1, int pageSize = 10, string termo = "")
         {
             try
             {
                 var query = _rm.ClienteRepository.SelectAll();
                 //Matriz (id: 1) retorna todos os dados
-                if (filialId > 1)
+                if (filialId.Length> 0)
                 {
-                    query = query.Where(c => c.FilialId ==filialId);
+                    query = query.Where(c => filialId.Contains(c.FilialId));
                 }
 
                 if (!string.IsNullOrEmpty(termo))
@@ -153,19 +137,16 @@ namespace wca.compras.services
             }
         }
 
-        public Task<bool> Remove(int filialId, int id)
+        public Task<bool> Remove( int id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<ClienteDto> Update(int filialId, UpdateClienteDto cliente)
+        public async Task<ClienteDto> Update(UpdateClienteDto cliente)
         {
             try
             {
                 var query = _rm.ClienteRepository.SelectByCondition(p => p.Id == cliente.Id,false);
-
-                if (filialId > 1)
-                    query = query.Where(c => c.FilialId == filialId);
 
                 query = query.Include(cc => cc.ClienteContatos)
                              .Include(co => co.ClienteOrcamentoConfiguracao);
@@ -212,15 +193,19 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ClienteDto>> GetByUser(int usuarioId)
+        public async Task<IList<ClienteDto>> GetByUser(int usuarioId, int[]? filial = null)
         {
             try
             {
-                var clientes = await _rm.ClienteRepository.SelectByCondition(c => c.Ativo)
+                var query = _rm.ClienteRepository.SelectByCondition(c => c.Ativo)
                     .Include(c => c.ClienteOrcamentoConfiguracao)
-                    .Where(c => c.Usuario.Any(c => c.Id == usuarioId))
-                    .ToListAsync();
-                
+                    .Where(c => c.Usuario.Any(c => c.Id == usuarioId));
+
+                if (filial?.Length > 0)
+                    query = query.Where(c => filial.Contains(c.FilialId));
+
+                IList<Cliente> clientes = await query.ToListAsync();
+
                 return _mapper.Map<IList<ClienteDto>>(clientes);
             }
             catch (Exception ex)
@@ -238,8 +223,8 @@ namespace wca.compras.services
                 byte[] arquivo = Convert.FromBase64String(clienteImportacaoDto.Arquivo);
                 MemoryStream ms = new MemoryStream(arquivo);
                 var sheets = MiniExcel.GetSheetNames(ms);
-
-                var rows = MiniExcel.Query(ms, sheetName: sheets[1]).Skip(2).ToList();
+                string sheetName = "NORGE LABS";
+                var rows = MiniExcel.Query(ms, sheetName: sheetName).Skip(3).ToList();
 
                 IDictionary<string, object> categoryRow = rows[0];
                 IDictionary<string, object> categorias = new Dictionary<string, object>();

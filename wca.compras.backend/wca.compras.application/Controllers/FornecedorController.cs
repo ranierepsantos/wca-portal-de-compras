@@ -56,9 +56,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.Update(filial, updateFornecedorDto);
+                var result = await service.Update(updateFornecedorDto);
                 if (result == null)
                 {
                     return NotFound($"Fornecedor íd: {updateFornecedorDto.Id}, não localizado!");
@@ -87,9 +85,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.GetById(filial, id);
+                var result = await service.GetById(id);
                 if (result == null)
                 {
                     return NotFound($"Fornecedor íd: {id}, não localizado!");
@@ -108,8 +104,8 @@ namespace wca.compras.webapi.Controllers
         /// <returns>items</returns>
         /// <param name="filial"></param>
         [HttpGet]
-        [Route("ToList/{filial}")]
-        public async Task<ActionResult<IList<FornecedorListDto>>> List(int filial)
+        [Route("ToList")]
+        public async Task<ActionResult<IList<ListItem>>> List([FromQuery] int[] filial)
         {
             try
             {
@@ -128,11 +124,10 @@ namespace wca.compras.webapi.Controllers
         /// <returns>FornecedorDto</returns>
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
-        public ActionResult<Pagination<FornecedorDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        public ActionResult<Pagination<FornecedorDto>> Paginate(int pageSize = 10, int page = 1, [FromQuery] int[]? filial = null, string? termo = "")
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 var items = service.Paginate(filial, page, pageSize, termo);
                 return Ok(items);
             }
@@ -152,8 +147,7 @@ namespace wca.compras.webapi.Controllers
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                await service.ImportProdutoFromExcel(filial, importProdutoDto.FornecedorId, importProdutoDto);
+                await service.ImportProdutoFromExcel(importProdutoDto.FornecedorId, importProdutoDto);
                 return Ok();
             }
             catch (Exception ex)
@@ -173,14 +167,7 @@ namespace wca.compras.webapi.Controllers
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                //int idUsuario = 0;
-                //if (onlyAuthUser)
-                //{
-                //    idUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
-                //}
-
-                var items = service.Paginate(filial, fornecedorId, page, pageSize, termo);
+                var items = service.Paginate(fornecedorId, page, pageSize, termo);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -229,9 +216,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.RemoveProduto(filial, fornecedorId, id);
+                var result = await service.RemoveProduto(fornecedorId, id);
                 if (!result)
                 {
                     return NotFound();
@@ -259,9 +244,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.UpdateProduto(filial, updateProdutoDto);
+                var result = await service.UpdateProduto(updateProdutoDto);
                 if (result == null)
                 {
                     return NotFound($"Produto íd: {updateProdutoDto.Id}, não localizado!");
@@ -291,9 +274,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.GetProdutoById(filial,fornecedorId, id);
+                var result = await service.GetProdutoById(fornecedorId, id);
                 if (result == null)
                 {
                     return NotFound($"Produto íd: {id}, não localizado!");
@@ -338,10 +319,9 @@ namespace wca.compras.webapi.Controllers
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 int idUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
                 
-                var items = await service.ListProdutoByFornecedorWithIcms(filial, fornecedorId, uf, idUsuario, termo);
+                var items = await service.ListProdutoByFornecedorWithIcms(fornecedorId, uf, idUsuario, termo);
                 return Ok(items);
             }
             catch (Exception ex)

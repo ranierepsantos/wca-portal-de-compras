@@ -22,13 +22,13 @@ export default {
 
     toList(filial)
     {
-        return api.get(route.fornecedorToList.replace("{filial}",filial));
+        return api.get(route.fornecedorToList,{ params: {filial: filial}});
     },
 
-    paginate(pageSize, page, termo = "")
+    paginate(pageSize, page, filter)
     {
         let url = route.fornecedorPaginate.replace("{pageSize}", pageSize).replace("{page}", page)
-        return api.get(url, {params: { termo: termo}} );
+        return api.get(url, {params: filter} );
     },
 
 

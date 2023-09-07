@@ -109,7 +109,7 @@ const menuItems = ref([
     title: "Requisições",
     value: 8,
     route: "/compras/requisicoes",
-    permissao: "aprova_requisicao|requisicao|requisicao_all_users"
+    permissao: "aprova_requisicao|aprova_requisicao_cliente|requisicao|requisicao_all_users"
   },
   {
     title: "Usuários",
