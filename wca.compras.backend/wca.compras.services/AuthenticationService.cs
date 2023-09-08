@@ -43,7 +43,6 @@ namespace wca.compras.services
             try
             {
                 var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true)
-                                        .Include(u => u.Filial)
                                         .FirstOrDefaultAsync();
                 if (authUser == null || !BC.Verify(login.Password, authUser.Password))
                 {
