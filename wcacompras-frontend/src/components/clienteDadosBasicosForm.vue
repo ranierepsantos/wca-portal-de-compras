@@ -51,7 +51,6 @@
           item-title="text"
           item-value="value"
           v-model="cliente.filialId"
-          :disabled="authStore.user.filial != 1"
           density="compact"
           :rules="[(v) => !!v || 'Filial é obrigatório']"
         ></v-select>

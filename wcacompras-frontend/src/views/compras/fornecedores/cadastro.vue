@@ -21,21 +21,20 @@
 
                         </v-row>
                         <v-row>
-                            <v-col cols="4">
+                            <v-col >
                                 <v-text-field label="Inscrição Estadual" v-model="fornecedor.inscricaoEstadual"
                                     type="text" required density="compact" variant="outlined" color="primary"
                                     v-maska="'###.###.###.###'"
                                     :rules="[(v) => !!v || 'Campo é obrigatório']"></v-text-field>
                             </v-col>
-                            <v-col cols="4">
+                            <v-col >
                                 <v-select label="Matriz/Filial" :items="filiais" variant="outlined" color="primary"
                                     item-title="text" item-value="value" v-model="fornecedor.filialId"
-                                    :disabled="(authStore.user.filial != 1)" density="compact"
+                                    density="compact"
                                     :rules="[(v) => !!v || 'Filial é obrigatório']"></v-select>
                             </v-col>
-                            <v-col>
-                                <v-checkbox v-model="fornecedor.ativo" color="primary" label="Ativo?" density="compact"
-                                    v-show="fornecedor.id > 0">
+                            <v-col v-show="fornecedor.id > 0">
+                                <v-checkbox v-model="fornecedor.ativo" color="primary" label="Ativo?" density="compact">
                                 </v-checkbox>
                             </v-col>
                             
@@ -304,7 +303,7 @@ async function getFilialToList()
 {
     try
     {
-        let response = await filialService.toList();
+        let response = await filialService.getListByAuthenticatedUser();
         filiais.value = response.data;
     } catch (error)
     {

@@ -2,9 +2,14 @@
     <div>
         <bread-crumbs title="Fornecedores" @novoClick="editar('novo')" />
         <v-row>
-            <v-col cols="6">
-                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact"
-                    variant="outlined" color="info">
+            <v-col cols="5">
+                <v-select label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
+                    item-title="text" item-value="value" variant="outlined" color="primary"
+                    :hide-details="true" clearable></v-select>
+            </v-col>
+            <v-col cols="4">
+                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter.termo" density="compact"
+                    variant="outlined" color="info" clearable>
                 </v-text-field>
             </v-col>
         </v-row>
@@ -61,6 +66,7 @@ import fornecedorService from "@/services/fornecedor.service";
 import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
+import filialService from "@/services/filial.service";
 
 //DATA
 const page = ref(1);
@@ -68,17 +74,22 @@ const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
 const fornecedores = ref([]);
+const filiais = ref ([]);
 const swal = inject("$swal");
-const filter = ref("");
+const filter = ref({
+    filial: [],
+    termo: ""
+});
 
 //VUE METHODS
 onMounted(async () =>
 {
+    await getFiliaisByUser();
     await getItems();
 });
 
 watch(page, () => getItems());
-watch(filter, () => getItems());
+watch(() =>filter, () => getItems(), {deep: true});
 
 //METHODS
 async function enableDisable(item)
@@ -121,17 +132,37 @@ async function enableDisable(item)
     }
 }
 
-
 function editar(id)
 {
     router.push({ name: "fornecedorCadastro", query: { id: id } })
 }
+
+async function getFiliaisByUser() {
+    try
+    {
+        isBusy.value = true;
+        let response = await filialService.getListByAuthenticatedUser()
+        filiais.value = response.data;
+        
+    } catch (error)
+    {
+        console.log("clientes.getFiliaisByUser.error:", error.response);
+        handleErrors(error)
+    } finally
+    {
+        isBusy.value = false;
+    }
+}
+
 async function getItems()
 {
     try
     {
         isBusy.value = true;
-        let response = await fornecedorService.paginate(pageSize, page.value, filter.value);
+        let filtro = {...filter.value}
+        if (!filtro.filial || filtro.filial.length ==0 ) filtro.filial = filiais.value.map(f => {return f.value})
+
+        let response = await fornecedorService.paginate(pageSize, page.value, filtro);
         fornecedores.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)

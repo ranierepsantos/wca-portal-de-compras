@@ -10,13 +10,14 @@ namespace wca.compras.domain.Interfaces.Services
 {
     public interface IUsuarioService
     {
-        public Task<UsuarioDto> Create(CreateUsuarioDto usuario);
-        public Task<UsuarioDto> Update(int sistemaId, int filialId, UpdateUsuarioDto usuario);
-        public Task<bool> Remove(int filialId, int id, int sistemaId = 0);
-        public Task<UsuarioDto> GetById(int filialId, int id, int sistemaId);
-        public Pagination<UsuarioDto> Paginate(int filialId, int sistemaId, int page = 1, int pageSize = 10, string termo = "");
-        public Task<IList<ListItem>> GetToList(int filialId, int sistemaId);
+        Task<UsuarioDto> Create(int sistemaId, CreateUsuarioDto usuario);
+        public Task<UsuarioDto> Update(int sistemaId,  UpdateUsuarioDto usuario);
+        public Task<bool> Remove( int id, int sistemaId = 0);
+        public Task<UsuarioDto> GetById( int id, int sistemaId);
+        public Pagination<UsuarioDto> Paginate( int sistemaId, int page = 1, int pageSize = 10, string termo = "", int[]? filial= null);
+        public Task<IList<ListItem>> GetToList( int sistemaId, int[]? filial);
         
         Task<IList<ListItem>> GetToListByPerfil(int perfilId);
+        
     }
 }

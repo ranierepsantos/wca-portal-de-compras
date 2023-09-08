@@ -53,11 +53,10 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RecorrenciaDto>> Paginate(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0)
+        public ActionResult<Pagination<RecorrenciaDto>> Paginate(int pageSize = 10, int page = 1, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, [FromQuery] int[]? filial = null)
         {
             try
             {
-                int filial = int.Parse(User.FindFirst("Filial").Value);
                 var items = service.Paginate(filial, page, pageSize, clienteId, fornecedorId, usuarioId);
                 return Ok(items);
             }
@@ -128,9 +127,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = 1; //int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.GetById(filial, id);
+                var result = await service.GetById(id);
                 if (result == null)
                 {
                     return NotFound($"Recorrência código: {id}, não localizado!");
@@ -159,9 +156,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest();
                 }
 
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-
-                var result = await service.Update(filial, updateRecorrenciaDto);
+                var result = await service.Update(updateRecorrenciaDto);
                 if (result == null)
                 {
                     return NotFound($"Requisição íd: {updateRecorrenciaDto.Id}, não localizado!");
@@ -189,9 +184,7 @@ namespace wca.compras.webapi.Controllers
                 {
                     return BadRequest();
                 }
-                int filial = int.Parse(User.FindFirst("Filial").Value);
-                
-                var result = await service.EnabledDisabled(filial, enableRecorrencia);
+                var result = await service.EnabledDisabled(enableRecorrencia);
 
                 if (!result) return NotFound($"Recorrência código {enableRecorrencia.Id}, não localizada!");
 
