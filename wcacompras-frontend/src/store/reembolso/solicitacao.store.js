@@ -9,7 +9,9 @@ export class Solicitacao {
         this.clienteId= data == undefined? null: data.clienteId
         this.dataSolicitacao= data == undefined? moment().format("YYYY-MM-DD"): data.dataSolicitacao
         this.colaboradorId= data == undefined? "": data.colaboradorId
+        this.colaboradorNome = data ==undefined? "": data.colaboradorNome
         this.gestorId = data == undefined? "": data.gestorId
+        this.gestorNome = data ==undefined? "": data.gestorNome
         this.colaboradorCargo= data == undefined? "": data.colaboradorCargo
         this.projeto= data == undefined? "": data.projeto
         this.objetivo=data == undefined? "": data.objetivo

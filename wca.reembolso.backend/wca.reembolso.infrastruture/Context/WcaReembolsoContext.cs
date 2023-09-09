@@ -20,10 +20,13 @@ namespace wca.reembolso.infrastruture.Context
         public DbSet<StatusSolicitacao> StatusSolicitacao { get; set; }
         public DbSet<TipoDespesa> TipoDespesas { get; set; }
         public DbSet<Transacao> Transacoes { get; set; }
+
+        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<UsuarioClientes> UsuariosClientes { get; set; }
+        public DbSet<Filial> Filial { get; set; }
+        public DbSet<FilialUsuario> FilialUsuario { get; set; }
         
-
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UsuarioClientes>().HasKey(pk => new { pk.UsuarioId, pk.ClienteId });
@@ -35,6 +38,8 @@ namespace wca.reembolso.infrastruture.Context
                 .HasMany(c => c.Transacoes)
                 .WithOne(t => t.ContaCorrente)
                 .HasPrincipalKey(t => t.UsuarioId);
+
+            modelBuilder.Entity<FilialUsuario>().HasKey(pk => new { pk.UsuarioId, pk.FilialId });
         }
     }
 }

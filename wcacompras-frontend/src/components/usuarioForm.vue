@@ -3,6 +3,28 @@
     <v-row>
       <v-col>
         <v-text-field
+          label="Email"
+          v-model="user.email"
+          type="email"
+          required
+          variant="outlined"
+          color="primary"
+          :rules="emailRules"
+          density="compact"
+          @blur="$emit('emailChange', $event.target.value)"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="2" v-show="user.id > 0">
+        <v-checkbox
+          v-model="user.ativo"
+          label="Ativo"
+          color="primary"
+        ></v-checkbox>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-text-field
           label="Nome"
           v-model="user.nome"
           type="text"
@@ -14,33 +36,12 @@
         ></v-text-field>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col>
-        <v-text-field
-          label="Email"
-          v-model="user.email"
-          type="email"
-          required
-          variant="outlined"
-          color="primary"
-          :rules="emailRules"
-          density="compact"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="2" v-show="user.id > 0">
-        <v-checkbox
-          v-model="user.ativo"
-          label="Ativo"
-          color="primary"
-        ></v-checkbox>
-      </v-col>
-    </v-row>
+    
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { useAuthStore } from "@/store/auth.store";
 
 defineProps({
   user: {
@@ -54,7 +55,7 @@ defineProps({
     default: () =>{ return []; }
   }
 });
-const authStore = useAuthStore();
+
 const emailRules = ref([
   (v) => !!v || "E-mail é obrigatório",
   (v) => /.+@.+\..+/.test(v) || "E-mail deve ser válido",

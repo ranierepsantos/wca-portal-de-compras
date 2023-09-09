@@ -24,8 +24,8 @@
                   label="Cliente"
                   :items="clientes"
                   density="compact"
-                  item-title="nome"
-                  item-value="id"
+                  item-title="text"
+                  item-value="value"
                   variant="outlined"
                   color="primary"
                   v-model="solicitacao.clienteId"
@@ -60,7 +60,7 @@
             </v-row>
             <v-row
               v-show="
-                solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id
+                solicitacao.id > 0 
               "
             >
               <v-col>
@@ -71,8 +71,9 @@
                   color="primary"
                   density="compact"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
-                  v-model="solicitacao.colaborador"
+                  v-model="solicitacao.colaboradorNome"
                   :readonly="true"
+                  bg-color="#f2f2f2"
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -82,15 +83,16 @@
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  v-model="solicitacao.gestor"
+                  v-model="solicitacao.gestorNome"
                   :readonly="true"
+                  bg-color="#f2f2f2"
                 ></v-text-field>
               </v-col>
             </v-row>
             <v-row>
               <v-col
                 v-show="
-                  solicitacao.id > 0 && solicitacao.colaboradorId != usuario.id
+                  solicitacao.id > 0 
                 "
               >
                 <v-text-field
@@ -100,6 +102,7 @@
                   color="primary"
                   density="compact"
                   v-model="solicitacao.colaboradorCargo"
+                  bg-color="#f2f2f2"
                   :readonly="true"
                 ></v-text-field>
               </v-col>
@@ -358,7 +361,6 @@ onMounted(async () => {
   try {
     isBusy.value = true;
 
-    await solicitacaoStore.loadUsuarios();
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
     despesaTipos.value = await despesaTipoStore.toComboList();
@@ -372,13 +374,6 @@ onMounted(async () => {
           event: "aprovar-click",
         });
       }
-      solicitacao.value.colaborador = solicitacaoStore.getUsuarioSolicitacao(
-        solicitacao.value.colaboradorId
-      ).text;
-      solicitacao.value.gestor = solicitacaoStore.getUsuarioSolicitacao(
-        solicitacao.value.gestorId
-      ).text;
-
       if (
         solicitacao.value.tipoSolicitacao == 2 &&
         solicitacao.value.status == 2
