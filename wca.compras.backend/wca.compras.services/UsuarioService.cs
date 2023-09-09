@@ -81,6 +81,30 @@ namespace wca.compras.services
 
         }
 
+        public async Task<UsuarioDto> GetByEmail(string email)
+        {
+            try
+            {
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Email.ToLower().Equals(email.ToLower())); ;
+                query = query.Include(q => q.UsuarioSistemaPerfil);
+                
+                var data = await query.FirstOrDefaultAsync();
+
+                if (data == null)
+                    return null;
+
+                return _mapper.Map<UsuarioDto>(data);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Usuario.GetByEmail.Error" + ex.Message);
+                throw new Exception(ex.ToString());
+            }
+
+        }
+
+
         public async Task<bool> Remove(int id, int sistemaId = 0)
         {
             throw new NotImplementedException();

@@ -17,6 +17,9 @@ namespace wca.compras.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
+        [Column("sistema_id")]
+        public int SistemaId { get; set; } 
+
         [JsonIgnore]
         public IList<Usuario> Usuario { get; set; }
     }
