@@ -120,7 +120,8 @@ function clearData()
   filial.value = {
     id: 0,
     nome: "",
-    ativo: true
+    ativo: true,
+    sistemaId: useAuthStore().sistema.id
   };
 }
 
