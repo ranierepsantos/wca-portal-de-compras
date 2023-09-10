@@ -15,6 +15,10 @@ export default {
     {
         return api.get(route.usuarioGetById.replace('{id}', id).replace("{sistemaId}", authStore.sistema.id));
     },
+    getByEmail(email)
+    {
+        return api.get(route.usuarioGetByEmail.replace('{email}', email));
+    },
     remove(id)
     {
         return api.get(route.usuarioGetById.replace("{id}", id));

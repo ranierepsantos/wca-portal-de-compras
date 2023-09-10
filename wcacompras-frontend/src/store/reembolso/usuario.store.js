@@ -43,20 +43,20 @@ export const useUsuarioStore = defineStore("usuario", {
                 data.filial = [];
                 let response = await userService.create(data);
                 
-
                 data.id = response.data.id;
                 data.filial = filiais;
 
                 await reembolsoUsuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
-                let userClientes = {
-                    usuarioId: response.data.id,
-                    clienteIds: clientes
+                if (clientes.length > 0){
+                    let userClientes = {
+                        usuarioId: response.data.id,
+                        clienteIds: clientes
+                    }
+                    await clienteService.RelacionarClienteUsuario(userClientes);
                 }
-                await clienteService.RelacionarClienteUsuario(userClientes);
-
-
+                
             } catch (error) {
                 throw error
             }
@@ -70,7 +70,9 @@ export const useUsuarioStore = defineStore("usuario", {
                 response = await clienteService.getListByUser(data.id)
                 
                 data.cliente = response.data.map( item => {return { text: item.nome, value: item.id}})
-
+                
+                data.filial = (await this.getFiliais(id))
+                
                 let usuario = new Usuario(data);
                 return usuario;
 
@@ -85,28 +87,45 @@ export const useUsuarioStore = defineStore("usuario", {
         },
 
         async update (data) {
-                
+                debugger
                 let clientes = data.cliente.map(function (el) { return el.value; });
+                let filiais  = [...data.filial];
 
                 data.cliente = [];
+                data.filial = [];
 
                 data.usuarioReembolsoComplemento.usuarioId = data.id;
 
                 await userService.update(data);
 
+                data.filial = filiais;
 
-                let userClientes = {
-                    usuarioId: data.id,
-                    clienteIds: clientes
+                await reembolsoUsuarioService.createUpdate(data)
+            
+                // relacionar clientes x usuario
+                if (clientes.length > 0){
+                    let userClientes = {
+                        usuarioId: data.id,
+                        clienteIds: clientes
+                    }
+                    await clienteService.RelacionarClienteUsuario(userClientes);
                 }
-                
-            await clienteService.RelacionarClienteUsuario(userClientes);
-
         },
 
         async toComboList() {
             let response = await userService.toList()
             return response.data;
+        },
+
+        /**
+         * Retorna uma lista de filiais do usuário
+         * objeto: {text: string, value: number }
+        */
+        async getFiliais (usuarioId) {
+            
+           let response = await reembolsoUsuarioService.getFiliais(usuarioId)
+           return response.data;
+           
         },
 
         async reembolsoToListByClientePerfil(clienteId, perfilId) {

@@ -57,6 +57,7 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useAuthStore } from "@/store/auth.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
+import { useUsuarioStore } from "@/store/reembolso/usuario.store";
 //DATA
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
@@ -71,6 +72,7 @@ const authStore = useAuthStore();
 //VUE METHODS
 onMounted(async () =>
 {
+    authStore.user.filial = (await useUsuarioStore().getFiliais(authStore.user.id))[0].value
     await getItems();
 });
 
@@ -125,9 +127,7 @@ async function getItems()
     try
     {
         isBusy.value = true;
-        //let response = await clienteService.paginate(pageSize, page.value, filter.value);
         let response = await clienteStore.getClientesByPaginate(authStore.user.filial, page.value, pageSize, filter.value);
-        console.log(response);
         clientes.value = response.items;
         totalPages.value = response.totalPages;
     } catch (error)
