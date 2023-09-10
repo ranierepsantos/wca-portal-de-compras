@@ -97,7 +97,8 @@ const swal = inject("$swal");
 const filial = ref({
   id: 0,
   nome: "",
-  ativo: true
+  ativo: true,
+  sistemaId: useAuthStore().sistema.id
 });
 const filialForm = ref(null)
 
@@ -120,7 +121,8 @@ function clearData()
   filial.value = {
     id: 0,
     nome: "",
-    ativo: true
+    ativo: true,
+    sistemaId: useAuthStore().sistema.id
   };
 }
 

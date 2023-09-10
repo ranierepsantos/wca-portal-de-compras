@@ -23,8 +23,9 @@ namespace wca.reembolso.infrastruture.Context
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<UsuarioClientes> UsuariosClientes { get; set; }
-        public DbSet<Filial> Filial { get; set; }
-        public DbSet<FilialUsuario> FilialUsuario { get; set; }
+
+        //public DbSet<Filial> Filial { get; set; }
+        //public DbSet<FilialUsuario> FilialUsuario { get; set; }
         
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,7 +40,7 @@ namespace wca.reembolso.infrastruture.Context
                 .WithOne(t => t.ContaCorrente)
                 .HasPrincipalKey(t => t.UsuarioId);
 
-            modelBuilder.Entity<FilialUsuario>().HasKey(pk => new { pk.UsuarioId, pk.FilialId });
+            //modelBuilder.Entity<FilialUsuario>().HasKey(pk => new { pk.UsuarioId, pk.FilialId });
         }
     }
 }

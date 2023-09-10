@@ -14,6 +14,7 @@
                 <tr>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CNPJ</th>
+                    <th class="text-left text-grey" v-show="isMatriz">FILIAL</th>
                     <th class="text-center text-grey">ATIVO</th>
                     <th></th>
                 </tr>
@@ -25,6 +26,7 @@
                         &nbsp;{{ item.nome }}
                     </td>
                     <td class="text-left">{{ item.cnpj }}</td>
+                    <td class="text-left" v-show="isMatriz">{{ filiais.find(q => q.value == item.filialId).text }}</td>
                     <td class="text-center">
                         <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
                             :color="item.ativo ? 'success' : 'error'"></v-icon>
@@ -41,7 +43,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4">
+                    <td :colspan="isMatriz ? 5 : 4">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -58,6 +60,7 @@ import router from "@/router";
 import { useAuthStore } from "@/store/auth.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import { useUsuarioStore } from "@/store/reembolso/usuario.store";
+import filialService from "@/services/filial.service";
 //DATA
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
@@ -65,14 +68,18 @@ const isBusy = ref(false);
 const totalPages = ref(1);
 const clienteStore = useClienteStore();
 const clientes = ref([]);
+const filiais = ref([])
 const filter = ref("");
 const swal = inject("$swal");
 const authStore = useAuthStore();
-
+const isMatriz = ref(false)
 //VUE METHODS
 onMounted(async () =>
 {
-    authStore.user.filial = (await useUsuarioStore().getFiliais(authStore.user.id))[0].value
+    await getFiliais();
+    let filialUsuario =(await useUsuarioStore().getFiliais(authStore.user.id))[0]
+    isMatriz.value = filialUsuario.text.toLowerCase() =="matriz"
+    authStore.user.filial = filialUsuario.value
     await getItems();
 });
 
@@ -121,13 +128,25 @@ async function enableDisable(item)
         handleErrors(error)
     }
 }
+async function getFiliais() 
+{
+    try
+    {
+        let response = await filialService.toList()
+        filiais.value = response.data;
+    } catch (error)
+    {
+        console.log("clientes.getItems.error:", error.response);
+        handleErrors(error)
+    } 
+}
 
 async function getItems()
 {
     try
     {
         isBusy.value = true;
-        let response = await clienteStore.getClientesByPaginate(authStore.user.filial, page.value, pageSize, filter.value);
+        let response = await clienteStore.getClientesByPaginate(isMatriz.value ? 0: authStore.user.filial, page.value, pageSize, filter.value);
         clientes.value = response.items;
         totalPages.value = response.totalPages;
     } catch (error)

@@ -70,6 +70,7 @@
                           :rules="[(v) => !!v || 'Filial é obrigatória']"
                           density="compact"
                           @update:model-value="setFilialUsuario($event)"
+                          :disabled = "!isMatriz"
                         ></v-select>
                       </v-col>
                       <v-col>
@@ -166,8 +167,8 @@ import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
 import { Usuario, useUsuarioStore, IDPERFILGESTOR, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { useFilialStore } from "@/store/reembolso/filial.store";
 import userService from "@/services/user.service"
+import filialService from "@/services/filial.service"
 
 //DATA
 const isBusy = ref(true);
@@ -180,32 +181,40 @@ const swal = inject("$swal");
 const route = useRoute();
 const tab = ref(null);
 const usuario = ref(new Usuario());
-let filialUsuario = 0;
 const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
 const usuarioStore = useUsuarioStore();
 const colaboradorClienteId = ref(null)
+const isMatriz = ref(false)
 
 //VUE METHODS
 onMounted(async () => {
   tab.value = authStore.sistema.id
-  clearData();
+  let filiaisUsuario  = await usuarioStore.getFiliais();
+  if (filiaisUsuario.length > 0){
+    isMatriz.value = filiaisUsuario[0].text.toLowerCase() =="matriz"
+    authStore.user.filial = filiaisUsuario[0].value
+  }
   await getFilialToList();
   await getPerfilToList();
+  clearData();
   if (parseInt(route.query.id) > 0) {
     await getUsuario(route.query.id);
   }
   isBusy.value = false;
 });
 
-watch(() => colaboradorClienteId.value, async(clienteId) => {
+watch(() => colaboradorClienteId.value, async(clienteId, oldClienteId) => {
   
   let cliente = clientes.value.filter(q => q.value== clienteId)[0]
   if (cliente) 
   {
     usuario.value.cliente = []
-    usuario.value.cliente.push(cliente)
+    if (oldClienteId && oldClienteId != clienteId )
+      usuario.value.usuarioReembolsoComplemento.gestorId = null
+    
+      usuario.value.cliente.push(cliente)
   }
   await getGestorToList(clienteId)
 })
@@ -224,7 +233,6 @@ const isGestor = computed(() => {
   else  {
     return false
   }
-    
 })
 
 //METHODS
@@ -244,6 +252,7 @@ async function setFilialUsuario(filialId)
     usuario.value.filial =[]
     usuario.value.filial.push(_filial)
     usuario.value.cliente = []
+    colaboradorClienteId.value = null
     await getClienteToList(_filial.value)
   }
 }
@@ -264,7 +273,7 @@ async function setPerfilUsuario(perfilId) {
   }
   if (perfilId == IDPERFILCOLABORADOR || perfilId == IDPERFILGESTOR) { 
     usuario.value.cliente = []
-    await getClienteToList(filialUsuario)
+    await getClienteToList(getFilialUsuario())
   }
   
   if (perfilId != IDPERFILCOLABORADOR) {
@@ -313,6 +322,8 @@ async function salvar() {
 
 async function clearData() {
   usuario.value = new Usuario();
+  if (!isMatriz.value)
+    setFilialUsuario(authStore.user.filial)
 }
 
 function clientesListRemove(removerTodos = false) {
@@ -355,7 +366,8 @@ async function getPerfilToList() {
 
 async function getFilialToList() {
   try {
-    filiais.value = await useFilialStore().toComboList()
+    let response = await filialService.toList()
+    filiais.value = response.data
     
   } catch (error) {
     console.log("getFilialToList.error:", error);

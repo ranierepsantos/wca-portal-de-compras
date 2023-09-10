@@ -55,10 +55,12 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id);
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id)
+                               .Include(q => q.Filial.Where(c =>  c.SistemaId == sistemaId))
+                               .Include(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == sistemaId));
 
-                query = query.Include(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == sistemaId))
-                             .Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
+
+                //query = query.Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
 
                 Usuario data = new Usuario();
 
@@ -141,14 +143,15 @@ namespace wca.compras.services
                 var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id, true);
 
                 query = query.Include("UsuarioSistemaPerfil")
+                             .Include(c =>  c.Filial.Where(q =>  q.SistemaId.Equals(sistemaId)))
                              .Include("UsuarioReembolsoComplemento");
 
                 //Retorna dados especificos do sistema
                 if (sistemaId == 1 ) //compras
                 {
                     query = query.Include("Cliente")
-                                 .Include("TipoFornecimento")
-                                 .Include("Filial");
+                                 .Include("TipoFornecimento");
+                                 
                 }
                 
                 var baseData = await query.FirstOrDefaultAsync();
@@ -166,6 +169,31 @@ namespace wca.compras.services
                         throw new Exception("Email já cadastrado");
                     }
                 }
+
+                //Remover Filiais que foram retiradas do relacionamento
+                if (usuario.Filial != null)
+                {
+                    List<Filial> filiais = baseData.Filial
+                    .Where(x => !usuario.Filial.Where(q => q.Value == x.Id).Any())
+                    .Where(x => x.Id != 0)
+                    .ToList();
+
+                    foreach (Filial item in filiais)
+                    {
+                        baseData.Filial.Remove(item);
+                    }
+                }
+
+                //Adicionar Filiais caso tenha novas
+                usuario.Filial?.ToList().ForEach(item =>
+                {
+                    if (baseData.Filial.Where(p => p.Id == item.Value).FirstOrDefault() == null)
+                    {
+                        var filial = _mapper.Map<Filial>(item);
+                        _rm.FilialRepository.Attach(filial);
+                        baseData.Filial.Add(filial);
+                    }
+                });
 
                 if (sistemaId == 1)
                 {
@@ -216,7 +244,8 @@ namespace wca.compras.services
                 }
 
                 query = query.Include(q => q.UsuarioSistemaPerfil.Where(c=> c.SistemaId == sistemaId))
-                             .Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
+                             .Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId))
+                             .Include(c => c.Filial.Where(x => x.SistemaId == sistemaId));
 
                 query = query.OrderBy(p => p.Nome);
 
@@ -285,7 +314,6 @@ namespace wca.compras.services
         private async Task<Usuario> GetDataToCompras(IQueryable<Usuario> query)
         {
             var data = await query.Include("Cliente")
-                                  .Include("Filial")
                                   .Include(u => u.TipoFornecimento)
                                   .FirstOrDefaultAsync();
             return data;
@@ -303,20 +331,7 @@ namespace wca.compras.services
         private async Task<bool> UpdateComprasRelacoes(Usuario usuario ,UpdateUsuarioDto updateUsuario) 
         {
 
-            //Remover Filiais que foram retiradas do relacionamento
-            if (updateUsuario.Filial != null)
-            {
-                List<Filial> filiais = usuario.Filial
-                .Where(x => !updateUsuario.Filial.Where(q => q.Value == x.Id).Any())
-                .Where(x => x.Id != 0)
-                .ToList();
-
-                foreach (Filial item in filiais)
-                {
-                    usuario.Filial.Remove(item);
-                }
-            }
-
+            
             //Remover Cliente que foram retirados do relacionamento
             if (updateUsuario.Cliente != null)
             {
@@ -330,16 +345,6 @@ namespace wca.compras.services
                     usuario.Cliente.Remove(item);
                 }
             }
-
-            //usuario.Cliente.ToList().ForEach(cli =>
-            //{
-
-            //    if (updateUsuario.Cliente.Where(p => p.Value == cli.Id).FirstOrDefault() == null)
-            //    {
-            //        var cliente = usuario.Cliente.FirstOrDefault(p => p.Id == cli.Id);
-            //        usuario.Cliente.Remove(cliente);
-            //    }
-            //});
 
             //Remover Tipo de Fornecimento que foram retirados do relacionamento
 
@@ -355,27 +360,6 @@ namespace wca.compras.services
                     usuario.TipoFornecimento.Remove(item);
                 }
             }
-
-            //usuario.TipoFornecimento.ToList().ForEach(tipo =>
-            //{
-            //    if (updateUsuario.TipoFornecimento.Where(p => p.Value == tipo.Id).FirstOrDefault() == null)
-            //    {
-            //        var tp = usuario.TipoFornecimento.FirstOrDefault(p => p.Id == tipo.Id);
-            //        usuario.TipoFornecimento.Remove(tp);
-            //    }
-            //});
-
-            //Adicionar Filiais caso tenha novas
-            updateUsuario.Filial?.ToList().ForEach(item =>
-            {
-                if (usuario.Filial.Where(p => p.Id == item.Value).FirstOrDefault() == null)
-                {
-                    var filial = _mapper.Map<Filial>(item);
-                    _rm.FilialRepository.Attach(filial);
-                    usuario.Filial.Add(filial);
-                }
-            });
-
 
             //Adicionar cliente caso tenha novas
             updateUsuario.Cliente?.ToList().ForEach(cli =>
