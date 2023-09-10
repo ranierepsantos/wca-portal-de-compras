@@ -38,17 +38,18 @@ namespace wca.compras.services
 
         public async Task<IList<FilialDto>> GetAll()
         {
-            try
-            {
-                var filiais = await _rm.FilialRepository.SelectAll().OrderBy(f => f.Nome).ToListAsync();
+            throw new NotImplementedException();
+            //try
+            //{
+            //    var filiais = await _rm.FilialRepository.SelectAll().OrderBy(f => f.Nome).ToListAsync();
 
-                return _mapper.Map<IList<FilialDto>>(filiais);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"FilialService.GetAll.Error: {ex.Message}");
-                throw new Exception(ex.Message, ex.InnerException);
-            }
+            //    return _mapper.Map<IList<FilialDto>>(filiais);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine($"FilialService.GetAll.Error: {ex.Message}");
+            //    throw new Exception(ex.Message, ex.InnerException);
+            //}
         }
 
         public async Task<FilialDto> GetById(int id)
@@ -69,17 +70,13 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ListItem>> GetToList(int filialId)
+        public async Task<IList<ListItem>> GetToList(int sistemaId)
         {
             try
             {
-                var query = _rm.FilialRepository.SelectByCondition(c => c.Ativo == true);
+                var query = _rm.FilialRepository.SelectByCondition(c => c.Ativo && c.SistemaId.Equals(sistemaId));
 
-                if (filialId > 1)
-                {
-                    query= query.Where(c => c.Id == filialId);
-                }
-                var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
+                var itens = await query.OrderBy(p => p.Nome).ToListAsync();
 
                 return _mapper.Map<IList<ListItem>>(itens);
             }
@@ -90,11 +87,11 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ListItem>> GetToListByUser(int usuarioId)
+        public async Task<IList<ListItem>> GetToListByUser(int sistemaId, int usuarioId)
         {
             try
             {
-                var query = _rm.FilialRepository.SelectByCondition(c => c.Ativo == true);
+                var query = _rm.FilialRepository.SelectByCondition(c => c.Ativo &&  c.SistemaId.Equals(sistemaId));
 
                 query = query.Where(c => c.Usuario.Where(q => q.Id.Equals(usuarioId)).Any());
 
@@ -110,12 +107,12 @@ namespace wca.compras.services
         }
 
 
-        public Pagination<FilialDto> Paginate(int page, int pageSize, string termo = "")
+        public Pagination<FilialDto> Paginate(int sistemaId, int page, int pageSize, string termo = "")
         {
             try
             {
                 //Não trazer a MATRIZ
-                var query = _rm.FilialRepository.SelectAll().Where(c => c.Id > 1);
+                var query = _rm.FilialRepository.SelectAll().Where(c => !c.Nome.Equals("MATRIZ") && c.SistemaId.Equals(sistemaId));
 
                 if (!string.IsNullOrEmpty(termo))
                 {

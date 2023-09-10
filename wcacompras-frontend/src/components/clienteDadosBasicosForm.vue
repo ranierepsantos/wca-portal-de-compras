@@ -53,6 +53,7 @@
           v-model="cliente.filialId"
           density="compact"
           :rules="[(v) => !!v || 'Filial é obrigatório']"
+          :disabled="comboFilialDisabled"
         ></v-select>
       </v-col>
     </v-row>
@@ -94,6 +95,10 @@ defineProps({
       default: function() {
           return []
       }
+  },
+  comboFilialDisabled: {
+    type: Boolean,
+    default: false
   }
 });
 const authStore = useAuthStore();

@@ -6,7 +6,7 @@
     <div class="text-h4 text-primary">{{ title }}</div>
     <v-spacer></v-spacer>
     <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" v-for="(button, index) in buttons"
-      @click="$emit(button.event)" :key="index">
+      @click="$emit(button.event)" :key="index" :disabled="button.disabled??false">
       <v-icon :icon="button.icon" v-if="button.icon != ''"></v-icon>
       <b>{{ button.text }}</b>
     </v-btn>
