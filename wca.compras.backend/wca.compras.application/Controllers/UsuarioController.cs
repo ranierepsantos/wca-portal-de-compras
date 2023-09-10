@@ -168,9 +168,9 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
-        /// Busca cliente pelo Id
+        /// Busca Usuário pelo Id
         /// </summary>
-        /// <returns>Cliente</returns>
+        /// <returns>Usuario</returns>
         /// <param name="id"></param>
         /// <param name="sistemaId"></param>
         [HttpGet]
@@ -188,6 +188,35 @@ namespace wca.compras.webapi.Controllers
                 if (result == null)
                 {
                     return NotFound($"Usuário íd: {id}, não localizado!");
+                }
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Busca Usuário pelo Id
+        /// </summary>
+        /// <returns>Usuario</returns>
+        /// <param name="email"></param>
+        [HttpGet]
+        [Route("{email}")]
+        public async Task<ActionResult<UsuarioDto>> GetByEmail(string email)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await _usuarioService.GetByEmail(email);
+                if (result == null)
+                {
+                    return NotFound($"Usuário não localizado!");
                 }
                 return Ok(result);
             }

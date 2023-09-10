@@ -49,7 +49,6 @@ namespace wca.reembolso.domain.Entities
 
         [Column("StatusSolicitacaoId")]
         public int Status { get; set; } = 1;
-
         
         public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();

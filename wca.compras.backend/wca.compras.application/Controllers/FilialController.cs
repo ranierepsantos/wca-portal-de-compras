@@ -39,13 +39,12 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>items</returns>
         [HttpGet]
-        [Route("ToList")]
-        public async Task<ActionResult<IList<ListItem>>> List()
+        [Route("ToList/{sistemaId}")]
+        public async Task<ActionResult<IList<ListItem>>> List(int sistemaId)
         {
             try
             {
-                int filial = 1; //int.Parse(User.FindFirst("Filial").Value);
-                var items = await service.GetToList(filial);
+                var items = await service.GetToList(sistemaId);
                 return Ok(items);
             }
             catch (ArgumentException ex)
@@ -60,13 +59,13 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>items</returns>
         [HttpGet]
-        [Route("ListByAuthenticatedUser")]
-        public async Task<ActionResult<IList<ListItem>>> ListByAuthenticatedUser()
+        [Route("ListByAuthenticatedUser/{sistemaId}")]
+        public async Task<ActionResult<IList<ListItem>>> ListByAuthenticatedUser(int sistemaId)
         {
             try
             {
                 int codigoUsuario = int.Parse(User.FindFirst("CodigoUsuario").Value);
-                var items = await service.GetToListByUser (codigoUsuario);
+                var items = await service.GetToListByUser (sistemaId, codigoUsuario);
                 return Ok(items);
             }
             catch (ArgumentException ex)
@@ -129,12 +128,12 @@ namespace wca.compras.webapi.Controllers
         /// </summary>
         /// <returns>FilialDto</returns>
         [HttpGet]
-        [Route("Paginate/{pageSize}/{page}")]
-        public ActionResult<Pagination<FilialDto>> Paginate(int pageSize = 10, int page = 1, string? termo = "")
+        [Route("Paginate/{sistemaId}/{pageSize}/{page}")]
+        public ActionResult<Pagination<FilialDto>> Paginate(int sistemaId, int pageSize = 10, int page = 1, string? termo = "")
         {
             try
             {
-                var items = service.Paginate(page, pageSize, termo);
+                var items = service.Paginate(sistemaId, page, pageSize, termo);
                 return Ok(items);
             }
             catch (Exception ex)

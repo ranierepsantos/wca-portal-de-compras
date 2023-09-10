@@ -60,6 +60,20 @@
                     <v-row style="margin-top: 3px;">
                       <v-col>
                         <v-select
+                          label="Filial"
+                          :model-value="getFilialUsuario()"
+                          :items="filiais"
+                          item-title="text"
+                          item-value="value"
+                          variant="outlined"
+                          color="primary"
+                          :rules="[(v) => !!v || 'Filial é obrigatória']"
+                          density="compact"
+                          @update:model-value="setFilialUsuario($event)"
+                        ></v-select>
+                      </v-col>
+                      <v-col>
+                        <v-select
                           label="Perfil"
                           :model-value="getSistemaPerfil(2)"
                           :items="listPerfil"
@@ -143,7 +157,6 @@
 <script setup>
 import { ref, onMounted, watch, inject,computed } from "vue";
 import perfilService from "@/services/perfil.service";
-import filialService from "@/services/filial.service";
 import handleErrors from "@/helpers/HandleErrors";
 import { useAuthStore } from "@/store/auth.store";
 import { useRoute } from "vue-router";
@@ -153,6 +166,8 @@ import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
 import { Usuario, useUsuarioStore, IDPERFILGESTOR, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
+import { useFilialStore } from "@/store/reembolso/filial.store";
+import userService from "@/services/user.service"
 
 //DATA
 const isBusy = ref(true);
@@ -184,16 +199,6 @@ onMounted(async () => {
   isBusy.value = false;
 });
 
-watch(
-  () => usuario.value.filialId,
-  async (filialid, oldValue) => {
-    if (filialid != filialUsuario) {
-      usuario.value.cliente = [];
-      filialUsuario = filialid;
-    }
-    await getClienteToList(filialUsuario)
-  }
-);
 watch(() => colaboradorClienteId.value, async(clienteId) => {
   
   let cliente = clientes.value.filter(q => q.value== clienteId)[0]
@@ -223,6 +228,26 @@ const isGestor = computed(() => {
 })
 
 //METHODS
+function getFilialUsuario() 
+{
+  if (usuario.value.filial.length > 0) {
+    return usuario.value.filial[0].value 
+  }
+  return null
+   
+}
+
+async function setFilialUsuario(filialId) 
+{
+  let _filial = filiais.value.find(q =>  q.value == filialId)
+  if (_filial) {
+    usuario.value.filial =[]
+    usuario.value.filial.push(_filial)
+    usuario.value.cliente = []
+    await getClienteToList(_filial.value)
+  }
+}
+
 async function setPerfilUsuario(perfilId) {
   let index = -1;
   if ( usuario.value.usuarioSistemaPerfil.length > 0) {
@@ -288,8 +313,6 @@ async function salvar() {
 
 async function clearData() {
   usuario.value = new Usuario();
-  filialUsuario = authStore.user.filial;
-  usuario.value.filialId = filialUsuario
 }
 
 function clientesListRemove(removerTodos = false) {
@@ -332,8 +355,8 @@ async function getPerfilToList() {
 
 async function getFilialToList() {
   try {
-    let response = await filialService.toList();
-    filiais.value = response.data;
+    filiais.value = await useFilialStore().toComboList()
+    
   } catch (error) {
     console.log("getFilialToList.error:", error);
     handleErrors(error);
@@ -344,10 +367,12 @@ async function getUsuario(usuarioId) {
   try {
     isBusy.value = true;
     usuario.value = await usuarioStore.getById(usuarioId);
-    filialUsuario = usuario.value.filialId;
-    if (usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILCOLABORADOR ||
-        usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILGESTOR) {
-      colaboradorClienteId.value = usuario.value.cliente[0].value
+    await getClienteToList(getFilialUsuario())
+    
+    if ((usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILCOLABORADOR ||
+        usuario.value.usuarioSistemaPerfil[0].perfilId == IDPERFILGESTOR) &&
+        usuario.value.cliente.length > 0) {
+            colaboradorClienteId.value = usuario.value.cliente[0].value
     }else {
       clientesListRemove()
     }
@@ -359,6 +384,24 @@ async function getUsuario(usuarioId) {
     isBusy.value = false;
   }
 }
+
+async function searchByEmail(email) {
+  if (usuario.value.id ==0) {
+    try {
+      let _usuario = (await userService.getByEmail(email)).data  
+
+      if (_usuario.usuarioSistemaPerfil.find(q =>  q.sistemaId == authStore.sistema.id) == undefined)
+      {
+        usuario.value.id = _usuario.id
+        usuario.value.nome = _usuario.nome 
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  
+}
+
 </script>
 
 <style scoped>

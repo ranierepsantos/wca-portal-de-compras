@@ -18,6 +18,8 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<IList<ListItem>> GetToList( int sistemaId, int[]? filial);
         
         Task<IList<ListItem>> GetToListByPerfil(int perfilId);
-        
+        Task<UsuarioDto> GetByEmail(string email);
+
+
     }
 }

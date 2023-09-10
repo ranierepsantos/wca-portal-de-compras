@@ -17,9 +17,9 @@ export const route = {
 
     filialCreate: "Filial",
     filialUpdate: "Filial",
-    filialToList: "Filial/ToList",
-    filialPaginate: "Filial/Paginate/{pageSize}/{page}",
-    filialListByAuthenticatedUser: "Filial/ListByAuthenticatedUser",
+    filialToList: "Filial/ToList/{sistemaId}",
+    filialPaginate: "Filial/Paginate/{sistemaId}/{pageSize}/{page}",
+    filialListByAuthenticatedUser: "Filial/ListByAuthenticatedUser/{sistemaId}",
 
     fornecedorCreate: "Fornecedor",
     fornecedorUpdate: "Fornecedor",
@@ -77,6 +77,7 @@ export const route = {
 
     usuarioCreate: "Usuario/{sistemaId}",
     usuarioGetById: "Usuario/{id}/{sistemaId}",
+    usuarioGetByEmail: "Usuario/{email}",
     usuarioRemove: "Usuario",
     usuarioUpdate: "Usuario/{sistemaId}",
     usuarioPaginate: "Usuario/Paginate/{sistemaId}/{pageSize}/{page}",
