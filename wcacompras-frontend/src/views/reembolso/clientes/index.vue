@@ -136,7 +136,7 @@ async function getFiliais()
         filiais.value = response.data;
     } catch (error)
     {
-        console.log("clientes.getItems.error:", error.response);
+        console.log("clientes.getFiliais.error:", error.response);
         handleErrors(error)
     } 
 }

@@ -57,8 +57,8 @@ export const useClienteStore = defineStore("cliente", {
         return response.data;
     },
     
-    async toComboList(filial = 0)  {
-        let response = await clienteService.toList(filial);
+    async toComboList(filial = 0, usuarioId = 0)  {
+        let response = await clienteService.toList(filial, usuarioId);
         return response.data;
     },
 

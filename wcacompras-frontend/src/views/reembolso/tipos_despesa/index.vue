@@ -184,7 +184,8 @@ async function enableDisable(item)
     {
       let data = { ...item }
       data.ativo = !data.ativo
-      despesaTipoStore.update(data)
+      
+      await despesaTipoStore.update(data)
 
       await getItems()
 

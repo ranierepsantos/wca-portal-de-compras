@@ -13,7 +13,7 @@ module.exports = defineConfig({
       },
       '^/reembolsoapi': {
         //target: 'https://wca-backend.azurewebsites.net/',
-        target: 'https://localhost:7235/api',
+        target: 'http://localhost:5100/api',
         pathRewrite: {'^/reembolsoapi': ''},
         changeOrigin: true,
         secure: false,

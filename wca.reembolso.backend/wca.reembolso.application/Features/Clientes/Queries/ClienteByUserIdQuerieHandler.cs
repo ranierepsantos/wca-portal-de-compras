@@ -25,8 +25,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
         {
 
             var query = _repository.ClienteRepository.ToQuery();
-            query = query.Include("UsuarioClientes")
-                         .Where(q => q.UsuarioClientes.Any(sq => sq.UsuarioId == request.UsuarioId));
+            query = query.Where(q => q.UsuarioClientes.Any(sq => sq.UsuarioId == request.UsuarioId));
 
             var list = await query.ToListAsync(cancellationToken: cancellationToken);
 

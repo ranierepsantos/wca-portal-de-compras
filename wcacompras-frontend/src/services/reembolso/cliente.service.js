@@ -28,9 +28,9 @@ export default {
         return api.put(rotas.Update, cliente);
     },
 
-    toList(filial)
+    toList(filialId =0, usuarioId =0)
     {
-        return api.get(rotas.ToComboList, {params: {filialId: filial}});
+        return api.get(rotas.ToComboList, {params: {filialId: filialId, usuarioId: usuarioId}});
     },
 
     paginate(filialId, pageSize, page, termo = "")
