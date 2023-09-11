@@ -247,7 +247,7 @@ namespace wca.compras.services
                     }
                 }
 
-                var filiais = _rm.FilialRepository.SelectAll().ToList();
+                var filiais = _rm.FilialRepository.SelectByCondition(q =>  q.SistemaId == 1).ToList();
                 var tipos = _rm.TipoFornecimentoRepository.SelectAll().ToList();
 
 
@@ -261,6 +261,11 @@ namespace wca.compras.services
                     cep = cep?.Replace("s/n", "");
                     if (cep?.Length > 9) cep = cep.Substring(0, 9);
 
+                    var clienteFilial = filiais.Where(q => q.Nome.ToLower().Equals(filialNome.ToLower())).FirstOrDefault();
+                    if (clienteFilial ==null)
+                    {
+                        throw new Exception($"Filial {filialNome}, não cadastrada");
+                    }
                     CreateClienteDto createCliente = new CreateClienteDto(
                         Nome: row["B"]?.ToString(),
                         CNPJ: row["C"]?.ToString(),
@@ -274,7 +279,7 @@ namespace wca.compras.services
                         PeriodoEntrega: "",
                         NaoUltrapassarLimitePorRequisicao: false,
                         ValorLimiteRequisicao: 0,
-                        FilialId: filiais.Where(q => q.Nome.ToLower().Equals(filialNome.ToLower())).FirstOrDefault().Id,
+                        FilialId: clienteFilial.Id,
                         ClienteContatos: new List<ClienteContatoDto>(),
                         ClienteOrcamentoConfiguracao: new List<ClienteOrcamentoConfiguracaoDto>()
                     );
