@@ -19,6 +19,7 @@ export class Solicitacao {
         this.valorAdiantamento= data == undefined? 0.00: data.valorAdiantamento
         this.valorDespesa= data == undefined? 0.00: data.valorDespesado
         this.status = data == undefined? 1: data.status
+        this.statusAnterior = data == undefined? 1: data.statusAnterior
         this.cliente = data == undefined? {}: data.cliente
         this.despesa= data == undefined? []: data.despesa
         this.solicitacaoHistorico = data == undefined? []: data.solicitacaoHistorico
