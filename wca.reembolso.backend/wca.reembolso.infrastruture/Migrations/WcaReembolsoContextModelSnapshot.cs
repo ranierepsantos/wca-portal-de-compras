@@ -87,7 +87,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes");
+                    b.ToTable("Clientes", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.ContaCorrente", b =>
@@ -102,7 +102,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasKey("UsuarioId");
 
-                    b.ToTable("ContaCorrente");
+                    b.ToTable("ContaCorrente", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Despesa", b =>
@@ -180,7 +180,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("TipoDespesaId");
 
-                    b.ToTable("Despesas");
+                    b.ToTable("Despesas", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Faturamento", b =>
@@ -224,7 +224,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("Faturamento");
+                    b.ToTable("Faturamento", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.FaturamentoItem", b =>
@@ -250,7 +250,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("SolicitacaoId");
 
-                    b.ToTable("FaturamentoItems");
+                    b.ToTable("FaturamentoItems", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Notificacao", b =>
@@ -279,7 +279,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("Notificacoes");
+                    b.ToTable("Notificacoes", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Solicitacao", b =>
@@ -358,7 +358,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("GestorId");
 
-                    b.ToTable("Solicitacoes");
+                    b.ToTable("Solicitacoes", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.SolicitacaoHistorico", b =>
@@ -387,7 +387,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("SolicitacaoId");
 
-                    b.ToTable("SolicitacaoHistorico");
+                    b.ToTable("SolicitacaoHistorico", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.StatusSolicitacao", b =>
@@ -423,7 +423,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatusSolicitacao");
+                    b.ToTable("StatusSolicitacao", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.TipoDespesa", b =>
@@ -454,7 +454,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TiposDespesa");
+                    b.ToTable("TiposDespesa", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Transacao", b =>
@@ -491,7 +491,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("ContaCorrenteUsuarioId");
 
-                    b.ToTable("Transacoes");
+                    b.ToTable("Transacoes", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Usuario", b =>
@@ -518,7 +518,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioClientes", b =>
@@ -535,7 +535,7 @@ namespace wca.reembolso.infrastruture.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("UsuarioClientes");
+                    b.ToTable("UsuarioClientes", (string)null);
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Despesa", b =>

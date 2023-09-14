@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using wca.reembolso.application.Features.Solicitacoes.Common;
+using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Clientes.Common
 {
@@ -19,5 +21,21 @@ namespace wca.reembolso.application.Features.Clientes.Common
         string UF,
         bool Ativo,
         decimal ValorLimite
+    );
+
+    public record ClienteResponseWithValorUsado(
+        int Id,
+        int FilialId,
+        string Nome,
+        string CNPJ,
+        string InscricaoEstadual,
+        string Endereco,
+        string Numero,
+        string CEP,
+        string Cidade,
+        string UF,
+        bool Ativo,
+        decimal ValorLimite,
+        decimal ValorUtilizadoMes
     );
 }

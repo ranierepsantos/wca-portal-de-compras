@@ -53,5 +53,7 @@ namespace wca.reembolso.domain.Entities
         public decimal ValorLimite { get; set; } = decimal.Zero;
         
         public IList<UsuarioClientes> UsuarioClientes { get; set; } = new List<UsuarioClientes>();
+
+        public IList<Solicitacao> Solicitacoes { get; set; }
     }
 }

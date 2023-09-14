@@ -352,7 +352,6 @@ import {
   Despesa,
   Solicitacao,
   useSolicitacaoStore,
-  Evento,
 } from "@/store/reembolso/solicitacao.store";
 import moment from "moment";
 import router from "@/router";
@@ -561,11 +560,23 @@ function limparDadosDespesa() {
 async function salvar() {
   try {
     let data = { ...solicitacao.value };
-    //checar se o status esta aguardando despesa e se há despesa lançadas
-    //verificar se finalizou o cadastro de despesas
-    if (data.tipoSolicitacao == 1) {
-      data.status = 5; //Aguardando Conferência
+    
+    // verificar se o limite foi excedido
+    if (hasValorLimiteExcedido(data)) {
+      let options = {
+        title: "Atenção",
+        html: "O valor limite definido para o cliente foi atingido! <br/> Esta solicitação será abortada",
+        icon: "warning",
+        showCancelButton: false
+      };
+
+      await swal.fire(options);
+      return
     }
+    
+    
+    //checar se o status esta aguardando prestação de contas e se há despesa lançadas
+    //verificar se finalizou o cadastro de despesas
     if (data.tipoSolicitacao == 2 && data.status == 3 && data.despesa.length > 0) {
       let options = {
         title: "Confirmação",
@@ -581,11 +592,11 @@ async function salvar() {
         data.status = 5; //5 - aguardando conferência
       }
     }
-    if (data.id == 0) await solicitacaoStore.add(data);
-    else {
+    if (data.id == 0)
+      await solicitacaoStore.add(data);
+    else
       await solicitacaoStore.update(data);
-    }
-
+    
     swal.fire({
       toast: true,
       icon: "success",
@@ -719,5 +730,16 @@ function carregarBotoes() {
       formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
 
 }
+
+function hasValorLimiteExcedido(data) {
+  //1. pegar informações do cliente
+  let _cliente = clientes.value.find(q => q.id == data.clienteId)
+  if (_cliente && _cliente.valorLimite > 0) {
+    let valorSolicitacao = data.tipoSolicitacaoId == 1? data.valorDespesa: data.valorAdiantamento
+    return (parseFloat(valorSolicitacao) + parseFloat(_cliente.valorUtilizadoMes)) > parseFloat(_cliente.valorLimite);
+  }
+  return true
+}
+
 
 </script>
