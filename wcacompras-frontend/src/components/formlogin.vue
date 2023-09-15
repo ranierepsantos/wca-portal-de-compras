@@ -1,7 +1,7 @@
 <template>
     <v-form ref="form" @submit.prevent="submit()">
         <div class="text-right">
-            <span v-once style="font-size: 10px;">v{{packageJsonInfo.version}}</span>
+            <span v-once style="font-size: 10px;">{{`v${packageJsonInfo.version} ${packageJsonInfo.enviroment}`}}</span>
         </div>
         <v-text-field variant="outlined" density="compact" label="Email" type="email" v-model="formData.email"
             :rules="emailRules" required></v-text-field>
