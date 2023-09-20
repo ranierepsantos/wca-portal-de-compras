@@ -26,7 +26,7 @@ namespace wca.reembolso.infrastruture.Persistence
         private IRepository<Transacao>? _transacaoRepo;
         private IRepository<UsuarioClientes>? _usuarioClienteRepo;
         private IRepository<Usuario>? _usuarioRepo;
-        //private IRepository<Filial>? _filialRepo;
+        private IRepository<FaturamentoHistorico>? _faturamentoHistoricoRepo;
         //private IRepository<FilialUsuario>? _filialUsuarioRepo;
 
         public RepositoryManager(WcaReembolsoContext context) => _context = context;
@@ -55,8 +55,7 @@ namespace wca.reembolso.infrastruture.Persistence
 
         public IRepository<UsuarioClientes> UsuarioClientesRepository => _usuarioClienteRepo ??= new BaseRepository<UsuarioClientes>(_context);
         public IRepository<Usuario> UsuarioRepository => _usuarioRepo ??= new BaseRepository<Usuario>(_context);
-        
-        //public IRepository<Filial> FilialRepository => _filialRepo ??= new BaseRepository<Filial>(_context);
+        public IRepository<FaturamentoHistorico> FaturamentoHistoricoRepository => _faturamentoHistoricoRepo ??= new BaseRepository<FaturamentoHistorico>(_context);
         //public IRepository<FilialUsuario> FilialUsuarioRepository => _filialUsuarioRepo??= new BaseRepository<FilialUsuario>(_context);
 
         public async Task SaveAsync()

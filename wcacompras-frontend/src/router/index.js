@@ -326,7 +326,7 @@ const routes = [
       {
         path: 'solicitacao',
         name: 'reembolsoSolicitacaoCadastro',
-        meta: {permissao: "solicitacao|cliente_aprovacao|wca_aprovacao", sistema: 2},
+        meta: {permissao: "solicitacao|cliente_aprovacao|wca_aprovacao|faturamento|cliente_faturamento", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting

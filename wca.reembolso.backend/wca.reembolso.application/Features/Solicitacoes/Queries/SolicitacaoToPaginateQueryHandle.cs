@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Solicitacoes.Common;
-using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacaos.Queries
 {
@@ -39,7 +37,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             query = query.Include(i => i.Cliente)
                          .Include(q => q.Colaborador)
                          .Include(q => q.Gestor)
-                         .Include(q => q.SolicitacaoHistorico);
+                         .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora));
 
             if (request.FilialId > 1)
              query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));

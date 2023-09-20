@@ -18,8 +18,7 @@ namespace wca.reembolso.application.Contracts.Persistence
         IRepository<TipoDespesa> TipoDespesaRepository { get; }
         IRepository<Transacao> TransacaoRepository { get; }
         IRepository<UsuarioClientes> UsuarioClientesRepository { get; }
-        //IRepository<FilialUsuario> FilialUsuarioRepository { get; }
-
+        IRepository<FaturamentoHistorico> FaturamentoHistoricoRepository { get; }
         IRepository<Usuario> UsuarioRepository { get; }
         //IRepository<Filial> FilialRepository { get; }
 
