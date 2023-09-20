@@ -56,5 +56,5 @@ jobs:
         with:
           app-name: 'wca-backend'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_299E48CFA62349D88C67023378C99D97 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_41263F2A5A464F838EF47FA364A077F4 }}
           package: .
