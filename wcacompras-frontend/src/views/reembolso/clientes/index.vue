@@ -26,7 +26,7 @@
                         &nbsp;{{ item.nome }}
                     </td>
                     <td class="text-left">{{ item.cnpj }}</td>
-                    <td class="text-left" v-show="isMatriz">{{ filiais.find(q => q.value == item.filialId).text }}</td>
+                    <td class="text-left" v-show="isMatriz">{{ getFilialNome(item.filialId) }}</td>
                     <td class="text-center">
                         <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
                             :color="item.ativo ? 'success' : 'error'"></v-icon>
@@ -157,6 +157,14 @@ async function getItems()
     {
         isBusy.value = false;
     }
+}
+
+function getFilialNome(filialId) {
+    let _filial =filiais.value.find(q => q.value == filialId)
+    if (_filial)
+        return _filial.text;
+
+    return ""
 }
 </script>
   

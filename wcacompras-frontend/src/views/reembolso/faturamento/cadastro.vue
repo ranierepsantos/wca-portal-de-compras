@@ -40,7 +40,7 @@
                   v-else
                 ></v-text-field>
               </v-col>
-              <v-col cols="4" v-show="faturamento.status > 0">
+              <v-col cols="4" v-show="faturamento.id > 0">
                 <v-btn
                   :color="faturamentoStore.getStatus(faturamento.status).color"
                   variant="tonal"
@@ -102,7 +102,7 @@
             <v-col class="text-right" cols="2">
               <v-btn icon="mdi-filter-check-outline" variant="plain" color="primary" @click="getSolicitacoes()" title="Aplicar Filtros"></v-btn>  
               &nbsp;
-              <v-btn icon="mdi-filter-remove-outline" variant="plain" color="error" @click="clearFilters()" title="Remover Filtros"></v-btn>
+              <v-btn icon="mdi-filter-remove-outline" variant="plain" color="error" @click="clearFilters(faturamento.clienteId)" title="Remover Filtros"></v-btn>
             </v-col>
           </v-row>
         </v-card-text>
@@ -495,11 +495,18 @@ const valorFaturamento = computed(() => {
 async function enviarPO() {
   try {
     isRunningEvent.value = true;
+
+
+
     let data = {
       id: faturamento.value.id,
       numeroPO: poFormData.value.numero,
       documentoPO: poFormData.value.documento
     }
+
+    let status = faturamentoStore.getStatus(2)
+    data.notificar = await getUsuarioToNotificar(status);
+    data.status = status;
 
     await faturamentoStore.addPO(data);
     
@@ -507,8 +514,8 @@ async function enviarPO() {
       toast: true,
       icon: "success",
       index: "top-end",
-      title: "P.O enviado com sucesso!",
-      html: mensagem,
+      title: "Sucesso!",
+      text: "P.O enviado com sucesso!",
       showConfirmButton: false,
       timer: 4000,
     });
@@ -591,10 +598,14 @@ async function getSolicitacoes () {
   }
 }
 
-
 async function salvar() {
   try {
     let data = faturamento.value;
+    
+    let status = faturamentoStore.getStatus(1)
+    data.notificar = await getUsuarioToNotificar(status);
+    data.status = status;
+
     await faturamentoStore.add(data);
     
     swal.fire({
@@ -678,6 +689,19 @@ async function finalizar () {
   }finally {
     isRunningEvent.value = false
   }
+}
+
+async function getUsuarioToNotificar(status) {
+  let notificar = []
+    
+  if (status.notifica == 2) {
+    let notificaList = await usuarioStore.getUsuarioToNotificacaoByCliente(faturamento.value.clienteId, "cliente_faturamento")
+    notificar = notificaList.map(q => {return q.value})
+  }else if (status.notifica == 1)
+  {
+    notificar.push(faturamento.value.usuarioId);
+  }
+  return notificar;
 }
 
 </script>

@@ -16,8 +16,6 @@ namespace wca.reembolso.domain.Entities
         [Column("usuario_id")]
         public int UsuarioId { get; set; }
 
-        public Usuario Usuario { get; set; } = new Usuario();
-
         [Column("data_hora", TypeName = "smalldatetime")]
         public DateTime DataHora { get; set; } = DateTime.Now;
 

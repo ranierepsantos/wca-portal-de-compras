@@ -26,10 +26,13 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
 
+      
+
       <v-btn class="text-none" stacked>
-      <v-badge content="2" color="error">
+      <v-badge :content="notificacoes.length" color="error">
         <v-icon>mdi-bell-outline</v-icon>
       </v-badge>
+      <notificacao-list :notificacoes="notificacoes"/>
     </v-btn>
 
       <v-btn variant="text" class="text-capitalize" color="primary">
@@ -59,7 +62,10 @@ import { ref, computed } from "vue";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
+import notificacaoList from "@/components/notificacaoList.vue";
 import { compararValor } from "@/helpers/functions";
+import { onMounted } from "vue";
+import moment from "moment";
 //VARIABLES
 const drawer = ref(true);
 const menuItems = ref([
@@ -119,25 +125,35 @@ const menuItems = ref([
   },
   
 ]);
+const notificacoes = ref([])
 const authStore = useAuthStore();
 const router = useRouter();
 const usuario = computed(() =>
 {
   return authStore.user;
 })
+const checkNotificacoes = ref(null);
 
+//VUE - FUNCTIONS
+onMounted(async () => {
+  clearInterval(checkNotificacoes.value)
+  startCheckNotificacoes();
+});
 
 //FUNCTIONS
-function logout()
-{
-  authStore.finishSession()
-  router.push({ name: "login" })
-}
-
 function checkPermissao(permissao)
 {
   return authStore.hasPermissao(permissao)
 }
+
+function startCheckNotificacoes () {
+  checkNotificacoes.value = setInterval(async () => {
+    notificacoes.value = []
+    notificacoes.value = await authStore.getNotificacoesReembolso();
+  },5000)
+}
+
+
 </script>
 
 <style>

@@ -132,7 +132,6 @@ export const useUsuarioStore = defineStore("usuario", {
             return list;
         },
 
-
         async reembolsoToListByClientePerfil(clienteId, perfilId) {
             let response = await userService.toListByPerfil(perfilId)
             let usuarios = response.data;
@@ -147,6 +146,26 @@ export const useUsuarioStore = defineStore("usuario", {
             )
 
             return list;
+        },
+
+        async getUsuarioToNotificacaoByCliente(clienteId, permissao) {
+            if (!permissao || permissao.trim() =="")
+            throw new TypeError("A permissão deve ser informada!")
+        
+            let response = await userService.toListByPermissao(permissao)
+            let usuarios = response.data;
+            
+            response = await clienteService.getListUsersByCliente(clienteId);
+
+            let usersCliente = response.data;
+
+
+            let list = usuarios.filter(user => 
+                {return usersCliente.includes(user.value) }
+            )
+
+            return list;
         }
+
     },
 });
