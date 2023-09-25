@@ -56,6 +56,10 @@
           }}</span
         >
       </v-col>
+      <v-col cols="2">
+        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxa Gestão</span><br/>
+        <span style="font-size: 14px" class="text-center">{{formatToCurrencyBRL(valorTotalPedido - requisicao.taxaGestao)}}</span>
+      </v-col>
     </v-row>
   </v-app-bar>
   <bread-crumbs

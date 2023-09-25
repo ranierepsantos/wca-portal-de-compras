@@ -31,7 +31,7 @@ function initialDecimalNumber(value, numberOfDecimal)
         dec = "0".repeat(numberOfDecimal);
     else
     {
-        dec = arr[1] + "0".repeat(numberOfDecimal - arr[1].length)
+        dec = arr[1] + (arr[1].length < 2 ? "0".repeat(numberOfDecimal - arr[1].length): "")
     }
     num = arr[0] + '.' + dec
     return num;
