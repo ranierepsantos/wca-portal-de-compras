@@ -57,8 +57,8 @@
         >
       </v-col>
       <v-col cols="2">
-        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxa Gestão</span><br/>
-        <span style="font-size: 14px" class="text-center">{{formatToCurrencyBRL(valorTotalPedido - requisicao.taxaGestao)}}</span>
+        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxas</span><br/>
+        <span style="font-size: 14px" class="text-center">{{formatToCurrencyBRL(valorTotalPedidoSemTaxa)}}</span>
       </v-col>
     </v-row>
   </v-app-bar>
@@ -644,6 +644,23 @@ const valorTotalPedido = computed(() => {
 
   return requisicao.value.valorTotal.toFixed(2);
 });
+
+const valorTotalPedidoSemTaxa = computed(() => {
+  if (requisicao.value.requisicaoItens.length == 0) return 0;
+
+  let produtos = requisicao.value.requisicaoItens;
+  let valorTotal = 0;
+  
+  produtos.forEach((produto) => {
+    valorTotal +=
+      produto.quantidade * parseFloat(produto.valor);
+  });
+  valorTotal = valorTotal.toFixed(2);
+  
+  return valorTotal
+});
+
+
 
 //METHODS
 
