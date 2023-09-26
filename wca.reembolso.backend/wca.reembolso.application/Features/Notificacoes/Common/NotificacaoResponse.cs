@@ -9,6 +9,8 @@ namespace wca.reembolso.application.Features.Notificacoes.Common
     public record NotificacaoResponse(
         int Id,
         DateTime DataHora,
-        string Nota
+        string Nota,
+        string Entidade,
+        int EntidadeId
     );
 }
