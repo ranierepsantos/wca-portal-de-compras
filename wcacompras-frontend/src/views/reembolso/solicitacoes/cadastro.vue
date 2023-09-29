@@ -362,6 +362,7 @@ import { computed } from "vue";
 import { compararValor } from "@/helpers/functions";
 import historico from "@/components/reembolso/historico.vue";
 import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
+import tipodespesaService from "@/services/reembolso/tipodespesa.service";
 
 
 const authStore = useAuthStore();
@@ -595,6 +596,7 @@ async function salvar() {
       await swal.fire(options);
       return
     }
+
     //checar se o status esta aguardando prestação de contas e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas
     if (data.tipoSolicitacao == 2 && data.status == 3 && data.despesa.length > 0) {
@@ -617,25 +619,36 @@ async function salvar() {
     data.despesa.forEach(d => {
       if (d.id < 0) d.id = 0
     });
+    
+    // verificar se haverá notificação
+    let statusAtual = 0 
+
+    if (data.status == 4) {
+      statusAtual = data.statusAnterior
+    }else {
+      if (data.id == 0){
+        if (data.tipoSolicitacao == 2 ) 
+          data.status = 1; //1 - solicitado
+        else 
+          data.status = 5; //5 - aguardando conferência
+      }
+      statusAtual = data.status
+    }
+
+    let notificar = []
+    let status = solicitacaoStore.getStatus(statusAtual) 
+    if (status.notifica == 1) //wca
+    {
+      let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, "wca_aprovacao")
+      notificar = notificaList.map(q => {return q.value})
+    }
+    else if (status.notifica == 2 && data.gestorId) //cliente
+      notificar.push (data.gestorId)
+    
+    data.notificar = notificar;
+
 
     if (data.id == 0) {
-      data.status = 5
-      if (data.tipoSolicitacao == 2) {
-        data.status = 1; //1 - solicitado
-      }
-
-      let notificar = []
-      let status = solicitacaoStore.getStatus(data.status) 
-      if (status.notifica == 1) //wca
-      {
-        let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, "wca_aprovacao")
-        notificar = notificaList.map(q => {return q.value})
-      }
-      else if (status.notifica == 2 && data.gestorId) //cliente
-        notificar.push (data.gestorId)
-      
-
-      data.notificar = notificar;
       await solicitacaoStore.add(data);
     } else
       await solicitacaoStore.update(data);
@@ -732,7 +745,22 @@ async function registrarPagto() {
   }
 }
 
-function salvarDespesa() {
+async function salvarDespesa() {
+
+  let tipoDespesa = despesaTipos.value.find(q =>  q.id == despesa.value.tipoDespesaId)
+  let hasDespesa = tipoDespesa.tipo == 1 ? await solicitacaoStore.checarSeDespesaExiste(despesa.value): false;
+  if (hasDespesa) {
+    limparDadosDespesa();
+    openDespesaForm.value = false;
+    swal.fire({
+        icon: "warning",
+        index: "top-end",
+        title: "Atenção!",
+        text: "Já existe despesa cadastrada com esta nota e cnpj!",
+        showConfirmButton: true
+      });
+      return 
+  }
   solicitacao.value.salvarDespesa(despesa.value);
   limparDadosDespesa();
   openDespesaForm.value = false;

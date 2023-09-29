@@ -5,15 +5,15 @@ module.exports = defineConfig({
     port: 2808,
     proxy: {
       '^/api': {
-        //target: 'https://wca-backend.azurewebsites.net/',
-        target: 'http://localhost:5031',
+        target: 'https://wca-api-hml.azurewebsites.net/',
+        //target: 'http://localhost:5031',
         changeOrigin: true,
         secure: true,
         logLevel: 'error'
       },
       '^/reembolsoapi': {
-        //target: 'https://wca-backend.azurewebsites.net/',
-        target: 'http://localhost:5100/api',
+        target: 'https://wca-api-reembolso-hml.azurewebsites.net/api',
+        //target: 'http://localhost:5100/api',
         pathRewrite: {'^/reembolsoapi': ''},
         changeOrigin: true,
         secure: false,

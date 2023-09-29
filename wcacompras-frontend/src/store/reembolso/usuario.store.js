@@ -4,8 +4,8 @@ import reembolsoUsuarioService from "@/services/reembolso/usuario.service"
 import clienteService from "@/services/reembolso/cliente.service";
 import filialService from "@/services/filial.service";
 
-export const IDPERFILGESTOR = 5001
-export const IDPERFILCOLABORADOR = 5002
+export const IDPERFILCOLABORADOR = process.env.VUE_APP_REEM_PERFILCOLABORADOR
+export const IDPERFILGESTOR = process.env.VUE_APP_REEM_PERFILGESTOR
 
 export class Usuario {
     
