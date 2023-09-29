@@ -225,7 +225,7 @@ const routes = [
         path: 'clientes',
         name: 'reembolsoClientes',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "cliente", sistema: 2},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -236,7 +236,7 @@ const routes = [
         path: 'clientes/cadastro',
         name: 'reembolsoCadastroCliente',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "cliente", sistema: 2},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -246,7 +246,7 @@ const routes = [
       {
         path: 'faturamento',
         name: 'reembolsoFaturamento',
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "faturamento|cliente_faturamento", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
@@ -258,7 +258,7 @@ const routes = [
       {
         path: 'faturamento/cadastro',
         name: 'reembolsoFaturamentoCadastro',
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "faturamento|cliente_faturamento", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
@@ -271,7 +271,7 @@ const routes = [
         path: 'filiais',
         name: 'reembolsoFiliais',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre"},
+        meta: {permissao: "filial"},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -282,7 +282,7 @@ const routes = [
         path: 'movimentacao-financeira',
         name: 'reembolsoContaCorrente',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "contacorrente", sistema: 2},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -293,7 +293,7 @@ const routes = [
         path: 'perfil',
         name: 'reembolsoPerfil',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "perfil", sistema: 2},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -303,7 +303,7 @@ const routes = [
       {
         path: 'perfil/cadastro',
         name: 'reembolsoPerfilCadastro',
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "perfil", sistema: 2},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -314,7 +314,7 @@ const routes = [
       {
         path: 'solicitacoes',
         name: 'reembolsoSolicitacoes',
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "solicitacao|cliente_aprovacao|wca_aprovacao", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
@@ -326,7 +326,7 @@ const routes = [
       {
         path: 'solicitacao',
         name: 'reembolsoSolicitacaoCadastro',
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "solicitacao|cliente_aprovacao|wca_aprovacao", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
@@ -338,7 +338,7 @@ const routes = [
       {
         path: 'tipo-despesa',
         name: 'tipoDespesa',
-        meta: {permissao: "livre", sistema: 2},
+        meta: {permissao: "tipodespesa", sistema: 2},
         beforeEnter: protectRoute,
         //meta: {permissao: "categorias"},
         // route level code-splitting
@@ -349,7 +349,7 @@ const routes = [
       {
         path: 'usuarios',
         name: 'reembolsoUsuarios',
-        meta: {permissao: "livre"},
+        meta: {permissao: "usuario"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -359,7 +359,7 @@ const routes = [
       {
         path: 'usuarios/cadastro',
         name: 'reembolsoUsuarioCadastro',
-        meta: {permissao: "livre"},
+        meta: {permissao: "usuario"},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route

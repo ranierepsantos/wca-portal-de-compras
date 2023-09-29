@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
-using wca.reembolso.application6.Common;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Common

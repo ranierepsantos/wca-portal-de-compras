@@ -250,7 +250,7 @@
                     @click="editarDespesa(item)"
                     title="Editar"
                     :disabled="isBusy"
-                    v-show ="!despesaCanView && despesaCanEdit"
+                    v-show ="!despesaCanView && solicitacaoCanEdit"
                   ></v-btn>
                   <v-btn
                     icon="mdi-delete"
@@ -258,7 +258,7 @@
                     color="error"
                     @click="removerDespesa(item)"
                     :disabled="isBusy"
-                    v-show="!despesaCanView && despesaCanEdit"
+                    v-show="!despesaCanView && solicitacaoCanEdit"
                   >
                   </v-btn>
                 </td>
@@ -394,7 +394,7 @@ const showSecaoDespesa = computed(()=> {
         (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
 })
 const despesaCanAdd = computed(() => solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.status == 3)
-const despesaCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status));
+const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
 const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status)));
 
 //VUE FUNCTIONS
@@ -408,23 +408,6 @@ onMounted(async () => {
 
     if (parseInt(route.query.id) > 0) {
       await getSolicitacao(route.query.id);
-      if ("1,5,6".includes(solicitacao.value.status)) {
-        formButtons.value.push({
-          text: "Aprovar / Reprovar",
-          icon: "",
-          event: "aprovar-click",
-        });
-      }
-      if (
-        solicitacao.value.tipoSolicitacao == 2 &&
-        solicitacao.value.status == 2
-      ) {
-        formButtons.value.push({
-          text: "Registrar Pagamento",
-          icon: "",
-          event: "registrarpgto-click",
-        });
-      }
     } else {
       //checar se o usuario já possui adiantamento em aberto
       let adiantamento = await solicitacaoStore.getByTipoAndUsuario(
@@ -446,19 +429,11 @@ onMounted(async () => {
         return;
       }
       solicitacao.value.colaboradorId = usuario.value.id;
-      solicitacao.value.colaborador = usuario.value.nome;
-      solicitacao.value.colaboradorCargo =
-        usuario.value.usuarioReembolsoComplemento.cargo;
-      solicitacao.value.gestorId =
-        usuario.value.usuarioReembolsoComplemento.gestorId;
-      solicitacao.value.gestor = solicitacao.value.gestor =
-        solicitacaoStore.getUsuarioSolicitacao(
-          usuario.value.usuarioReembolsoComplemento.gestorId
-        ).text;
+      solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
+      solicitacao.value.gestorId = usuario.value.usuarioReembolsoComplemento.gestorId;
     }
-
-    // if (!"2,4,5,6".includes(solicitacao.value.status))
-    formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+    carregarBotoes()
+      
   } catch (error) {
     console.log("onMounted.error:", error);
     handleErrors(error);
@@ -473,7 +448,6 @@ onMounted(async () => {
 
 async function aprovarReprovar(isAprovado, comentario) {
   try {
-    debugger;
     isRunningEvent.value = true;
 
     /**
@@ -536,6 +510,7 @@ async function aprovarReprovar(isAprovado, comentario) {
       showConfirmButton: false,
       timer: 4000,
     });
+    router.push({ name: "reembolsoSolicitacoes" });
   } catch (error) {
     console.log("aprovarReprovar.error:", error);
     handleErrors(error);
@@ -591,11 +566,7 @@ async function salvar() {
     if (data.tipoSolicitacao == 1) {
       data.status = 5; //Aguardando Conferência
     }
-    if (
-      data.tipoSolicitacao == 2 &&
-      data.status == 3 &&
-      data.despesa.length > 0
-    ) {
+    if (data.tipoSolicitacao == 2 && data.status == 3 && data.despesa.length > 0) {
       let options = {
         title: "Confirmação",
         html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",
@@ -612,7 +583,6 @@ async function salvar() {
     }
     if (data.id == 0) await solicitacaoStore.add(data);
     else {
-      if (data.status == 4) data.status = 5; //5 - aguardando conferência
       await solicitacaoStore.update(data);
     }
 
@@ -689,6 +659,7 @@ async function registrarPagto() {
         showConfirmButton: false,
         timer: 2000,
       });
+      router.push({ name: "reembolsoSolicitacoes" });
     }
   } catch (error) {
     console.log("solicitacao.cadastro.registrarPagamento.erro", error);
@@ -717,4 +688,36 @@ async function removerDespesa(item) {
     solicitacao.value.removerDespesa(item);
   }
 }
+function carregarBotoes() {
+
+  let statusSolicitacao = solicitacaoStore.getStatus(solicitacao.value.status);
+
+  let wcaAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 1 && authStore.hasPermissao("wca_aprovacao")
+  let clienteAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 2 && authStore.hasPermissao("cliente_aprovacao")
+  let registraPagamento = solicitacao.value.status == 2 && authStore.hasPermissao("solicitacaoregistrarpagamento")
+  
+  let podeSalvar = solicitacao.value.id == 0  || solicitacaoCanEdit.value
+
+
+  if (wcaAprova || clienteAprova) {
+    formButtons.value.push({
+      text: "Aprovar / Reprovar",
+      icon: "",
+      event: "aprovar-click",
+    });
+  }
+
+  if (registraPagamento) {
+    formButtons.value.push({
+      text: "Registrar Pagamento",
+      icon: "",
+      event: "registrarpgto-click",
+    });
+  }
+
+  if (podeSalvar)
+      formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+
+}
+
 </script>
