@@ -21,8 +21,6 @@ namespace wca.reembolso.domain.Entities
 
         [Column("ativo")]
         public bool Ativo { get; set; }
-
-        [JsonIgnore]
-        public IList<FilialUsuario> FilialUsuario { get; set; } = new List<FilialUsuario>();
+        
     }
 }

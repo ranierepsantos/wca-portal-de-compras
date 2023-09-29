@@ -36,7 +36,6 @@ namespace wca.reembolso.application.Features.Usuarios.Commands
 
 
             var usuario = await _repository.UsuarioRepository.ToQuery()
-                           .Include("FilialUsuario")
                            .FirstOrDefaultAsync(q => q.Id.Equals(request.Id));
 
             if (usuario == null)
@@ -51,32 +50,32 @@ namespace wca.reembolso.application.Features.Usuarios.Commands
                 _repository.GetDbSet<Usuario>().Entry(usuario).State = EntityState.Modified;
             }
 
-            if (request.Filial != null)
-            {
-                List<FilialUsuario> toRemove = usuario.FilialUsuario
-                .Where(x => !request.Filial.Where(q => q.Value == x.FilialId).Any())
-                .Where(x => x.FilialId != 0)
-                .ToList();
+            //if (request.Filial != null)
+            //{
+            //    List<FilialUsuario> toRemove = usuario.FilialUsuario
+            //    .Where(x => !request.Filial.Where(q => q.Value == x.FilialId).Any())
+            //    .Where(x => x.FilialId != 0)
+            //    .ToList();
 
-                foreach (var item in toRemove)
-                {
-                    _repository.FilialUsuarioRepository.Delete(item);
-                }
+            //    foreach (var item in toRemove)
+            //    {
+            //        _repository.FilialUsuarioRepository.Delete(item);
+            //    }
 
-                List<ListItem> toAdd = request.Filial
-                    .Where(x => !usuario.FilialUsuario.Any(q => q.FilialId.Equals(x.Value)))
-                .ToList();
+            //    List<ListItem> toAdd = request.Filial
+            //        .Where(x => !usuario.FilialUsuario.Any(q => q.FilialId.Equals(x.Value)))
+            //    .ToList();
 
-                foreach (var item in toAdd)
-                {
-                    var _filial = new FilialUsuario() { 
-                        FilialId = item.Value,
-                        UsuarioId = request.Id
-                    };
+            //    foreach (var item in toAdd)
+            //    {
+            //        var _filial = new FilialUsuario() { 
+            //            FilialId = item.Value,
+            //            UsuarioId = request.Id
+            //        };
                     
-                    usuario.FilialUsuario.Add(_filial);
-                }
-            }
+            //        usuario.FilialUsuario.Add(_filial);
+            //    }
+            //}
             await _repository.SaveAsync();
             return true;
         }

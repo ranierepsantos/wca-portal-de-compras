@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import userService from "@/services/user.service";
 import reembolsoUsuarioService from "@/services/reembolso/usuario.service"
 import clienteService from "@/services/reembolso/cliente.service";
+import filialService from "@/services/filial.service";
 
 export const IDPERFILGESTOR = 5001
 export const IDPERFILCOLABORADOR = 5002
@@ -37,16 +38,13 @@ export const useUsuarioStore = defineStore("usuario", {
 
             try {
                 let clientes = data.cliente.map(function (el) { return el.value; });
-                let filiais  = {...data.filial};
-
                 data.cliente = [];
-                data.filial = [];
+                
                 let response = await userService.create(data);
                 
 
                 data.id = response.data.id;
-                data.filial = filiais;
-
+                
                 await reembolsoUsuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
@@ -72,8 +70,6 @@ export const useUsuarioStore = defineStore("usuario", {
                 
                 data.cliente = response.data.map( item => {return { text: item.nome, value: item.id}})
                 
-                data.filial = (await this.getFiliais(id))
-                
                 let usuario = new Usuario(data);
                 return usuario;
 
@@ -88,29 +84,21 @@ export const useUsuarioStore = defineStore("usuario", {
         },
 
         async update (data) {
-                debugger
                 let clientes = data.cliente.map(function (el) { return el.value; });
-                let filiais  = [...data.filial];
-
                 data.cliente = [];
-                data.filial = [];
-
+                
                 data.usuarioReembolsoComplemento.usuarioId = data.id;
 
                 await userService.update(data);
 
-                data.filial = filiais;
-
                 await reembolsoUsuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
-                if (clientes.length > 0){
-                    let userClientes = {
-                        usuarioId: data.id,
-                        clienteIds: clientes
-                    }
-                    await clienteService.RelacionarClienteUsuario(userClientes);
+                let userClientes = {
+                    usuarioId: data.id,
+                    clienteIds: clientes
                 }
+                await clienteService.RelacionarClienteUsuario(userClientes);
         },
 
         async toComboList() {
@@ -122,9 +110,9 @@ export const useUsuarioStore = defineStore("usuario", {
          * Retorna uma lista de filiais do usuário
          * objeto: {text: string, value: number }
         */
-        async getFiliais (usuarioId) {
+        async getFiliais () {
             
-           let response = await reembolsoUsuarioService.getFiliais(usuarioId)
+           let response = await filialService.getListByAuthenticatedUser()
            return response.data;
            
         },
