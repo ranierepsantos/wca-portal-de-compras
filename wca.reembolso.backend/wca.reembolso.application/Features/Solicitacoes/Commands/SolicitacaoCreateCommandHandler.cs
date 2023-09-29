@@ -8,6 +8,8 @@ using wca.reembolso.application.Features.Solicitacoes.Behaviors;
 using wca.reembolso.domain.Entities;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Common;
+using wca.reembolso.application.Features.Notificacoes.Commands;
+using Microsoft.EntityFrameworkCore;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Commands
 {
@@ -25,7 +27,8 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         decimal? ValorDespesa,
         int Status,
         int TipoSolicitacao,
-        IList<Despesa> Despesa
+        IList<Despesa> Despesa, 
+        int[] Notificar
     ) : IRequest<ErrorOr<SolicitacaoResponse>>;
 
     public class SolicitacaoCreateCommandHandler : IRequestHandler<SolicitacaoCreateCommand, ErrorOr<SolicitacaoResponse>>
@@ -74,7 +77,20 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             //Criar evento
             var querie = new SolicitacaoHistorioCreateCommand(dado.Id, $"Solicitação criada!");
-            await _mediator.Send ( querie );
+            await _mediator.Send(querie, cancellationToken);
+
+
+            var status = await  _repository.StatusSolicitacaoRepository.ToQuery().FirstOrDefaultAsync(q => q.Id.Equals(dado.Status), cancellationToken: cancellationToken);
+
+            // gerar notificação
+            for (var ii = 0; ii < request.Notificar.Length; ii++)
+            {
+                string mensagem = status.TemplateNotificacao.Replace("{id}", dado.Id.ToString());
+
+                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, dado.GetType().Name, dado.Id);
+
+                await _mediator.Send(notificacao, cancellationToken);
+            }
 
             //3. mapear para SolicitacaoResponse
             return _mapper.Map<SolicitacaoResponse>(dado);

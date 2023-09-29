@@ -22,6 +22,12 @@ namespace wca.reembolso.domain.Entities
         [Column("nota", TypeName = "varchar(500)")]
         public string Nota { get; set; } = "";
 
+        [Column("entidade", TypeName = "varchar(50)")]
+        public string Entidade { get; set; } = "";
+
+        [Column("entidade_id")]
+        public int EntidadeId { get; set; } = 0;
+
         [Column("lido")]
         public bool Lido { get; set; } = false;
     }

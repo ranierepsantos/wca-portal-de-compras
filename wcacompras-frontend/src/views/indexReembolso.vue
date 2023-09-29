@@ -66,6 +66,7 @@ import notificacaoList from "@/components/notificacaoList.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
 import moment from "moment";
+import { onUnmounted } from "vue";
 //VARIABLES
 const drawer = ref(true);
 const menuItems = ref([
@@ -137,8 +138,13 @@ const checkNotificacoes = ref(null);
 //VUE - FUNCTIONS
 onMounted(async () => {
   clearInterval(checkNotificacoes.value)
+  notificacoes.value = []
+  notificacoes.value = await authStore.getNotificacoesReembolso();
   startCheckNotificacoes();
 });
+
+onUnmounted(() => {  clearInterval(checkNotificacoes.value) }) 
+
 
 //FUNCTIONS
 function checkPermissao(permissao)

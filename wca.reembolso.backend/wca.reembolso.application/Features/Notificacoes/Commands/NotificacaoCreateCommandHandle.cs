@@ -8,7 +8,9 @@ namespace wca.reembolso.application.Features.Notificacoes.Commands
 {
     public sealed record NotificacaoCreateCommand(
         int UsuarioId,
-        string Nota
+        string Nota,
+        string Entidade,
+        int EntidadeId
     ): IRequest<ErrorOr<bool>>;
 
     public sealed class NotificacaoCreateCommandHandle : IRequestHandler<NotificacaoCreateCommand, ErrorOr<bool>>
@@ -30,7 +32,9 @@ namespace wca.reembolso.application.Features.Notificacoes.Commands
             Notificacao notificacao = new()
             {
                 Nota = request.Nota,
-                UsuarioId = request.UsuarioId
+                UsuarioId = request.UsuarioId,
+                Entidade = request.Entidade,
+                EntidadeId= request.EntidadeId
             };
 
             _repository.NotificacaoRepository.Create(notificacao);
