@@ -98,7 +98,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="4">
+          <td colspan="5">
             <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>

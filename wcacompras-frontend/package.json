@@ -5,7 +5,8 @@
   "enviroment": "Homologação",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "build-hml": "vue-cli-service build --mode hml"
   },
   "dependencies": {
     "@sweetalert2/theme-material-ui": "^5.0.14",

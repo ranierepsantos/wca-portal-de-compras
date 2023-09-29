@@ -35,6 +35,16 @@ namespace wca.compras.services
 
                 _rm.UsuarioRepository.Attach(data);
 
+                if (usuario.Filial != null)
+                {
+                    foreach (var item in usuario.Filial)
+                    {
+                        var filial = _mapper.Map<Filial>(item);
+                        _rm.FilialRepository.Attach(filial);
+                        data.Filial.Add(filial);
+                    }
+                }
+
                 if (sistemaId == 1) //1 - COMPRAS
                     AddComprasRelacoes(data, usuario);
                 
@@ -409,16 +419,6 @@ namespace wca.compras.services
 
         private void AddComprasRelacoes(Usuario usuario, CreateUsuarioDto createUsuario)
         {
-
-            if (createUsuario.Filial != null)
-            {
-                foreach (var item in createUsuario.Filial)
-                {
-                    var filial = _mapper.Map<Filial>(item);
-                    _rm.FilialRepository.Attach(filial);
-                    usuario.Filial.Add(filial);
-                }
-            }
 
             if (createUsuario.Cliente != null)
             {

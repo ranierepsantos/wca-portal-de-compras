@@ -8,7 +8,8 @@ const rotas = {
     ListarPorColaboradorGestor: "Solicitacao/ListarPorColaboradorGestor",
     ListarStatusSolicitacao: "Solicitacao/ListarStatusSolicitacao",
     AlterarStatus: "Solicitacao/AlterarStatus",
-    RegistrarEvento: "Solicitacao/RegistrarEvento"
+    RegistrarEvento: "Solicitacao/RegistrarEvento",
+    ChecaSeDespesaExiste: "Solicitacao/ChecarSeDespesaExiste"
 }
 
 export default {
@@ -61,6 +62,15 @@ export default {
     },
     registrarEvento(evento) {
         return api.post(rotas.registrarEvento, evento);  
+    },
+    despesaChecaSeExiste(cnpj, numeroFiscal) {
+
+        let query = {
+            CNPJ: cnpj,
+            notaFiscal: numeroFiscal
+        }
+
+        return api.get(rotas.ChecaSeDespesaExiste, {params: query})
     }
     
 }

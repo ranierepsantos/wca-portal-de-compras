@@ -99,6 +99,7 @@
                           item-value="value"
                           density="compact"
                           v-model ="colaboradorClienteId"
+                          :rules="(isColaborador || isGestor) ?[(v) => !!v  || 'Cliente é obrigatório']:''"
                         ></v-select>
                       </v-col>
                     </v-row>
@@ -111,6 +112,7 @@
                           variant="outlined"
                           color="primary"
                           density="compact"
+                          :rules="isColaborador ?[(v) => !!v  || 'Cargo é obrigatório']:''"
                         ></v-text-field>
                       </v-col>
                       <v-col>
@@ -123,6 +125,7 @@
                           item-value="value"
                           v-model="usuario.usuarioReembolsoComplemento.gestorId"
                           density="compact"
+                          :rules="isColaborador ?[(v) => !!v  || 'Gestor é obrigatório']:''"
                         ></v-select>
                       </v-col>
                     </v-row>
@@ -294,6 +297,10 @@ function getSistemaPerfil(sistemaId) {
 async function salvar() {
   try {
     let { valid } = await userForm.value.validate();
+
+
+
+
     if (valid) {
       isSaving.value = true;
       let data = usuario.value;
