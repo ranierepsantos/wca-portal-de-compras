@@ -3,15 +3,9 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Faturamentos.Common;
-using wca.reembolso.application.Features.Solicitacoes.Common;
 
 namespace wca.reembolso.application.Features.Faturamentos.Queries
 {
@@ -38,7 +32,9 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
             }
 
             var query = _repository.FaturamentoRepository.ToQuery();
-            query = query.Include(i => i.Cliente);
+            query = query.Include(i => i.Cliente)
+                         .Include(i => i.FaturamentoHistorico.OrderByDescending(f => f.DataHora));
+            
 
             if (request.FilialId > 1)
                 query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
@@ -50,7 +46,11 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
                 query = query.Where(q => q.Status.Equals(request.Status));
 
             if (request.DataIni != null && request.DataFim != null)
-                query = query.Where(c => c.DataCriacao >= request.DataIni && c.DataCriacao <= request.DataFim);
+            {
+                var dataFim = request.DataFim.Value.AddHours(23).AddMinutes(59);
+                query = query.Where(c => c.DataCriacao >= request.DataIni && c.DataCriacao <= dataFim);
+            }
+                
 
             query = query.OrderBy(q => q.Id);
 

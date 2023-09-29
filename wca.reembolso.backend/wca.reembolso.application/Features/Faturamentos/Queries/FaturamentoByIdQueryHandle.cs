@@ -32,10 +32,11 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
             var query = _repository.FaturamentoRepository.ToQuery()
                 .Where(q =>  q.Id == request.Id)
                 .Include(n => n.Cliente)
+                .Include(n => n.FaturamentoHistorico.OrderByDescending(f => f.DataHora))
                 .Include(n => n.FaturamentoItem)
                 .ThenInclude(n => n.Solicitacao);
             
-            var dado = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var dado = await query.AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (dado == null)
             {

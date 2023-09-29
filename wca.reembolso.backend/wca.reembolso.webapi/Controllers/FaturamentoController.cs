@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.reembolso.application.Features.Faturamentos.Commands;
 using wca.reembolso.application.Features.Faturamentos.Queries;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
+using wca.reembolso.application.Features.Solicitacoes.Commands;
 
 namespace wca.reembolso.webapi.Controllers
 {
@@ -36,5 +38,45 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create(FaturamentoCreateCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpPost("AdicionarPO")]
+        public async Task<IActionResult> AddPO(FaturamentoAddPOCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpPost("Finalizar")]
+        public async Task<IActionResult> Finalizar(FaturamentoFinalizarCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpPut("AlterarStatus")]
+        public async Task<IActionResult> AlterarStatus([FromBody] FaturamentoChangeStatusCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
     }
 }

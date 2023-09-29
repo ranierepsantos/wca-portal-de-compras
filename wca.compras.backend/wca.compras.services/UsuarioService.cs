@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Collections.Immutable;
 using wca.compras.domain.Dtos;
 using wca.compras.domain.Entities;
@@ -297,6 +296,27 @@ namespace wca.compras.services
             catch (Exception ex)
             {
                 Console.WriteLine($"{this.GetType().Name}.GetToListByClientePerfil.Error: {ex.Message}");
+                throw new Exception(ex.Message, ex.InnerException);
+            }
+        }
+
+        public async Task<IList<ListItem>> GetToListByPermissao(int sistemaId, string permissao)
+        {
+            try
+            {
+                string query = "select u.id, u.nome, u.email, u.password, u.ativo from Usuarios u " +
+                    "inner join Usuario_Sistema_Perfil up on up.usuario_id  = u.id " +
+                    "inner join PerfilPermissao pp on pp.PerfilId  = up.perfil_id " +
+                    "inner join Permissao p on p.id  = pp.PermissaoId " +
+                    $"where u.ativo = 1 and up.sistema_id  = {sistemaId}  and p.regra = '{permissao}' ";
+                
+                var items = await _rm.GetDbSet<Usuario>().FromSqlRaw(query).ToListAsync();
+
+                return _mapper.Map<IList<ListItem>>(items);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{this.GetType().Name}.GetToListByPermissao.Error: {ex.Message}");
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }

@@ -79,7 +79,7 @@ const menuItems = ref([
     title: "Faturamento",
     value: 8,
     route: "/reembolso/faturamento",
-    permissao: "faturamento"
+    permissao: "faturamento|cliente_faturamento"
   },
   {
     title: "Filiais",

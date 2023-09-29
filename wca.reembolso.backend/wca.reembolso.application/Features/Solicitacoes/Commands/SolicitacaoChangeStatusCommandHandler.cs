@@ -55,11 +55,10 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             // cadastrar evento
             var eventoCommand = new SolicitacaoHistorioCreateCommand(dado.Id, request.Evento);
+            await _mediator.Send(eventoCommand);
 
-            var result = await _mediator.Send(eventoCommand);
+            // gerar notificação
             
-            if (result.IsError) { return result.FirstError; }
-
             // return 
             return true;
         }

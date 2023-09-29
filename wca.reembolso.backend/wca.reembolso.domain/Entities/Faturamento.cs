@@ -9,7 +9,7 @@ namespace wca.reembolso.domain.Entities
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("DataCriacao", TypeName ="smalldatetime")]
+        [Column("data_criacao", TypeName ="smalldatetime")]
         public DateTime DataCriacao { get; set; } = DateTime.Now;
 
         [Column("usuario_id")]
@@ -30,10 +30,17 @@ namespace wca.reembolso.domain.Entities
         [Column("numero_po", TypeName ="varchar(20)")]
         public string? NumeroPO { get; set; }
 
-        [Column("documento_po", TypeName = "varchar(200)")]
+        [Column("documento_po", TypeName = "varchar(500)")]
         public string? DocumentoPO { get; set; }
+
+        [Column("data_finalizacao", TypeName = "smalldatetime")]
+        public DateTime? DataFinalizacao { get; set; } = null;
+
+        [Column("notaFiscal", TypeName = "varchar(20)")]
+        public string? NotaFiscal { get; set; } = null;
 
         public IList<FaturamentoItem> FaturamentoItem { get; set; } = new List<FaturamentoItem>();
 
+        public IList<FaturamentoHistorico> FaturamentoHistorico { get; set; } = new List<FaturamentoHistorico>();
     }
 }
