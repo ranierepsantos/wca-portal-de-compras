@@ -86,10 +86,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     
     async add (data) {
         try {
-            
-            let response = await api.create(data);
-            console.debug(response);
-
+            await api.create(data);
         } catch (error) {
             throw error
         }  
@@ -98,9 +95,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     async changeStatus (data) {
         try {
             
-            let response = await api.changeStatus(data);
-            console.debug(response);
-
+            await api.changeStatus(data);
         } catch (error) {
             throw error
         }  
@@ -108,15 +103,13 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     
     async getById (id) {
         let response = await api.getById(id);
-        console.debug("solicitacao.store.getById", response);
         return new Solicitacao(response.data);
     },
 
     async update (data) {
         try {
             
-            let response = await api.update(data);
-            console.debug(response);
+            await api.update(data);
             return true;
         } catch (error) {
             throw error
