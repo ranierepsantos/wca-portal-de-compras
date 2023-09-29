@@ -399,10 +399,6 @@ const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == aut
 const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status)));
 
 //VUE FUNCTIONS
-onBeforeMount(async () => {
-  await solicitacaoStore.loadListStatusSolicitacao();
-});
-
 onMounted(async () => {
   try {
     isBusy.value = true;

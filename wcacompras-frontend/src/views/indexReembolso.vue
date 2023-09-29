@@ -67,6 +67,7 @@ import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
 import moment from "moment";
 import { onUnmounted } from "vue";
+import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 //VARIABLES
 const drawer = ref(true);
 const menuItems = ref([
@@ -137,6 +138,7 @@ const checkNotificacoes = ref(null);
 
 //VUE - FUNCTIONS
 onMounted(async () => {
+  await useSolicitacaoStore().loadListStatusSolicitacao();
   clearInterval(checkNotificacoes.value)
   notificacoes.value = []
   notificacoes.value = await authStore.getNotificacoesReembolso();
