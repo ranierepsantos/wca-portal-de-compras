@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20230908003121_CreateTables_FilialUsuario")]
+    partial class CreateTables_FilialUsuario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace wca.reembolso.infrastruture.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FilialUsuario", b =>
+                {
+                    b.Property<int>("FilialId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FilialId", "UsuarioId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("FilialUsuario");
+                });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Cliente", b =>
                 {
@@ -277,21 +295,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.ToTable("Filial");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.FilialUsuario", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FilialId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UsuarioId", "FilialId");
-
-                    b.HasIndex("FilialId");
-
-                    b.ToTable("FilialUsuario");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.Notificacao", b =>
                 {
                     b.Property<int>("Id")
@@ -315,8 +318,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnName("usuario_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Notificacoes");
                 });
@@ -347,7 +348,7 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("smalldatetime")
                         .HasColumnName("data_solicitacao");
 
-                    b.Property<int?>("GestorId")
+                    b.Property<int>("GestorId")
                         .HasColumnType("int")
                         .HasColumnName("gestor_id");
 
@@ -388,10 +389,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
-
-                    b.HasIndex("ColaboradorId");
-
-                    b.HasIndex("GestorId");
 
                     b.ToTable("Solicitacoes");
                 });
@@ -569,6 +566,21 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.ToTable("UsuarioClientes");
                 });
 
+            modelBuilder.Entity("FilialUsuario", b =>
+                {
+                    b.HasOne("wca.reembolso.domain.Entities.Filial", null)
+                        .WithMany()
+                        .HasForeignKey("FilialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.reembolso.domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("wca.reembolso.domain.Entities.Despesa", b =>
                 {
                     b.HasOne("wca.reembolso.domain.Entities.Solicitacao", "Solicitacao")
@@ -616,32 +628,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.Navigation("Solicitacao");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.FilialUsuario", b =>
-                {
-                    b.HasOne("wca.reembolso.domain.Entities.Filial", null)
-                        .WithMany("FilialUsuario")
-                        .HasForeignKey("FilialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("wca.reembolso.domain.Entities.Usuario", null)
-                        .WithMany("FilialUsuario")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("wca.reembolso.domain.Entities.Notificacao", b =>
-                {
-                    b.HasOne("wca.reembolso.domain.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.Solicitacao", b =>
                 {
                     b.HasOne("wca.reembolso.domain.Entities.Cliente", "Cliente")
@@ -650,21 +636,7 @@ namespace wca.reembolso.infrastruture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("wca.reembolso.domain.Entities.Usuario", "Colaborador")
-                        .WithMany()
-                        .HasForeignKey("ColaboradorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("wca.reembolso.domain.Entities.Usuario", "Gestor")
-                        .WithMany()
-                        .HasForeignKey("GestorId");
-
                     b.Navigation("Cliente");
-
-                    b.Navigation("Colaborador");
-
-                    b.Navigation("Gestor");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.SolicitacaoHistorico", b =>
@@ -719,21 +691,11 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.Navigation("FaturamentoItem");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.Filial", b =>
-                {
-                    b.Navigation("FilialUsuario");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.Solicitacao", b =>
                 {
                     b.Navigation("Despesa");
 
                     b.Navigation("SolicitacaoHistorico");
-                });
-
-            modelBuilder.Entity("wca.reembolso.domain.Entities.Usuario", b =>
-                {
-                    b.Navigation("FilialUsuario");
                 });
 #pragma warning restore 612, 618
         }

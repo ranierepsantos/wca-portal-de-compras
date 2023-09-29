@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20230908033429_AlterTable_FilialUsuario")]
+    partial class AlterTable_FilialUsuario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

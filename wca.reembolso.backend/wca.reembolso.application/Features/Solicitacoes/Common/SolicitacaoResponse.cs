@@ -1,4 +1,5 @@
 ﻿using wca.reembolso.application.Features.Clientes.Common;
+using wca.reembolso.domain.Common.Enum;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Common
@@ -8,7 +9,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         int ClienteId,
         DateTime DataSolicitacao,
         int ColaboradorId,
-        int GestorId,
+        string? ColaboradorNome,
+        int? GestorId,
+        string? GestorNome,
         string ColaboradorCargo,
         string Projeto,
         string Objetivo,

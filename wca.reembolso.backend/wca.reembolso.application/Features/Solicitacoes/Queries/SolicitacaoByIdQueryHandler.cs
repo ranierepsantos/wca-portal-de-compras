@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
+using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application.Features.Solicitacoes.Common;
 using wca.reembolso.domain.Entities;
 
@@ -27,8 +28,10 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
 
             var dado = await _repository.SolicitacaoRepository.ToQuery()
                 .Include("Despesa")
+                .Include(q =>  q.Colaborador)
+                .Include(q => q.Gestor)
                 .Include("SolicitacaoHistorico")
-                .Where(q => q.Id.Equals(request.Id)).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                .Where(q => q.Id.Equals(request.Id)).AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (dado == null)
             {

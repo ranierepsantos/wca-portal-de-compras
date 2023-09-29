@@ -28,7 +28,7 @@
                     <th class="text-center">{{item.id}}</th>
                     <td class="text-center">{{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}</td>
                     <td class="text-left"> {{ item.cliente.nome }}</td>
-                    <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.colaboradorId).text }}</td>
+                    <td class="text-left">{{ item.colaboradorNome }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valorAdiantamento) }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valorDespesa) }}</td>
                     <td class="text-left">{{ solicitacaoStore.getTipoSolicitacao(item.tipoSolicitacao).text }}</td>

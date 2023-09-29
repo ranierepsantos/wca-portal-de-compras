@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import userService from "@/services/user.service";
+import reembolsoUsuarioService from "@/services/reembolso/usuario.service"
 import clienteService from "@/services/reembolso/cliente.service";
 
 export const IDPERFILGESTOR = 5001
@@ -36,12 +37,13 @@ export const useUsuarioStore = defineStore("usuario", {
 
             try {
                 let clientes = data.cliente.map(function (el) { return el.value; });
-                let filiais  = data.filial.map(function (el) { return el.value; });
+                let filiais  = {...data.filial};
 
                 data.cliente = [];
-
+                data.filial = [];
                 let response = await userService.create(data);
                 
+
                 data.id = response.data.id;
                 data.filial = filiais;
 

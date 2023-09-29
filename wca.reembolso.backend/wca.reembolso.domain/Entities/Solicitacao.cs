@@ -20,9 +20,13 @@ namespace wca.reembolso.domain.Entities
         [Column("colaborador_id")]
         public int ColaboradorId { get; set; }
 
+        public Usuario? Colaborador { get; private set; }
+
         [Column("gestor_id")]
-        public int GestorId { get; set; }
-        
+        public int? GestorId { get; set; }
+
+        public Usuario? Gestor {get; private set; }
+
         [Column("colaborador_cargo", TypeName = "varchar(100)")]
         public string ColaboradorCargo { get; set; }
         
@@ -45,7 +49,7 @@ namespace wca.reembolso.domain.Entities
         public decimal ValorDespesa { get;set; } = decimal.Zero;
 
         [Column("tipo_solicitacao")]
-        public EnumTipoSolicitacao TipoSolicitacao { get; set; } = EnumTipoSolicitacao.Reembolso;
+        public int TipoSolicitacao { get; set; } = 1;
 
         [Column("StatusSolicitacaoId")]
         public int Status { get; set; } = 1;

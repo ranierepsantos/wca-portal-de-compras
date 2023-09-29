@@ -3,13 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application6.Common;
 
 namespace wca.reembolso.application.Features.Clientes.Queries
