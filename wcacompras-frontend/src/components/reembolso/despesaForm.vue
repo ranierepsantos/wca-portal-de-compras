@@ -10,7 +10,7 @@
           class="text-capitalize"
           @click="emit('cancelaClick')"
         >
-          <b>Cancelar</b>
+          <b>{{ readOnly? 'Voltar': 'Cancelar' }}</b>
         </v-btn>
 
         <v-btn
@@ -19,6 +19,7 @@
           class="text-capitalize"
           @click="submitData()"
           style="margin-left: 5px"
+          v-show="!readOnly"
         >
           <b>Salvar</b>
         </v-btn>
@@ -36,6 +37,8 @@
                     color="primary"
                     density="compact"
                     v-model="despesa.dataEvento"
+                    :readonly="readOnly"
+                    :bg-color = 'readOnly ? "#f2f2f2":"" '
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -51,6 +54,8 @@
                     color="primary"
                     v-model="despesa.tipoDespesaId"
                     :rules="[(v) => !!v || 'Campo obrigatório']"
+                    :readonly="readOnly"
+                    :bg-color = 'readOnly ? "#f2f2f2":"" '
                   ></v-select>
                 </v-col>
               </v-row>
@@ -69,6 +74,8 @@
                           ? [(v) => !!v || 'Campo é obrigatório']
                           : []
                       "
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -87,6 +94,8 @@
                           ? [(v) => !!v || 'Campo é obrigatório']
                           : []
                       "
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                   <v-col>
@@ -103,6 +112,8 @@
                           ? [(v) => !!v || 'Campo é obrigatório']
                           : []
                       "
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -120,6 +131,8 @@
                           ? [(v) => !!v || 'Campo é obrigatório']
                           : []
                       "
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -139,6 +152,8 @@
                           ? [(v) => !!v || 'Campo é obrigatório']
                           : []
                       "
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -156,6 +171,8 @@
                           ? [(v) => !!v || 'Campo é obrigatório']
                           : []
                       "
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -174,6 +191,8 @@
                           : []
                       "
                       @update:model-value="calcularValor()"
+                      :readonly="readOnly"
+                      :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -190,7 +209,8 @@
                         ? [(v) => !!v || 'Campo é obrigatório']
                         : []
                     "
-                    :disabled="despesaTipo.tipo == 2"
+                    :readonly="readOnly || despesaTipo.tipo == 2"
+                    :bg-color = 'readOnly ||despesaTipo.tipo == 2 ? "#f2f2f2":"" '
                   ></v-text-field-money>
                 </v-col>
               </v-row>
@@ -204,6 +224,8 @@
                     no-resize
                     rows="3"
                     :rules="[(v) => !!v || 'Campo obrigatório']"
+                    :readonly="readOnly"
+                    :bg-color = 'readOnly ? "#f2f2f2":"" '
                   >
                   </v-textarea>
                 </v-col>
@@ -222,7 +244,7 @@
               icon="mdi-close"
               style="margin-bottom: 3px; margin-right: 15px"
               @click="clearImage()"
-              v-show="despesa.imagePath != ''"
+              v-show="despesa.imagePath != '' &&  !readOnly "
             ></v-btn>
             <div
               id="img-preview"
@@ -262,6 +284,10 @@ const props = defineProps({
       return [];
     },
   },
+  readOnly: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const despesaForm = ref(null);
@@ -269,23 +295,26 @@ const emit = defineEmits(["cancelaClick", "changeImage", "changeValor", "saveCli
 
 const dropzoneFile = ref("");
 const tipoEscolhido = ref({
-  tipo: 1,
+  tipo: 0,
   valor: 0
 })
 
-watch( () => tipoEscolhido.value.tipo, (novoTipo) => {
-  if (novoTipo == 1) {
-    props.despesa.kmPercorrido = 0
-    props.despesa.destino = "";
-    props.despesa.origem = "";
-    
-  } else {
-    props.despesa.cnpj = ""
-    props.despesa.inscricaoEstadual = ""
-    props.despesa.razaoSocial= ""
-    props.despesa.nroFiscal = ""
+watch( () => tipoEscolhido.value.tipo, (novoTipo, oldTipo) => {
+  if (!props.readOnly && oldTipo !=0) {
+    if (novoTipo == 1) {
+      props.despesa.kmPercorrido = 0
+      props.despesa.destino = "";
+      props.despesa.origem = "";
+      
+    } else {
+      props.despesa.cnpj = ""
+      props.despesa.inscricaoEstadual = ""
+      props.despesa.razaoSocial= ""
+      props.despesa.nroFiscal = ""
+    }
+    props.despesa.valor = 0
   }
-  props.despesa.valor = 0
+  
 })
 
 const despesaTipo = computed(() => {
@@ -330,7 +359,6 @@ function getImgData() {
     const fileReader = new FileReader();
     fileReader.readAsDataURL(files);
     fileReader.addEventListener("load", function () {
-      //imgPreview.style.display = "block"
       emit("changeImage", this.result);
     });
   }
@@ -338,7 +366,6 @@ function getImgData() {
 
 async function submitData() {
   let { valid } = await despesaForm.value.validate();
-  console.log("Form valido: ", valid);
   if (valid) {
     emit('saveClick')
   }

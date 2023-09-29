@@ -101,8 +101,8 @@ export const useUsuarioStore = defineStore("usuario", {
                 await clienteService.RelacionarClienteUsuario(userClientes);
         },
 
-        async toComboList() {
-            let response = await userService.toList()
+        async toComboList(filial =0) {
+            let response = await userService.toList(filial)
             return response.data;
         },
 

@@ -12,7 +12,7 @@ using wca.reembolso.domain.Entities;
 namespace wca.reembolso.application.Features.Solicitacaos.Queries
 {
 
-    public record SolicitacaoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int ColaboradorId =0 , int GestorId = 0, int ClienteId = 0, int Status = 0) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoResponse>>>;
+    public record SolicitacaoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int UsuarioId =0, int ClienteId = 0, int Status = 0) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoResponse>>>;
     public sealed class SolicitacaoToPaginateQueryHandle : 
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoResponse>>>
     {
@@ -36,16 +36,16 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             }
 
             var query = _repository.SolicitacaoRepository.ToQuery();
-            query = query.Include(i => i.Cliente);
+            query = query.Include(i => i.Cliente)
+                         .Include(q => q.Colaborador)
+                         .Include(q => q.Gestor)
+                         .Include(q => q.SolicitacaoHistorico);
 
             if (request.FilialId > 1)
              query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
-            if (request.ColaboradorId > 0)
-                query = query.Where(q => q.ColaboradorId.Equals(request.ColaboradorId));
-
-            if (request.GestorId > 0)
-                query = query.Where(q => q.GestorId.Equals(request.GestorId));
+            if (request.UsuarioId > 0)
+                query = query.Where(q => q.ColaboradorId.Equals(request.UsuarioId) || q.GestorId.Equals(request.UsuarioId));
 
             if (request.ClienteId > 0)
                 query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
@@ -54,7 +54,12 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
                 query = query.Where(q => q.Status.Equals( request.Status));
 
             if (request.DataIni != null && request.DataFim != null)
-                query = query.Where(c => c.DataSolicitacao >= request.DataIni && c.DataSolicitacao <= request.DataFim);
+            {
+                var dataFim = request.DataFim.Value.AddHours(23).AddMinutes(59);
+                _logger.LogInformation($"DataFim {dataFim.ToString()}");
+                query = query.Where(c => c.DataSolicitacao >= request.DataIni && c.DataSolicitacao <= dataFim);
+            }
+                
 
             query = query.OrderBy(q => q.Id);
 

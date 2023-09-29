@@ -51,9 +51,8 @@ export default {
             page: page,
             pageSize: pageSize,
             filialId: filters.filialId,
-            colaboradorId: filters.colaboradorId,
+            usuarioId: filters.usuarioId,
             clienteId: filters.clienteId,
-            gestorId: filters.gestorId,
             dataIni: filters.dataIni,
             dataFim: filters.dataFim,
             status: filters.status
