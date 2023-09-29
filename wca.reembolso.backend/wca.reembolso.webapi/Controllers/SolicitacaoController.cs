@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.reembolso.application.Features.Despesas.Queries;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
@@ -103,5 +104,15 @@ namespace wca.reembolso.webapi.Controllers
 
         }
 
+        [HttpGet("ChecarSeDespesaExiste")]
+        public async Task<IActionResult> DespesaCheckIfExists([FromQuery] DespesaChecarByNotaAndCnpjQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
     }
 }
