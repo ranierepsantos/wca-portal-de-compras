@@ -3,6 +3,7 @@ import api from "@/services/reembolso/solicitacao.service";
 import moment from "moment/moment";
 
 export class Solicitacao {
+    controlIdDespesa = 0
     constructor(data = undefined) {
         this.id= data == undefined? 0: data.id
         this.clienteId= data == undefined? null: data.clienteId
@@ -29,6 +30,8 @@ export class Solicitacao {
     salvarDespesa(despesa) {
         let index = -1        
         if (despesa.id == 0) {
+            this.controlIdDespesa--
+            despesa.id = this.controlIdDespesa
             despesa.solicitacaoId = this.id
         }else {
             index = this.despesa.findIndex(q =>  q.id == despesa.id)

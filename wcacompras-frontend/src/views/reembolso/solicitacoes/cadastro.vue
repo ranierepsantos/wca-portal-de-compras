@@ -393,9 +393,9 @@ const showSecaoDespesa = computed(()=> {
   return solicitacao.value.tipoSolicitacao == 1 ||
         (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
 })
-const despesaCanAdd = computed(() => solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.status == 3)
-const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
-const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status)));
+const despesaCanAdd = computed(() => solicitacao.value.colaboradorId == authStore.user.id)
+const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
+const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status)));
 
 //VUE FUNCTIONS
 onMounted(async () => {
@@ -495,11 +495,23 @@ async function aprovarReprovar(isAprovado, comentario) {
     }</b> por ${authStore.user.nome}, status alterado para <b>${
       reembolsoStatus.status
     }</b>. <br/> Comentário: ${comentario}`;
+    debugger  
+    let notificarUsuario = []
+    
+    if (reembolsoStatus.notifica == 1) // wca
+    {
+      let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
+      notificarUsuario = notificaList.map(q => {return q.value})
+    }else if (reembolsoStatus.notifica == 2) //cliente
+      notificarUsuario.push(solicitacao.value.gestorId)
+    else if (reembolsoStatus.notifica == 3) //gestor
+      notificarUsuario.push(solicitacao.value.colaboradorId)
 
     let solicitacaoStatus = {
       solicitacaoId: solicitacao.value.id,
       evento: texto,
       status: reembolsoStatus,
+      notificar: notificarUsuario
     };
 
     await solicitacaoStore.changeStatus(solicitacaoStatus);
@@ -583,8 +595,6 @@ async function salvar() {
       await swal.fire(options);
       return
     }
-    
-    
     //checar se o status esta aguardando prestação de contas e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas
     if (data.tipoSolicitacao == 2 && data.status == 3 && data.despesa.length > 0) {
@@ -602,9 +612,19 @@ async function salvar() {
         data.status = 5; //5 - aguardando conferência
       }
     }
-    if (data.id == 0)
+    
+    //trocar os id despesa negativos por 0
+    data.despesa.forEach(d => {
+      if (d.id < 0) d.id = 0
+    });
+
+    if (data.id == 0) {
+      data.status = 5
+      if (data.tipoSolicitacao == 2) {
+        data.status = 1; //1 - solicitado
+      }
       await solicitacaoStore.add(data);
-    else
+    } else
       await solicitacaoStore.update(data);
     
     swal.fire({
@@ -662,11 +682,22 @@ async function registrarPagto() {
         valor
       )}!`;
       
+      let notificarUsuario = []
+
+      if (novoStatus.notifica == 1) // wca
+      {
+        let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
+        notificarUsuario = notificaList.map(q => {return q.value})
+      }else if (novoStatus.notifica == 2) //cliente
+        notificarUsuario.push(solicitacao.value.gestorId)
+      else if (novoStatus.notifica == 3) //gestor
+        notificarUsuario.push(solicitacao.value.colaboradorId)
 
       let solicitacaoStatus = {
         solicitacaoId: solicitacao.value.id,
         evento: texto,
         status: novoStatus,
+        notificar: notificarUsuario
       };
 
       await solicitacaoStore.changeStatus(solicitacaoStatus);

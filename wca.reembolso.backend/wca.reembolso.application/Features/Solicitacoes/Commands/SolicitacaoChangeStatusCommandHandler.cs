@@ -3,6 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
+using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.domain.Entities;
@@ -13,7 +14,8 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
     public record SolicitacaoChangeStatusCommand(
         int SolicitacaoId,
         string Evento,
-        StatusSolicitacao Status
+        StatusSolicitacao Status,
+        int[]? Notificar
     ):IRequest<ErrorOr<bool>>;
 
     public sealed class SolicitacaoChangeStatusCommandHandler : IRequestHandler<SolicitacaoChangeStatusCommand, ErrorOr<bool>>
@@ -58,7 +60,15 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             await _mediator.Send(eventoCommand);
 
             // gerar notificação
-            
+            for (var ii =0; ii < request.Notificar?.Length; ii++)
+            {
+                string mensagem = request.Status.TemplateNotificacao.Replace("{id}", request.SolicitacaoId.ToString());
+
+                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem);
+
+                await _mediator.Send(notificacao, cancellationToken);
+            }
+
             // return 
             return true;
         }

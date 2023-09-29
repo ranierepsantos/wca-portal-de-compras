@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.Notificacoes.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Queries;
 
@@ -20,6 +21,16 @@ namespace wca.reembolso.webapi.Controllers
         public async Task<IActionResult> ListarPorColaboradorGestor([FromQuery] NotificacaoListByUserQuery query)
         {
             var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpPut("MarcarComoLido")]
+        public async Task<IActionResult> MarcarComoLido(NotificacaoMarcarLidoCommand command)
+        {
+            var result = await _mediator.Send(command);
 
             if (result.IsError) { return Problem(result.Errors); }
 

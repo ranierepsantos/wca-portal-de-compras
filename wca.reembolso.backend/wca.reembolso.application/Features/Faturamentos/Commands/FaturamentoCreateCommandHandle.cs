@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Faturamentos.Behaviors;
 using wca.reembolso.application.Features.Faturamentos.Common;
+using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
 using wca.reembolso.domain.Entities;
 
@@ -18,8 +19,11 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
     public record FaturamentoCreateCommand(
         int UsuarioId,
         int ClienteId,
-        int Valor,
-        IList<FaturamentoItemCreate> FaturamentoItem
+        decimal Valor,
+        IList<FaturamentoItemCreate> FaturamentoItem,
+        StatusSolicitacao Status, 
+        int[] Notificar
+
     ): IRequest<ErrorOr<FaturamentoResponse>>;
 
 
@@ -72,8 +76,18 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
 
             foreach(var item in faturamento.FaturamentoItem)
             {
-                var changeStatus = new SolicitacaoChangeStatusCommand(item.SolicitacaoId, evento, status);
+                var changeStatus = new SolicitacaoChangeStatusCommand(item.SolicitacaoId, evento, status, null);
                 await _mediator.Send(changeStatus, cancellationToken);
+            }
+
+            //notificar usuario
+            for (var ii = 0; ii < request.Notificar.Length; ii++)
+            {
+                string mensagem = request.Status.TemplateNotificacao.Replace("{id}", faturamento.Id.ToString());
+
+                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem);
+
+                await _mediator.Send(notificacao, cancellationToken);
             }
 
             return _mapper.Map<FaturamentoResponse>(faturamento);

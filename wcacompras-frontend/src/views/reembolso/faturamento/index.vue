@@ -287,7 +287,6 @@ async function getItems()
     try
     {
         isLoading.value.busy = true;
-        debugger
         if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
         throw new TypeError("Ambas as datas devem ser informadas!")
         else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 

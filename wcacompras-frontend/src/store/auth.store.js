@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import authService from "@/services/auth.service";
+import apiReembolso from "@/services/reembolso/api"
 
 const modelUser = {
   id: 0,
@@ -114,5 +115,18 @@ export const useAuthStore = defineStore("auth", {
       localStorage.setItem("token", this.token);
       localStorage.setItem("expireIn", this.expireIn);
     },
+
+    async getNotificacoesReembolso () {
+
+      let response = await apiReembolso.get("Notificacao/ListarPorUsuario", {params: {usuarioId: this.user.id}})
+      return response.data
+
+    },
+
+    async marcarNotificaoReembolso(notificacaoId) {
+      await apiReembolso.put("Notificacao/MarcarComoLido", {id: notificacaoId})
+    }
+
+
   },
 });

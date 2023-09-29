@@ -47,7 +47,13 @@ export default {
 
     toListByPerfil(perfilId) {
         return api.get(route.usuarioToListByPerfil.replace("{perfilId}", perfilId));
-    }
+    },
     
+    toListByPermissao(permissao) {
+        if (!permissao || permissao.trim() =="")
+            throw new TypeError("A permissão deve ser informada!")
+            
+        return api.get(route.usuarioToListByPermissao.replace("{sistemaId}", authStore.sistema.id).replace("{permissao}", permissao));
+    },
     
 }
