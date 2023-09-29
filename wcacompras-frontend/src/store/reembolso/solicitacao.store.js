@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import api from "@/services/reembolso/solicitacao.service";
 import moment from "moment/moment";
-import { useUsuarioStore } from "./usuario.store";
 
 export class Solicitacao {
     constructor(data = undefined) {
@@ -48,21 +47,21 @@ export class Solicitacao {
 }
 
 export class Despesa {
-    constructor() {
-        this.id = 0
-        this.solicitacaoId = 0
-        this.tipoDespesaId = null
-        this.dataEvento = moment().format("YYYY-MM-DD")
-        this.razaoSocial = ""
-        this.cnpj = ""
-        this.inscricaoEstadual = ""
-        this.numeroFiscal = ""
-        this.valor= 0.0
-        this.imagePath = ""
-        this.motivo = ""
-        this.origem =""
-        this.destino = ""
-        this.kmPercorrido = 0
+    constructor(data = null) {
+        this.id = data ?  data.id: 0
+        this.solicitacaoId = data ?  data.solicitacaoId : 0
+        this.tipoDespesaId = data ?  data.tipoDespesaId : null
+        this.dataEvento = data ?  moment(data.dataEvento).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
+        this.razaoSocial = data ?  data.razaoSocial :""
+        this.cnpj = data ?  data.cnpj :""
+        this.inscricaoEstadual = data ?  data.inscricaoEstadual :""
+        this.numeroFiscal = data ?  data.numeroFiscal :""
+        this.valor= data ?  data.valor :0.0
+        this.imagePath = data ?  data.imagePath :""
+        this.motivo = data ?  data.motivo :""
+        this.origem =data ?  data.origem :""
+        this.destino = data ?  data.destino :""
+        this.kmPercorrido = data ?  data.kmPercorrido :0
     }
 }
 
@@ -129,21 +128,18 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
 
     async loadListStatusSolicitacao() {
         try {
+            if (this.statusSolicitacao.length ==0)
+            {
+                let response = await api.ListarStatusSolicitacao();
             
-            let response = await api.ListarStatusSolicitacao();
-            
-            this.statusSolicitacao = response.data 
-            localStorage.setItem('reembolso-status-solicitacao',JSON.stringify(this.statusSolicitacao))
-
+                this.statusSolicitacao = response.data 
+                localStorage.setItem('reembolso-status-solicitacao',JSON.stringify(this.statusSolicitacao))
+            }
         } catch (error) {
             throw error
         }  
     },
     
-    async loadUsuarios() {
-        this.usuarios = await useUsuarioStore().toComboList()
-    },
-
     async getListarPorColaboradorGestor(colaboradorId = 0, gestorId = 0)
     {
         try {

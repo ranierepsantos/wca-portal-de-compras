@@ -1,142 +1,363 @@
 <template>
-    <div>
-        <bread-crumbs title="Solicitações" @novoClick="editar('novo')" />
-        <v-row>
-            <v-col cols="6">
-                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact"
-                    variant="outlined" color="info">
-                </v-text-field>
-            </v-col>
-        </v-row>
-        <v-progress-linear color="primary" indeterminate :height="5" v-show="isBusy"></v-progress-linear>
-        <v-table class="elevation-2">
-            <thead>
-                <tr>
-                    <th class="text-center text-grey">#</th>
-                    <th class="text-center text-grey">DATA</th>
-                    <th class="text-left text-grey">CLIENTE</th>
-                    <th class="text-left text-grey">COLABORADOR</th>
-                    <th class="text-center text-grey">VALOR ADIANTAMENTO</th>
-                    <th class="text-center text-grey">VALOR DESPESA</th>
-                    <th class="text-left text-grey">TIPO SOLICITAÇÃO</th>
-                    <th class="text-left text-grey">STATUS</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in solicitacoes" :key="item.id">
-                    <th class="text-center">{{item.id}}</th>
-                    <td class="text-center">{{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}</td>
-                    <td class="text-left"> {{ item.cliente.nome }}</td>
-                    <td class="text-left">{{ item.colaboradorNome }}</td>
-                    <td class="text-right">{{ formatToCurrencyBRL(item.valorAdiantamento) }}</td>
-                    <td class="text-right">{{ formatToCurrencyBRL(item.valorDespesa) }}</td>
-                    <td class="text-left">{{ solicitacaoStore.getTipoSolicitacao(item.tipoSolicitacao).text }}</td>
-                    <td class="text-left">
-                        <v-btn :color="solicitacaoStore.getStatus(item.status).color" variant="tonal"
-                            density="compact" class="text-center"> {{
-                                solicitacaoStore.getStatus(item.status).status
-                            }}</v-btn>    
-                    </td>
-                    <td class="text-right">
-                        <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item.id)"></v-btn>
-                        <v-btn icon="mdi-history" size="smaller" variant="plain" color="primary"
-                            title="Histórico" :disabled="isBusy" @click="showHistorico(item)"></v-btn>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="9">
-                        <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
-                    </td>
-                </tr>
-            </tfoot>
-        </v-table>
-        <!--DIALOG PARA EXIBIR HISTÓRICO -->
-        <v-dialog
-        v-model="openHistorico"
-        max-width="900"
-        :absolute="false"
-        
-      >
-        <historico :eventos="solicitacaoEventos.sort(compararValor('dataEvento', 'desc'))"/>
-      </v-dialog>
-    </div>
+  <div>
+    <bread-crumbs title="Solicitações" @novoClick="editar('novo')" />
+    <v-row v-show="!isLoading.form">
+      <v-col v-show="isMatriz">
+        <v-select
+          label="Filiais"
+          v-model="filter.filialId"
+          :items="filiais"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          variant="outlined"
+          color="primary"
+          :hide-details="true"
+        ></v-select>
+      </v-col>
+      <v-col>
+        <v-select
+          label="Clientes"
+          v-model="filter.clienteId"
+          :items="clientes"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          variant="outlined"
+          color="primary"
+          :hide-details="true"
+        ></v-select>
+      </v-col>
+      <v-col v-show="!isGestor && !isColaborador && isAprovador">
+        <v-select
+          label="Usuário"
+          v-model="filter.usuarioId"
+          :items="usuarios"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          variant="outlined"
+          color="primary"
+          :hide-details="true"
+        ></v-select>
+      </v-col>
+    </v-row>
+    <v-row v-show="!isLoading.form">
+      <v-col cols="3">
+        <v-select
+          label="Status"
+          v-model="filter.status"
+          :items="solicitacaoStore.statusSolicitacao"
+          density="compact"
+          item-title="status"
+          item-value="id"
+          variant="outlined"
+          color="primary"
+          :hide-details="true"
+        ></v-select>
+      </v-col>
+      <v-col cols="2">
+        <v-text-field
+          label="Data Início"
+          v-model="filter.dataIni"
+          type="date"
+          variant="outlined"
+          color="primary"
+          density="compact"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="2">
+        <v-text-field
+          label="Data Fim"
+          v-model="filter.dataFim"
+          type="date"
+          variant="outlined"
+          color="primary"
+          density="compact"
+        ></v-text-field>
+      </v-col>
+      <v-col class="text-right">
+        <v-btn
+          color="primary"
+          variant="outlined"
+          class="text-capitalize"
+          @click="getItems()"
+        >
+          <b>Aplicar Filtros</b>
+        </v-btn>
+        &nbsp;
+        <v-btn
+          color="info"
+          variant="outlined"
+          class="text-capitalize"
+          @click="clearFilters()"
+        >
+          <b>Limpar Filtros</b>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <br />
+    <v-progress-linear
+      color="primary"
+      indeterminate
+      :height="5"
+      v-show="isLoading.busy || isLoading.form"
+    ></v-progress-linear>
+    <v-table class="elevation-2" v-show="!isLoading.form">
+      <thead>
+        <tr>
+          <th class="text-center text-grey">#</th>
+          <th class="text-center text-grey">DATA</th>
+          <th class="text-left text-grey">CLIENTE</th>
+          <th class="text-left text-grey">COLABORADOR</th>
+          <th class="text-center text-grey">VALOR ADIANTAMENTO</th>
+          <th class="text-center text-grey">VALOR DESPESA</th>
+          <th class="text-left text-grey">TIPO SOLICITAÇÃO</th>
+          <th class="text-left text-grey">STATUS</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in solicitacoes" :key="item.id">
+          <th class="text-center">{{ item.id }}</th>
+          <td class="text-center">
+            {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
+          </td>
+          <td class="text-left">{{ item.cliente.nome }}</td>
+          <td class="text-left">{{ item.colaboradorNome }}</td>
+          <td class="text-right">
+            {{ formatToCurrencyBRL(item.valorAdiantamento) }}
+          </td>
+          <td class="text-right">
+            {{ formatToCurrencyBRL(item.valorDespesa) }}
+          </td>
+          <td class="text-left">
+            {{ solicitacaoStore.getTipoSolicitacao(item.tipoSolicitacao).text }}
+          </td>
+          <td class="text-left">
+            <v-btn
+              :color="solicitacaoStore.getStatus(item.status).color"
+              variant="tonal"
+              density="compact"
+              class="text-center"
+            >
+              {{ solicitacaoStore.getStatus(item.status).status }}</v-btn
+            >
+          </td>
+          <td class="text-right">
+            <v-btn
+              icon="mdi-lead-pencil"
+              variant="plain"
+              color="primary"
+              @click="editar(item.id)"
+            ></v-btn>
+            <v-btn
+              icon="mdi-history"
+              size="smaller"
+              variant="plain"
+              color="primary"
+              title="Histórico"
+              :disabled="isLoading.busy"
+              @click="showHistorico(item)"
+            ></v-btn>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="9">
+            <v-pagination
+              v-model="page"
+              :length="totalPages"
+              :total-visible="4"
+            ></v-pagination>
+          </td>
+        </tr>
+      </tfoot>
+    </v-table>
+    <!--DIALOG PARA EXIBIR HISTÓRICO -->
+    <v-dialog v-model="openHistorico" max-width="900" :absolute="false">
+      <historico
+        :eventos="solicitacaoEventos.sort(compararValor('dataEvento', 'desc'))"
+      />
+    </v-dialog>
+  </div>
 </template>
-  
+
 <script setup>
 import { ref, onMounted, watch, inject } from "vue";
-import handleErrors from "@/helpers/HandleErrors"
+import handleErrors from "@/helpers/HandleErrors";
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import moment from "moment";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 import historico from "@/components/reembolso/historico.vue";
 import { compararValor, formatToCurrencyBRL } from "@/helpers/functions";
+import filialService from "@/services/filial.service";
+import {
+  IDPERFILCOLABORADOR,
+  IDPERFILGESTOR,
+  useUsuarioStore,
+} from "@/store/reembolso/usuario.store";
+import { useAuthStore } from "@/store/auth.store";
+import { computed } from "vue";
+import { useClienteStore } from "@/store/reembolso/cliente.store";
 //DATA
+const authStore = useAuthStore();
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
-const isBusy = ref(false);
 const totalPages = ref(1);
 const solicitacoes = ref([]);
+const clientes = ref([]);
+const filiais = ref([]);
+const usuarios = ref([]);
 const filter = ref({
-    filialId: null,
-    clienteId: null,
-    colaboradorId: null,
-    gestorId: null,
-    status: 0,
-    dataIni: null,
-    dataFim: null
+  filialId: null,
+  clienteId: null,
+  usuarioId: null,
+  status: null,
+  dataIni: null,
+  dataFim: null,
 });
 const swal = inject("$swal");
-const solicitacaoStore = useSolicitacaoStore()
-const solicitacaoEventos = ref([])
-const openHistorico =ref(false)
+const solicitacaoStore = useSolicitacaoStore();
+const solicitacaoEventos = ref([]);
+const openHistorico = ref(false);
+const isMatriz = ref(false);
+const isLoading = ref({
+  form: true,
+  busy: false,
+});
+
+//COMPUTED'S
+const isColaborador = computed(() => {
+  return authStore.sistema.perfil.id == IDPERFILCOLABORADOR;
+});
+const isGestor = computed(() => {
+  return authStore.sistema.perfil.id == IDPERFILGESTOR;
+});
+
+const isAprovador = computed(() => {
+  return true; //authStore.hasPermissao("aprovar_solicitacao")
+});
+
+//WATCH'S
+watch(
+  () => filter.value.filialId,
+  async () => {
+    let _filiais = [];
+    if (filter.value.filialId != null) _filiais.push(filter.value.filialId);
+    filter.value.clienteId = null;
+    filter.value.usuarioId = null;
+    //filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
+    await getClientesToList(_filiais[0]);
+    await getUsuarioToList(_filiais);
+  }
+);
 
 //VUE METHODS
-onMounted(async () =>
-{
-    await solicitacaoStore.loadUsuarios();
-    if (solicitacaoStore.statusSolicitacao.length ==0) {
-        await solicitacaoStore.loadListStatusSolicitacao()
-    }
+onMounted(async () => {
+  try {
+    isLoading.value.form = true;
+    await solicitacaoStore.loadListStatusSolicitacao();
+    await getFiliaisToList();
+    let filialUsuario = (
+      await useUsuarioStore().getFiliais(authStore.user.id)
+    )[0];
+    isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
+    authStore.user.filial = filialUsuario.value;
+    await clearFilters();
     await getItems();
+  } catch (error) {
+  } finally {
+    isLoading.value.form = false;
+  }
 });
 
 watch(page, () => getItems());
-watch(filter, () => getItems());
 
 //METHODS
-function editar(id)
-{
-    router.push({ name: "reembolsoSolicitacaoCadastro", query: { id: id } })
-}
-
-async function showHistorico(item)
-{
-    solicitacaoEventos.value = item.solicitacaoHistorico;
-    openHistorico.value = true
-}
-
-async function getItems()
-{
-    try
-    {
-        isBusy.value = true;
-        let response = await solicitacaoStore.getPaginate(page.value, pageSize, filter)
-        console.log("solicitacao.index.getItems->",response)
-        solicitacoes.value = response.items;
-        totalPages.value = response.totalPages;
-    } catch (error)
-    {
-        console.log("solicitacoes.getItems.error:", error.response);
-        handleErrors(error)
-    } finally
-    {
-        isBusy.value = false;
+async function clearFilters() {
+  try {
+    isLoading.busy =true
+    filter.value = {
+      filialId: null,
+      clienteId: null,
+      usuarioId: null,
+      status: null,
+      dataIni: null,
+      dataFim: null,
+    };
+    if (!isMatriz.value) {
+      filter.value.filialId = authStore.user.filial;
     }
+    await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
+    // se tiver permissão de visualizar de outros usuario
+    if (isColaborador.value || isGestor.value || !isAprovador.value) {
+      filter.value.usuarioId = authStore.user.id;
+      await getClientesToList(filter.value.filialId, filter.value.usuarioId);
+    } else {
+      await getClientesToList(filter.value.filialId);
+    }
+    await getItems();
+  } catch (error) {
+    console.error(error)
+
+  }finally {
+    isLoading.busy =false
+  }
+}
+
+function editar(id) {
+  router.push({ name: "reembolsoSolicitacaoCadastro", query: { id: id } });
+}
+
+async function showHistorico(item) {
+  solicitacaoEventos.value = item.solicitacaoHistorico;
+  openHistorico.value = true;
+}
+
+async function getItems() {
+  try {
+    
+    let response = await solicitacaoStore.getPaginate(
+      page.value,
+      pageSize,
+      filter.value
+    );
+    solicitacoes.value = response.items;
+    totalPages.value = response.totalPages;
+  } catch (error) {
+    console.log("solicitacoes.getItems.error:", error.response);
+    handleErrors(error);
+  }
+}
+
+async function getClientesToList(filialId = 0, usuarioId = 0) {
+  try {
+    clientes.value = await useClienteStore().toComboList(filialId, usuarioId);
+  } catch (error) {
+    console.log("solcitacoes.getFiliais.error:", error.response);
+    handleErrors(error);
+  }
+}
+
+async function getFiliaisToList() {
+  try {
+    let response = await filialService.toList();
+    filiais.value = response.data;
+  } catch (error) {
+    console.log("solcitacoes.getFiliais.error:", error.response);
+    handleErrors(error);
+  }
+}
+
+async function getUsuarioToList(filiais = []) {
+  try {
+    usuarios.value = await useUsuarioStore().toComboList(filiais);
+  } catch (error) {
+    console.log("solcitacoes.getUsuarioToList.error:", error.response);
+    handleErrors(error);
+  }
 }
 </script>
-  
-  

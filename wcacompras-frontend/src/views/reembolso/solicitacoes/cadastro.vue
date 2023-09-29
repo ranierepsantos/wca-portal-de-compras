@@ -24,13 +24,26 @@
                   label="Cliente"
                   :items="clientes"
                   density="compact"
-                  item-title="text"
-                  item-value="value"
+                  item-title="nome"
+                  item-value="id"
                   variant="outlined"
                   color="primary"
                   v-model="solicitacao.clienteId"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
+                  v-if="solicitacao.id == 0"
                 ></v-select>
+                <v-text-field
+                  label="Cliente"
+                  type="text"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  :rules="[(v) => !!v || 'Campo obrigatório']"
+                  v-model="solicitacao.cliente.nome"
+                  :readonly="true"
+                  bg-color="#f2f2f2"
+                  v-else
+                ></v-text-field>
               </v-col>
               <v-col>
                 <v-select
@@ -58,11 +71,7 @@
                 >
               </v-col>
             </v-row>
-            <v-row
-              v-show="
-                solicitacao.id > 0 
-              "
-            >
+            <v-row v-show="solicitacao.id > 0">
               <v-col>
                 <v-text-field
                   label="Colaborador"
@@ -114,6 +123,8 @@
                   color="primary"
                   density="compact"
                   v-model="solicitacao.projeto"
+                  :readonly="isReadonly"
+                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -126,6 +137,8 @@
                   color="primary"
                   density="compact"
                   v-model="solicitacao.objetivo"
+                  :readonly="isReadonly"
+                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -136,6 +149,8 @@
                   color="primary"
                   density="compact"
                   v-model="solicitacao.periodoInicial"
+                  :readonly="isReadonly"
+                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -146,6 +161,8 @@
                   color="primary"
                   density="compact"
                   v-model="solicitacao.periodoFinal"
+                  :readonly="isReadonly"
+                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
                 ></v-text-field>
               </v-col>
               <v-col v-show="solicitacao.tipoSolicitacao == 2">
@@ -155,6 +172,8 @@
                   color="primary"
                   :number-decimal="2"
                   prefix="R$"
+                  :readonly="isReadonly"
+                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
                 ></v-text-field-money>
               </v-col>
             </v-row>
@@ -164,10 +183,7 @@
 
       <v-card
         style="margin-top: 20px"
-        v-show="
-          solicitacao.tipoSolicitacao == 1 ||
-          (solicitacao.tipoSolicitacao == 2 && solicitacao.status != 1)
-        "
+        v-show="showSecaoDespesa"
       >
         <v-card-title>
           <v-breadcrumbs>
@@ -178,7 +194,7 @@
               variant="outlined"
               class="text-capitalize"
               @click="openDespesaForm = true"
-              v-show="canEdit"
+              v-show="despesaCanAdd"
             >
               <b>Nova Despesa</b>
             </v-btn>
@@ -191,7 +207,7 @@
               <tr>
                 <th class="text-center text-grey">DATA</th>
                 <th class="text-center text-grey">TIPO</th>
-                <th class="text-center text-grey">DESCRICAO</th>
+                <th class="text-center text-grey" colspan="2">DESCRICAO</th>
                 <th class="text-center text-grey">VALOR</th>
                 <th class="text-center text-grey"></th>
               </tr>
@@ -204,20 +220,28 @@
                 <td class="text-center">
                   {{ getDespesaTipo(item.tipoDespesaId).nome }}
                 </td>
-                <td class="text-center">
+                <td class="text-center" colspan="2">
                   {{
                     getDespesaTipo(item.tipoDespesaId).tipo == 1
-                      ? "Cupom/Nota:" +
-                        item.numeroFiscal +
-                        " / " +
-                        item.razaoSocial
-                      : item.origem + " -> " + item.destino
+                      ? item.razaoSocial +
+                        " : " +
+                        item.numeroFiscal
+                      : item.origem + " > " + item.destino
                   }}
                 </td>
                 <td class="text-right">
                   {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
                 </td>
                 <td class="text-right">
+                  <v-btn
+                    icon="mdi-text-box-search-outline"
+                    size="smaller"
+                    variant="plain"
+                    color="primary"
+                    @click="editarDespesa(item)"
+                    title="Visualizar"
+                    v-show ="despesaCanView"
+                  ></v-btn>
                   <v-btn
                     icon="mdi-lead-pencil"
                     size="smaller"
@@ -226,6 +250,7 @@
                     @click="editarDespesa(item)"
                     title="Editar"
                     :disabled="isBusy"
+                    v-show ="!despesaCanView && despesaCanEdit"
                   ></v-btn>
                   <v-btn
                     icon="mdi-delete"
@@ -233,6 +258,7 @@
                     color="error"
                     @click="removerDespesa(item)"
                     :disabled="isBusy"
+                    v-show="!despesaCanView && despesaCanEdit"
                   >
                   </v-btn>
                 </td>
@@ -289,6 +315,7 @@
             }
           "
           @save-click="salvarDespesa()"
+          :read-only="despesaCanView"
         ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
@@ -355,6 +382,20 @@ const despesaTipos = ref([]);
 
 const formButtons = ref([]);
 const usuario = ref(new Usuario());
+
+//COMPUTED
+const isReadonly = computed(() =>{
+
+  return (solicitacao.value.id > 0 && solicitacao.value.status != 4)
+      || (solicitacao.value.colaboradorId != authStore.user.id)
+})
+const showSecaoDespesa = computed(()=> {
+  return solicitacao.value.tipoSolicitacao == 1 ||
+        (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
+})
+const despesaCanAdd = computed(() => solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.status == 3)
+const despesaCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status));
+const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "3,4".includes(solicitacao.value.status)));
 
 //VUE FUNCTIONS
 onMounted(async () => {
@@ -426,7 +467,7 @@ onMounted(async () => {
   }
 });
 
-const canEdit = computed(() => !"2,4,5,6".includes(solicitacao.value.status));
+
 
 //FUNCTIONS
 
@@ -515,7 +556,7 @@ function calcularTotalDespesa() {
 }
 
 function editarDespesa(item) {
-  despesa.value = { ...item };
+  despesa.value = new Despesa({ ...item });
   openDespesaForm.value = true;
 }
 

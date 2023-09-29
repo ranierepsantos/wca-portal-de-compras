@@ -27,6 +27,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
         {
 
             var dado = await _repository.SolicitacaoRepository.ToQuery()
+                .Include("Cliente")
                 .Include("Despesa")
                 .Include(q =>  q.Colaborador)
                 .Include(q => q.Gestor)
