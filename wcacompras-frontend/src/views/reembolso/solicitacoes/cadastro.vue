@@ -362,7 +362,7 @@ import { computed } from "vue";
 import { compararValor } from "@/helpers/functions";
 import historico from "@/components/reembolso/historico.vue";
 import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
-import tipodespesaService from "@/services/reembolso/tipodespesa.service";
+import { onBeforeMount } from "vue";
 
 
 const authStore = useAuthStore();
@@ -399,10 +399,13 @@ const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == aut
 const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status)));
 
 //VUE FUNCTIONS
+onBeforeMount(async () => {
+  await solicitacaoStore.loadListStatusSolicitacao();
+});
+
 onMounted(async () => {
   try {
     isBusy.value = true;
-    await solicitacaoStore.loadListStatusSolicitacao();
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
     despesaTipos.value = await despesaTipoStore.toComboList();
