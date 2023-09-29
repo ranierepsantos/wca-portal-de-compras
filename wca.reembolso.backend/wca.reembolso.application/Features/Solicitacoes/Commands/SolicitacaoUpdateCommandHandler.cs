@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
+using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Behaviors;
 using wca.reembolso.application.Features.Solicitacoes.Common;
@@ -88,7 +89,6 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 HandleFile.DeleteFile(removerImagens[idx]);
             }
 
-
             // salvar imagens de despesas que trocaram imagem ou são novas
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - salvando imagens");
             for (int idx = 0; idx < request.Despesa.Count; idx++)
@@ -101,10 +101,17 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             // mapear para cliente e adicionar
             _mapper.Map(request, dado);
-            
+
+            if (findResult.Value.Status == 4)
+                dado.Status = findResult.Value.StatusAnterior;
+
             _repository.SolicitacaoRepository.Update(dado);
 
             await _repository.SaveAsync();
+
+            //Criar evento
+            var evento = new SolicitacaoHistorioCreateCommand(dado.Id, $"Solicitação atualizada!");
+            await _mediator.Send(evento);
 
             //3. mapear para SolicitacaoResponse
             return _mapper.Map<SolicitacaoResponse>(dado);

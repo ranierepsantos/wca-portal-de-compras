@@ -1,6 +1,9 @@
 <template>
   <div>
-    <bread-crumbs title="Solicitações" @novoClick="editar('novo')" />
+    <bread-crumbs title="Solicitações" :show-button="false" 
+     :buttons="formButtons"
+     @novo-click="editar('novo')" 
+    />
     <v-row v-show="!isLoading.form">
       <v-col v-show="isMatriz">
         <v-select
@@ -145,7 +148,57 @@
             >
           </td>
           <td class="text-right">
-            <v-btn
+            <div class="text-center">
+    <v-menu
+      open-on-hover
+    >
+      <template v-slot:activator="{ props }">
+        <v-btn
+          icon="mdi-dots-vertical"
+          color="primary"
+          v-bind="props"
+          variant="plain"
+        >
+        </v-btn>
+      </template>
+
+      <v-list>
+        <v-list-item v-show="authStore.hasPermissao('solicitacao')">
+          <v-btn
+              prepend-icon="mdi-lead-pencil"
+              variant="plain"
+              color="primary"
+              @click="editar(item.id)"
+              size="small"
+            >Editar</v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn
+              prepend-icon="mdi-history"
+              variant="plain"
+              color="primary"
+              @click="showHistorico(item)"
+              size="small"
+              :disabled="isLoading.busy"
+            >Histórico</v-btn>
+        </v-list-item>
+        <v-list-item v-show="(authStore.hasPermissao('wca_aprovacao') || authStore.hasPermissao('cliente_aprovacao')) && !authStore.hasPermissao('solicitacao')">
+          <v-btn
+              prepend-icon="mdi-text-box-search-outline"
+              variant="plain"
+              color="primary"
+              @click="editar(item.id)"
+              size="small"
+              :disabled="isLoading.busy"
+            >Visualizar</v-btn>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+  </div>
+            
+            
+            
+            <!-- <v-btn
               icon="mdi-lead-pencil"
               variant="plain"
               color="primary"
@@ -159,7 +212,7 @@
               title="Histórico"
               :disabled="isLoading.busy"
               @click="showHistorico(item)"
-            ></v-btn>
+            ></v-btn> -->
           </td>
         </tr>
       </tbody>
@@ -228,6 +281,8 @@ const isLoading = ref({
   form: true,
   busy: false,
 });
+const formButtons = ref([])
+
 
 //COMPUTED'S
 const isColaborador = computed(() => {
@@ -268,6 +323,12 @@ onMounted(async () => {
     authStore.user.filial = filialUsuario.value;
     await clearFilters();
     await getItems();
+
+    if (authStore.hasPermissao("solicitacao")) {
+      formButtons.value.push({ text: "Novo", icon: "", event: "novo-click" });
+    }
+    
+
   } catch (error) {
   } finally {
     isLoading.value.form = false;

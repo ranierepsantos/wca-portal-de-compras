@@ -20,6 +20,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         decimal ValorAdiantamento,
         decimal ValorDespesa,
         int Status,
+        int StatusAnterior,
         int TipoSolicitacao,
         ClienteResponse Cliente,
         IList<Despesa> Despesa,

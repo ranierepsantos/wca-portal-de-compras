@@ -43,7 +43,10 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             // atualizar o status
             var dado = _mapper.Map<Solicitacao>(findResult.Value);
-            
+
+            //armazenar o status anterior
+            dado.StatusAnterior = dado.Status;
+
             dado.Status = request.Status.Id;
 
             _repository.SolicitacaoRepository.Update(dado);

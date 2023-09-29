@@ -73,49 +73,49 @@ const menuItems = ref([
     title: "Clientes",
     value: 2,
     route: "/reembolso/clientes",
-    permissao: "livre"
+    permissao: "cliente"
   },
   {
     title: "Faturamento",
     value: 8,
     route: "/reembolso/faturamento",
-    permissao: "livre"
+    permissao: "faturamento"
   },
   {
     title: "Filiais",
     value: 3,
     route: "/reembolso/filiais",
-    permissao: "livre"
+    permissao: "filial"
   },
   {
     title: "Perfil",
     value: 4,
     route: "/reembolso/perfil",
-    permissao: "livre"
+    permissao: "perfil"
   },
   {
     title: "Solicitações",
     value: 5,
     route: "/reembolso/solicitacoes",
-    permissao: "livre"
+    permissao: "solicitacao|wca_aprovacao|cliente_aprovacao"
   },
   {
     title: "Tipos Despesa",
     value: 6,
     route: "/reembolso/tipo-despesa",
-    permissao: "livre"
+    permissao: "tipodespesa"
   },
   {
     title: "Usuários",
     value: 7,
     route: "/reembolso/usuarios",
-    permissao: "livre"
+    permissao: "usuario"
   },
   {
     title: "Movimentações Financeiras",
     value: 9,
     route: "/reembolso/movimentacao-financeira",
-    permissao: "livre"
+    permissao: "contacorrente"
   },
   
 ]);
