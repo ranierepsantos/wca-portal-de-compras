@@ -101,7 +101,7 @@ export const useUsuarioStore = defineStore("usuario", {
                 await clienteService.RelacionarClienteUsuario(userClientes);
         },
 
-        async toComboList(filial =0) {
+        async toComboList(filial =[]) {
             let response = await userService.toList(filial)
             return response.data;
         },
@@ -116,6 +116,23 @@ export const useUsuarioStore = defineStore("usuario", {
            return response.data;
            
         },
+
+        async getListByCliente(clienteId) {
+            let response = await userService.toList()
+            let usuarios = response.data;
+            
+            response = await clienteService.getListUsersByCliente(clienteId);
+
+            let usersCliente = response.data;
+
+
+            let list = usuarios.filter(user => 
+                {return usersCliente.includes(user.value) }
+            )
+
+            return list;
+        },
+
 
         async reembolsoToListByClientePerfil(clienteId, perfilId) {
             let response = await userService.toListByPerfil(perfilId)

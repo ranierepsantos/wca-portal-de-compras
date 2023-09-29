@@ -1,6 +1,18 @@
 <template>
     <v-card>
-        <v-card-title class="text-left text-primary text-h5">HISTÓRICO</v-card-title>
+        <v-breadcrumbs>
+            <div class="text-h5 text-primary">HISTÓRICO</div>
+            <v-spacer></v-spacer>
+            <v-btn
+            icon="$close"
+            density="comfortable"
+            variant="plain"
+            color="primary"
+            @click="emit('closeClick')"
+            >
+            </v-btn>
+        </v-breadcrumbs>
+        
         <v-card-text>
           <v-row>
               <v-col class="text-left">
@@ -27,4 +39,5 @@
             default: function() {return []}
         }
     })
+    const emit = defineEmits(["closeClick"]);
 </script>

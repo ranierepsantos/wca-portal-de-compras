@@ -42,5 +42,23 @@ namespace wca.reembolso.application.Common
             File.WriteAllBytes(filePath, bytes);
             return  MyHttpContext.AppBaseUrl + $"//{dirPath}//{nomeArquivo}.{extension}";
         }
+
+        public static string SaveFile(string base64String, string nomeArquivo)
+        {
+
+            string arquivo = base64String.Split(",")[1];
+            string extension = base64String.Split(',')[0].Split(';')[0].Split('/')[1];
+
+            byte[] bytes = Convert.FromBase64String(arquivo);
+            string dirPath = _configuration.GetSection("MediaDirectory").Value ?? "Media";
+
+            if (!Directory.Exists($"wwwroot//{dirPath}"))
+            {
+                Directory.CreateDirectory($"wwwroot//{dirPath}");
+            }
+            string filePath = $"wwwroot//{dirPath}//{nomeArquivo}.{extension}";
+            File.WriteAllBytes(filePath, bytes);
+            return MyHttpContext.AppBaseUrl + $"//{dirPath}//{nomeArquivo}.{extension}";
+        }
     }
 }

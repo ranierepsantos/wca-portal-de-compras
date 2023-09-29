@@ -56,7 +56,8 @@
                   color="primary"
                   v-model="solicitacao.tipoSolicitacao"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
-                  :disabled="solicitacao.id > 0"
+                  :readonly="solicitacao.id > 0"
+                  :bg-color="solicitacao.id > 0? '#f2f2f2':''"
                 ></v-select>
               </v-col>
               <v-col v-show="solicitacao.id > 0">
@@ -469,8 +470,17 @@ async function aprovarReprovar(isAprovado, comentario) {
       )
         solicitacao.value.status = 2; //2 - Aguardando Depósito
       //Status: 5 - Aguardando conferência
-      else if (solicitacao.value.status == 5)
+      else if (solicitacao.value.status == 5){
         solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
+
+        let transacao = new Transacao(
+          `Débito - solicitação ${solicitacao.value.id}`,
+          "-",
+          solicitacao.value.valorDespesa
+        );
+        contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
+
+      }
       //Status: 6 - Aguardando Aprovação Cliente
       else if (solicitacao.value.status == 6) {
         solicitacao.value.status = 7; //7 - Aguardando Faturamento

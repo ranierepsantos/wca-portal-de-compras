@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -18,7 +19,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         int Status,
         int Valor,
         string? NumeroPO,
-        string? DocumentoPO
+        string? DocumentoPO,
+        IList<FaturamentoHistorico>? FaturamentoHistorico
     );
 
     public sealed record FaturamentoResponse
@@ -27,11 +29,15 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         DateTime DataCriacao,
         int UsuarioId,
         int ClienteId,
+        string ClienteNome,
         int Status,
         int Valor,
         string? NumeroPO,
         string? DocumentoPO,
-        IList<FaturamentoItemResponse>? FaturamentoItem
+        DateTime? DataFinalizacao,
+        string? NotaFiscal,
+        IList<FaturamentoItemResponse>? FaturamentoItem,
+        IList<FaturamentoHistorico>? FaturamentoHistorico
     );
 
     public record FaturamentoItemResponse(

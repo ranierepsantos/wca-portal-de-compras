@@ -1,0 +1,43 @@
+﻿using ErrorOr;
+using MediatR;
+using Microsoft.Extensions.Logging;
+using wca.reembolso.application.Contracts.Persistence;
+using wca.reembolso.domain.Entities;
+
+namespace wca.reembolso.application.Features.Notificacoes.Commands
+{
+    public sealed record NotificacaoCreateCommand(
+        int UsuarioId,
+        string Nota
+    ): IRequest<ErrorOr<bool>>;
+
+    public sealed class NotificacaoCreateCommandHandle : IRequestHandler<NotificacaoCreateCommand, ErrorOr<bool>>
+    {
+        private readonly IRepositoryManager _repository;
+        
+        private readonly ILogger<NotificacaoCreateCommandHandle> _logger;
+
+        public NotificacaoCreateCommandHandle(IRepositoryManager repository, ILogger<NotificacaoCreateCommandHandle> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+        public async Task<ErrorOr<bool>> Handle(NotificacaoCreateCommand request, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Adicionando notificação");
+
+            Notificacao notificacao = new()
+            {
+                Nota = request.Nota,
+                UsuarioId = request.UsuarioId
+            };
+
+            _repository.NotificacaoRepository.Create(notificacao);
+
+            await _repository.SaveAsync();
+            
+            return true;
+        }
+    }
+}

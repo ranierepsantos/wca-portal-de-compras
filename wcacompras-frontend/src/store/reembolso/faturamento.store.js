@@ -3,8 +3,11 @@ import moment from "moment";
 import api from "@/services/reembolso/api";
 
 const rotas = {
+    Create: "Faturamento",
     Paginar: "Faturamento/Paginar",
-    GetById: "Faturamento?Id={Id}"
+    GetById: "Faturamento?Id={Id}",
+    AddPO: "Faturamento/AdicionarPO",
+    Finalizar: "Faturamento/Finalizar",
 }
 
 
@@ -14,17 +17,20 @@ export class Faturamento {
         this.dataCriacao = data ? data.dataCriacao: moment().format("YYYY-MM-DD")
         this.usuarioId = data ? data.usuarioId: null
         this.clienteId = data ? data.clienteId: null
-        this.status = data? data.status: 1
+        this.clienteNome = data ? data.clienteNome: null
+        this.status = data? data.status: 0
         this.valor = data ? data.valor: 0.00
         this.numeroPO = data? data.numeroPO: null
         this.documentoPO = data? data.documentoPO: null
         this.faturamentoItem = data? data.faturamentoItem: []
-        //this.eventos = data? data.eventos: []
+        this.dataFinalizacao = data? data.dataFinalizacao: null
+        this.notaFiscal = data? data.notaFiscal: null
+        this.faturamentoHistorico = data? data.faturamentoHistorico: []
     }
 
     adicionarAlterarItem(faturamentoItem) {
         let index = -1        
-        index = this.faturamentoItem.findIndex(q =>  q.id == faturamentoItem.id) 
+        index = this.faturamentoItem.findIndex(q =>  q.solicitacaoIdid == faturamentoItem.solicitacaoId) 
         if (index == -1)
             this.faturamentoItem.push(faturamentoItem);
         else 
@@ -66,21 +72,45 @@ export class FaturamentoEvento {
 export const useFaturamentoStore = defineStore("faturamento", {
   state: () => ({
     faturamentoStatus: [
-        { value: -1, text: "Todos" },
-        { value: 0, text: "Novo", color: "info", notifica: "" },
-        { value: 1, text: "Aguardando Aprovação", color: "warning", notifica: "cliente" },
-        { value: 2, text: "Aprovado", color: "success", notifica: "usuario" },
-        { value: 3, text: "Rejeitado", color: "error", notifica: "usuario" },
-        
+        { id: -1, status: "Todos" },
+        { id: 0, status: "Novo", color: "info", notifica: "" },
+        { id: 1, status: "Aguardando P.O", color: "warning", notifica: "cliente" },
+        { id: 2, status: "P.O Emitido", color: "success", notifica: "wca" },
+        { id: 3, status: "Finalizado", color: "success", notifica: "" },
     ]
   }),
   actions: {
+    async add (data) {
+        try {
+            await api.post(rotas.Create, data);
+        } catch (error) {
+            throw error
+        }  
+    },
+    
+    async addPO (data) {
+        try {
+            await api.post(rotas.AddPO, data);
+        } catch (error) {
+            throw error
+        }  
+    },
+    async finalizar (data) {
+        try {
+            await api.post(rotas.Finalizar, data);
+        } catch (error) {
+            throw error
+        }  
+    },
+    
+    
+
     async getById (id) {
         let response = await api.get(rotas.GetById.replace("{Id}",id));
         return  new Faturamento(response.data);
     },
 
-    async getPaginate(page = 1, pageSize = 10, filters = "") {
+    async getPaginate(page = 1, pageSize = 10, filters) {
 
         let parametros = {
             page: page,
@@ -114,7 +144,7 @@ export const useFaturamentoStore = defineStore("faturamento", {
         return list;
     },
     getStatus(statusId) {
-        let data = this.faturamentoStatus.find(q => q.value == statusId)
+        let data = this.faturamentoStatus.find(q => q.id == statusId)
         return data
     },
     

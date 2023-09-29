@@ -196,7 +196,6 @@ async function importar()
         if (file)
         {
             isBusy.value = true
-            console.log(file.name);
             var arquivo = await toBase64(file);
             arquivo = arquivo.split(";")[1].replace('base64,', '');
 

@@ -23,11 +23,12 @@ namespace wca.reembolso.infrastruture.Context
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<UsuarioClientes> UsuariosClientes { get; set; }
+        public DbSet<FaturamentoHistorico> FaturamentoHistorico { get; set; }
 
         //public DbSet<Filial> Filial { get; set; }
         //public DbSet<FilialUsuario> FilialUsuario { get; set; }
-        
-        
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UsuarioClientes>().HasKey(pk => new { pk.UsuarioId, pk.ClienteId });

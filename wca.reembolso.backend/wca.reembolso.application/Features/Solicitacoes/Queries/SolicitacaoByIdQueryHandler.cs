@@ -31,7 +31,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
                 .Include("Despesa")
                 .Include(q =>  q.Colaborador)
                 .Include(q => q.Gestor)
-                .Include("SolicitacaoHistorico")
+                .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora))
                 .Where(q => q.Id.Equals(request.Id)).AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (dado == null)

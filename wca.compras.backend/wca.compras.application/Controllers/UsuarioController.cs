@@ -168,6 +168,25 @@ namespace wca.compras.webapi.Controllers
         }
 
         /// <summary>
+        /// Retorna lista de usuarios ativos para preenchimento de Listas e Combos
+        /// </summary>
+        /// <returns>items</returns>
+        [HttpGet]
+        [Route("ToListByPermissao/{sistemaId}/{permissao}")]
+        public async Task<ActionResult<IList<ListItem>>> ListByPermissao(int sistemaId, string permissao)
+        {
+            try
+            {
+                var items = await _usuarioService.GetToListByPermissao(sistemaId, permissao);
+                return Ok(items);
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+
+        }
+        /// <summary>
         /// Busca Usuário pelo Id
         /// </summary>
         /// <returns>Usuario</returns>

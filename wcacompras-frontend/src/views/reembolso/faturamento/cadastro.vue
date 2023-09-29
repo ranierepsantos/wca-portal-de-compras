@@ -4,8 +4,10 @@
       title="Faturamento"
       :show-button="false"
       :buttons="formButtons"
-      @aprovar-click="openAprovacaoForm = true"
+      @add-po-click="openAprovacaoForm = true"
       @salvar-click="salvar()"
+      @view-po-click="visualizarPO()"
+      @finalizar-click="finalizarDialog = true"
     />
     <v-container class="justify-center">
       <v-card>
@@ -23,7 +25,20 @@
                   color="primary"
                   v-model="faturamento.clienteId"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
+                  v-if="faturamento.id == 0"
                 ></v-select>
+                <v-text-field
+                  label="Cliente"
+                  type="text"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  :rules="[(v) => !!v || 'Campo obrigatório']"
+                  v-model="faturamento.clienteNome"
+                  :readonly="true"
+                  bg-color="#f2f2f2"
+                  v-else
+                ></v-text-field>
               </v-col>
               <v-col cols="4" v-show="faturamento.status > 0">
                 <v-btn
@@ -32,7 +47,8 @@
                   class="text-center"
                 >
                   {{
-                    faturamentoStore.getStatus(faturamento.status).text
+                    faturamentoStore.getStatus(faturamento.status).status +
+                    (faturamento.status == 2 ? `: ${faturamento.numeroPO}`:"")
                   }}</v-btn
                 >
               </v-col>
@@ -42,7 +58,7 @@
       </v-card>
       <v-card
         style="margin-top: 10px"
-        v-show="'1,2'.includes(faturamento.status) == false"
+        v-show="faturamento.id == 0 && faturamento.clienteId > 0"
       >
         <v-card-title>
           <v-breadcrumbs>
@@ -53,28 +69,14 @@
           <v-row>
             <v-col>
               <v-select
-                label="Colaborador"
-                :items="colaboradores"
+                label="Usuário"
+                :items="usuariosCliente"
                 density="compact"
                 item-title="text"
                 item-value="value"
                 variant="outlined"
                 color="primary"
-                v-model="filter.colaboradorId"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
-              ></v-select>
-            </v-col>
-            <v-col>
-              <v-select
-                label="Gestor"
-                :items="gestores"
-                density="compact"
-                item-title="text"
-                item-value="value"
-                variant="outlined"
-                color="primary"
-                v-model="filter.gestorId"
-                :rules="[(v) => !!v || 'Campo obrigatório']"
+                v-model="filter.usuarioId"
               ></v-select>
             </v-col>
             <v-col cols="2">
@@ -97,6 +99,11 @@
                 v-model="filter.dataFim"
               ></v-text-field>
             </v-col>
+            <v-col class="text-right" cols="2">
+              <v-btn icon="mdi-filter-check-outline" variant="plain" color="primary" @click="getSolicitacoes()" title="Aplicar Filtros"></v-btn>  
+              &nbsp;
+              <v-btn icon="mdi-filter-remove-outline" variant="plain" color="error" @click="clearFilters()" title="Remover Filtros"></v-btn>
+            </v-col>
           </v-row>
         </v-card-text>
       </v-card>
@@ -105,7 +112,7 @@
         <v-card-title>
           <v-breadcrumbs>
             <div class="text-h6 text-primary">
-              Items {{ faturamento.status == 2 ? "Faturados" : " a Faturar" }}
+              Items {{ faturamento.id > 0 ? "Faturados" : " a Faturar" }}
             </div>
           </v-breadcrumbs>
         </v-card-title>
@@ -122,7 +129,7 @@
                 <th class="text-center text-grey">VALOR</th>
                 <th
                   class="text-center text-grey"
-                  v-show="faturamento.status != 2"
+                  v-if="faturamento.id == 0"
                 >
                   <div>
                     <v-btn
@@ -138,13 +145,14 @@
                     <span @click="selecionarTodos()">SELECIONAR TODOS</span>
                   </div>
                 </th>
+                <th v-else></th>
               </tr>
             </thead>
             <tbody>
               <template
                 v-for="(item, index) in faturamento.faturamentoItem.sort(compararValor('id'))"
                 :key="index"
-                v-if="faturamento.status == 2"
+                v-if="faturamento.id > 0"
               >
                 <tr>
                   <td class="text-center">{{ item.solicitacao.id }}</td>
@@ -155,12 +163,23 @@
                       )
                     }}
                   </td>
-                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.solicitacao.colaboradorId).text }}</td>
-                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.solicitacao.gestorId).text }}</td>
+                  <td class="text-left">{{ getNomeUsuario(item.solicitacao.colaboradorId) }}</td>
+                  <td class="text-left">{{ getNomeUsuario(item.solicitacao.gestorId) }}</td>
                   <td class="text-right">
                     {{
                       formatToCurrencyBRL(parseFloat(item.solicitacao.valorDespesa))
                     }}
+                  </td>
+                  <td>
+                    <v-btn
+                    icon="mdi-text-box-search-outline"
+                    size="smaller"
+                    variant="plain"
+                    color="primary"
+                    @click="visualizarSolicitacao(item.solicitacao.id)"
+                    title="Visualizar"
+                    
+                  ></v-btn>
                   </td>
                 </tr>
               </template>
@@ -170,8 +189,8 @@
                   <td class="text-center">
                     {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
                   </td>
-                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.colaboradorId).text }}</td>
-                  <td class="text-left">{{ solicitacaoStore.getUsuarioSolicitacao(item.gestorId).text }}</td>
+                  <td class="text-left">{{ getNomeUsuario(item.colaboradorId) }}</td>
+                  <td class="text-left">{{ getNomeUsuario(item.gestorId) }}</td>
                   <td class="text-right">
                     {{ formatToCurrencyBRL(parseFloat(item.valorDespesa)) }}
                   </td>
@@ -198,37 +217,159 @@
                 <td class="text-right">
                   {{ formatToCurrencyBRL(valorFaturamento) }}
                 </td>
-                <td v-show="faturamento.status != 2"></td>
+                <td></td>
               </tr>
             </tfoot>
           </v-table>
         </v-card-text>
       </v-card>
-      <!-- FORM PARA APROVAR / REJEITAR FATURAMENTO -->
+      <!-- FORM PARA INFORMAR P.O -->
       <v-dialog
         v-model="openAprovacaoForm"
         max-width="700"
         :absolute="false"
         persistent
       >
-        <aprovar-rejeitar-form
-          title="APROVAR / REJEITAR - FATURAMENTO"
-          @aprovar-click="aprovarReprovar(true, $event)"
-          @reprovar-click="aprovarReprovar(false, $event)"
-          @close-form="openAprovacaoForm = false"
-          :is-running-event="isRunningEvent"
-        />
+        <v-form ref="oForm">
+          <v-card>
+            <v-row>
+              <v-col>
+                <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                  INFORMAR P.O.
+                </v-card-title>
+              </v-col>
+              <v-col class="text-right">
+                <v-btn
+                  class="mb-2 mt-3 mr-2"
+                  variant="plain"
+                  color="grey"
+                  @click="openAprovacaoForm=false"
+                  icon="mdi-close-circle-outline"
+                ></v-btn>
+              </v-col>
+            </v-row>
+            <v-card-text>
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Número P.O"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model ="poFormData.numero"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-file-input
+                    accept=".pdf,.doc,.docx"
+                    label="Informe o arquivo de P.O"
+                    variant="outlined"
+                    density="compact"
+                    @change ="handleFile"
+                  ></v-file-input>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col class="text-right">
+                  <v-progress-circular
+                    color="primary"
+                    indeterminate
+                    v-show="isRunningEvent"
+                  ></v-progress-circular>
+                  <v-btn
+                    color="success"
+                    @click="enviarPO()"
+                    :disabled="isRunningEvent"
+                    >Enviar</v-btn
+                  >
+                  &nbsp;
+                  <v-btn
+                    color="gray"
+                    class="mr-3"
+                    style="font-weight: bold"
+                    @click="openAprovacaoForm=false"
+                    :disabled="isRunningEvent"
+                    >Cancelar</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-form>
       </v-dialog>
     </v-container>
+    <!-- FORM PARA FINALIZAR FATURAMENTO -->
+    <v-dialog
+      v-model="finalizarDialog"
+      max-width="700"
+      max-height="700"
+      :absolute="false"
+      persistent
+    >
+      <v-card>
+        <v-card-title class="text-primary text-h5">
+          FINALIZAR
+        </v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="finalizar()" ref="finalizarForm">
+            <v-row>
+              <v-col>
+                <v-text-field
+                  label="Número Nota Fiscal"
+                  v-model="finalizarData.notaFiscal"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Número Nota Fiscal é obrigatório']"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-text-field
+                  label="Data"
+                  v-model="finalizarData.dataFinalizacao"
+                  type="date"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Data de finalização é obrigatória']"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col class="text-right">
+                <v-btn
+                  variant="outlined"
+                  color="primary"
+                  @click="finalizarDialog = false"
+                  >Cancelar</v-btn
+                >
+                <v-btn color="primary" type="submit" class="ml-3"
+                  >Finalizar</v-btn
+                >
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions></v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </div>
 </template>
 
 <script setup>
 import breadCrumbs from "@/components/breadcrumbs.vue";
 import { ref, inject, computed, watch, onMounted } from "vue";
-import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
 import { useAuthStore } from "@/store/auth.store";
-import { formatToCurrencyBRL, compararValor } from "@/helpers/functions";
+import { formatToCurrencyBRL, compararValor, toBase64 } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import { Evento, useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 import { IDPERFILCOLABORADOR, IDPERFILGESTOR, useUsuarioStore } from "@/store/reembolso/usuario.store";
@@ -251,52 +392,75 @@ const clienteStore = useClienteStore();
 const usuarioStore = useUsuarioStore();
 const faturamentoStore = useFaturamentoStore();
 const faturamento = ref(new Faturamento());
+const finalizarForm = ref(null);
+const finalizarDialog = ref(false)
+const finalizarData = ref({
+  notaFiscal: null,
+  dataFinalizacao: moment().format("YYYY-MM-DD"),
+});
 const isRunningEvent = ref(false);
 const clientes = ref([]);
-const gestores = ref([]);
-const colaboradores = ref([]);
 const items = ref([]);
 const route = useRoute();
 const swal = inject("$swal");
-const filtro = ref({
-  periodoInicial: moment().format("DD/MM/YYYY"),
-  periodoFinal: moment().format("DD/MM/YYYY"),
-});
 const selecionarTodosItens = ref(false);
 const formButtons = ref([]);
-
 const page = 1;
 const pageSize = 99999;
-const isBusy = ref(false);
 const filter = ref({
     filialId: null,
     clienteId: null,
-    colaboradorId: null,
-    gestorId: null,
+    usuarioId: null,
     status: 7,
     dataIni: null,
     dataFim: null
 });
-
-
-
-
+const usuarios = ref([])
+const usuariosCliente = ref([])
+const poFormData = ref ({
+  numero: "",
+  documento: null
+})
 
 //VUE - FUNCTIONS
 onMounted(async () => {
+  solicitacaoStore
   clientes.value = await clienteStore.ListByUsuario(authStore.user.id);
-  await solicitacaoStore.loadUsuarios()
+  usuarios.value  = await usuarioStore.toComboList()
+
+
   if (parseInt(route.query.id) > 0) {
     await getById(route.query.id);
-    if (faturamento.value.status == 1)
+    if (faturamento.value.status == 1 && authStore.hasPermissao("cliente_faturamento"))
       formButtons.value.push({
-        text: "Aprovar / Reprovar",
+        text: "Informar P.O",
         icon: "",
-        event: "aprovar-click",
+        event: "add-po-click",
       });
+    if (faturamento.value.status == 2){
+      formButtons.value.push({
+        text: "Visualizar P.O",
+        icon: "mdi-file-download-outline",
+        event: "view-po-click",
+      });
+
+      if (authStore.hasPermissao("faturamento"))
+      {
+        formButtons.value.push({
+          text: "Finalizar",
+          icon: "mdi-receipt-text-check",
+          event: "finalizar-click",
+        });
+      }
+    }
+      
+    
+  }else 
+  {
+    faturamento.value.usuarioId = authStore.user.id
   }
 
-  if (!"1,2".includes(faturamento.value.status))
+  if (faturamento.value.id == 0)
     formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
 });
 
@@ -305,21 +469,19 @@ watch(() => faturamento.value.clienteId,
         if (oldValue && newValue != oldValue)
           faturamento.value.faturamentoItem = [];
         
+        usuariosCliente.value = await usuarioStore.getListByCliente(faturamento.value.clienteId)
+        
         clearFilters(faturamento.value.clienteId)
-
-        await getListGestoresByCliente(faturamento.value.clienteId)
-
-        await getListColaboradoresByCliente(faturamento.value.clienteId)        
       }
 );
 
-watch(
-  () => filter.value,
-  async (newValue, oldValue) => {
-    await getSolicitacoes()
-  },
-  { deep: true }
-)
+// watch(
+//   () => filter.value,
+//   async (newValue, oldValue) => {
+//     await getSolicitacoes()
+//   },
+//   { deep: true }
+// )
 
 const valorFaturamento = computed(() => {
   faturamento.value.valor = 0;
@@ -330,50 +492,29 @@ const valorFaturamento = computed(() => {
 });
 
 //FUNCTIONS
-
-async function aprovarReprovar(isAprovado, comentario) {
+async function enviarPO() {
   try {
     isRunningEvent.value = true;
-
-    if (!isAprovado) faturamento.value.status = 3; //rejeitado
-    else faturamento.value.status = 2; //aprovado
-
-    openAprovacaoForm.value = false;
-
-    let texto = `Solicitação  <b>${
-      isAprovado ? "APROVADA" : "REJEITADA"
-    }</b> por ${authStore.user.nome}. <br/> Comentário: ${comentario}`;
-
-    faturamento.value.addEvento(
-      new FaturamentoEvento(faturamento.value.id, authStore.user.nome, texto)
-    );
-
-    faturamentoStore.update(faturamento.value);
-
-    //passa por cada solicitação e atualiza o status para Faturado
-    if (isAprovado) {
-      faturamento.value.faturamentoItem.forEach((fitem) => {
-        let sitem = new Solicitacao(fitem.solicitacao);
-        sitem.status = 6; //faturado
-        sitem.addEvento(new Evento(sitem.id, authStore.user.nome,`Solicitação Faturada, nº faturamento: ${faturamento.value.id}`));
-        solicitacaoStore.update(sitem);
-      });
+    let data = {
+      id: faturamento.value.id,
+      numeroPO: poFormData.value.numero,
+      documentoPO: poFormData.value.documento
     }
 
-    let mensagem =
-      (isAprovado ? "Aprovação" : "Rejeição") + " realizada com sucesso!";
-
+    await faturamentoStore.addPO(data);
+    
     swal.fire({
       toast: true,
       icon: "success",
       index: "top-end",
-      title: "Sucesso!",
+      title: "P.O enviado com sucesso!",
       html: mensagem,
       showConfirmButton: false,
       timer: 4000,
     });
+    router.push({ name: "reembolsoFaturamento" });
   } catch (error) {
-    console.log("aprovarReprovar.error:", error);
+    console.log("enviarPO.error:", error);
     handleErrors(error);
   } finally {
     isRunningEvent.value = false;
@@ -406,17 +547,17 @@ function addRemove(solicitacao) {
   }
 }
 
-function clearFilters(cliente)
+async function clearFilters(cliente)
 {
     filter.value = {
       filialId: null,
       clienteId: cliente,
-      colaboradorId: null,
-      gestorId: null,
+      usuarioId: null,
       status: 7,
       dataIni: null,
       dataFim: null
     }
+    await getSolicitacoes()
 }
 
 async function getById(faturamentoId) {
@@ -432,28 +573,15 @@ async function getById(faturamentoId) {
   }
 }
 
-async function getListColaboradoresByCliente(clienteId) {
-  try {
-    colaboradores.value = await usuarioStore.reembolsoToListByClientePerfil(clienteId, IDPERFILCOLABORADOR);
-  } catch (error) {
-    console.debug("getListColaboradoresByCliente", error);
-    handleErrors(error)
-  }
-}
-
-async function getListGestoresByCliente(clienteId) {
-  try {
-    gestores.value = await usuarioStore.reembolsoToListByClientePerfil(clienteId, IDPERFILGESTOR);
-  } catch (error) {
-    console.debug("getListGestoresByCliente", error);
-    handleErrors(error)
-  }
-}
-
 async function getSolicitacoes () {
 
   try {
     //isBusy.value = true;
+    if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
+      throw new TypeError("Ambas as datas devem ser informadas!")
+    else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
+      throw new TypeError("A data fim deve ser maior que a data início!")
+
     items.value = (await solicitacaoStore.getPaginate(page, pageSize, filter.value)).items;
   } catch (error) {
     console.error("getSolicitacoes.error:", error);
@@ -461,20 +589,14 @@ async function getSolicitacoes () {
   } finally {
     //isBusy.value = false;
   }
-  
 }
 
 
 async function salvar() {
   try {
     let data = faturamento.value;
-    if (data.status == 0) {
-      await faturamentoStore.add(data);
-    } else {
-      if (data.status == 3) data.status = 1;
-      await faturamentoStore.update(data);
-    }
-
+    await faturamentoStore.add(data);
+    
     swal.fire({
       toast: true,
       icon: "success",
@@ -486,7 +608,7 @@ async function salvar() {
     });
     router.push({ name: "reembolsoFaturamento" });
   } catch (error) {
-    console.log("usuários.error:", error);
+    console.log("salvar.error:", error);
     handleErrors(error);
   }
 }
@@ -504,4 +626,58 @@ function selecionarTodos() {
     }
   }
 }
+
+function getNomeUsuario (id) {
+  let colaborador = usuarios.value.find(q => q.value == id)
+  if (colaborador) return colaborador.text
+  return ""
+}
+
+function visualizarSolicitacao(id) {
+  let rota = router.resolve({ name: "reembolsoSolicitacaoCadastro", query: { id: id } });
+
+  window.open(rota.href, "_blank");
+
+}
+
+async function handleFile(event) {
+  let file = event.target.files[0]
+  var arquivo = await toBase64(file);
+  
+  poFormData.value.documento = arquivo;
+}
+
+function visualizarPO() {
+  window.open(faturamento.value.documentoPO, "_blank")
+}
+
+async function finalizar () {
+  try {
+    isRunningEvent.value = true 
+    let data = {
+      id: faturamento.value.id,
+      dataFinalizacao: finalizarData.value.dataFinalizacao,
+      notaFiscal: finalizarData.value.notaFiscal,
+      nomeUsuario: authStore.user.nome
+    };
+    await faturamentoStore.finalizar(data);
+    
+    swal.fire({
+      toast: true,
+      icon: "success",
+      position: "top-end",
+      title: "Sucesso!",
+      text: "Finalizado com sucesso!",
+      showConfirmButton: false,
+      timer: 2000,
+    });
+    router.push({ name: "reembolsoFaturamento" });
+  } catch (error) {
+    console.log("finalizar.error:", error);
+    handleErrors(error);
+  }finally {
+    isRunningEvent.value = false
+  }
+}
+
 </script>

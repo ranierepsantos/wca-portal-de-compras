@@ -149,70 +149,50 @@
           </td>
           <td class="text-right">
             <div class="text-center">
-    <v-menu
-      open-on-hover
-    >
-      <template v-slot:activator="{ props }">
-        <v-btn
-          icon="mdi-dots-vertical"
-          color="primary"
-          v-bind="props"
-          variant="plain"
-        >
-        </v-btn>
-      </template>
+              <v-menu open-on-hover>
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    icon="mdi-dots-vertical"
+                    color="primary"
+                    v-bind="props"
+                    variant="plain"
+                  >
+                  </v-btn>
+                </template>
 
-      <v-list>
-        <v-list-item v-show="authStore.hasPermissao('solicitacao')">
-          <v-btn
-              prepend-icon="mdi-lead-pencil"
-              variant="plain"
-              color="primary"
-              @click="editar(item.id)"
-              size="small"
-            >Editar</v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn
-              prepend-icon="mdi-history"
-              variant="plain"
-              color="primary"
-              @click="showHistorico(item)"
-              size="small"
-              :disabled="isLoading.busy"
-            >Histórico</v-btn>
-        </v-list-item>
-        <v-list-item v-show="(authStore.hasPermissao('wca_aprovacao') || authStore.hasPermissao('cliente_aprovacao')) && !authStore.hasPermissao('solicitacao')">
-          <v-btn
-              prepend-icon="mdi-text-box-search-outline"
-              variant="plain"
-              color="primary"
-              @click="editar(item.id)"
-              size="small"
-              :disabled="isLoading.busy"
-            >Visualizar</v-btn>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-  </div>
-            
-            
-            
-            <!-- <v-btn
-              icon="mdi-lead-pencil"
-              variant="plain"
-              color="primary"
-              @click="editar(item.id)"
-            ></v-btn>
-            <v-btn
-              icon="mdi-history"
-              size="smaller"
-              variant="plain"
-              color="primary"
-              title="Histórico"
-              :disabled="isLoading.busy"
-              @click="showHistorico(item)"
-            ></v-btn> -->
+                <v-list>
+                  <v-list-item v-show="authStore.hasPermissao('solicitacao')">
+                    <v-btn
+                        prepend-icon="mdi-lead-pencil"
+                        variant="plain"
+                        color="primary"
+                        @click="editar(item.id)"
+                        size="small"
+                      >Editar</v-btn>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-btn
+                        prepend-icon="mdi-history"
+                        variant="plain"
+                        color="primary"
+                        @click="showHistorico(item)"
+                        size="small"
+                        :disabled="isLoading.busy"
+                      >Histórico</v-btn>
+                  </v-list-item>
+                  <v-list-item v-show="(authStore.hasPermissao('wca_aprovacao') || authStore.hasPermissao('cliente_aprovacao')) && !authStore.hasPermissao('solicitacao')">
+                    <v-btn
+                        prepend-icon="mdi-text-box-search-outline"
+                        variant="plain"
+                        color="primary"
+                        @click="editar(item.id)"
+                        size="small"
+                        :disabled="isLoading.busy"
+                      >Visualizar</v-btn>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -229,9 +209,10 @@
       </tfoot>
     </v-table>
     <!--DIALOG PARA EXIBIR HISTÓRICO -->
-    <v-dialog v-model="openHistorico" max-width="900" :absolute="false">
+    <v-dialog v-model="openHistorico" max-width="900" max-height="500" scrollable>
       <historico
-        :eventos="solicitacaoEventos.sort(compararValor('dataEvento', 'desc'))"
+        :eventos="solicitacaoEventos"
+        @close-click="openHistorico=false"
       />
     </v-dialog>
   </div>
@@ -245,7 +226,7 @@ import router from "@/router";
 import moment from "moment";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 import historico from "@/components/reembolso/historico.vue";
-import { compararValor, formatToCurrencyBRL } from "@/helpers/functions";
+import { formatToCurrencyBRL } from "@/helpers/functions";
 import filialService from "@/services/filial.service";
 import {
   IDPERFILCOLABORADOR,
@@ -293,7 +274,7 @@ const isGestor = computed(() => {
 });
 
 const isAprovador = computed(() => {
-  return true; //authStore.hasPermissao("aprovar_solicitacao")
+  return authStore.hasPermissao("cliente_aprovacao") || authStore.hasPermissao("wca_aprovacao")
 });
 
 //WATCH'S
@@ -380,7 +361,13 @@ async function showHistorico(item) {
 
 async function getItems() {
   try {
+    isLoading.busy =true
+    if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
+      throw new TypeError("Ambas as datas devem ser informadas!")
+    else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
+      throw new TypeError("A data fim deve ser maior que a data início!")
     
+
     let response = await solicitacaoStore.getPaginate(
       page.value,
       pageSize,
@@ -391,14 +378,14 @@ async function getItems() {
   } catch (error) {
     console.log("solicitacoes.getItems.error:", error.response);
     handleErrors(error);
-  }
+  }finally {isLoading.busy =false}
 }
 
 async function getClientesToList(filialId = 0, usuarioId = 0) {
   try {
     clientes.value = await useClienteStore().toComboList(filialId, usuarioId);
   } catch (error) {
-    console.log("solcitacoes.getFiliais.error:", error.response);
+    console.log("solcitacoes.getClientesToList.error:", error.response);
     handleErrors(error);
   }
 }
