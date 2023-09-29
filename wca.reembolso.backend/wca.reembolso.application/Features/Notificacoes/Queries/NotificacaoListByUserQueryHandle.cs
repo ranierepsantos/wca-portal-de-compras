@@ -28,7 +28,7 @@ namespace wca.reembolso.application.Features.Notificacoes.Queries
 
             var query = _repository.NotificacaoRepository.ToQuery();
             
-            query = query.Where(q => q.UsuarioId.Equals(request.UsuarioId)).OrderByDescending(o => o.DataHora);
+            query = query.Where(q => q.Lido == false && q.UsuarioId.Equals(request.UsuarioId)).OrderByDescending(o => o.DataHora);
 
             var list = await query.ToListAsync();
 

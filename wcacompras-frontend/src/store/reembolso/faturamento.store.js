@@ -18,7 +18,7 @@ export class Faturamento {
         this.usuarioId = data ? data.usuarioId: null
         this.clienteId = data ? data.clienteId: null
         this.clienteNome = data ? data.clienteNome: null
-        this.status = data? data.status: 0
+        this.status = data? data.status: 1
         this.valor = data ? data.valor: 0.00
         this.numeroPO = data? data.numeroPO: null
         this.documentoPO = data? data.documentoPO: null
@@ -73,10 +73,9 @@ export const useFaturamentoStore = defineStore("faturamento", {
   state: () => ({
     faturamentoStatus: [
         { id: -1, status: "Todos" },
-        { id: 0, status: "Novo", color: "info", notifica: "" },
-        { id: 1, status: "Aguardando P.O", color: "warning", notifica: "cliente" },
-        { id: 2, status: "P.O Emitido", color: "success", notifica: "wca" },
-        { id: 3, status: "Finalizado", color: "success", notifica: "" },
+        { id: 1, status: "Aguardando P.O", color: "warning", notifica: 2, autorizar: false, templateNotificacao:"Faturamento #{id}, aguardando P.O!" },
+        { id: 2, status: "P.O Emitido", color: "success", notifica: 1, autorizar: false, templateNotificacao:"Faturamento #{id}, P.O emitido!" },
+        { id: 3, status: "Finalizado", color: "success", notifica: "", autorizar: false, templateNotificacao:"" },
     ]
   }),
   actions: {

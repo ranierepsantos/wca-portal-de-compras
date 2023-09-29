@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Faturamentos.Queries;
+using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Faturamentos.Commands
@@ -12,7 +13,9 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
     public sealed record FaturamentoAddPOCommand(
         int Id,
         string NumeroPO,
-        string DocumentoPO
+        string DocumentoPO,
+        StatusSolicitacao Status,
+        int[] Notificar
     ) : IRequest<ErrorOr<bool>>;
 
     public sealed class FaturamentoAddPOCommandHandle : IRequestHandler<FaturamentoAddPOCommand, ErrorOr<bool>>
@@ -60,17 +63,15 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
 
             await _mediator.Send(historico, cancellationToken);
 
-            ////alterar o status do faturamento
-            //var status = new StatusFaturamento()
-            //{
-            //    Id = 2,
-            //    Status = "P.O Emitido",
-            //    Color = "info",
-            //    Notifica = domain.Common.Enum.EnumNotificaQuem.WCA
-            //};
+            //notificar usuario
+            for (var ii = 0; ii < request.Notificar.Length; ii++)
+            {
+                string mensagem = request.Status.TemplateNotificacao.Replace("{id}", faturamento.Id.ToString());
 
-            //enviar notificação ao usuário criador do faturamento
+                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem);
 
+                await _mediator.Send(notificacao, cancellationToken);
+            }
 
             return true;
         }

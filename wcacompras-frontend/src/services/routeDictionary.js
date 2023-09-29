@@ -83,4 +83,5 @@ export const route = {
     usuarioPaginate: "Usuario/Paginate/{sistemaId}/{pageSize}/{page}",
     usuarioToList: "Usuario/ToList/{sistemaId}",
     usuarioToListByPerfil: "Usuario/ToListByPerfil/{perfilId}",
+    usuarioToListByPermissao: "Usuario/ToListByPermissao/{sistemaId}/{permissao}",
 }
