@@ -401,7 +401,7 @@ const despesaCanView = computed(() => solicitacao.value.colaboradorId != authSto
 onMounted(async () => {
   try {
     isBusy.value = true;
-
+    await solicitacaoStore.loadListStatusSolicitacao();
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
     despesaTipos.value = await despesaTipoStore.toComboList();
@@ -623,6 +623,19 @@ async function salvar() {
       if (data.tipoSolicitacao == 2) {
         data.status = 1; //1 - solicitado
       }
+
+      let notificar = []
+      let status = solicitacaoStore.getStatus(data.status) 
+      if (status.notifica == 1) //wca
+      {
+        let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, "wca_aprovacao")
+        notificar = notificaList.map(q => {return q.value})
+      }
+      else if (status.notifica == 2 && data.gestorId) //cliente
+        notificar.push (data.gestorId)
+      
+
+      data.notificar = notificar;
       await solicitacaoStore.add(data);
     } else
       await solicitacaoStore.update(data);

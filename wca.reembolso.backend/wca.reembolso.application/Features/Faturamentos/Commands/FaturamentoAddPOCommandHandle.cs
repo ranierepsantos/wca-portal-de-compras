@@ -68,7 +68,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
             {
                 string mensagem = request.Status.TemplateNotificacao.Replace("{id}", faturamento.Id.ToString());
 
-                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem);
+                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, faturamento.GetType().Name, faturamento.Id);
 
                 await _mediator.Send(notificacao, cancellationToken);
             }
