@@ -709,13 +709,13 @@ namespace wca.compras.services
                         ws.Cell($"P{row}").SetValue(item.ValorTotal);
                         Periodo periodos = JsonConvert.DeserializeObject<Periodo>(requisicao.PeriodoEntrega);
                         string periodoEntrega = "";
-                        periodoEntrega += periodos.Domingo.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Domingo: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Domingo.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Domingo: {(string.Join(", ", periodos.Domingo.periodo)).Trim()}" : "";
                         periodoEntrega += periodos.Segunda.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Segunda: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
-                        periodoEntrega += periodos.Terca.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Terça: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}": "";
-                        periodoEntrega += periodos.Quarta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quarta: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
-                        periodoEntrega += periodos.Quinta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quinta: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
-                        periodoEntrega += periodos.Sexta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sexta: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
-                        periodoEntrega += periodos.Sabado.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sabádo: {(string.Join(", ", periodos.Segunda.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Terca.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Terça: {(string.Join(", ", periodos.Terca.periodo)).Trim()}": "";
+                        periodoEntrega += periodos.Quarta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quarta: {(string.Join(", ", periodos.Quarta.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Quinta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quinta: {(string.Join(", ", periodos.Quinta.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Sexta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sexta: {(string.Join(", ", periodos.Sexta.periodo)).Trim()}" : "";
+                        periodoEntrega += periodos.Sabado.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sabádo: {(string.Join(", ", periodos.Sabado.periodo)).Trim()}" : "";
 
                         ws.Cell($"Q{row}").SetValue(periodoEntrega);
                         row++;
