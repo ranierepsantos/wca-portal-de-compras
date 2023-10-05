@@ -250,8 +250,17 @@ async function gerarRelatorio()
     try
     {
         isBusy.value = true;
-        let response = await requisicaoService.gerarRelatorio(filter.value);
-        console.log("gerarRelatorio", response)
+        let filtro = {...filter.value }
+
+        if (filtro.filial.length == 0)
+            filtro.filial = filiais.value.map(p => {return p.value })
+
+        if (!authStore.hasPermissao("requisicao_all_users")) {
+            filtro.authUserId = authStore.user.id;
+        }
+
+        let response = await requisicaoService.gerarRelatorio(filtro);
+        
         if (response.status == 200) {
             let nomeArquivo = `requisicao_relatorio_${moment().format("DDMMYYYY_HHmmSS")}.xlsx`
             await new Promise(r => setTimeout(r, 1000));

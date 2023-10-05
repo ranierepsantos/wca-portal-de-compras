@@ -14,7 +14,7 @@ namespace wca.compras.domain.Interfaces.Services
         Task<RequisicaoAprovacaoDto> GetByAprovacaoToken(string tokenAprovacao);
         Task<bool> aprovarRequisicao(AprovarRequisicaoDto aprovarRequisicaoDto, string urlOrigin);
         Task<Stream> ExportToExcel(int requisicaoId);
-        Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null);
+        Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0);
         Task<RequisicaoDuplicarResponse> Duplicate(int requisicaoId, int usuarioId, string usuarioNome, string urlOrigin);
         Task<bool> FinalizarPedido(FinalizarRequisicaoDto finalizarRequisicaoDto, string usuarioNome);
         Task<bool> EnviarRequisicao(int requisicaoId, EnumRequisicaoDestinoEmail destino, string urlOrigin);

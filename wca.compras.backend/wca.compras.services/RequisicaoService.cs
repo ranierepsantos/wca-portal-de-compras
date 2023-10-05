@@ -645,11 +645,27 @@ namespace wca.compras.services
 
         public async Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, 
             EnumStatusRequisicao status = EnumStatusRequisicao.TODOS,
-            DateTime? dataInicio = null, DateTime? dataFim = null)
+            DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0)
         {
             try
             {
                 var query = _rm.RequisicaoRepository.SelectAll();
+                if (authUserId > 0)
+                {
+                    string consulta = "select r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
+                                + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
+                                + "r.usuario_id, r.valor_icms, r.valor_total "
+                                + "from Requisicoes r "
+                                + "inner join clientes c on c.id = r.cliente_id "
+                                + "inner join ClienteUsuario cu on cu.ClienteId = c.id "
+                                + "inner join RequisicaoItens ri  on ri.requisicao_id  = r.id "
+                                + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId "
+                                + $"where cu.UsuarioId ={authUserId}"
+                                + "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
+                                + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
+                                + "r.usuario_id, r.valor_icms, r.valor_total";
+                    query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
+                }
 
                 if (filials.Length > 0)
                     query = query.Where(c => filials.Contains(c.FilialId));
