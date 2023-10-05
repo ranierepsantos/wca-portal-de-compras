@@ -243,7 +243,7 @@ namespace wca.compras.webapi.Controllers
         [Route("GerarRelatorio")]
         [Authorize("Bearer")]
         public async Task<ActionResult> ExportExcel([FromQuery] int [] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS
-            , DateTime? dataInicio = null, DateTime? dataFim = null)
+            , DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0)
         {
             try
             {
@@ -252,7 +252,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest(error: new { message = "Data início ou fim inválida!"});
                 }
 
-                Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim);
+                Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim, authUserId);
                 if (st == null)
                     return NoContent();
 
