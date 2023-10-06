@@ -747,7 +747,7 @@ namespace wca.compras.services
                             EnumStatusRequisicao.AGUARDANDO => "AGUARDANDO",
                             EnumStatusRequisicao.CANCELADO => "CANCELADO",
                             EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
-                            _ => "DESCONHECIDO"
+                            _ => $"{requisicao.Status} - DESCONHECIDO"
                         };
 
                         ws.Cell($"S{row}").SetValue(_status); //status
