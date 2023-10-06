@@ -252,7 +252,7 @@ async function gerarRelatorio()
         isBusy.value = true;
         let filtro = {...filter.value }
 
-        if (filtro.filial.length == 0)
+        if (!filtro.filial || filtro.filial.length == 0)
             filtro.filial = filiais.value.map(p => {return p.value })
 
         if (!authStore.hasPermissao("requisicao_all_users")) {
@@ -320,6 +320,7 @@ async function getItems()
 {
     try
     {
+        debugger
         isBusy.value = true;
 
         let response =  null;
@@ -327,7 +328,7 @@ async function getItems()
         if (authStore.hasPermissao("requisicao_all_users")){
             let filtro = {...filter.value }
 
-            if (filtro.filial.length == 0)
+            if (!filtro.filial || filtro.filial.length == 0)
                 filtro.filial = filiais.value.map(p => {return p.value })
         
                 response = await requisicaoService.paginate(pageSize, page.value, filtro);

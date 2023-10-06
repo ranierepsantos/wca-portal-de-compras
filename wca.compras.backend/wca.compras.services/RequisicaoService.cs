@@ -687,9 +687,12 @@ namespace wca.compras.services
                 }
 
                 query = query.Include("Usuario")
-                             .Include("Cliente")
+                             .Include(c =>  c.Cliente)
+                             .ThenInclude(x => x.ClienteOrcamentoConfiguracao)
                              .Include("Fornecedor")
-                             .Include("RequisicaoItens").OrderBy(o => o.Id);
+                             .Include(r => r.RequisicaoItens)
+                             .ThenInclude(t => t.TipoFornecimento)
+                             .OrderBy(o => o.Id);
 
                 var requisicoes = await query.ToListAsync();
 
@@ -732,8 +735,25 @@ namespace wca.compras.services
                         periodoEntrega += periodos.Quinta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quinta: {(string.Join(", ", periodos.Quinta.periodo)).Trim()}" : "";
                         periodoEntrega += periodos.Sexta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sexta: {(string.Join(", ", periodos.Sexta.periodo)).Trim()}" : "";
                         periodoEntrega += periodos.Sabado.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sabádo: {(string.Join(", ", periodos.Sabado.periodo)).Trim()}" : "";
-
                         ws.Cell($"Q{row}").SetValue(periodoEntrega);
+
+                        var verbaConfigurada = requisicao.Cliente.ClienteOrcamentoConfiguracao.FirstOrDefault(q => q.TipoFornecimentoId == item.TipoFornecimentoId);
+                        decimal valor = (decimal)(verbaConfigurada?.ValorPedido);
+                        ws.Cell($"R{row}").SetValue(valor); //verbas
+
+                        string _status = requisicao.Status switch
+                        {
+                            EnumStatusRequisicao.APROVADO => "APROVADO",
+                            EnumStatusRequisicao.AGUARDANDO => "AGUARDANDO",
+                            EnumStatusRequisicao.CANCELADO => "CANCELADO",
+                            EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
+                            _ => "DESCONHECIDO"
+                        };
+
+                        ws.Cell($"S{row}").SetValue(_status); //status
+                        ws.Cell($"T{row}").SetValue(requisicao.Fornecedor?.Nome); //fornecedor
+                        ws.Cell($"U{row}").SetValue(item.TipoFornecimento.Nome); //categoria
+
                         row++;
                     }
                 }
