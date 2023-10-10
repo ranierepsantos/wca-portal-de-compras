@@ -6,7 +6,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - wca-api-reembolso-hml
 on:
   push:
     branches:
-      - main
+      - prod
   workflow_dispatch:
 
 jobs:
@@ -23,18 +23,15 @@ jobs:
           include-prerelease: true
 
       - name: Build with dotnet
-        run: dotnet build ./wca.reembolso.backend/wca.reembolso.application --configuration Release
-      
-      - name: listar pastas antes de publicar
-        run: ls ${{env.DOTNET_ROOT}}
+        run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./wca.reembolso.backend/wca.reembolso.application -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
-          name: .wca.reembolso.backend
+          name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
@@ -47,8 +44,8 @@ jobs:
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
-        #with:
-          #name: .net-app
+        with:
+          name: .net-app
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -56,5 +53,5 @@ jobs:
         with:
           app-name: 'wca-api-reembolso-hml'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_25BFE056988A4A7AB1C2E550D626F0B4 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DBC1DFF3C84F49FE9568E57E3243A25B }}
           package: .
