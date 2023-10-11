@@ -5,7 +5,7 @@
      @novo-click="editar('novo')" 
     />
     <v-row v-show="!isLoading.form">
-      <v-col v-show="isMatriz">
+      <v-col v-show="isMatriz && !isGestor && !isColaborador">
         <v-select
           label="Filiais"
           v-model="filter.filialId"
@@ -18,7 +18,7 @@
           :hide-details="true"
         ></v-select>
       </v-col>
-      <v-col>
+      <v-col v-show="!isGestor && !isColaborador">
         <v-select
           label="Clientes"
           v-model="filter.clienteId"

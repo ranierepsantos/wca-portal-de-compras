@@ -362,7 +362,6 @@ import { computed } from "vue";
 import { compararValor } from "@/helpers/functions";
 import historico from "@/components/reembolso/historico.vue";
 import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
-import { onBeforeMount } from "vue";
 
 
 const authStore = useAuthStore();
@@ -431,6 +430,9 @@ onMounted(async () => {
       solicitacao.value.colaboradorId = usuario.value.id;
       solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
       solicitacao.value.gestorId = usuario.value.usuarioReembolsoComplemento.gestorId;
+      if (clientes.value.length ==1)
+        solicitacao.value.clienteId = clientes.value[0].id
+
     }
     carregarBotoes()
       

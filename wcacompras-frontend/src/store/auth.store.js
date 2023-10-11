@@ -21,8 +21,6 @@ const modelSistema = {
     perfil: {...modelPerfil}
 }
 
-
-
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: JSON.parse(localStorage.getItem("user")) || { ...modelUser },
