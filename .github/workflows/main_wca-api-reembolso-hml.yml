@@ -6,7 +6,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - wca-api-reembolso-hml
 on:
   push:
     branches:
-      - main
+      - prod
   workflow_dispatch:
 
 jobs:
@@ -56,5 +56,5 @@ jobs:
         with:
           app-name: 'wca-api-reembolso-hml'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_25BFE056988A4A7AB1C2E550D626F0B4 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DBC1DFF3C84F49FE9568E57E3243A25B }}
           package: .
