@@ -701,12 +701,42 @@ namespace wca.compras.services
 
                 var excelFile = "Files/excel/modelo_relatorio_requisicoes.xlsx";
                 var workbook = new XLWorkbook(excelFile);
-                var ws = workbook.Worksheet(1); 
-                
+                var ws = workbook.Worksheet(1);
+                var ws2 = workbook.Worksheet(2);
+                var numberFormat = "#,##0.00; (#,##0.00)";
                 var row = 3;
+                var rowPlan2 = 3;
+                decimal valorVerbaTotal =0;
+                decimal valorPedidosTotal = 0;
+                decimal valorDiferencaTotal = 0;
 
                 foreach (var requisicao in requisicoes)
                 {
+                    var categoriaVerba = requisicao.Cliente.ClienteOrcamentoConfiguracao.FirstOrDefault(q => q.TipoFornecimentoId == requisicao.RequisicaoItens[0].TipoFornecimentoId);
+                    decimal valorVerba = (decimal)(categoriaVerba?.ValorPedido);
+
+                    string _status = requisicao.Status switch
+                    {
+                        EnumStatusRequisicao.APROVADO => "APROVADO",
+                        EnumStatusRequisicao.AGUARDANDO => "AGUARDANDO",
+                        EnumStatusRequisicao.CANCELADO => "CANCELADO",
+                        EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
+                        _ => "DESCONHECIDO"
+                    };
+
+                    ws2.Cell($"B{rowPlan2}").SetValue(requisicao.Id);
+                    ws2.Cell($"C{rowPlan2}").SetValue(requisicao.Cliente.Nome);
+                    ws2.Cell($"D{rowPlan2}").SetValue(valorVerba).Style.NumberFormat.Format = numberFormat; 
+                    ws2.Cell($"E{rowPlan2}").SetValue(requisicao.ValorTotal).Style.NumberFormat.Format = numberFormat;
+                    ws2.Cell($"F{rowPlan2}").SetValue(valorVerba - requisicao.ValorTotal).Style.NumberFormat.NumberFormatId = (int)XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
+                    ws2.Cell($"G{rowPlan2}").SetValue(_status);
+
+                    valorVerbaTotal += valorVerba;
+                    valorPedidosTotal += requisicao.ValorTotal;
+                    valorDiferencaTotal += valorVerba - requisicao.ValorTotal;
+
+                    rowPlan2++;
+
                     foreach (var item in requisicao.RequisicaoItens)
                     {
                         ws.Cell($"B{row}").SetValue(requisicao.Id);
@@ -737,27 +767,28 @@ namespace wca.compras.services
                         periodoEntrega += periodos.Sabado.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sabádo: {(string.Join(", ", periodos.Sabado.periodo)).Trim()}" : "";
                         ws.Cell($"Q{row}").SetValue(periodoEntrega);
 
-                        var verbaConfigurada = requisicao.Cliente.ClienteOrcamentoConfiguracao.FirstOrDefault(q => q.TipoFornecimentoId == item.TipoFornecimentoId);
-                        decimal valor = (decimal)(verbaConfigurada?.ValorPedido);
-                        ws.Cell($"R{row}").SetValue(valor); //verbas
+                        //var verbaConfigurada = requisicao.Cliente.ClienteOrcamentoConfiguracao.FirstOrDefault(q => q.TipoFornecimentoId == item.TipoFornecimentoId);
+                        //decimal valor = (decimal)(verbaConfigurada?.ValorPedido);
+                        //ws.Cell($"R{row}").SetValue(valor); //verbas
 
-                        string _status = requisicao.Status switch
-                        {
-                            EnumStatusRequisicao.APROVADO => "APROVADO",
-                            EnumStatusRequisicao.AGUARDANDO => "AGUARDANDO",
-                            EnumStatusRequisicao.CANCELADO => "CANCELADO",
-                            EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
-                            _ => "DESCONHECIDO"
-                        };
-
-                        ws.Cell($"S{row}").SetValue(_status); //status
-                        ws.Cell($"T{row}").SetValue(requisicao.Fornecedor?.Nome); //fornecedor
-                        ws.Cell($"U{row}").SetValue(item.TipoFornecimento.Nome); //categoria
+                        ws.Cell($"R{row}").SetValue(_status); //status
+                        ws.Cell($"S{row}").SetValue(requisicao.Fornecedor?.Nome); //fornecedor
+                        ws.Cell($"T{row}").SetValue(item.TipoFornecimento.Nome); //categoria
 
                         row++;
                     }
                 }
 
+                ws2.Cell($"B{rowPlan2}").SetValue("TOTAIS");
+                ws2.Range($"B{rowPlan2}:C{rowPlan2}").Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+                ws2.Cell($"D{rowPlan2}").SetValue(valorVerbaTotal).Style.NumberFormat.Format = numberFormat;
+                ws2.Cell($"E{rowPlan2}").SetValue(valorPedidosTotal).Style.NumberFormat.Format = numberFormat;
+                ws2.Cell($"F{rowPlan2}").SetValue(valorDiferencaTotal).Style.NumberFormat.NumberFormatId =(int) XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
+                ws2.Cell($"G{rowPlan2}").SetValue("TOTAIS");
+
+                ws2.Range($"B{rowPlan2}:G{rowPlan2}").Style.Fill.BackgroundColor = XLColor.BlueGray;
+                ws2.Range($"B{rowPlan2}:G{rowPlan2}").Style.Font.Bold = true;
+                
                 Stream spreadsheetStream = new MemoryStream();
                 workbook.SaveAs(spreadsheetStream);
                 spreadsheetStream.Position = 0;
