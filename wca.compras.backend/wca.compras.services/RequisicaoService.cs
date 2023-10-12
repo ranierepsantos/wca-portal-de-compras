@@ -713,7 +713,7 @@ namespace wca.compras.services
                 foreach (var requisicao in requisicoes)
                 {
                     var categoriaVerba = requisicao.Cliente.ClienteOrcamentoConfiguracao.FirstOrDefault(q => q.TipoFornecimentoId == requisicao.RequisicaoItens[0].TipoFornecimentoId);
-                    decimal valorVerba = (decimal)(categoriaVerba?.ValorPedido);
+                    decimal valorVerba = categoriaVerba is null ? 0 : (decimal)(categoriaVerba?.ValorPedido);
 
                     string _status = requisicao.Status switch
                     {
@@ -736,6 +736,9 @@ namespace wca.compras.services
                     valorDiferencaTotal += valorVerba - requisicao.ValorTotal;
 
                     rowPlan2++;
+
+                    if (requisicao.Id == 463)
+                        rowPlan2 = rowPlan2;
 
                     foreach (var item in requisicao.RequisicaoItens)
                     {
