@@ -730,6 +730,7 @@ namespace wca.compras.services
                     ws2.Cell($"E{rowPlan2}").SetValue(requisicao.ValorTotal).Style.NumberFormat.Format = numberFormat;
                     ws2.Cell($"F{rowPlan2}").SetValue(valorVerba - requisicao.ValorTotal).Style.NumberFormat.NumberFormatId = (int)XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
                     ws2.Cell($"G{rowPlan2}").SetValue(_status);
+                    ws2.Cell($"H{rowPlan2}").SetValue(requisicao.Usuario.Nome);
 
                     valorVerbaTotal += valorVerba;
                     valorPedidosTotal += requisicao.ValorTotal;
@@ -789,8 +790,8 @@ namespace wca.compras.services
                 ws2.Cell($"F{rowPlan2}").SetValue(valorDiferencaTotal).Style.NumberFormat.NumberFormatId =(int) XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
                 ws2.Cell($"G{rowPlan2}").SetValue("TOTAIS");
 
-                ws2.Range($"B{rowPlan2}:G{rowPlan2}").Style.Fill.BackgroundColor = XLColor.BlueGray;
-                ws2.Range($"B{rowPlan2}:G{rowPlan2}").Style.Font.Bold = true;
+                ws2.Range($"B{rowPlan2}:H{rowPlan2}").Style.Fill.BackgroundColor = XLColor.BlueGray;
+                ws2.Range($"B{rowPlan2}:H{rowPlan2}").Style.Font.Bold = true;
                 
                 Stream spreadsheetStream = new MemoryStream();
                 workbook.SaveAs(spreadsheetStream);
