@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 using wca.reembolso.application;
 using wca.reembolso.infrastruture;
 
