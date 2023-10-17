@@ -442,7 +442,11 @@ namespace wca.compras.services
                             }
                         }
                     }
-                    data.Status = EnumStatusRequisicao.AGUARDANDO;
+                    if (data.RequerAutorizacaoCliente  && data.RequerAutorizacaoWCA)
+                        data.Status = EnumStatusRequisicao.AGUARDANDO;
+                    else
+                        data.Status = EnumStatusRequisicao.APROVADO;
+
                 }
                 _rm.RequisicaoRepository.Update(data);
 
