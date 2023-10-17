@@ -1,6 +1,6 @@
 {
-  "name": "WCA-Compras",
-  "version": "1.4.0",
+  "name": "WCA-APP",
+  "version": "1.4.1",
   "private": true,
   "enviroment": "Homologação",
   "scripts": {

@@ -82,7 +82,10 @@ export const useUsuarioStore = defineStore("usuario", {
             let response = await userService.paginate(pageSize, pageNumber, filter)
             return response.data
         },
-
+        
+        async enabledDisabled (data) {
+            await userService.update(data);
+        },
         async update (data) {
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
