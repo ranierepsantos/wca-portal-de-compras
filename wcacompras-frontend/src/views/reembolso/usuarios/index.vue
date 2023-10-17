@@ -116,7 +116,7 @@ async function enableDisable(item)
     {
       let data = { ...item }
       data.ativo = !data.ativo
-      usuarioStore.enabledDisabled(data)
+      await usuarioStore.enabledDisabled(data)
       await getItems()
 
       swal.fire({
