@@ -425,20 +425,29 @@ namespace wca.compras.services
                 {
                     if (updateRequisicaoDto.RequerAutorizacaoCliente == false || updateRequisicaoDto.RequerAutorizacaoWCA == false)
                     {
-                        var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, DateTime.Now.AddDays(-30), DateTime.Now);
-
                         var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
                                                .Include(inc => inc.ClienteOrcamentoConfiguracao)
                                                .FirstOrDefaultAsync();
 
-                        foreach (var item in cliente.ClienteOrcamentoConfiguracao)
+                        //verificar o foi excedido a quantidade de pedidos determinadas pro mês
+                        if (cliente?.ClienteOrcamentoConfiguracao.Count > 0)
                         {
-                            if (comprasMes[item.TipoFornecimentoId] > item.QuantidadeMes)
+                            var (dataIni, dataFim) = getDataCorte();
+                            var comprasMes = await GetQuantidadePedidoPorCliente((int)data.ClienteId, DateTime.Now.AddDays(-30), DateTime.Now);
+
+                            var categoriasRequisicao = updateRequisicaoDto.RequisicaoItens.Select(p => p.TipoFornecimentoId).Distinct().ToList();
+
+                            for (int idx = 0; idx <= categoriasRequisicao.Count - 1; idx++)
                             {
-                                if (item.AprovadoPor == EnumAprovadoPor.WCA)
-                                    data.RequerAutorizacaoWCA = true;
-                                else
-                                    data.RequerAutorizacaoCliente = true;
+                                var config = cliente.ClienteOrcamentoConfiguracao.Where(q => q.TipoFornecimentoId == categoriasRequisicao[idx]).FirstOrDefault();
+
+                                if (config != null && config.Ativo && config.QuantidadeMes < comprasMes[config.TipoFornecimentoId] && config.QuantidadeMes > 0)
+                                {
+                                    if (config.AprovadoPor == EnumAprovadoPor.WCA)
+                                        data.RequerAutorizacaoWCA = true;
+                                    else
+                                        data.RequerAutorizacaoCliente = true;
+                                }
                             }
                         }
                     }
