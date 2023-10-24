@@ -393,7 +393,7 @@ const showSecaoDespesa = computed(()=> {
   return solicitacao.value.tipoSolicitacao == 1 ||
         (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
 })
-const despesaCanAdd = computed(() => solicitacao.value.colaboradorId == authStore.user.id)
+const despesaCanAdd = computed(() => (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id > 0 && solicitacao.value.status == 4))
 const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
 const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status)));
 
