@@ -51,7 +51,7 @@ namespace wca.reembolso.domain.Entities
         [Column("destino", TypeName = "varchar(1000)")]
         public string Destino { get; set; } = string.Empty;
 
-        [Column("km_percorrido", TypeName = "decimal(10,2)")]
+        [Column("km_percorrido", TypeName = "decimal(10,3)")]
         public decimal KmPercorrido { get; set; } = decimal.Zero;
 
     }
