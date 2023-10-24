@@ -178,7 +178,7 @@
                 </v-row>
                 <v-row>
                   <v-col>
-                    <v-text-field
+                    <!-- <v-text-field
                       label="Km percorrido"
                       type="text"
                       variant="outlined"
@@ -193,7 +193,21 @@
                       @update:model-value="calcularValor()"
                       :readonly="readOnly"
                       :bg-color = 'readOnly ? "#f2f2f2":"" '
-                    ></v-text-field>
+                    ></v-text-field> -->
+                    <v-text-field-money
+                    label="KM percorrido"
+                    :number-decimal="3"
+                    density="compact"
+                    v-model="despesa.kmPercorrido"
+                    :rules="
+                      despesaTipo.tipo == 2
+                        ? [(v) => !!v || 'Campo é obrigatório']
+                        : []
+                    "
+                    :readonly="readOnly"
+                    :bg-color = 'readOnly ? "#f2f2f2":"" '
+                    @update:model-value="calcularValor()"
+                  ></v-text-field-money>
                   </v-col>
                 </v-row>
               </div>
@@ -335,7 +349,7 @@ const despesaTipo = computed(() => {
 
 function calcularValor() {
     let valor = parseFloat(props.despesa.kmPercorrido) * parseFloat(tipoEscolhido.value.valor)
-    props.despesa.valor = valor;
+    props.despesa.valor = parseFloat(valor.toFixed(2));
 }
 
 function clearImage() {

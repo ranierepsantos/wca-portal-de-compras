@@ -548,7 +548,7 @@ function calcularTotalDespesa() {
   solicitacao.value.despesa.forEach((item) => {
     valorTotalDespesa += parseFloat(item.valor);
   });
-  
+  valorTotalDespesa = valorTotalDespesa.toFixed(2);
   solicitacao.value.valorDespesa = valorTotalDespesa;
   return valorTotalDespesa;
 }

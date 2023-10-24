@@ -3,7 +3,7 @@ import api from "@/services/reembolso/solicitacao.service";
 import moment from "moment/moment";
 
 export class Solicitacao {
-    controlIdDespesa = 0
+    controlIdDespesa = sessionStorage.getItem("reembolso-despesa-fakeid")||0
     constructor(data = undefined) {
         this.id= data == undefined? 0: data.id
         this.clienteId= data == undefined? null: data.clienteId
@@ -33,6 +33,7 @@ export class Solicitacao {
             this.controlIdDespesa--
             despesa.id = this.controlIdDespesa
             despesa.solicitacaoId = this.id
+            sessionStorage.setItem("reembolso-despesa-fakeid", this.controlIdDespesa);
         }else {
             index = this.despesa.findIndex(q =>  q.id == despesa.id)
         }
