@@ -1,5 +1,5 @@
 <template>
-    <v-text-field density="compact" type="number" :model-value="initialDecimalNumber(modelValue, 2)" :label="labelText"
+    <v-text-field density="compact" type="number" :model-value="initialDecimalNumber(modelValue, numberDecimal)" :label="labelText"
         variant="outlined" :color="color" class="right-input" :rules="fieldRules" :prefix="prefix" :suffix="sufix"
         @input="$emit('update:modelValue', toDecimalNumber($event.target.value, numberDecimal))">
     </v-text-field>
