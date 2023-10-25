@@ -82,7 +82,7 @@ namespace wca.compras.services
             catch (Exception ex)
             {
                 Console.WriteLine("Authenticate.Error: " + ex.ToString());
-                throw new Exception(ex.ToString());
+                throw new Exception(ex.Message, ex.InnerException);
             }
 
         }
@@ -122,7 +122,7 @@ namespace wca.compras.services
             catch (Exception ex)
             {
                 Console.WriteLine("ForgotPassword.Error: " + ex.ToString());
-                throw new Exception(ex.ToString());
+                throw new Exception(ex.Message, ex.InnerException);
             }
 
         }
@@ -160,9 +160,8 @@ namespace wca.compras.services
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine("ResetPassword.Error: " + ex.ToString());
-                throw new Exception(ex.ToString());
+                throw new Exception(ex.Message,ex.InnerException);
             }
         }
 
