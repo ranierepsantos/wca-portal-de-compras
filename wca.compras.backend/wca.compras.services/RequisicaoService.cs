@@ -533,8 +533,11 @@ namespace wca.compras.services
                     ws.Cell($"D{row}").SetValue(item.Quantidade);
                     ws.Cell($"E{row}").SetValue(item.PercentualIPI);
                     ws.Cell($"F{row}").SetValue(item.Icms);
-                    ws.Cell($"G{row}").SetValue(item.Valor * (1 + item.PercentualIPI / 100));
-                    ws.Cell($"H{row}").SetValue((item.Valor * (1 + item.PercentualIPI / 100)) * item.Quantidade);
+                    decimal valorItemComIpi = Math.Round((item.Valor * (1 + item.PercentualIPI / 100)), 2);
+                    ws.Cell($"G{row}").SetValue(valorItemComIpi);
+                    ws.Cell($"H{row}").SetValue(valorItemComIpi * item.Quantidade);
+                    //ws.Cell($"G{row}").SetValue(item.Valor * (1 + item.PercentualIPI / 100));
+                    //ws.Cell($"H{row}").SetValue((item.Valor * (1 + item.PercentualIPI / 100)) * item.Quantidade);
                     ws.Cell($"I{row}").SetValue(item.TaxaGestao);
                     ws.Cell($"J{row}").SetValue(item.TaxaGestao * item.Quantidade);
                     ws.Cell($"K{row}").SetValue(item.ValorTotal);
@@ -696,6 +699,7 @@ namespace wca.compras.services
                     query = query.Where(c => c.Status == status);
                 if (dataInicio !=null && dataFim !=null)
                 {
+                    dataFim = dataFim.Value.AddDays(1);
                     query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao<= dataFim);
                 }
 
@@ -768,8 +772,9 @@ namespace wca.compras.services
                         ws.Cell($"I{row}").SetValue(item.Valor);
                         ws.Cell($"J{row}").SetValue(item.PercentualIPI);
                         ws.Cell($"K{row}").SetValue(item.Icms);
-                        ws.Cell($"L{row}").SetValue(item.Valor * (1 + item.PercentualIPI/100));
-                        ws.Cell($"M{row}").SetValue((item.Valor * (1 + item.PercentualIPI / 100)) * item.Quantidade);
+                        decimal valorItemComIpi = Math.Round((item.Valor * (1 + item.PercentualIPI / 100)),2);
+                        ws.Cell($"L{row}").SetValue(valorItemComIpi);
+                        ws.Cell($"M{row}").SetValue(valorItemComIpi * item.Quantidade);
                         ws.Cell($"N{row}").SetValue(item.TaxaGestao);
                         ws.Cell($"O{row}").SetValue(item.TaxaGestao * item.Quantidade);
                         ws.Cell($"P{row}").SetValue(item.ValorTotal);
