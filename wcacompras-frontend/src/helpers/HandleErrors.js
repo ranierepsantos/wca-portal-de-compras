@@ -33,7 +33,11 @@ const handleErrors = (error) =>
             router.push({name: "login"})
             return
         }
-        message = "Houve um erro na sua requisição!"
+        message = `${error.request.status} - Houve um erro na sua requisição!`
+        if (error.request.message && error.request.message != "")  {
+            message = `${error.request.status} - ${error.request.message}!`
+        }
+        
     } else {
         message = error.message
     }
