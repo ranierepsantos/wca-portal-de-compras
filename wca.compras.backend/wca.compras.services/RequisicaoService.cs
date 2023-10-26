@@ -536,8 +536,6 @@ namespace wca.compras.services
                     decimal valorItemComIpi = Math.Round((item.Valor * (1 + item.PercentualIPI / 100)), 2);
                     ws.Cell($"G{row}").SetValue(valorItemComIpi);
                     ws.Cell($"H{row}").SetValue(valorItemComIpi * item.Quantidade);
-                    //ws.Cell($"G{row}").SetValue(item.Valor * (1 + item.PercentualIPI / 100));
-                    //ws.Cell($"H{row}").SetValue((item.Valor * (1 + item.PercentualIPI / 100)) * item.Quantidade);
                     ws.Cell($"I{row}").SetValue(item.TaxaGestao);
                     ws.Cell($"J{row}").SetValue(item.TaxaGestao * item.Quantidade);
                     ws.Cell($"K{row}").SetValue(item.ValorTotal);
