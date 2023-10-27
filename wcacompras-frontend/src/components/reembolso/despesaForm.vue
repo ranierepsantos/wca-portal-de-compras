@@ -253,6 +253,14 @@
               style="margin-left: auto; margin-right: auto"
               v-show="despesa.imagePath == ''"
             />
+            <br/>
+            <v-alert
+              density="compact"
+              type="warning"
+              title="Arquivo inválido"
+              text="O comprovante deve ser uma imagem ou um pdf!"
+              v-show="isFileInvalid"
+            ></v-alert>
             <v-btn
               density="compact"
               icon="mdi-close"
@@ -262,14 +270,19 @@
             ></v-btn>
             <div
               id="img-preview"
-              style="margin-left: auto; margin-right: auto"
+              style="margin-left: auto; margin-right: auto;"
               v-show="despesa.imagePath != ''"
             >
               <img
                 :src="despesa.imagePath"
-                style="max-width: 320px; height: auto"
+                style="max-width: 100%; height: 520px"
+                v-if="despesa.imagePath.indexOf('pdf') ==-1"
               />
+              <object v-else :data="despesa.imagePath" type="application/pdf" width="100%" height="500px">
+                <p>Não foi possível exibir o PDF. <a :href="despesa.imagePath">Clique aqui</a> para download.</p>
+              </object>  
             </div>
+            
           </v-col>
         </v-row>
       </v-card-text>
@@ -283,7 +296,7 @@ import dropzone from "@/components/dropzone.vue";
 import { Despesa } from "@/store/reembolso/solicitacao.store";
 import { watch } from "vue";
 import { computed } from "vue";
-import { ref } from "vue";
+import { ref,inject } from "vue";
 
 const props = defineProps({
   despesa: {
@@ -305,6 +318,7 @@ const props = defineProps({
 });
 
 const despesaForm = ref(null);
+const swal = inject("$swal");
 const emit = defineEmits(["cancelaClick", "changeImage", "changeValor", "saveClick"]);
 
 const dropzoneFile = ref("");
@@ -312,7 +326,7 @@ const tipoEscolhido = ref({
   tipo: 0,
   valor: 0
 })
-
+const isFileInvalid = ref(false);
 watch( () => tipoEscolhido.value.tipo, (novoTipo, oldTipo) => {
   if (!props.readOnly && oldTipo !=0) {
     if (novoTipo == 1) {
@@ -368,12 +382,16 @@ function selectedFile() {
 }
 
 function getImgData() {
+  isFileInvalid.value = false 
   const files = dropzoneFile.value;
   if (files) {
     const fileReader = new FileReader();
     fileReader.readAsDataURL(files);
     fileReader.addEventListener("load", function () {
-      emit("changeImage", this.result);
+      if(this.result.indexOf("data:image") ==-1 && this.result.indexOf("data:application/pdf") ==-1 )
+        isFileInvalid.value = true  
+      else
+        emit("changeImage", this.result);
     });
   }
 }

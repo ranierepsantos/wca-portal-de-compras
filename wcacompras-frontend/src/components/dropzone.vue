@@ -13,7 +13,7 @@
         <v-icon icon="mdi-camera"></v-icon>
         Selecione o arquivo
     </label>
-    <input type="file" id="dropzoneFile" class="dropzoneFile" accept="image/png, image/jpeg, image/bmp" />
+    <input type="file" id="dropzoneFile" class="dropzoneFile" accept="application/pdf,image/png, image/jpeg, image/bmp" />
     
   </div>
 </template>
