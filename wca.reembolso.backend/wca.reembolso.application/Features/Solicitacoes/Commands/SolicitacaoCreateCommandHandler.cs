@@ -62,9 +62,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             //2.salvar as imagens das despesas
             for (int idx = 0; idx < request.Despesa.Count; idx++)
             {
-                if (HandleFile.IsBase64Image(request.Despesa[idx].ImagePath))
+                if (HandleFile.IsBase64(request.Despesa[idx].ImagePath))
                 {
-                    request.Despesa[idx].ImagePath = HandleFile.SaveImage(request.Despesa[idx].ImagePath);
+                    request.Despesa[idx].ImagePath = HandleFile.SaveFile(request.Despesa[idx].ImagePath);
                 }
             }
 
