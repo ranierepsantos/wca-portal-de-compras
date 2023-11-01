@@ -67,6 +67,7 @@
       :show-button="false"
       :custom-button-show="true"
       custom-button-text="Salvar"
+      :custom-button-disabled="isBusy"
       @customClick="salvar()"
     />
     <v-progress-linear

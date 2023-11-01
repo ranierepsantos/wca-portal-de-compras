@@ -320,7 +320,6 @@ async function getItems()
 {
     try
     {
-        debugger
         isBusy.value = true;
 
         let response =  null;

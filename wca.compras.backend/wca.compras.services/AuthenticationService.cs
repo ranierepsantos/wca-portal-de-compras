@@ -111,7 +111,8 @@ namespace wca.compras.services
                 var link = $"{urlOrigin}/recuperar-senha/{resetPassword.Token}";
 
                 string mensagem = $"<p>Olá {usuario.Nome} </p>";
-                mensagem += $"Clique <a href='{link}'>aqui</a> para alterar sua senha!";
+                mensagem += $"<p>Clique <a href='{link}'>aqui</a> para alterar sua senha!</p>";
+                mensagem += "<p>Este link expira em 24 horas</p>";
 
                 var message = new Message(new string[] { usuario.Email }, "Alterar senha de acesso", mensagem);
 
