@@ -301,7 +301,7 @@
       <!-- FORM PARA CADASTRO DE DESPESA -->
       <v-dialog
         v-model="openDespesaForm"
-        max-width="900"
+        min-width="1024"
         :absolute="false"
         persistent
       >
