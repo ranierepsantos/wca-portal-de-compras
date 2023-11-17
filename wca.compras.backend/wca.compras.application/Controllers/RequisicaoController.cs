@@ -193,7 +193,7 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, [FromQuery] int[]? filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, [FromQuery] int[] filial = null, int authUserId = 0, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, [FromQuery] int[]? status = null)
         {
             try
             {
@@ -202,7 +202,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
                 
-                var items = service.Paginate(filial, page, pageSize, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim);
+                var items = service.Paginate(filial, authUserId, page, pageSize, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -219,7 +219,7 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("PaginateByUserContext/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize = 10, int page = 1,[FromQuery] int[] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize = 10, int page = 1,[FromQuery] int[] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, [FromQuery] int[]? status = null)
         {
             try
             {
@@ -228,7 +228,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
                 int logedUserId = int.Parse(User.FindFirst("CodigoUsuario").Value);
-                var items = service.PaginateByContextUser(filial, logedUserId, page, pageSize, clienteId, usuarioId, fornecedorId,  status, dataInicio, dataFim);
+                var items = service.Paginate(filial, logedUserId, page, pageSize, clienteId, usuarioId, fornecedorId,  dataInicio, dataFim, status);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -242,8 +242,8 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("GerarRelatorio")]
         [Authorize("Bearer")]
-        public async Task<ActionResult> ExportExcel([FromQuery] int [] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS
-            , DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0)
+        public async Task<ActionResult> ExportExcel([FromQuery] int [] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0,
+                                                    DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0, [FromQuery] params int[] status)
         {
             try
             {
@@ -252,7 +252,7 @@ namespace wca.compras.webapi.Controllers
                     return BadRequest(error: new { message = "Data início ou fim inválida!"});
                 }
 
-                Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, status, dataInicio, dataFim, authUserId);
+                Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, dataInicio, dataFim, authUserId, status);
                 if (st == null)
                     return NoContent();
 

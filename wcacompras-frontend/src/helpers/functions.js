@@ -1,5 +1,5 @@
 export const status = [
-    { value: -1, text: "Todos" },
+    // { value: -1, text: "Todos" },
     { value: 0, text: "Aguardando", color: "warning" },
     { value: 1, text: "Aprovado", color: "success" },
     { value: 2, text: "Rejeitado", color: "error" },
