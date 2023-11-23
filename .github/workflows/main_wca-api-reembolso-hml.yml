@@ -6,7 +6,7 @@ name: Build and deploy ASP.Net Core app to Azure Web App - wca-api-reembolso-hml
 on:
   push:
     branches:
-      - prod
+      - main
   workflow_dispatch:
 
 jobs:
