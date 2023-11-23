@@ -54,7 +54,6 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             if (request.DataIni != null && request.DataFim != null)
             {
                 var dataFim = request.DataFim.Value.AddHours(23).AddMinutes(59);
-                _logger.LogInformation($"DataFim {dataFim.ToString()}");
                 query = query.Where(c => c.DataSolicitacao >= request.DataIni && c.DataSolicitacao <= dataFim);
             }
                 

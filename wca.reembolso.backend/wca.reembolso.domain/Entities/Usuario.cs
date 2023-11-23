@@ -13,14 +13,14 @@ namespace wca.reembolso.domain.Entities
 
         [Required, MaxLength(100)]
         [Column("nome", TypeName = "varchar(100)")]
-        public string Nome { get; set; }
+        public string Nome { get; set; } = string.Empty;
 
         [Required, MaxLength(150)]
         [Column("email", TypeName = "varchar(150)")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Column("ativo")]
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;
         
     }
 }

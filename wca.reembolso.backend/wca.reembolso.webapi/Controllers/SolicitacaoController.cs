@@ -114,5 +114,17 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
 
         }
+
+        [HttpGet("ExportarParaExcel")]
+        public async Task<IActionResult> Export2Excel([FromQuery] SolicitacaoExportToExcelQuery querie)
+        {
+            var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return new FileStreamResult(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"relatorio_solicitacoes.xlsx" };
+
+        }
+
     }
 }

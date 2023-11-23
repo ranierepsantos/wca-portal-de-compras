@@ -9,7 +9,8 @@ const rotas = {
     ListarStatusSolicitacao: "Solicitacao/ListarStatusSolicitacao",
     AlterarStatus: "Solicitacao/AlterarStatus",
     RegistrarEvento: "Solicitacao/RegistrarEvento",
-    ChecaSeDespesaExiste: "Solicitacao/ChecarSeDespesaExiste"
+    ChecaSeDespesaExiste: "Solicitacao/ChecarSeDespesaExiste",
+    ExportarParaExcel: "Solicitacao/ExportarParaExcel"
 }
 
 export default {
@@ -71,6 +72,9 @@ export default {
         }
 
         return api.get(rotas.ChecaSeDespesaExiste, {params: query})
-    }
+    },
+    exportarParaExcel(filters)   {
+        return api.get(rotas.ExportarParaExcel, {params: filters, responseType: 'blob'} );
+    },
     
 }

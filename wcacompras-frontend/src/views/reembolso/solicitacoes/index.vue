@@ -3,6 +3,7 @@
     <bread-crumbs title="Solicitações" :show-button="false" 
      :buttons="formButtons"
      @novo-click="editar('novo')" 
+     @report-click="gerarRelatorio"
     />
     <v-row v-show="!isLoading.form">
       <v-col v-show="isMatriz && !isGestor && !isColaborador">
@@ -226,7 +227,7 @@ import router from "@/router";
 import moment from "moment";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 import historico from "@/components/reembolso/historico.vue";
-import { formatToCurrencyBRL } from "@/helpers/functions";
+import { formatToCurrencyBRL, realizarDownload } from "@/helpers/functions";
 import filialService from "@/services/filial.service";
 import {
   IDPERFILCOLABORADOR,
@@ -304,7 +305,7 @@ onMounted(async () => {
     authStore.user.filial = filialUsuario.value;
     await clearFilters();
     await getItems();
-
+    formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
     if (authStore.hasPermissao("solicitacao")) {
       formButtons.value.push({ text: "Novo", icon: "", event: "novo-click" });
     }
@@ -321,7 +322,7 @@ watch(page, () => getItems());
 //METHODS
 async function clearFilters() {
   try {
-    isLoading.busy =true
+    isLoading.value.busy =true
     filter.value = {
       filialId: null,
       clienteId: null,
@@ -361,7 +362,7 @@ async function showHistorico(item) {
 
 async function getItems() {
   try {
-    isLoading.busy =true
+    isLoading.value.busy =true
     if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
       throw new TypeError("Ambas as datas devem ser informadas!")
     else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
@@ -378,7 +379,7 @@ async function getItems() {
   } catch (error) {
     console.log("solicitacoes.getItems.error:", error.response);
     handleErrors(error);
-  }finally {isLoading.busy =false}
+  }finally {isLoading.value.busy =false}
 }
 
 async function getClientesToList(filialId = 0, usuarioId = 0) {
@@ -408,4 +409,27 @@ async function getUsuarioToList(filiais = []) {
     handleErrors(error);
   }
 }
+
+async function gerarRelatorio() {
+  try {
+    isLoading.value.busy =true
+    if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
+      throw new TypeError("Ambas as datas devem ser informadas!")
+    else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
+      throw new TypeError("A data fim deve ser maior que a data início!")
+      
+    let response = await solicitacaoStore.gerarRelatorio(filter.value);
+      
+    if (response.status == 200) {
+          let nomeArquivo = `relatorio_solicitacoes_${moment().format("DDMMYYYY_HHmmSS")}.xlsx`
+          await new Promise(r => setTimeout(r, 2000));
+          console.log("excel: ",response)
+          realizarDownload(response, nomeArquivo, response.headers.getContentType());
+    }
+  } catch (error) {
+    console.log("solicitacoes.gerarRelatorio.error:", error.response);
+    handleErrors(error);
+  }finally {isLoading.value.busy =false}
+}
+
 </script>
