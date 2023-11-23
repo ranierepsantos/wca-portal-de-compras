@@ -178,7 +178,12 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     async checarSeDespesaExiste(despesa) {
         let response = await api.despesaChecaSeExiste(despesa.cnpj, despesa.numeroFiscal);
         return response.data
-    }
+    },
+    async gerarRelatorio(filters) {
+        let response = await api.exportarParaExcel (filters)
+        return response
+    },
+
 
   },
 });
