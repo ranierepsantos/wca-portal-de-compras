@@ -155,15 +155,15 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
                     sheetDespesas.Cell($"H{rowDespesa}").SetValue(statusList.Where(q => q.Id == item.Status).First().Status);
                     sheetDespesas.Cell($"I{rowDespesa}").SetValue(item.ValorAdiantamento).Style.NumberFormat.Format = numberFormat;
                     sheetDespesas.Cell($"J{rowDespesa}").SetValue(item.ValorDespesa).Style.NumberFormat.Format = numberFormat;
-                    sheetDespesas.Cell($"K{row}").SetValue(despesa.DataEvento);
-                    sheetDespesas.Cell($"L{row}").SetValue(despesa.TipoDespesa?.Nome);
-                    sheetDespesas.Cell($"M{row}").SetValue(despesa.TipoDespesa?.Tipo == EnumTipoDespesaTipo.Consumo ? "Consumo": "Distância");
-                    sheetDespesas.Cell($"N{row}").SetValue(despesa.CNPJ);
-                    sheetDespesas.Cell($"O{row}").SetValue(despesa.RazaoSocial);
-                    sheetDespesas.Cell($"P{row}").SetValue(despesa.NumeroFiscal);
-                    sheetDespesas.Cell($"Q{row}").SetValue(despesa.KmPercorrido == 0 ? "": despesa.KmPercorrido);
-                    sheetDespesas.Cell($"R{row}").SetValue(despesa.Valor).Style.NumberFormat.Format = numberFormat; 
-
+                    sheetDespesas.Cell($"K{rowDespesa}").SetValue(despesa.DataEvento);
+                    sheetDespesas.Cell($"L{rowDespesa}").SetValue(despesa.TipoDespesa?.Nome);
+                    sheetDespesas.Cell($"M{rowDespesa}").SetValue(despesa.TipoDespesa?.Tipo == EnumTipoDespesaTipo.Consumo ? "Consumo": "Distância");
+                    sheetDespesas.Cell($"N{rowDespesa}").SetValue(despesa.CNPJ);
+                    sheetDespesas.Cell($"O{rowDespesa}").SetValue(despesa.RazaoSocial);
+                    sheetDespesas.Cell($"P{rowDespesa}").SetValue(despesa.NumeroFiscal);
+                    sheetDespesas.Cell($"Q{rowDespesa}").SetValue(despesa.KmPercorrido == 0 ? "": despesa.KmPercorrido);
+                    sheetDespesas.Cell($"R{rowDespesa}").SetValue(despesa.Valor).Style.NumberFormat.Format = numberFormat; 
+                                              
                     rowDespesa++;
                 }
                 row++;
