@@ -369,6 +369,20 @@ const routes = [
     ]
   },
   {
+    path: "/rh",
+    component: () => import("../views/indexRH"), //webpackChunkName app
+    children: [
+      {
+        path: '',
+        name: 'rh',
+        component: HomeView,
+        meta: {sistema: 3},
+        beforeEnter: protectRoute,
+      }
+    ]
+  },
+
+  {
     path: '/app/acessonegado',
     name: 'acessonegado',
     // route level code-splitting

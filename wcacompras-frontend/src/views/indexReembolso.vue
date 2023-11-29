@@ -178,7 +178,7 @@ function startCheckNotificacoes () {
 }
 
 nav a {
-  color: white;
+  color: white !important;
   font-size: large;
 }
 
