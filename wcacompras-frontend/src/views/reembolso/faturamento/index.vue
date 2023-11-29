@@ -1,7 +1,9 @@
 <template>
     <div>
-        <bread-crumbs title="Faturamento" :show-button="false" @novo-click="editar('novo')" 
+        <bread-crumbs title="Faturamento" :show-button="false"
         :buttons="formButtons"
+        @novo-click="editar('novo')" 
+        @report-click="gerarRelatorio"
         />
         <!--FILTROS - INÍCIO-->
         <v-row v-show="!isLoading.form">
@@ -176,7 +178,7 @@ import moment from "moment";
 import { useFaturamentoStore } from "@/store/reembolso/faturamento.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import historico from "@/components/reembolso/historico.vue";
-import { formatToCurrencyBRL } from "@/helpers/functions";
+import { formatToCurrencyBRL, realizarDownload } from "@/helpers/functions";
 import { useAuthStore } from "@/store/auth.store";
 import filialService from "@/services/filial.service";
 import { useUsuarioStore } from "@/store/reembolso/usuario.store";
@@ -216,6 +218,9 @@ onMounted(async () =>
         isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
         authStore.user.filial = filialUsuario.value;
         await clearFilters();
+        if (authStore.hasPermissao("faturamento_relatorio")) {
+            formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
+        }
         if (authStore.hasPermissao("faturamento")) {
             formButtons.value.push({ text: "Novo", icon: "", event: "novo-click" });
         }
@@ -309,6 +314,27 @@ async function showHistorico(item)
 {
     faturamentoEventos.value = item.faturamentoHistorico
     openHistorico.value = true
+}
+
+async function gerarRelatorio() {
+  try {
+    isLoading.value.busy =true
+    if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
+      throw new TypeError("Ambas as datas devem ser informadas!")
+    else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
+      throw new TypeError("A data fim deve ser maior que a data início!")
+      
+    let response = await faturamentoStore.gerarRelatorio(filter.value);
+      
+    if (response.status == 200) {
+          let nomeArquivo = `relatorio_faturamento_${moment().format("DDMMYYYY_HHmmSS")}.xlsx`
+          await new Promise(r => setTimeout(r, 2000));
+          realizarDownload(response, nomeArquivo, response.headers.getContentType());
+    }
+  } catch (error) {
+    console.log("faturamentos.gerarRelatorio.error:", error.response);
+    handleErrors(error);
+  }finally {isLoading.value.busy =false}
 }
 
 </script>
