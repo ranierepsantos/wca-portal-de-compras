@@ -305,7 +305,9 @@ onMounted(async () => {
     authStore.user.filial = filialUsuario.value;
     await clearFilters();
     await getItems();
-    formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
+    if (authStore.hasPermissao("solicitacao_relatorio")) {
+      formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
+    }
     if (authStore.hasPermissao("solicitacao")) {
       formButtons.value.push({ text: "Novo", icon: "", event: "novo-click" });
     }
@@ -423,7 +425,6 @@ async function gerarRelatorio() {
     if (response.status == 200) {
           let nomeArquivo = `relatorio_solicitacoes_${moment().format("DDMMYYYY_HHmmSS")}.xlsx`
           await new Promise(r => setTimeout(r, 2000));
-          console.log("excel: ",response)
           realizarDownload(response, nomeArquivo, response.headers.getContentType());
     }
   } catch (error) {

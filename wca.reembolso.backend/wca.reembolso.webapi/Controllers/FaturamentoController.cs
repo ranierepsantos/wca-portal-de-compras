@@ -4,6 +4,7 @@ using wca.reembolso.application.Features.Faturamentos.Commands;
 using wca.reembolso.application.Features.Faturamentos.Queries;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
+using wca.reembolso.application.Features.Solicitacoes.Queries;
 
 namespace wca.reembolso.webapi.Controllers
 {
@@ -76,6 +77,17 @@ namespace wca.reembolso.webapi.Controllers
             if (result.IsError) { return Problem(result.Errors); }
 
             return Ok(result.Value);
+
+        }
+
+        [HttpGet("ExportarParaExcel")]
+        public async Task<IActionResult> Export2Excel([FromQuery] FaturamentoExportToExcelQuery querie)
+        {
+            var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return new FileStreamResult(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"relatorio_solicitacoes.xlsx" };
 
         }
     }

@@ -8,6 +8,7 @@ const rotas = {
     GetById: "Faturamento?Id={Id}",
     AddPO: "Faturamento/AdicionarPO",
     Finalizar: "Faturamento/Finalizar",
+    ExportarParaExcel: "Faturamento/ExportarParaExcel"
 }
 
 
@@ -146,6 +147,8 @@ export const useFaturamentoStore = defineStore("faturamento", {
         let data = this.faturamentoStatus.find(q => q.id == statusId)
         return data
     },
-    
+    gerarRelatorio(filters)   {
+        return api.get(rotas.ExportarParaExcel, {params: filters, responseType: 'blob'} );
+    },
   },
 });
