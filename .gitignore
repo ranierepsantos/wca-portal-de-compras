@@ -120,6 +120,7 @@ dist
 /wca.compras.backend/wca.compras.services/obj/
 /wca.compras.backend/wca.compras.services/obj/
 /wca.compras.backend/wca.compras.application/appsettings.Development.json
+/wca.compras.backend/wca.compras.application/appsettings.json
 wca.compras.backend/wca.compras.functions/__azurite_db_blob__.json
 wca.compras.backend/wca.compras.functions/__azurite_db_blob_extent__.json
 wca.compras.backend/wca.compras.functions/__azurite_db_queue__.json
