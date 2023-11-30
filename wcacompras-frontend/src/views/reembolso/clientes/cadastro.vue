@@ -6,7 +6,7 @@
             <v-card class="mx-auto">
                 <v-card-text>
                     <v-form ref="clienteForm" lazy-validation>
-                        <cliente-dados-basicos-form :cliente="cliente" :filiais = "filiais" :combo-filial-disabled="authStore.user.filial !== 1"/>
+                        <cliente-dados-basicos-form :cliente="cliente" :filiais = "filiais" :combo-filial-disabled="!isMatriz"/>
                         <v-divider class="mt-2"></v-divider>
                         <!-- ORÇAMENTOS -->
                         <v-row class="mt-2">
@@ -44,7 +44,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import ClienteDadosBasicosForm from '@/components/clienteDadosBasicosForm.vue';
 import {Cliente, useClienteStore } from '@/store/reembolso/cliente.store';
-import { useFilialStore } from '@/store/reembolso/filial.store';
+import filialService from '@/services/filial.service';
 import { useUsuarioStore } from '@/store/reembolso/usuario.store';
 
 // VARIABLES
@@ -59,12 +59,15 @@ const isLoading = ref({
     form: true,
     save: false
 })
+const isMatriz = ref(false)
 //VUE FUNCTIONS
 
 onMounted(async () => {
     try {
         isLoading.value.form = true
-        authStore.user.filial = (await useUsuarioStore().getFiliais(authStore.user.id))[0].value;
+        let filialUsuario =(await useUsuarioStore().getFiliais(authStore.user.id))[0]
+        isMatriz.value = filialUsuario.text.toLowerCase() =="matriz"
+        authStore.user.filial = filialUsuario.value;
         cliente.value.filialId = authStore.user.filial
         await getFilialToList()
         if (parseInt(route.query.id) > 0) {
@@ -90,8 +93,9 @@ async function getCliente(clienteId) {
 
 async function getFilialToList() {
     try {
-        
-        filiais.value = await useFilialStore().toComboList();
+        let response = await  filialService.toList();
+
+        filiais.value = response.data
 
     } catch (error) {
         console.log("getFilialToList.error:", error);

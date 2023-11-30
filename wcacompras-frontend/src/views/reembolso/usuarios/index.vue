@@ -14,7 +14,7 @@
         <tr>
           <th class="text-left text-grey">NOME</th>
           <th class="text-left text-grey">PERFIL</th>
-          <th class="text-left text-grey" v-show="authStore.user.filial == 1">FILIAL</th>
+          <th class="text-left text-grey" v-show="isMatriz">FILIAL</th>
           <th class="text-center text-grey">ATIVO</th>
           <th></th>
         </tr>
@@ -26,7 +26,7 @@
             &nbsp;{{ user.nome }}
           </td>
           <td class="text-left">{{ getPerfilName(user.usuarioSistemaPerfil[0].perfilId) }}</td>
-          <td class="text-left" v-show="authStore.user.filial == 1">{{ getFilialName(user.filialid) }}</td>
+          <td class="text-left" v-show="isMatriz">{{ getFilialName(user.filial[0].value) }}</td>
           <td class="text-center">
             <v-icon :icon="user.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="user.ativo ? 'success' : 'error'"></v-icon>
@@ -42,7 +42,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td :colspan="authStore.user.filial == 1 ? 5 : 4">
+          <td :colspan="isMatriz ? 5 : 4">
             <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>
@@ -73,13 +73,23 @@ const swal = inject("$swal");
 const authStore = useAuthStore();
 const filter = ref("");
 const usuarioStore = useUsuarioStore()
-
+const isMatriz = ref(false)
 //VUE METHODS
 onMounted(async () =>
 {
-  await getFilialToList();
-  await getPerfilToList();
-  await getItems();
+  try {
+    let filiaisUsuario  = await usuarioStore.getFiliais();
+    if (filiaisUsuario.length > 0){
+      isMatriz.value = filiaisUsuario[0].text.toLowerCase() =="matriz"
+      authStore.user.filial = filiaisUsuario[0].value
+    }
+    await getFilialToList();
+    await getPerfilToList();
+    await getItems();  
+  } catch (error) {
+    handleErrors(error) 
+  }
+  
 });
 
 watch(page, async () => await getItems());
@@ -106,7 +116,6 @@ async function enableDisable(item)
     {
       let data = { ...item }
       data.ativo = !data.ativo
-      //await userService.update(data);
       usuarioStore.update(data)
       await getItems()
 
@@ -191,7 +200,13 @@ async function getItems()
   try
   {
     isBusy.value = true;
-    let data = await usuarioStore.getPaginate(page.value, pageSize, filter.value);
+    let filtro = {
+      termo: filter.value,
+      filial: isMatriz.value ? []: [authStore.user.filial]
+    }
+
+
+    let data = await usuarioStore.getPaginate(page.value, pageSize, filtro);
     console.log("usuarios.data", data)
     users.value = data.items;
     totalPages.value = data.totalPages;

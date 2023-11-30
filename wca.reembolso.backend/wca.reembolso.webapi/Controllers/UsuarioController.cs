@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using wca.reembolso.application.Features.Usuarios.Commands;
-using wca.reembolso.application.Features.Usuarios.Queries;
 
 namespace wca.reembolso.webapi.Controllers
 {
@@ -24,17 +23,6 @@ namespace wca.reembolso.webapi.Controllers
 
             return Ok(result.Value);
         }
-
-        [HttpGet("ListFilialByUsuario/{usuarioId}")]
-        public async Task<IActionResult> ListFilialByUsuario([FromRoute] UsuarioGetFiliais command)
-        {
-            var result = await _mediator.Send(command);
-
-            if (result.IsError) { return Problem(result.Errors); }
-
-            return Ok(result.Value);
-        }
-
 
     }
 }
