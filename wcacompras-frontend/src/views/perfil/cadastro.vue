@@ -7,7 +7,9 @@
                 <v-card-text>
                     <v-form ref="form" v-model="valid" lazy-validation>
                         <v-text-field density="compact" variant="outlined" v-model="perfil.nome" :counter="50"
-                            :rules="nameRules" label="Perfil" required>
+                            :rules="nameRules" label="Perfil" required 
+                            :readonly="isBlocked"
+                            :bg-color = 'isBlocked ? "#f2f2f2":"" '>
                         </v-text-field>
 
                         <v-textarea v-model="perfil.descricao" label="Descrição" variant="outlined" density="compact">
@@ -52,13 +54,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref, inject } from "vue"
+import { onMounted, ref, inject, computed } from "vue"
 import perfilService from "@/services/perfil.service";
 import handleErrors from "../../helpers/HandleErrors"
 import { useRoute } from "vue-router";
 import breadCrumbs from '@/components/breadcrumbs.vue';
 import router from "@/router"
 import { useAuthStore } from "@/store/auth.store";
+import { IDPERFILGESTOR, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 
 // VARIABLES
 let route = useRoute();
@@ -96,6 +99,10 @@ onMounted(async () =>
         routeName = "perfil"
     else if (authStore.sistema.id == 2) //reembolso
         routeName = "reembolsoPerfil"
+})
+
+const isBlocked = computed(() => {
+    return perfil.value.id == IDPERFILCOLABORADOR || perfil.value.id == IDPERFILGESTOR
 })
 
 // METHODS
