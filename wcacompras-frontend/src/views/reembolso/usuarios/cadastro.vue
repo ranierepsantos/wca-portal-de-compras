@@ -11,7 +11,7 @@
       <v-card v-show="!isBusy">
         <v-card-text>
           <v-form @submit.prevent="salvar()" ref="userForm">
-            <usuario-form :user="usuario" :list-filial="filiais"></usuario-form>
+            <usuario-form :user="usuario" :list-filial="filiais" @email-change ="searchByEmail"></usuario-form>
             <v-card elevation="2">
               <v-tabs v-model="tab" color="primary" align-tabs="start">
                 <v-tab value="1" v-show="authStore.sistema.id == 1">COMPRAS</v-tab>
@@ -385,21 +385,8 @@ async function getUsuario(usuarioId) {
   }
 }
 
-async function searchByEmail(email) {
-  if (usuario.value.id ==0) {
-    try {
-      let _usuario = (await userService.getByEmail(email)).data  
-
-      if (_usuario.usuarioSistemaPerfil.find(q =>  q.sistemaId == authStore.sistema.id) == undefined)
-      {
-        usuario.value.id = _usuario.id
-        usuario.value.nome = _usuario.nome 
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-  
+function searchByEmail(email) {
+  console.log(email)
 }
 
 </script>
