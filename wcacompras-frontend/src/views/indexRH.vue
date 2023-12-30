@@ -46,8 +46,16 @@
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <!-- If using vue-router -->
+        <v-row>
+          <v-col><card-list :list-data="list1" color="orange-lighten-2" card-title="Aguardando"></card-list></v-col>
+          <v-col><card-list :list-data="list2" color="lime-darken-1" card-title="Em Andamento"></card-list></v-col>
+          <v-col><card-list :list-data="list3" color="deep-purple-lighten-1" card-title="Concluídos"></card-list></v-col>
+        </v-row>
+        
         <router-view></router-view>
+        
       </v-container>
+      
     </v-main>
 
     <v-footer app>
@@ -63,6 +71,7 @@ import { useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
+import  cardList from "@/components/rh/cardlist.vue"
 
 
 //VARIABLES
@@ -131,7 +140,17 @@ const usuario = computed(() =>
   return authStore.user;
 })
 
+const list1 = ref([
+  { id: 1, nome: "Auxiliar de Cozinha", status: "Em análise", list: 1 },
+  { id: 2, nome: "Auxiliar de Limpeza", status: "Em análise", list: 1 },
+]);
 
+const list2 = ref([
+  { id: 3, nome: "Desenvolvedor Jr", status: "Em análise", list: 1 },
+  { id: 4, nome: "Product Owner", status: "Em análise", list: 1 },
+]);
+
+const list3 = ref([]);
 //VUE - FUNCTIONS
 onMounted(async () => {
 });
