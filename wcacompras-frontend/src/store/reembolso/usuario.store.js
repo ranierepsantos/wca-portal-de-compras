@@ -27,6 +27,7 @@ class UsuarioReembolsoComplemento {
         this.usuarioId = data? data.usuarioId: 0;
         this.gestorId = data? data.gestorId: null;
         this.cargo = data? data.cargo: "";
+        this.centroCustoId = data? data.centroCustoId: null;
     }
 }
 

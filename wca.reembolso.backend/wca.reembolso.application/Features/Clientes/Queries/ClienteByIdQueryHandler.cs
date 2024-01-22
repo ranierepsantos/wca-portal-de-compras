@@ -24,7 +24,9 @@ namespace wca.reembolso.application.Features.Clientes.Queries
         public async Task<ErrorOr<ClienteResponse>> Handle(ClienteByIdQuerie request, CancellationToken cancellationToken)
         {
 
-            var cliente = await _repository.ClienteRepository.ToQuery().Where(q =>  q.Id.Equals( request.id)).FirstOrDefaultAsync(cancellationToken);
+            var cliente = await _repository.ClienteRepository.ToQuery()
+                .Include(x => x.CentroCusto)
+                .Where(q =>  q.Id.Equals( request.id)).FirstOrDefaultAsync(cancellationToken);
 
             if (cliente == null)
             {

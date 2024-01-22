@@ -12,6 +12,7 @@
         <v-table class="elevation-2">
             <thead>
                 <tr>
+                    <th class="text-left text-grey">COD.CLIENTE</th>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CNPJ</th>
                     <th class="text-left text-grey" v-show="isMatriz">FILIAL</th>
@@ -23,8 +24,9 @@
                 <tr v-for="item in clientes" :key="item.id">
                     <td class="text-left">
                         <v-icon icon="mdi-home-outline"></v-icon>
-                        &nbsp;{{ item.nome }}
+                        &nbsp;{{ item.codigoCliente }}
                     </td>
+                    <td class="text-left">{{ item.nome }}</td>
                     <td class="text-left">{{ item.cnpj }}</td>
                     <td class="text-left" v-show="isMatriz">{{ getFilialNome(item.filialId) }}</td>
                     <td class="text-center">

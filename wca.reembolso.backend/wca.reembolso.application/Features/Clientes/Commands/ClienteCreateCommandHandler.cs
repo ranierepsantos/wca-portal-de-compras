@@ -19,7 +19,9 @@ namespace wca.reembolso.application.Features.Clientes.Commands
         string CEP,
         string Cidade,
         string UF,
-        decimal ValorLimite
+        decimal ValorLimite,
+        string CodigoCliente,
+        IList<CentroCusto> CentroCusto 
     ) : IRequest<ErrorOr<ClienteResponse>>;
 
     public class ClienteCreateCommandHandler : IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>

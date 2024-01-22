@@ -12,7 +12,12 @@ namespace wca.reembolso.domain.Entities
         public int Id { get; set; }
 
         [Column("filial_id")]
-        public int FilialId { get; set; } 
+        public int FilialId { get; set; }
+
+
+        [MaxLength(20)]
+        [Column("codigo_cliente", TypeName = "varchar(20)")]
+        public string? CodigoCliente { get; set; }
 
         [Required, MaxLength(150)]
         [Column("nome", TypeName = "varchar(150)")]
@@ -55,5 +60,7 @@ namespace wca.reembolso.domain.Entities
         public IList<UsuarioClientes> UsuarioClientes { get; set; } = new List<UsuarioClientes>();
 
         public IList<Solicitacao> Solicitacoes { get; set; }
+
+        public IList<CentroCusto> CentroCusto { get; set; } = new List<CentroCusto>();
     }
 }

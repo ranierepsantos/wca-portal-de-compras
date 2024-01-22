@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
@@ -34,6 +35,9 @@ namespace wca.reembolso.application.Features.Clientes.Queries
 
             if (!string.IsNullOrEmpty(request.Termo))
                 query = query.Where(q => q.Nome.Contains(request.Termo));
+
+            query = query.Include(x => x.CentroCusto);
+
 
             var pagination = Pagination<ClienteResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 

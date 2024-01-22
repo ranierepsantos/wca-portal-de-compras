@@ -18,7 +18,39 @@
                                 </v-row>
                             </v-col>
                         </v-row>
-                        <v-divider class="mt-2"></v-divider>
+                        <v-divider class="mt-3 mb-3"></v-divider>
+                        <!-- CENTRO DE CUSTO -->
+                        <v-row>
+                            <v-col>
+                                <h3 class="text-left text-grey">CENTROS DE CUSTO</h3>
+                                <!-- <small class="text-error" v-show="!isContatoValido">Deve haver pelo menos 1 contato que
+                                    aprova requisição</small> -->
+                                <v-divider class="mt-3"></v-divider>
+                            </v-col>
+                        </v-row>
+                        <v-table class="elevation-2">
+                            <thead>
+                                <tr>
+                                    <th class="text-left text-grey">CÓDIGO</th>
+                                    <th class="text-left text-grey">NOME</th>
+                                    <th class="text-right"> <v-btn density="compact" variant="outlined" color="primary"
+                                            class="text-capitalize" @click="editarCentroCusto(null)">Adicionar</v-btn>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in cliente.centroCusto" :key="item.id">
+                                    <td class="text-left">
+                                        {{ item.centroCustoId }}
+                                    </td>
+                                    <td class="text-left">{{ item.nome }}</td>
+                                    <td class="text-right">
+                                        <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editarCentroCusto(item)"></v-btn>
+                                        <v-btn icon="mdi-delete" variant="plain" color="error"  @click="removerCentroCusto(item)"></v-btn>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
                     </v-form>
                 </v-card-text>
                 <v-card-text class="text-right">
@@ -31,6 +63,35 @@
                 </v-card-text>
             </v-card>
         </v-container>
+        <v-dialog v-model="dialogCentroCustoOpen" max-width="700" :absolute="false">
+            <v-card>
+                <v-card-title class="text-primary text-h5">Centro de Custo</v-card-title>
+                <v-card-text>
+                    <v-form @submit.prevent="salvarCentroCusto()" ref="centroCustoForm">
+                        <v-row>
+                            <v-col>
+                                <v-text-field label="Código" v-model="centroCusto.centroCustoId" type="number" required
+                                    density="compact" variant="outlined" color="primary"
+                                    :rules="[(v) => !!v || 'Campo é obrigatório']">
+                                </v-text-field>
+                            </v-col>
+                            <v-col>
+                                <v-text-field label="Nome" v-model="centroCusto.nome" type="text" required
+                                    density="compact" variant="outlined" color="primary" :rules="[(v) => !!v || 'Campo é obrigatório']">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col class="text-right">
+                                <v-btn variant="outlined" color="primary" @click="closeDialogCentroCusto()">Cancelar</v-btn>
+                                <v-btn color="primary" type="submit" class="ml-3">Salvar</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-form>
+                </v-card-text>
+                <v-card-actions> </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -42,7 +103,7 @@ import breadCrumbs from '@/components/breadcrumbs.vue';
 import router from "@/router"
 import handleErrors from "@/helpers/HandleErrors"
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
-import ClienteDadosBasicosForm from '@/components/clienteDadosBasicosForm.vue';
+import ClienteDadosBasicosForm from '@/components/clienteDadosBasicosReembolsoForm.vue';
 import {Cliente, useClienteStore } from '@/store/reembolso/cliente.store';
 import filialService from '@/services/filial.service';
 import { useUsuarioStore } from '@/store/reembolso/usuario.store';
@@ -60,6 +121,15 @@ const isLoading = ref({
     save: false
 })
 const isMatriz = ref(false)
+
+const centroCusto = ref({
+    centroCustoId: 0,
+    clienteId: 0,
+    nome: ''
+})
+const dialogCentroCustoOpen = ref(false)
+const centroCustoForm = ref(null)
+
 //VUE FUNCTIONS
 
 onMounted(async () => {
@@ -132,6 +202,67 @@ async function salvar() {
         handleErrors(error)
     } finally {
         isLoading.value.save = false
+    }
+}
+
+async function salvarCentroCusto() {
+    const { valid } = await centroCustoForm.value.validate()
+    if (valid)
+    {
+        let index = -1;
+        if (centroCusto.value.centroCustoId != 0)
+        {
+            index = cliente.value.centroCusto.findIndex(c => { return c.centroCustoId == centroCusto.value.centroCustoId })
+            if (index > -1)
+            {
+                cliente.value.centroCusto[index] = { ...centroCusto.value }
+            }
+        }
+        if (index < 0) {
+            cliente.value.centroCusto.push({ ...centroCusto.value })
+        }
+
+        closeDialogCentroCusto()
+    }
+}
+
+function closeDialogCentroCusto() {
+    dialogCentroCustoOpen.value = false
+    clearCentroCustoData()
+}
+
+function clearCentroCustoData() {
+    centroCusto.value = {
+        centroCustoId: 0,
+        clienteId: 0,
+        nome: ''
+    }
+}
+
+function editarCentroCusto(item) {
+    if (!item)
+        clearCentroCustoData()
+    else 
+        centroCusto.value = {...item};
+    dialogCentroCustoOpen.value = true
+}
+
+async function removerCentroCusto(item) {
+    let options = {
+        title: "Confirma Exclusão?",
+        text: "Deseja realmente excluir o centro de custo: " + item.centroCustoId + ' - ' + item.nome + "?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
+    }
+
+    let response = await swal.fire(options);
+    if (response.isConfirmed) {
+        let index = cliente.value.centroCusto.findIndex(c => { return c.centroCustoId == item.centroCustoId })
+        if (index > -1) {
+            cliente.value.centroCusto.splice(index, 1);
+        }
     }
 }
 </script>

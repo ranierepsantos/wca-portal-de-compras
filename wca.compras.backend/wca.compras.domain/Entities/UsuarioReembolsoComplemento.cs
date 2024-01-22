@@ -22,11 +22,15 @@ namespace wca.compras.domain.Entities
 
         [Column("gestor_id")]
         public int? GestorId { get; set; }
+        
         [JsonIgnore]
         public Usuario? Gestor { get; set; }
 
         [Column("cargo", TypeName = "varchar(100)")]
         public string? Cargo { get; set; } = string.Empty;
+
+        [Column("centrocusto_id")]
+        public int? CentroCustoId { get; set; }
 
     }
 }
