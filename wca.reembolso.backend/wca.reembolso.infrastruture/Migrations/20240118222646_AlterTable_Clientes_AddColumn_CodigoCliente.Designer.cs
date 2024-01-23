@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20240118222646_AlterTable_Clientes_AddColumn_CodigoCliente")]
+    partial class AlterTable_Clientes_AddColumn_CodigoCliente
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,29 +24,6 @@ namespace wca.reembolso.infrastruture.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("wca.reembolso.domain.Entities.CentroCusto", b =>
-                {
-                    b.Property<int>("CentroCustoId")
-                        .HasColumnType("int")
-                        .HasColumnName("centrocusto_id");
-
-                    b.Property<int>("ClienteId")
-                        .HasColumnType("int")
-                        .HasColumnName("cliente_id");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("nome");
-
-                    b.HasKey("CentroCustoId", "ClienteId");
-
-                    b.HasIndex("ClienteId");
-
-                    b.ToTable("CentrosDeCustos");
-                });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Cliente", b =>
                 {
@@ -614,17 +594,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.ToTable("UsuarioClientes");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.CentroCusto", b =>
-                {
-                    b.HasOne("wca.reembolso.domain.Entities.Cliente", "Cliente")
-                        .WithMany("CentroCusto")
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cliente");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.Despesa", b =>
                 {
                     b.HasOne("wca.reembolso.domain.Entities.Solicitacao", "Solicitacao")
@@ -745,8 +714,6 @@ namespace wca.reembolso.infrastruture.Migrations
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.Cliente", b =>
                 {
-                    b.Navigation("CentroCusto");
-
                     b.Navigation("Solicitacoes");
 
                     b.Navigation("UsuarioClientes");

@@ -138,3 +138,5 @@ wca.compras.backend/__azurite_db_blob_extent__.json
 /wca.reembolso.backend/wca.reembolso.domain/bin/
 /wca.reembolso.backend/wca.reembolso.webapi/appsettings.Development.json
 /wca.reembolso.backend/wca.reembolso.webapi/wwwroot/Media
+/wca.reembolso.backend/wca.reembolso.webapi/Properties/PublishProfiles
+/wca.reembolso.backend/wca.reembolso.webapi/wca.reembolso.webapi.csproj.user

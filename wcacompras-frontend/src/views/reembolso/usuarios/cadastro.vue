@@ -102,6 +102,20 @@
                           :rules="(isColaborador || isGestor) ?[(v) => !!v  || 'Cliente é obrigatório']:''"
                         ></v-select>
                       </v-col>
+                      <v-col v-show="isColaborador">
+                        <v-select
+                          label="Centro de Custo"
+                          :items="centrosDeCusto"
+                          variant="outlined"
+                          color="primary"
+                          item-title="nome"
+                          item-value="centroCustoId"
+                          v-model="usuario.usuarioReembolsoComplemento.centroCustoId"
+                          density="compact"
+                          :rules="isColaborador ?[(v) => !!v  || 'Centro de Custo é obrigatório']:''"
+                      ></v-select>
+                      </v-col>
+                      
                     </v-row>
                     <v-row v-show="isColaborador">
                       <v-col>
@@ -170,7 +184,6 @@ import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
 import { Usuario, useUsuarioStore, IDPERFILGESTOR, IDPERFILCOLABORADOR } from "@/store/reembolso/usuario.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import userService from "@/services/user.service"
 import filialService from "@/services/filial.service"
 
 //DATA
@@ -190,6 +203,7 @@ const tipos = ref([]);
 const usuarioStore = useUsuarioStore();
 const colaboradorClienteId = ref(null)
 const isMatriz = ref(false)
+const centrosDeCusto = ref([])
 
 //VUE METHODS
 onMounted(async () => {
@@ -214,10 +228,12 @@ watch(() => colaboradorClienteId.value, async(clienteId, oldClienteId) => {
   if (cliente) 
   {
     usuario.value.cliente = []
-    if (oldClienteId && oldClienteId != clienteId )
+    if (oldClienteId && oldClienteId != clienteId ) {
       usuario.value.usuarioReembolsoComplemento.gestorId = null
-    
-      usuario.value.cliente.push(cliente)
+      usuario.value.usuarioReembolsoComplemento.centroCustoId = null
+    }
+    centrosDeCusto.value = cliente.centroCusto;
+    usuario.value.cliente.push(cliente)
   }
   await getGestorToList(clienteId)
 })
@@ -346,7 +362,6 @@ function clientesListRemove(removerTodos = false) {
 async function getClienteToList(filial) {
   try {
     clientes.value = await useClienteStore().toComboList(filial)
-    console.log("getClienteToList",clientes.value);
   } catch (error) {
     console.log("getClienteToList.error:", error);
     handleErrors(error);

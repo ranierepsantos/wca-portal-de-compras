@@ -17,7 +17,9 @@ export class Cliente {
             this.cidade= ""
             this.uf= ""
             this.ativo= true
-            this.valorLimite = 0 
+            this.valorLimite = 0,
+            this.codigoCliente = ""
+            this.centroCusto = []
         }else {
             this.id= data.id
             this.filialId= data.filialId
@@ -30,7 +32,9 @@ export class Cliente {
             this.cidade= data.cidade
             this.uf= data.uf
             this.ativo= data.ativo
-            this.valorLimite= data.valorLimite 
+            this.valorLimite= data.valorLimite,
+            this.codigoCliente = data.codigoCliente,
+            this.centroCusto = data.centroCusto
         }
     }
 }

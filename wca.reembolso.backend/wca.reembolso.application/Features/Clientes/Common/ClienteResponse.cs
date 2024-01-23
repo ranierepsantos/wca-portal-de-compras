@@ -10,7 +10,7 @@ namespace wca.reembolso.application.Features.Clientes.Common
 {
     public record ClienteResponse (
         int Id,
-        int FilialId, 
+        int FilialId,
         string Nome,
         string CNPJ,
         string InscricaoEstadual,
@@ -20,7 +20,9 @@ namespace wca.reembolso.application.Features.Clientes.Common
         string Cidade,
         string UF,
         bool Ativo,
-        decimal ValorLimite
+        decimal ValorLimite,
+        string? CodigoCliente,
+        IList<CentroCusto> CentroCusto
     );
 
     public record ClienteResponseWithValorUsado(
@@ -36,6 +38,7 @@ namespace wca.reembolso.application.Features.Clientes.Common
         string UF,
         bool Ativo,
         decimal ValorLimite,
-        decimal ValorUtilizadoMes
+        decimal ValorUtilizadoMes,
+        string? CodigoCliente
     );
 }

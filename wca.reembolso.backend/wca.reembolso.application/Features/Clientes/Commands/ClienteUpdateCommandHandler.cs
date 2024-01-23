@@ -22,7 +22,9 @@ namespace wca.reembolso.application.Features.Clientes.Commands
         string Cidade,
         string UF,
         bool Ativo,
-        decimal ValorLimite
+        decimal ValorLimite,
+        string CodigoCliente,
+        IList<CentroCusto> CentroCusto
     ) : IRequest<ErrorOr<ClienteResponse>>;
 
     public class ClienteUpdateCommandHandler : IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>
@@ -57,6 +59,25 @@ namespace wca.reembolso.application.Features.Clientes.Commands
             var findResult = await _mediator.Send(querie);
 
             if (findResult.IsError) return findResult;
+
+            var dado = findResult.Value;
+            //3. remover centro de custo que foi excluído!
+            List<CentroCusto> centroCustoRemover = dado.CentroCusto
+                .Where(x => !request.CentroCusto.Where(q => q.CentroCustoId == x.CentroCustoId).Any())
+                .Where(x => x.CentroCustoId != 0)
+                .ToList();
+
+            foreach (var item in centroCustoRemover)
+            {
+                var centro = _reposistory.CentroCustoRepository.ToQuery()
+                            .Where(q => q.CentroCustoId.Equals(item.CentroCustoId) 
+                                     && q.ClienteId.Equals(item.ClienteId))
+                            .FirstOrDefault();
+                if (centro != null)
+                {
+                    _reposistory.CentroCustoRepository.Delete(centro);
+                }
+            }
 
             //2. mapear para cliente e adicionar
             Cliente cliente = _mapper.Map<Cliente>(request);

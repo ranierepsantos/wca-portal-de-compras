@@ -20,7 +20,7 @@ namespace wca.reembolso.application.Contracts.Persistence
         IRepository<UsuarioClientes> UsuarioClientesRepository { get; }
         IRepository<FaturamentoHistorico> FaturamentoHistoricoRepository { get; }
         IRepository<Usuario> UsuarioRepository { get; }
-        //IRepository<Filial> FilialRepository { get; }
+        IRepository<CentroCusto> CentroCustoRepository { get; }
 
         Task SaveAsync();
         Task<int> ExecuteCommandAsync(string command);
