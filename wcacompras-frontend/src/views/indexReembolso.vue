@@ -65,7 +65,6 @@ import headerUserMenu from "@/components/headerUserMenu.vue";
 import notificacaoList from "@/components/notificacaoList.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
-import moment from "moment";
 import { onUnmounted } from "vue";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 //VARIABLES
@@ -156,7 +155,7 @@ function checkPermissao(permissao)
 
 function startCheckNotificacoes () {
   checkNotificacoes.value = setInterval(async () => {
-    notificacoes.value = []
+    //notificacoes.value = []
     notificacoes.value = await authStore.getNotificacoesReembolso();
   },5000)
 }
