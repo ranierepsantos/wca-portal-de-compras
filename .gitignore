@@ -140,3 +140,14 @@ wca.compras.backend/__azurite_db_blob_extent__.json
 /wca.reembolso.backend/wca.reembolso.webapi/appsettings.Development.json
 /wca.reembolso.backend/wca.reembolso.webapi/appsettings.json
 /wca.reembolso.backend/wca.reembolso.webapi/wwwroot/Media
+wca.share/.vs/
+wca.share/wca.share.webapi/bin/
+wca.share/wca.share.webapi/obj/
+wca.share/wca.share.webapi/Properties/
+wca.share/wca.share.webapi/appsettings.Development.json
+wca.share/wca.share.application/bin/
+wca.share/wca.share.application/obj/
+wca.share/wca.share.domain/bin/
+wca.share/wca.share.domain/obj/
+wca.share/wca.share.infrastructure/bin/
+wca.share/wca.share.infrastructure/obj/

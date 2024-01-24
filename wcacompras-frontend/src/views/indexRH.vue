@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" app color="grey-darken-2"
+    <v-navigation-drawer v-model="drawer" app color="#4A148C"
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px;">
       <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
@@ -83,30 +83,30 @@ const menuItems = ref([
     route: "/rh",
     permissao: "livre"
   },
-  // {
-  //   title: "Clientes",
-  //   value: 2,
-  //   route: "/rh/clientes",
-  //   permissao: "cliente"
-  // },
-  // {
-  //   title: "Faturamento",
-  //   value: 8,
-  //   route: "/rh/faturamento",
-  //   permissao: "faturamento|cliente_faturamento"
-  // },
+  {
+    title: "Clientes",
+    value: 2,
+    route: "/rh/clientes",
+    permissao: "livre"
+  },
+  {
+    title: "Desligamento",
+    value: 8,
+    route: "/rh/desligamento",
+    permissao: "livre"
+  },
   // {
   //   title: "Filiais",
   //   value: 3,
   //   route: "/rh/filiais",
   //   permissao: "filial"
   // },
-  // {
-  //   title: "Perfil",
-  //   value: 4,
-  //   route: "/rh/perfil",
-  //   permissao: "perfil"
-  // },
+  {
+    title: "Perfil",
+    value: 4,
+    route: "/rh/perfil",
+    permissao: "livre"
+  },
   // {
   //   title: "Solicitações",
   //   value: 5,
@@ -119,12 +119,12 @@ const menuItems = ref([
   //   route: "/rh/tipo-despesa",
   //   permissao: "tipodespesa"
   // },
-  // {
-  //   title: "Usuários",
-  //   value: 7,
-  //   route: "/rh/usuarios",
-  //   permissao: "usuario"
-  // },
+  {
+    title: "Usuários",
+    value: 7,
+    route: "/rh/usuarios",
+    permissao: "livre"
+  },
   // {
   //   title: "Movimentações Financeiras",
   //   value: 9,
