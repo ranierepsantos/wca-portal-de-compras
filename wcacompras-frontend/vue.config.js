@@ -18,6 +18,14 @@ module.exports = defineConfig({
         changeOrigin: true,
         secure: false,
         logLevel: 'error'
+      },
+      '^/shareapi': {
+        //target: 'https://wca-api-reembolso-hml.azurewebsites.net/api',
+        target: 'http://localhost:5030/api',
+        pathRewrite: {'^/shareapi': ''},
+        changeOrigin: true,
+        secure: false,
+        logLevel: 'error'
       }
     }
   }

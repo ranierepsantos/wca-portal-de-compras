@@ -80,7 +80,10 @@ function editar(id)
 {
   let routeName = "perfilCadastro"
 
-  if (useAuthStore().sistema.id == 2) routeName= "reembolsoPerfilCadastro"
+  if (useAuthStore().sistema.id == 2) 
+    routeName= "reembolsoPerfilCadastro"
+  else if (useAuthStore().sistema.id == 3) 
+    routeName= "sharePerfilCadastro"
 
   router.push({ name: routeName, query: { id: id } })
 }

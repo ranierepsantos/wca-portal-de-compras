@@ -2,12 +2,12 @@
   <v-app>
     <v-navigation-drawer v-model="drawer" app color="#4A148C"
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px;">
-      <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
+      <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
-      <v-btn block color="orange" rounded="lg" class="text-capitalize">
+      <!-- <v-btn block color="orange" rounded="lg" class="text-capitalize">
         <b>Nova Vaga</b>
-      </v-btn>
+      </v-btn> -->
       <br />
       <v-list class="text-left" density="compact">
         <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
@@ -46,11 +46,11 @@
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <!-- If using vue-router -->
-        <v-row>
+        <!-- <v-row>
           <v-col><card-list :list-data="list1" color="orange-lighten-2" card-title="Aguardando"></card-list></v-col>
           <v-col><card-list :list-data="list2" color="lime-darken-1" card-title="Em Andamento"></card-list></v-col>
           <v-col><card-list :list-data="list3" color="deep-purple-lighten-1" card-title="Concluídos"></card-list></v-col>
-        </v-row>
+        </v-row> -->
         
         <router-view></router-view>
         
@@ -71,7 +71,7 @@ import { useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
-import  cardList from "@/components/rh/cardlist.vue"
+import  cardList from "@/components/share/cardlist.vue"
 
 
 //VARIABLES
@@ -80,91 +80,51 @@ const menuItems = ref([
   {
     title: " Home",
     value: 1,
-    route: "/rh",
-    permissao: "livre"
-  },
-  {
-    title: "Clientes",
-    value: 2,
-    route: "/rh/clientes",
-    permissao: "livre"
-  },
-  {
-    title: "Desligamento",
-    value: 8,
-    route: "/rh/desligamento",
+    route: "/share",
     permissao: "livre"
   },
   // {
-  //   title: "Filiais",
-  //   value: 3,
-  //   route: "/rh/filiais",
-  //   permissao: "filial"
+  //   title: "Clientes",
+  //   value: 2,
+  //   route: "/share/clientes",
+  //   permissao: "livre"
+  // },
+  // {
+  //   title: "Desligamento",
+  //   value: 8,
+  //   route: "/share/desligamento",
+  //   permissao: "livre"
   // },
   {
     title: "Perfil",
     value: 4,
-    route: "/rh/perfil",
+    route: "/share/perfil",
     permissao: "livre"
   },
-  // {
-  //   title: "Solicitações",
-  //   value: 5,
-  //   route: "/rh/solicitacoes",
-  //   permissao: "solicitacao|wca_aprovacao|cliente_aprovacao"
-  // },
-  // {
-  //   title: "Tipos Despesa",
-  //   value: 6,
-  //   route: "/rh/tipo-despesa",
-  //   permissao: "tipodespesa"
-  // },
   {
     title: "Usuários",
     value: 7,
-    route: "/rh/usuarios",
+    route: "/share/usuarios",
     permissao: "livre"
   },
-  // {
-  //   title: "Movimentações Financeiras",
-  //   value: 9,
-  //   route: "/rh/movimentacao-financeira",
-  //   permissao: "contacorrente"
-  // },
-  
 ]);
+
 const authStore = useAuthStore();
-const router = useRouter();
 const usuario = computed(() =>
 {
   return authStore.user;
 })
 
-const list1 = ref([
-  { id: 1, nome: "Auxiliar de Cozinha", status: "Em análise", list: 1 },
-  { id: 2, nome: "Auxiliar de Limpeza", status: "Em análise", list: 1 },
-]);
 
-const list2 = ref([
-  { id: 3, nome: "Desenvolvedor Jr", status: "Em análise", list: 1 },
-  { id: 4, nome: "Product Owner", status: "Em análise", list: 1 },
-]);
-
-const list3 = ref([]);
 //VUE - FUNCTIONS
 onMounted(async () => {
 });
-
-
-
 
 //FUNCTIONS
 function checkPermissao(permissao)
 {
   return authStore.hasPermissao(permissao)
 }
-
-
 
 </script>
 

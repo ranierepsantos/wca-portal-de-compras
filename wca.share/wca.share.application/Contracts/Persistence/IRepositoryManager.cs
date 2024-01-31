@@ -1,0 +1,17 @@
+﻿using Microsoft.EntityFrameworkCore;
+using wca.share.domain.Entities;
+
+namespace wca.share.application.Contracts.Persistence
+{
+    public interface IRepositoryManager
+    {
+
+        IRepository<Cliente> ClienteRepository { get; }
+        IRepository<Usuario> UsuarioRepository { get; }
+        IRepository<UsuarioClientes> UsuarioClientesRepository { get; }
+        IRepository<Notificacao> NotificacaoRepository { get; }
+        Task SaveAsync();
+        Task<int> ExecuteCommandAsync(string command);
+        DbSet<T> GetDbSet<T>() where T : class;
+    }
+}
