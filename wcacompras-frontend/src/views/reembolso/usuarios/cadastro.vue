@@ -397,10 +397,6 @@ function getSistemaPerfil(sistemaId) {
 async function salvar() {
   try {
     let { valid } = await userForm.value.validate();
-
-
-
-
     if (valid) {
       isSaving.value = true;
       let data = {...usuario.value};
