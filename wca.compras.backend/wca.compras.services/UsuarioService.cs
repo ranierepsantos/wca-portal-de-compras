@@ -77,6 +77,9 @@ namespace wca.compras.services
                     data = await GetDataToCompras(query);
                 else if (sistemaId == 2)
                     data = await GetDataToReembolso(query);
+                else if (sistemaId ==3)
+                    data  = await GetDataToShare(query);
+
 
                 if (data == null)
                     return null;
@@ -355,6 +358,12 @@ namespace wca.compras.services
 
             var data = await query.FirstOrDefaultAsync();
             
+            return data;
+        }
+
+        private async Task<Usuario> GetDataToShare(IQueryable<Usuario> query)
+        {
+            var data = await query.FirstOrDefaultAsync();
             return data;
         }
 
