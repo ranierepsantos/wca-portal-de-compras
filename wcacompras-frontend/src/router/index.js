@@ -52,7 +52,7 @@ const routes = [
     path: "/sistemas",
     name: "sistemas",
     beforeEnter: protectRoute,
-    component: () => import("../views/Sistema")
+    component: () => import("../views/pages/Sistema")
   },
   {
     path: "/:pathMatch(.*)*",

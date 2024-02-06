@@ -22,7 +22,7 @@ namespace wca.share.application.Features.Clientes.Commands
         decimal ValorLimite
     ) : IRequest<ErrorOr<ClienteResponse>>;
 
-    public class ClienteCreateCommandHandler : IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>
+    internal sealed class ClienteCreateCommandHandler : IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>
     {
         private IRepositoryManager _repository;
         private IMapper _mapper;
@@ -39,7 +39,7 @@ namespace wca.share.application.Features.Clientes.Commands
         {
             _logger.LogInformation("CreateClienteCommandHandler - validation");
             //1. validar dados
-            CreateClienteCommandBehavior validator = new CreateClienteCommandBehavior();
+            CreateClienteCommandBehavior validator = new();
             var validationResult = validator.Validate(request);
             if (!validationResult.IsValid)
             {

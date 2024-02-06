@@ -22,7 +22,7 @@ namespace wca.share.application.Features.Clientes.Queries
         }
         public async Task<ErrorOr<IList<int>>> Handle(ClienteUsersByClienteQuerie request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Listando usuários por cliente");
+            _logger.LogInformation("Listando id de usuários por cliente");
 
             var query = _repository.UsuarioClientesRepository.ToQuery()
                         .Where(q => q.ClienteId.Equals(request.ClienteId));

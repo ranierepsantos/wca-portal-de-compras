@@ -2,12 +2,12 @@ import { protectRoute } from "./functions";
 
 export const reembolso = {
     path: "/reembolso",
-    component: () => import("../views/indexReembolso"), //webpackChunkName app
+    component: () => import("../views/reembolso/indexReembolso"), //webpackChunkName app
     children: [
       {
         path: '',
         name: 'reembolso',
-        component: () => import(/* webpackChunkName: "reembolso" */ '@/views/HomeView.vue'),
+        component: () => import(/* webpackChunkName: "reembolso" */ '@/views/pages/HomeView.vue'),
         meta: {sistema: 2},
         beforeEnter: protectRoute,
       },

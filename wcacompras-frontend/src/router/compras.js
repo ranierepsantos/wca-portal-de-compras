@@ -2,13 +2,13 @@ import { protectRoute } from "./functions";
 
 export const compras = {
     path: "/compras",
-    component: () => import(/* webpackChunkName: "compras" */ '@/views/indexCompras'),
+    component: () => import(/* webpackChunkName: "compras" */ '@/views/compras/indexCompras'),
     children: [
       {
         path: '',
         name: 'compras',
         meta: {sistema: 1},
-        component: () => import(/* webpackChunkName: "compras" */ '@/views/HomeView.vue'),
+        component: () => import(/* webpackChunkName: "compras" */ '@/views/pages/HomeView.vue'),
         beforeEnter: protectRoute,
       },
       {

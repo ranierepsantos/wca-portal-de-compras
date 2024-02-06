@@ -18,6 +18,13 @@
             </v-list-item-title>
           </router-link>
         </v-list-item>
+        <v-list-item v-show="checkPermissao('livre')" active-color="info">
+          <router-link to="/share/configuracoes" class="text-decoration-none">
+            <v-list-item-title>
+              Configurações
+            </v-list-item-title>
+          </router-link>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
@@ -67,11 +74,9 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/store/auth.store";
-import { useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
-import  cardList from "@/components/share/cardlist.vue"
 
 
 //VARIABLES
@@ -83,28 +88,46 @@ const menuItems = ref([
     route: "/share",
     permissao: "livre"
   },
-  // {
-  //   title: "Clientes",
-  //   value: 2,
-  //   route: "/share/clientes",
-  //   permissao: "livre"
-  // },
-  // {
-  //   title: "Desligamento",
-  //   value: 8,
-  //   route: "/share/desligamento",
-  //   permissao: "livre"
-  // },
+  {
+    title: "Clientes",
+    value: 2,
+    route: "/share/clientes",
+    permissao: "livre"
+  },
+  {
+    title: "Desligamento",
+    value: 2,
+    route: "/share/desligamento",
+    permissao: "livre"
+  },
+  {
+    title: "Mudança de base",
+    value: 3,
+    route: "/share/mudancabase",
+    permissao: "livre"
+  },
+  {
+    title: "Comunicados",
+    value: 4,
+    route: "/share/comunicados",
+    permissao: "livre"
+  },
   {
     title: "Perfil",
-    value: 4,
+    value: 5,
     route: "/share/perfil",
     permissao: "livre"
   },
   {
     title: "Usuários",
-    value: 7,
+    value: 6,
     route: "/share/usuarios",
+    permissao: "livre"
+  },
+  {
+    title: "Férias",
+    value: 4,
+    route: "/share/ferias",
     permissao: "livre"
   },
 ]);

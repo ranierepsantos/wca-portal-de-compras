@@ -79,7 +79,7 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
             await userService.update(data);
         },
         async update (data) {
-                debugger
+                
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
                 
@@ -127,7 +127,7 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
             return list;
         },
 
-        async reembolsoToListByClientePerfil(clienteId, perfilId) {
+        async toListByClientePerfil(clienteId, perfilId) {
             let response = await userService.toListByPerfil(perfilId)
             let usuarios = response.data;
             

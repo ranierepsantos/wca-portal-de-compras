@@ -2,7 +2,7 @@
   <v-app>
     <v-navigation-drawer v-model="drawer" app color="primary"
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px">
-      <img src="../assets/images/logoWCA.png" alt="" class="side-bar-logo" />
+      <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
       <v-btn block color="orange" rounded="lg" class="text-capitalize"
