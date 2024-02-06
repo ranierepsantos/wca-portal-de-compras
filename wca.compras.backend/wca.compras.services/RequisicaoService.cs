@@ -86,7 +86,7 @@ namespace wca.compras.services
                 }
 
                 if (data.RequerAutorizacaoCliente == false && data.RequerAutorizacaoWCA == false)
-                    data.Status = EnumStatusRequisicao.APROVADO;
+                    data.Status = (int)EnumStatusRequisicao.APROVADO;
 
                 await _rm.SaveAsync();
 
@@ -256,7 +256,10 @@ namespace wca.compras.services
                     data.RequerAutorizacaoCliente = false;
 
                 if (aprovarRequisicaoDto.Aprovado == false)
-                    data.Status = EnumStatusRequisicao.REJEITADO;
+                {
+
+                    data.Status = (int) EnumStatusRequisicao.REJEITADO;
+                }
                 else
                 {
                     /* SOMENTE APROVAR se o status atual for AGUARDANDO
@@ -264,7 +267,7 @@ namespace wca.compras.services
                      *  -- FINALIZADO - NÃO ALTERAR
                      *  -- REJEITADO  - NÃO ALTERAR
                     */
-                    if (data.Status == EnumStatusRequisicao.AGUARDANDO)
+                    if (data.Status == (int) EnumStatusRequisicao.AGUARDANDO)
                     {
                         // SOMENTE ALTERAR SE:
                         // solicitação por alterar status
@@ -273,7 +276,7 @@ namespace wca.compras.services
                             data.RequerAutorizacaoCliente == false &&
                             data.RequerAutorizacaoWCA == false)
                         {
-                            data.Status = EnumStatusRequisicao.APROVADO;
+                            data.Status = (int) EnumStatusRequisicao.APROVADO;
                         }
                     }
                     else
@@ -281,10 +284,10 @@ namespace wca.compras.services
                         evento = $"APROVAÇÃO realizado por {aprovarRequisicaoDto.NomeUsuario}, NÃO ACATADA, motivo: requisição com status: ";
                         evento += data.Status switch
                         {
-                            EnumStatusRequisicao.APROVADO => "APROVADO",
-                            EnumStatusRequisicao.CANCELADO => "CANCELADO",
-                            EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
-                            EnumStatusRequisicao.REJEITADO => "REJEITADO",
+                            (int) EnumStatusRequisicao.APROVADO => "APROVADO",
+                            (int) EnumStatusRequisicao.CANCELADO => "CANCELADO",
+                            (int) EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
+                            (int) EnumStatusRequisicao.REJEITADO => "REJEITADO",
                             _ => "DESCONHECIDO"
                         };
                     }
@@ -317,33 +320,11 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<RequisicaoDto> Paginate(int[] filials, int page = 1, int pageSize = 10, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public Pagination<RequisicaoDto> Paginate(int[] filials, int authUserId = 0, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId = 0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
         {
             try
             {
-                var query = _rm.RequisicaoRepository.SelectAll();
-
-                if (filials.Length > 0)
-                    query = query.Where(c => filials.Contains(c.FilialId));
-
-                if (clienteId > 0)
-                    query = query.Where(c => c.ClienteId == clienteId);
-
-                if (fornecedorId > 0)
-                    query = query.Where(c => c.FornecedorId == fornecedorId);
-
-                if (usuarioId > 0)
-                    query = query.Where(c => c.UsuarioId == usuarioId);
-
-                if (status != EnumStatusRequisicao.TODOS)
-                    query = query.Where(c => c.Status == status);
-
-                if (dataInicio != null && dataFim != null)
-                {
-                    dataFim =  dataFim.Value.AddDays(1);
-                    query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao <= dataFim);
-                }
-
+                IQueryable<Requisicao> query = GetQuery(filials, authUserId, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
                 query = query.Include("Usuario")
                              .Include("Cliente")
                              .Include("Fornecedor");
@@ -370,7 +351,7 @@ namespace wca.compras.services
 
                 if (data == null) return false;
 
-                data.Status = EnumStatusRequisicao.CANCELADO;
+                data.Status = (int)EnumStatusRequisicao.CANCELADO;
 
                 await _rm.SaveAsync();
 
@@ -398,6 +379,8 @@ namespace wca.compras.services
         {
             try
             {
+                string complementoHistorico = "";
+
                 var query = _rm.RequisicaoRepository.SelectByCondition(p => p.Id == updateRequisicaoDto.Id);
 
                 query = query.Include("RequisicaoItens");
@@ -406,7 +389,7 @@ namespace wca.compras.services
 
                 if (data == null) return null;
 
-                if (data.Status == EnumStatusRequisicao.APROVADO || data.Status == EnumStatusRequisicao.CANCELADO || data.Status == EnumStatusRequisicao.FINALIZADO)
+                if (data.Status == (int)EnumStatusRequisicao.APROVADO || data.Status == (int)EnumStatusRequisicao.CANCELADO || data.Status == (int)EnumStatusRequisicao.FINALIZADO)
                     throw new Exception("Requisição não pode ser editada!");
 
                 //Remover produtos caso tenha alterado
@@ -421,9 +404,9 @@ namespace wca.compras.services
                 });
                 _mapper.Map(updateRequisicaoDto, data);
 
-                if (updateRequisicaoDto.Status == EnumStatusRequisicao.ITENSALTERADOS)
+                if (updateRequisicaoDto.Status == EnumStatusRequisicao.ITENSALTERADOS || updateRequisicaoDto.Status == EnumStatusRequisicao.RETORNARPARAAPROVACAO)
                 {
-                    if (updateRequisicaoDto.RequerAutorizacaoCliente == false || updateRequisicaoDto.RequerAutorizacaoWCA == false)
+                    if (updateRequisicaoDto.Status == EnumStatusRequisicao.ITENSALTERADOS && (updateRequisicaoDto.RequerAutorizacaoCliente == false || updateRequisicaoDto.RequerAutorizacaoWCA == false))
                     {
                         var cliente = await _rm.ClienteRepository.SelectByCondition(c => c.Id == data.ClienteId)
                                                .Include(inc => inc.ClienteOrcamentoConfiguracao)
@@ -450,11 +433,15 @@ namespace wca.compras.services
                                 }
                             }
                         }
+                    }else if (updateRequisicaoDto.Status == EnumStatusRequisicao.RETORNARPARAAPROVACAO)
+                    {
+                        complementoHistorico = ", retornado para aprovação!";
                     }
+                    
                     if (data.RequerAutorizacaoCliente||data.RequerAutorizacaoWCA)
-                        data.Status = EnumStatusRequisicao.AGUARDANDO;
+                        data.Status = (int)EnumStatusRequisicao.AGUARDANDO;
                     else
-                        data.Status = EnumStatusRequisicao.APROVADO;
+                        data.Status = (int)EnumStatusRequisicao.APROVADO;
 
                 }
                 _rm.RequisicaoRepository.Update(data);
@@ -464,7 +451,7 @@ namespace wca.compras.services
                 await CreateRequisicaoHistorico(new RequisicaoHistorico()
                 {
                     DataHora = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZoneBrasilia),
-                    Evento = $"Requisição alterada por {updateRequisicaoDto.NomeUsuario}",
+                    Evento = $"Requisição alterada por {updateRequisicaoDto.NomeUsuario}{complementoHistorico}",
                     RequisicaoId = data.Id
                 });
 
@@ -614,7 +601,7 @@ namespace wca.compras.services
                 return false;
             }
 
-            requisicao.Status = EnumStatusRequisicao.FINALIZADO;
+            requisicao.Status = (int)EnumStatusRequisicao.FINALIZADO;
             requisicao.DataEntrega = finalizarRequisicaoDto.DataEntrega;
             requisicao.NotaFiscal = finalizarRequisicaoDto.NotaFiscal;
 
@@ -658,48 +645,12 @@ namespace wca.compras.services
         }
 
         public async Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, 
-            EnumStatusRequisicao status = EnumStatusRequisicao.TODOS,
-            DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0)
+                                                DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0, params int[] status)
         {
             try
             {
-                var query = _rm.RequisicaoRepository.SelectAll();
-                if (authUserId > 0)
-                {
-                    string consulta = "select r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
-                                + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                                + "r.usuario_id, r.valor_icms, r.valor_total "
-                                + "from Requisicoes r "
-                                + "inner join clientes c on c.id = r.cliente_id "
-                                + "inner join ClienteUsuario cu on cu.ClienteId = c.id "
-                                + "inner join RequisicaoItens ri  on ri.requisicao_id  = r.id "
-                                + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId "
-                                + $"where cu.UsuarioId ={authUserId}"
-                                + "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
-                                + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                                + "r.usuario_id, r.valor_icms, r.valor_total";
-                    query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
-                }
-
-                if (filials.Length > 0)
-                    query = query.Where(c => filials.Contains(c.FilialId));
-
-                if (clienteId > 0)
-                    query = query.Where(c => c.ClienteId == clienteId);
-
-                if (fornecedorId > 0)
-                    query = query.Where(c => c.FornecedorId == fornecedorId);
-
-                if (usuarioId > 0)
-                    query = query.Where(c => c.UsuarioId == usuarioId);
-
-                if (status != EnumStatusRequisicao.TODOS)
-                    query = query.Where(c => c.Status == status);
-                if (dataInicio !=null && dataFim !=null)
-                {
-                    dataFim = dataFim.Value.AddDays(1);
-                    query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao<= dataFim);
-                }
+                
+                IQueryable<Requisicao> query = GetQuery(filials, authUserId, clienteId, usuarioId, fornecedorId, dataInicio,dataFim, status);
 
                 query = query.Include("Usuario")
                              .Include(c =>  c.Cliente)
@@ -732,10 +683,10 @@ namespace wca.compras.services
 
                     string _status = requisicao.Status switch
                     {
-                        EnumStatusRequisicao.APROVADO => "APROVADO",
-                        EnumStatusRequisicao.AGUARDANDO => "AGUARDANDO",
-                        EnumStatusRequisicao.CANCELADO => "CANCELADO",
-                        EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
+                        (int)EnumStatusRequisicao.APROVADO => "APROVADO",
+                        (int)EnumStatusRequisicao.AGUARDANDO => "AGUARDANDO",
+                        (int)EnumStatusRequisicao.CANCELADO => "CANCELADO",
+                        (int)EnumStatusRequisicao.FINALIZADO => "FINALIZADO",
                         _ => "DESCONHECIDO"
                     };
 
@@ -823,65 +774,15 @@ namespace wca.compras.services
         }
 
 
-        public Pagination<RequisicaoDto> PaginateByContextUser(int[] filials, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId =0, int fornecedorId = 0, EnumStatusRequisicao status = EnumStatusRequisicao.TODOS, DateTime? dataInicio = null, DateTime? dataFim = null)
+        public Pagination<RequisicaoDto> PaginateByContextUser(int[] filials, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId =0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
         {
             try
             {
-                //var query = _rm.RequisicaoRepository.SelectByCondition(q => q.Cliente.Usuario.FirstOrDefault(c => c.Id.Equals(usuarioId)) != null);
-                //query = query.Include(ic => ic.Cliente)
-                //             .Where(q => q.Cliente.Usuario.Any(c => usuarioId.Equals(c.Id)))
-                //             .Where(q => q.Usuario.TipoFornecimento.Where(
-                //                 c => q.RequisicaoItens.Where(x => x.TipoFornecimentoId.Equals(c.Id)).Count() > 0).Count() > 0
-
-                //             )
-                //             .Include("Fornecedor")
-                //             .Include("Usuario");
-
-                string consulta = "select r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
-                                + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                                + "r.usuario_id, r.valor_icms, r.valor_total "
-                                + "from Requisicoes r "
-                                + "inner join clientes c on c.id = r.cliente_id "
-                                + "inner join ClienteUsuario cu on cu.ClienteId = c.id "
-                                + "inner join RequisicaoItens ri  on ri.requisicao_id  = r.id " 
-                                + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId "
-                                + $"where cu.UsuarioId ={logedUserId}"
-                                + "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
-                                + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                                + "r.usuario_id, r.valor_icms, r.valor_total";
-
-
-
-                var query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
+                IQueryable<Requisicao> query = GetQuery(filials, logedUserId, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
                 query = query
                         .Include(q => q.Cliente)
                         .Include("Fornecedor")
                         .Include("Usuario");
-
-                if (filials != null && filials.Length > 0)
-                {
-                    query = query.Where(c => filials.Contains(c.FilialId));
-                }
-
-                if (clienteId > 0)
-                    query = query.Where(c => c.ClienteId == clienteId);
-
-                if (usuarioId > 0)
-                    query = query.Where(c => c.UsuarioId == usuarioId);
-
-
-                if (fornecedorId > 0)
-                    query = query.Where(c => c.FornecedorId == fornecedorId);
-
-                
-                if (status != EnumStatusRequisicao.TODOS)
-                    query = query.Where(c => c.Status == status);
-
-                if (dataInicio != null && dataFim != null)
-                {
-                    dataFim = dataFim.Value.AddDays(1);
-                    query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao <= dataFim);
-                }
 
                 var pagination = Pagination<RequisicaoDto>.ToPagedList(_mapper, query, page, pageSize);
 
@@ -1186,6 +1087,55 @@ namespace wca.compras.services
 
             return (dataCorteIni, dataCorteFim);
         }
+
+        private IQueryable<Requisicao> GetQuery(int[] filials, int logedUserId = 0, int clienteId = 0, int usuarioId = 0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
+        {
+            var query = _rm.RequisicaoRepository.SelectAll();
+            if (logedUserId > 0)
+            {
+                string consulta = "select r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
+                            + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
+                            + "r.usuario_id, r.valor_icms, r.valor_total "
+                            + "from Requisicoes r "
+                            + "inner join clientes c on c.id = r.cliente_id "
+                            + "inner join ClienteUsuario cu on cu.ClienteId = c.id "
+                            + "inner join RequisicaoItens ri  on ri.requisicao_id  = r.id "
+                            + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId "
+                            + $"where cu.UsuarioId ={logedUserId}"
+                            + "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
+                            + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
+                            + "r.usuario_id, r.valor_icms, r.valor_total";
+                query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
+            }
+
+            if (filials != null && filials.Length > 0)
+            {
+                query = query.Where(c => filials.Contains(c.FilialId));
+            }
+
+            if (clienteId > 0)
+                query = query.Where(c => c.ClienteId == clienteId);
+
+            if (usuarioId > 0)
+                query = query.Where(c => c.UsuarioId == usuarioId);
+
+
+            if (fornecedorId > 0)
+                query = query.Where(c => c.FornecedorId == fornecedorId);
+
+            
+            if (status.Length > 0)
+                query = query.Where(c => status.Contains(c.Status));
+
+            if (dataInicio != null && dataFim != null)
+            {
+                dataFim = dataFim.Value.AddDays(1);
+                query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao <= dataFim);
+            }
+            return query;
+
+        }
+
 
         #endregion
     }

@@ -7,51 +7,52 @@
             />
         <v-row>
             <v-col>
-                <v-select label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
+                <v-autocomplete label="Filiais" v-model="filter.filial" :items="filiais" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
-                    :hide-details="true"></v-select>
+                    :hide-details="true">
+                </v-autocomplete>
             </v-col>
             <v-col >
-                <v-select label="Clientes" v-model="filter.clienteId" :items="clientes" density="compact"
+                <v-autocomplete label="Clientes" v-model="filter.clienteId" :items="clientes" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
-                    :hide-details="true"></v-select>
+                    :hide-details="true"></v-autocomplete>
             </v-col>
             <v-col >
-                <v-select label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
+                <v-autocomplete label="Fornecedor" v-model="filter.fornecedorId" :items="fornecedores" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
-                    :hide-details="true"></v-select>
+                    :hide-details="true"></v-autocomplete>
             </v-col>
             <v-col v-show="hasPermissionAprovador">
-                <v-select label="Usuário" v-model="filter.usuarioId" :items="usuarios" density="compact"
+                <v-autocomplete label="Usuário" v-model="filter.usuarioId" :items="usuarios" density="compact"
                     item-title="text" item-value="value" variant="outlined" color="primary"
-                    :hide-details="true"></v-select>
+                    :hide-details="true"></v-autocomplete>
             </v-col>
             
         </v-row>
         <v-row>
-            <v-col cols="2">
+            <v-col cols="4">
                 <v-select label="Status" v-model="filter.status" :items="status" density="compact" item-title="text"
-                    item-value="value" variant="outlined" color="primary" :hide-details="true"></v-select>
+                    item-value="value" variant="outlined" color="primary" :hide-details="true" multiple></v-select>
             </v-col>
-            <v-col>
+            <v-col cols="2">
                 <v-text-field label="Data Início" v-model="filter.dataInicio" type="date"
                 variant="outlined" color="primary"
                 density="compact"></v-text-field>
             </v-col>
-            <v-col>
+            <v-col cols="2">
                 <v-text-field label="Data Fim" v-model="filter.dataFim" type="date"
                 variant="outlined" color="primary"
                 density="compact"></v-text-field>
             </v-col>
             <v-col class="text-right">
-                <v-btn color="primary" variant="outlined" class="text-capitalize" @click="getItems()">
+                <v-btn color="primary" variant="outlined" class="text-capitalize" @click="applyFilters()" title="Aplicar Filtros">
                     <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
-                    <b>Aplicar Filtros</b>
+                    <b>Aplicar</b>
                 </v-btn>
                 &nbsp;
-                <v-btn color="info" variant="outlined" class="text-capitalize" @click="clearFilters()">
+                <v-btn color="info" variant="outlined" class="text-capitalize" @click="clearFilters()" title="Limpar Filtros">
                     <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
-                    <b>Limpar Filtros</b>
+                    <b>Limpar</b>
                 </v-btn>
             </v-col>
 
@@ -139,7 +140,7 @@ const filter = ref({
     clienteId: null,
     fornecedorId: null,
     usuarioId: null,
-    status: -1,
+    status: null,
     dataInicio: null,
     dataFim: null
 });
@@ -181,15 +182,21 @@ watch(()=>filter.value.filial, async () => {
 //watch(filter.value, () => getItems());
 
 //METHODS
+function applyFilters() 
+{
+    localStorage.setItem("requisicao.index.filters", JSON.stringify(filter.value))
+    getItems()   
+}
 function clearFilters()
 {
     filter.value.filial = null
     filter.value.clienteId = null
     filter.value.fornecedorId = null
     filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
-    filter.value.status = -1
+    filter.value.status = null
     filter.value.dataInicio = null
     filter.value.dataFim = null
+    localStorage.removeItem("requisicao.index.filters")
     getItems();
 }
 async function duplicar(item)
@@ -323,18 +330,20 @@ async function getItems()
         debugger
         isBusy.value = true;
 
-        let response =  null;
-        
-        if (authStore.hasPermissao("requisicao_all_users")){
-            let filtro = {...filter.value }
+        let storedFilters = JSON.parse(localStorage.getItem("requisicao.index.filters")) || null
+        if (storedFilters) filter.value = storedFilters
 
+        let response =  null;
+        let filtro = {...filter.value }
+        if (authStore.hasPermissao("requisicao_all_users")){
             if (!filtro.filial || filtro.filial.length == 0)
                 filtro.filial = filiais.value.map(p => {return p.value })
-        
-                response = await requisicaoService.paginate(pageSize, page.value, filtro);
         }else
-            response = await requisicaoService.paginateByUserContext(pageSize, page.value, filter.value);
+            filtro.authUserId = authStore.user.id;
+
         
+
+        response = await requisicaoService.paginate(pageSize, page.value, filtro);
         requisicoes.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)

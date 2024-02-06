@@ -21,7 +21,7 @@ namespace wca.compras.domain.Entities
         public decimal TaxaGestao { get; set; } = 0;
 
         [Column("status", TypeName = "tinyint")]
-        public EnumStatusRequisicao Status { get; set; } = 0;
+        public int Status { get; set; } = 0;
 
         [Column("destino", TypeName = "tinyint")]
         public EnumDestinoRequisicao Destino { get; set; } = 0;
@@ -99,6 +99,7 @@ namespace wca.compras.domain.Entities
 
     public enum EnumStatusRequisicao
     {
+        RETORNARPARAAPROVACAO =-3,
         ITENSALTERADOS = -2,
         TODOS = -1,
         AGUARDANDO,

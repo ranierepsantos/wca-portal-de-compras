@@ -234,6 +234,19 @@
               </v-btn>
             </v-col>
 
+            <v-col v-show="getStatus(requisicao.status).text.toLowerCase() =='rejeitado' && authStore.hasPermissao('requisicao_retornaaprovacao')">
+              <v-btn
+                color="primary"
+                variant="outlined"
+                class="text-center"
+                @click="salvar(true)"
+              >
+                Retornar para Aprovação
+              </v-btn>
+            </v-col>
+
+
+
             <v-col class="text-right">
               <v-btn
                 :disabled="requisicao.id == null"
@@ -671,7 +684,7 @@ const requisicao = ref({
   },
   valorTotal: 0,
   taxaGestao: 0,
-  status: -1,
+  status: null,
   destino: 0,
   usuarioId: null,
   usuario: {
@@ -908,13 +921,11 @@ function calcularOrcamentoTotais() {
     let index = orcamento.value.findIndex(
       (o) => o.tipoFornecimentoId == item.tipoFornecimentoId
     );
-    orcamento.value[index].valorTotal +=
-      item.quantidade * parseFloat(retornarValorTotalProduto(item));
-    orcamento.value[index].percentual =
-      (orcamento.value[index].valorTotal /
-        (orcamento.value[index].valorPedido *
-          (1 + orcamento.value[index].tolerancia / 100))) *
-      100;
+    if(index > -1) {
+      orcamento.value[index].valorTotal += item.quantidade * parseFloat(retornarValorTotalProduto(item));
+      orcamento.value[index].percentual = (orcamento.value[index].valorTotal / (orcamento.value[index].valorPedido * (1 + orcamento.value[index].tolerancia / 100))) * 100;
+    }
+    
   }
 }
 
@@ -922,7 +933,7 @@ function carregarConfiguracaoCliente() {
     let configuracoes = requisicao.value.cliente.clienteOrcamentoConfiguracao.filter(
       (c) => c.ativo == true
     );
-    console.log(configuracoes)
+    
     for (let idx = 0; idx < configuracoes.length; idx++) {
       configuracoes[idx].nome = getTipoFornecimentoNome(configuracoes[idx].tipoFornecimentoId)
       configuracoes[idx].valorTotal = 0;
@@ -1027,6 +1038,7 @@ async function getRequisicaoData(id) {
     isBusy.value = true;
     let response = await requisicaoService.getById(id);
     let data = response.data;
+    console.debug("requisição: ", data);
     data.requisicaoHistorico.sort(compararValor("dataHora", "desc"));
     if (data.periodoEntrega == null || data.periodoEntrega.trim() == "") {
       data.periodoEntrega = requisicao.value.periodoEntrega;
@@ -1037,13 +1049,6 @@ async function getRequisicaoData(id) {
     requisicao.value = data;
     requisicaoOriginal.value = JSON.parse(JSON.stringify(requisicao.value));
 
-    // orcamento.value = requisicao.value.cliente.clienteOrcamentoConfiguracao;
-    // for (let idx = 0; idx < orcamento.value.length; idx++) {
-    //   orcamento.value[idx].valorTotal = 0;
-    //   orcamento.value[idx].percentual = 0;
-    // }
-    
-    
   } catch (error) {
     console.log("getRequisicaoData.error:", error);
     handleErrors(error);
@@ -1054,7 +1059,10 @@ async function getRequisicaoData(id) {
 }
 
 function getStatus(codigo) {
-  let dado = status.filter((s) => s.value == codigo)[0];
+  let dado = { value: -1, text: "Todos" }
+  if (codigo != null)
+    dado = status.filter((s) => s.value == codigo)[0];
+  
   return dado;
 }
 
@@ -1101,75 +1109,59 @@ async function removeProdutoRequisicao(item) {
   calcularOrcamentoTotais();
 }
 
-async function salvar() {
+async function salvar(forceUpdate = false) {
   try {
     isBusy.value = true;
+    let data = {}
+    if (forceUpdate) {
+      //neste caso não deve ter alteração de dados, segue o original somente envia o status para retornar para aprovação
+      data = checarSeRequerAprovacao({ ...requisicaoOriginal.value })
+      data.status = -3 //retornar para aprovação
+    }else {
+      let { valid } = await formCadastro.value.validate();
+      hasProduto.value = requisicao.value.requisicaoItens.length > 0;
 
-    let { valid } = await formCadastro.value.validate();
-    hasProduto.value = requisicao.value.requisicaoItens.length > 0;
+      if (valid && hasProduto.value) {
+        
+        data = checarSeRequerAprovacao({ ...requisicao.value })
 
-    if (valid && hasProduto.value) {
-      let data = { ...requisicao.value };
-      //remover o campo id da requisicaoItens
-      data.requisicaoItens.forEach((produto) => {
-        produto.valorTotal =
-          retornarValorTotalProduto(produto) * produto.quantidade;
-      });
-      data.periodoEntrega = JSON.stringify(data.periodoEntrega);
-      data.requerAutorizacaoWCA = false;
-      data.requerAutorizacaoCliente = false;
-      // verificar se requer autorização
-      //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
-      orcamento.value.forEach((o) => {
-        if (o.percentual > 100) {
-          if (o.aprovadoPor == 1) data.requerAutorizacaoCliente = true;
-          else data.requerAutorizacaoWCA = true;
-        }
-      });
-      // verificar se ultrassou o limite estabelecido para o cliente
-      if (
-        data.cliente.naoUltrapassarLimitePorRequisicao &&
-        parseFloat(data.cliente.valorLimiteRequisicao) <
-          parseFloat(valorTotalPedido.value)
-      ) {
-        data.requerAutorizacaoWCA = true;
-      }
-      
-      if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
-        if (!authStore.hasPermissao("aprova_requisicao")) {
-          let result = await swal.fire({
-            icon: "warning",
-            title: "Atenção",
-            text: "O pedido excedeu limites configurados, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
-            confirmButtonText: "Estou ciente",
-            focusConfirm: false,
-          });
-          if (!result.isConfirmed) {
-            return;
+        if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
+          if (!authStore.hasPermissao("aprova_requisicao")) {
+            let result = await swal.fire({
+              icon: "warning",
+              title: "Atenção",
+              text: "O pedido excedeu limites configurados, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
+              confirmButtonText: "Estou ciente",
+              focusConfirm: false,
+            });
+            if (!result.isConfirmed) {
+              return;
+            }
+          } else {
+            data.requerAutorizacaoWCA = false;
+            data.usuarioAutorizador = authStore.user.nome;
           }
-        } else {
-          data.requerAutorizacaoWCA = false;
-          data.usuarioAutorizador = authStore.user.nome;
+        }
+
+        if (hasChanged.value == true) {
+          data.status = -2; //Itens Alterados
         }
       }
-
-      if (hasChanged.value == true) {
-        data.status = -2; //Itens Alterados
-      }
-
-      await requisicaoService.update(data);
-
-      swal.fire({
-        toast: true,
-        icon: "success",
-        index: "top-end",
-        title: "Sucesso!",
-        text: "Dados salvos com sucesso!",
-        showConfirmButton: false,
-        timer: 2000,
-      });
-      router.push({ name: "requisicoes" });
     }
+
+    await requisicaoService.update(data);
+
+    swal.fire({
+      toast: true,
+      icon: "success",
+      index: "top-end",
+      title: "Sucesso!",
+      text: "Dados salvos com sucesso!",
+      showConfirmButton: false,
+      timer: 2000,
+    });
+    router.push({ name: "requisicoes" });
+    
   } catch (error) {
     console.log("salvar.error:", error);
     handleErrors(error);
@@ -1177,6 +1169,36 @@ async function salvar() {
     isBusy.value = false;
   }
 }
+
+function checarSeRequerAprovacao( data ) {
+    //remover o campo id da requisicaoItens
+    data.requisicaoItens.forEach((produto) => {
+      produto.valorTotal =
+        retornarValorTotalProduto(produto) * produto.quantidade;
+    });
+    data.periodoEntrega = JSON.stringify(data.periodoEntrega);
+    data.requerAutorizacaoWCA = false;
+    data.requerAutorizacaoCliente = false;
+    // verificar se requer autorização
+    //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
+    orcamento.value.forEach((o) => {
+      if (o.percentual > 100) {
+        if (o.aprovadoPor == 1) data.requerAutorizacaoCliente = true;
+        else data.requerAutorizacaoWCA = true;
+      }
+    });
+    // verificar se ultrassou o limite estabelecido para o cliente
+    if (
+      data.cliente.naoUltrapassarLimitePorRequisicao &&
+      parseFloat(data.cliente.valorLimiteRequisicao) <
+        parseFloat(valorTotalPedido.value)
+    ) {
+      data.requerAutorizacaoWCA = true;
+    }
+    return data;
+}
+
+
 </script>
 
 <style scoped>
