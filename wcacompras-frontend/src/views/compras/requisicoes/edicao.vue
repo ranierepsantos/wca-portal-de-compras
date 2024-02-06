@@ -239,7 +239,7 @@
                 color="primary"
                 variant="outlined"
                 class="text-center"
-                @click="salvar(true)"
+                @click="retornarParaAprovacao"
               >
                 Retornar para Aprovação
               </v-btn>
@@ -1198,7 +1198,21 @@ function checarSeRequerAprovacao( data ) {
     return data;
 }
 
-
+async function retornarParaAprovacao() {
+  let result = await swal.fire({
+    icon: "question",
+    title: "Confirmação",
+    text: "Deseja retornar o pedido para aprovação?",
+    showCancelButton: true,
+    confirmButtonText: "Sim",
+    cancelButtonText: "Não",
+    focusConfirm: false,
+  });
+  if (!result.isConfirmed) {
+    return;
+  }
+  salvar(true);
+}
 </script>
 
 <style scoped>
