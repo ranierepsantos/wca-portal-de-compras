@@ -7,7 +7,7 @@ export const share = {
       {
         path: '',
         name: 'share',
-        component: () => import(/* webpackChunkName: "share" */ '../views/HomeView.vue'),
+        component: () => import(/* webpackChunkName: "share" */ '../views/pages/HomeView.vue'),
         meta: {sistema: 3},
         beforeEnter: protectRoute
       },

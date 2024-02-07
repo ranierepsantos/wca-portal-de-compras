@@ -11,7 +11,7 @@
       <v-card>
         <v-card-text>
           <v-form @submit.prevent="salvar()" ref="userForm">
-            <usuario-form :user="usuario" :list-filial="filiais"></usuario-form>
+            <usuario-form :user="usuario" :list-filial="filiais" @emailChange="checkUserExistsByEmail($event)"></usuario-form>
                 <v-row style="margin-top: 3px;">
                   <v-col>
                     <v-select
@@ -68,6 +68,7 @@ import Breadcrumbs from "@/components/breadcrumbs.vue";
 import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
 import { Usuario, useShareUsuarioStore } from "@/store/share/usuario.store";
+import userService from "@/services/user.service";
 
 //DATA
 const isBusy = ref(false);
@@ -260,6 +261,21 @@ function filiaisListRemove(removerTodos = false) {
   }
 }
 
+async function checkUserExistsByEmail(email) {
+  // try {
+  //   let user = (await userService.getByEmail(email)).data;
+  //   let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
+  //   console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
+  //   if (hasUserInTheSameSystem.length > 0) {
+  //     throw new Error("Email já cadastrado, neste sistema!")
+  //   }
+  //   usuario.value.nome = user.nome
+  // } catch (error) {
+  //   if( !error.response || error.response.status != 404)
+  //     handleErrors(error)
+  // }
+  
+}
 </script>
 
 <style scoped>
