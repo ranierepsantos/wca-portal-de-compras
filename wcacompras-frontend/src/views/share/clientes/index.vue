@@ -14,7 +14,7 @@
                 <tr>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CNPJ</th>
-                    <th class="text-left text-grey" v-show="isMatriz">FILIAL</th>
+                    <th class="text-left text-grey">FILIAL</th>
                     <th class="text-center text-grey">ATIVO</th>
                     <th></th>
                 </tr>
@@ -26,7 +26,7 @@
                         &nbsp;{{ item.nome }}
                     </td>
                     <td class="text-left">{{ item.cnpj }}</td>
-                    <td class="text-left" v-show="isMatriz">{{ getFilialNome(item.filialId) }}</td>
+                    <td class="text-left">{{ getFilialNome(item.filialId) }}</td>
                     <td class="text-center">
                         <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
                             :color="item.ativo ? 'success' : 'error'"></v-icon>
@@ -58,21 +58,21 @@ import handleErrors from "@/helpers/HandleErrors"
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useAuthStore } from "@/store/auth.store";
-import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { useUsuarioStore } from "@/store/reembolso/usuario.store";
+import { useShareClienteStore } from "@/store/share/cliente.store";
+import { useshareUsuarioStore } from "@/store/share/usuario.store";
 import filialService from "@/services/filial.service";
 //DATA
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
-const clienteStore = useClienteStore();
+const clienteStore = useShareClienteStore();
 const clientes = ref([]);
 const filiais = ref([])
 const filter = ref("");
 const swal = inject("$swal");
 const authStore = useAuthStore();
-const isMatriz = ref(false)
+
 //VUE METHODS
 onMounted(async () =>
 {

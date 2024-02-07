@@ -15,7 +15,7 @@ namespace wca.share.application.Features.Usuarios.Commands
       bool Ativo
     ): IRequest<ErrorOr<bool>>;
 
-    public sealed class UsuarioCreateUpdateCommandHandle : IRequestHandler<UsuarioCreateUpdateCommand, ErrorOr<bool>>
+    internal sealed class UsuarioCreateUpdateCommandHandle : IRequestHandler<UsuarioCreateUpdateCommand, ErrorOr<bool>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
@@ -30,22 +30,23 @@ namespace wca.share.application.Features.Usuarios.Commands
 
         public async Task<ErrorOr<bool>> Handle(UsuarioCreateUpdateCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Iniciando criação de usuario");
+            _logger.LogInformation("Iniciando criação / atualização de usuario");
 
 
             var usuario = await _repository.UsuarioRepository.ToQuery()
-                           .FirstOrDefaultAsync(q => q.Id.Equals(request.Id));
+                           .FirstOrDefaultAsync(q => q.Id.Equals(request.Id), cancellationToken: cancellationToken);
 
             if (usuario == null)
             {
                 usuario = _mapper.Map<Usuario>(request);
-                _repository.UsuarioRepository.Create(usuario);
-            }else
+                _repository.UsuarioRepository.Create(entity: usuario);
+                _logger.LogInformation($"Criando usuario {usuario.Nome}");
+            }
+            else
             {
-                usuario.Nome = request.Nome;
-                usuario.Email = request.Email;
-                usuario.Ativo = request.Ativo;
+                _mapper.Map(request, usuario);
                 _repository.GetDbSet<Usuario>().Entry(usuario).State = EntityState.Modified;
+                _logger.LogInformation($"Atualizando usuario {usuario.Nome}");
             }
             await _repository.SaveAsync();
             return true;
