@@ -647,9 +647,9 @@ namespace wca.compras.services
         public async Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, 
                                                 DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0, params int[] status)
         {
+            Console.WriteLine("Exportando dados para excel...");
             try
             {
-                
                 IQueryable<Requisicao> query = GetQuery(filials, authUserId, clienteId, usuarioId, fornecedorId, dataInicio,dataFim, status);
 
                 query = query.Include("Usuario")
@@ -776,6 +776,7 @@ namespace wca.compras.services
 
         public Pagination<RequisicaoDto> PaginateByContextUser(int[] filials, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId =0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
         {
+            Console.WriteLine("Retorna dados somente do usuário logado");
             try
             {
                 IQueryable<Requisicao> query = GetQuery(filials, logedUserId, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
