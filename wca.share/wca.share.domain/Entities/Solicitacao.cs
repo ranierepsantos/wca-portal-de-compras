@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using wca.share.domain.Common.Enum;
 
 namespace wca.share.domain.Entities
 {
@@ -7,27 +9,154 @@ namespace wca.share.domain.Entities
         [Column("id")]
         public int Id {  get; set; }
 
+        [Column("soliticacaotipo_id")]
+        public int SolicitacaoTipoId { get; set; }
+
+        [JsonIgnore]
+        public SolicitacaoTipo? SolicitacaoTipo { get; set; }
+
         [Column("cliente_id")]
         public int ClienteId { get; set; }
 
-        [NotMapped]
-        public Cliente Cliente { get; set; }
+        [JsonIgnore]
+        public Cliente? Cliente { get; set; }
 
         [Column("funcionario_id")]
         public int FuncionarioId { get; set; }
-        public Funcionario Funcionario { get; set; }
+
+        [JsonIgnore]
+        public Funcionario? Funcionario { get; set; }
 
         [Column("responsavel_id")]
-        public int ResponsavelId { get; set; }
+        public int? ResponsavelId { get; set; }
+
+        [JsonIgnore]
+        public Funcionario? Responsavel { get; set; }
 
         [Column("gestor_id")]
-        public int GestorId { get; set; }
+        public int? GestorId { get; set; }
+
+        [JsonIgnore]
+        public Usuario? Gestor { get; set; }
 
         [Column("data_solicitacao", TypeName = "smalldatetime")]
         public DateTime DataSolicitacao { get; set; } = DateTime.Now;
         
         [Column("descricao", TypeName = "nvarchar(max)")]
         public string Descricao { get; set; } = string.Empty;
+
+        [Column("StatusSolicitacaoId")]
+        public int Status { get; set; } = 1;
+
+        public SolicitacaoComunicado? Comunicado { get; set; }
+        public SolicitacaoDesligamento? Desligamento { get; set; }
+        public SolicitacaoMudancaBase? MudancaBase { get; set; }
+        public List<SolicitacaoArquivo> Anexos { get; set; } = new();
+
+    }
+
+    public sealed class SolicitacaoDesligamento
+    {
+        [Column("solicitacao_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int SolicitacaoId { get; set; }
+
+        [JsonIgnore]
+        public Solicitacao? Solicitacao { get; set; }
+
+        [Column("data_demissao")]
+        public DateTime? DataDemissao { get; set;}
+
+        [Column("motivodemissao_id")]
+        public int MotivoDemissaoId { get; set; }
+        
+        [JsonIgnore]
+        public MotivoDemissao? Motivo { get; set;}
+
+        [Column("tem_contrato_experiencia")]
+        public bool TemContratoExperiencia { get; set; } = false;
+        
+        [Column("status_apontamento")]
+        public EnumFieldStatus StatusApontamento { get; set; } = EnumFieldStatus.Pendente;
+        
+        [Column("status_aviso_previo")] 
+        public EnumStatusAvisoPrevio StatusAvisoPrevio { get; set; } = EnumStatusAvisoPrevio.NaoSeAplica;
+        
+        [Column("status_homologacao_sindicato")]
+        public EnumFieldStatus StatusHomologacaoSindicato { get; set; } = EnumFieldStatus.Pendente;
+
+        [Column("status_exame_demissional")]
+        public EnumFieldStatus StatusExameDemissional { get; set; } = EnumFieldStatus.Pendente;
+
+        [Column("data_credito")]
+        public DateTime? DataCredito { get; set; }
+    }
+
+    public sealed class SolicitacaoMudancaBase
+    {
+
+        [Column("solicitacao_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int SolicitacaoId { get; set; }
+        
+        [JsonIgnore]
+        public Solicitacao? Solicitacao { get; set; }
+
+        [Column("data_alteracao")]
+        public DateTime? DataAlteracao { get; set; }
+
+        [Column("observacao")]
+        public string? Observacao { get; set; } = string.Empty;
+
+        [Column("cliente_destino_id")]
+        public int? ClienteDestinoId { get; set; }
+        
+        [JsonIgnore]
+        public Cliente? ClienteDestino { get; set; }
+
+        public List<ItemMudanca>? ItensMudanca { get; set; } = new List<ItemMudanca>();
+    }
+
+    public sealed class SolicitacaoComunicado
+    {
+
+        [Column("solicitacao_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int SolicitacaoId { get; set; }
+
+        [JsonIgnore]
+        public Solicitacao? Solicitacao { get; set; }
+
+        [Column("assunto_id")]
+        public int AssuntoId { get; set; }
+
+        [JsonIgnore]
+        public Assunto? Assunto { get; set; }
+
+        [Column("data_alteracao")]
+        public DateTime? DataAlteracao { get; set; }
+
+        [Column("observacao")]
+        public string? Observacao { get; set; } = string.Empty;
+    }
+
+    [Table("SolicitacaoArquivos")]
+    public class SolicitacaoArquivo
+    {
+        [Column("id")]
+        public int Id { get; set; }
+
+        [Column("solicitacao_id")]
+        public int SolicitacaoId { get; set; }
+
+        [JsonIgnore]
+        public Solicitacao? Solicitacao { get; set; }
+
+        [Column("descricao", TypeName ="varchar(300)")]
+        public string Descricao { get; set; } = string.Empty;
+
+        [Column("caminho_arquivo", TypeName = "varchar(500)")]
+        public string CaminhoArquivo { get; set; } = string.Empty; 
 
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240216043141_four")]
+    partial class four
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,10 +262,6 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("soliticacaotipo_id");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("StatusSolicitacaoId");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
@@ -276,36 +275,6 @@ namespace wca.share.infrastructure.Migrations
                     b.HasIndex("SolicitacaoTipoId");
 
                     b.ToTable("Solicitacoes");
-                });
-
-            modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoArquivo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CaminhoArquivo")
-                        .IsRequired()
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("caminho_arquivo");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("varchar(300)")
-                        .HasColumnName("descricao");
-
-                    b.Property<int>("SolicitacaoId")
-                        .HasColumnType("int")
-                        .HasColumnName("solicitacao_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SolicitacaoId");
-
-                    b.ToTable("SolicitacaoArquivos");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoComunicado", b =>
@@ -378,33 +347,6 @@ namespace wca.share.infrastructure.Migrations
                     b.ToTable("SolicitacaoDesligamento");
                 });
 
-            modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoHistorico", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DataHora")
-                        .HasColumnType("smalldatetime")
-                        .HasColumnName("data_hora");
-
-                    b.Property<string>("Evento")
-                        .IsRequired()
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("evento");
-
-                    b.Property<int>("SolicitacaoId")
-                        .HasColumnType("int")
-                        .HasColumnName("solicitacao_id");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SolicitacaoHistorico");
-                });
-
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoMudancaBase", b =>
                 {
                     b.Property<int>("SolicitacaoId")
@@ -447,47 +389,6 @@ namespace wca.share.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SolicitacaoTipo");
-                });
-
-            modelBuilder.Entity("wca.share.domain.Entities.StatusSolicitacao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Autorizar")
-                        .HasColumnType("bit")
-                        .HasColumnName("autorizar");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("varchar(30)")
-                        .HasColumnName("color");
-
-                    b.Property<int>("Notifica")
-                        .HasColumnType("int")
-                        .HasColumnName("notifica");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("status");
-
-                    b.Property<string>("StatusIntermediario")
-                        .IsRequired()
-                        .HasColumnType("varchar(150)")
-                        .HasColumnName("status_intermediario");
-
-                    b.Property<string>("TemplateNotificacao")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("template_notificacao");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StatusSolicitacao");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Usuario", b =>
@@ -588,17 +489,6 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("SolicitacaoTipo");
                 });
 
-            modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoArquivo", b =>
-                {
-                    b.HasOne("wca.share.domain.Entities.Solicitacao", "Solicitacao")
-                        .WithMany("Arquivos")
-                        .HasForeignKey("SolicitacaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Solicitacao");
-                });
-
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoComunicado", b =>
                 {
                     b.HasOne("wca.share.domain.Entities.Assunto", "Assunto")
@@ -680,8 +570,6 @@ namespace wca.share.infrastructure.Migrations
 
             modelBuilder.Entity("wca.share.domain.Entities.Solicitacao", b =>
                 {
-                    b.Navigation("Arquivos");
-
                     b.Navigation("Comunicado");
 
                     b.Navigation("Desligamento");
