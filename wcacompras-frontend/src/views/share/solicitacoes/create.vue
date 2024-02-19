@@ -1,6 +1,9 @@
 <template>
   <div>
-    <Breadcrumbs :title="getBreadCrumbsTitle()" :show-button="false" />
+    <Breadcrumbs :title="getBreadCrumbsTitle()" :show-button="false" 
+    :buttons="formButtons"
+    @salvar-click="salvar()"
+    />
     <v-progress-linear
       color="primary"
       indeterminate
@@ -24,39 +27,9 @@
             <Ferias v-show="solicitacao.solicitacaoTipoId == 3" />
             <Mudancabase v-show="solicitacao.solicitacaoTipoId == 4" />
           </SolicitacaoForm>
-
-          <v-text-field
-            label="Arquivo"
-            type="file"
-            variant="outlined"
-            color="primary"
-            density="compact"
-          ></v-text-field>
-          <v-table> 
-            <thead>
-                <tr>
-                    <th class="text-left text-grey">Arquivo</th>
-                    <th class="text-center text-grey">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="item in solicitacao.anexos" :key="item.id">
-                    <td class="text-left">
-                        <v-icon icon="mdi-file-document-check-outline"></v-icon>
-                        &nbsp;{{ item.descricao }}
-                    </td>
-                    <td class="text-center">
-                        <v-btn icon="mdi-file-download-outline" variant="plain" color="primary"
-                        @click="downloadFile(item.caminhoArquivo, item.descricao)"
-                        ></v-btn>
-                        <v-btn variant="plain" color="error"
-                            icon="mdi-trash-can-outline"
-                            title="Exluir">
-                        </v-btn>
-                    </td>
-                </tr>
-            </tbody>
-          </v-table>
+          
+          <table-file-upload :anexos="solicitacao.anexos"/>
+            
         </v-form>
       </v-card-text>
     </v-card>
@@ -73,17 +46,23 @@ import { onBeforeMount, ref } from "vue";
 import Comunicado from "@/components/share/comunicado.vue";
 import Ferias from "@/components/share/ferias.vue";
 import Mudancabase from "@/components/share/mudancabase.vue";
-import axios from "axios";
-import { realizarDownload } from "@/helpers/functions";
+import tableFileUpload from "@/components/share/tableFileUpload.vue";
+import handleErrors from "@/helpers/HandleErrors";
+import { useAuthStore } from "@/store/auth.store";
+import { useShareSolicitacaoStore} from "@/store/share/solicitacao.store"
 
 const isBusy = ref(false);
 const solicitacao = ref(new Solicitacao());
 const clienteList = ref([]);
+const formButtons = ref([]);
 
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   clienteList.value = await useShareClienteStore().toComboList();
+  formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
 });
+
+
 
 //FUNCTIONS
 function getBreadCrumbsTitle() {
@@ -122,19 +101,22 @@ function getDescricaoObservacao() {
   }
 }
 
-function downloadFile(url, nomeArquivo) {
-            axios({
-                url: url, // Download File URL Goes Here
-                method: 'GET',
-                responseType: 'blob',
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': ' GET, PUT, POST, DELETE, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token',
-                    'Access-Control-Allow-Credentials': 'false',
-                },
-            }).then(async (res) => {
-                await realizarDownload(res,nomeArquivo)
-            });
-        }
+async function salvar() {
+  
+  try {
+    let data = {...solicitacao.value}
+    data.funcionarioId =1;
+    data.gestorId =1;
+    data.notificarUsuarioIds = []
+    data.usuarioCriador = useAuthStore().user.nome;
+
+    await useShareSolicitacaoStore().add(data);
+
+  } catch (error) {
+    console.debug(error)
+    handleErrors(error)
+  }
+
+}
+
 </script>
