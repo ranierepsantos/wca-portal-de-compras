@@ -79,7 +79,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
 
             _mapper.Map(request,dado);
 
-            dado.Status = request.Status.Id;
+            dado.StatusSolicitacaoId = request.Status.Id;
 
             if (dado.SolicitacaoTipoId == (int) EnumTipoSolicitacao.MudancaBase)
             {

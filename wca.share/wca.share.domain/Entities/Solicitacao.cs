@@ -31,7 +31,7 @@ namespace wca.share.domain.Entities
         public int? ResponsavelId { get; set; }
 
         [JsonIgnore]
-        public Funcionario? Responsavel { get; set; }
+        public Usuario? Responsavel { get; set; }
 
         [Column("gestor_id")]
         public int? GestorId { get; set; }
@@ -45,14 +45,18 @@ namespace wca.share.domain.Entities
         [Column("descricao", TypeName = "nvarchar(max)")]
         public string Descricao { get; set; } = string.Empty;
 
-        [Column("StatusSolicitacaoId")]
-        public int Status { get; set; } = 1;
+        [Column("status_id")]
+        public int StatusSolicitacaoId { get; set; } = 1;
+
+        [JsonIgnore]
+        public StatusSolicitacao? StatusSolicitacao { get; set; }
 
         public SolicitacaoComunicado? Comunicado { get; set; }
         public SolicitacaoDesligamento? Desligamento { get; set; }
         public SolicitacaoMudancaBase? MudancaBase { get; set; }
         public List<SolicitacaoArquivo> Anexos { get; set; } = new();
 
+        public List<SolicitacaoHistorico> Historico { get; set; }
     }
 
     public sealed class SolicitacaoDesligamento

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240218135526_seven")]
+    partial class seven
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,9 +262,9 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("soliticacaotipo_id");
 
-                    b.Property<int>("StatusSolicitacaoId")
+                    b.Property<int>("Status")
                         .HasColumnType("int")
-                        .HasColumnName("status_id");
+                        .HasColumnName("StatusSolicitacaoId");
 
                     b.HasKey("Id");
 
@@ -274,8 +277,6 @@ namespace wca.share.infrastructure.Migrations
                     b.HasIndex("ResponsavelId");
 
                     b.HasIndex("SolicitacaoTipoId");
-
-                    b.HasIndex("StatusSolicitacaoId");
 
                     b.ToTable("Solicitacoes");
                 });
@@ -571,19 +572,13 @@ namespace wca.share.infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("GestorId");
 
-                    b.HasOne("wca.share.domain.Entities.Usuario", "Responsavel")
+                    b.HasOne("wca.share.domain.Entities.Funcionario", "Responsavel")
                         .WithMany()
                         .HasForeignKey("ResponsavelId");
 
                     b.HasOne("wca.share.domain.Entities.SolicitacaoTipo", "SolicitacaoTipo")
                         .WithMany()
                         .HasForeignKey("SolicitacaoTipoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("wca.share.domain.Entities.StatusSolicitacao", "StatusSolicitacao")
-                        .WithMany()
-                        .HasForeignKey("StatusSolicitacaoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -596,8 +591,6 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("Responsavel");
 
                     b.Navigation("SolicitacaoTipo");
-
-                    b.Navigation("StatusSolicitacao");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoArquivo", b =>
