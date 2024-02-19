@@ -183,7 +183,5 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         let response = await api.exportarParaExcel (filters)
         return response
     },
-
-
   },
 });
