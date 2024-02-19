@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace wca.share.domain.Entities
 {
@@ -19,8 +20,17 @@ namespace wca.share.domain.Entities
         [Column("nome", TypeName = "varchar(200)")]
         public string Nome { get; private set; } = string.Empty;
 
-        
+        [Column("cliente_id")]
+        public int? ClienteId {  get; private set; }
 
+        [JsonIgnore]
+        public Cliente Cliente { get; private set; }
+
+        [Column("gestor_id")]
+        public int? GestorId { get; private set; }
+
+        [JsonIgnore]
+        public Usuario Gestor { get; private set; }
 
     }
 }
