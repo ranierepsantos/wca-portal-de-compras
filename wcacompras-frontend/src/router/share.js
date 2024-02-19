@@ -12,6 +12,13 @@ export const share = {
         beforeEnter: protectRoute
       },
       {
+        path: 'clientes',
+        name: 'shareClientes',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/clientes'),
+      },
+      {
         path: 'perfil',
         name: 'sharePerfil',
         beforeEnter: protectRoute,
@@ -45,6 +52,17 @@ export const share = {
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "share" */ '../views/share/usuarios/cadastro'),
+        props: route => ({ query: route.query.id })
+      },
+      {
+        path: 'desligamento/create',
+        name: 'shareDesligamentoCreate',
+        meta: {permissao: "livre", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/create'),
         props: route => ({ query: route.query.id })
       },
     ]

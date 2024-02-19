@@ -43,5 +43,37 @@ namespace wca.share.webapi.Controllers
 
             return Ok(result.Value);
         }
+
+        [HttpGet("Paginar")]
+        public async Task<IActionResult> ToPaginate([FromQuery] SolicitacaoPaginateQuery querie)
+        {
+            var result = await _mediator.Send(querie);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("ListarStatusSolicitacao")]
+        public async Task<IActionResult> ListarStatusSolicitacao()
+        {
+            var result = await _mediator.Send(new StatusSolicitacaoListQuery());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
+        [HttpGet("ListarMotivoDemissao")]
+        public async Task<IActionResult> ListarMotivoDemissao()
+        {
+            var result = await _mediator.Send(new MotivoDemissaoListQuery());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
     }
 }

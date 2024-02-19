@@ -26,7 +26,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         int SolicitacaoTipoId,
         int ClienteId,
         int FuncionarioId,
-        int Status,
+        int StatusSolicitacaoId,
         string UsuarioAtualizador,
         int? GestorId,
         int? ResponsavelId,

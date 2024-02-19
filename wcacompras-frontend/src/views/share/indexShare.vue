@@ -75,7 +75,7 @@ import { useAuthStore } from "@/store/auth.store";
 import headerUserMenu from "@/components/headerUserMenu.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
-
+import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 
 //VARIABLES
 const drawer = ref(true);
@@ -94,37 +94,37 @@ const menuItems = ref([
   },
   {
     title: "Desligamento",
-    value: 2,
-    route: "/share/desligamento",
+    value: 3,
+    route: "/share/desligamento/create",
     permissao: "livre"
   },
   {
     title: "Mudança de base",
-    value: 3,
+    value: 4,
     route: "/share/mudancabase",
     permissao: "livre"
   },
   {
     title: "Comunicados",
-    value: 4,
+    value: 5,
     route: "/share/comunicados",
     permissao: "livre"
   },
   {
     title: "Perfil",
-    value: 5,
+    value: 6,
     route: "/share/perfil",
     permissao: "livre"
   },
   {
     title: "Usuários",
-    value: 6,
+    value: 7,
     route: "/share/usuarios",
     permissao: "livre"
   },
   {
     title: "Férias",
-    value: 4,
+    value: 8,
     route: "/share/ferias",
     permissao: "livre"
   },
@@ -139,6 +139,8 @@ const usuario = computed(() =>
 
 //VUE - FUNCTIONS
 onMounted(async () => {
+  useShareSolicitacaoStore().listarStatusSolicitacao();
+  useShareSolicitacaoStore().listarMotivosDemissao();
 });
 
 //FUNCTIONS
