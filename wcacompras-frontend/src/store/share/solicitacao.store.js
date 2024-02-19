@@ -29,10 +29,10 @@ export class Solicitacao {
         this.comunicado = data && data.comunicado ? data.comunicado :null
         this.desligamento = data && data.desligamento ? data.desligamento : new Desligamento()
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
-        this.anexos = data && data.anexos ? data.anexos: anexo
+        this.anexos = data && data.anexos ? data.anexos: []
     }
 }
-export class Anexos {
+export class Anexo {
     constructor(data = null) {
         this.id = data? data.id: 0
         this.solicitacaoId = data ?data.solicitacaoId : 0
@@ -102,7 +102,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
   actions: {
     async add (data) {
         try {
-
+            console.debug("solicitacao.store.add",data);
             if (data.solicitacaoTipoId == 1) {
                 data.comunicado  = null
                 data.mudancaBase = null 
@@ -113,6 +113,8 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 data.comunicado  = null
                 data.desligamento = null 
             }
+            data.status = this.statusSolicitacao.find(x => x.id == 1);
+            console.debug("add=>data.status",data.status);
             await api.post(rotas.Create, data);
         } catch (error) {
             throw error
