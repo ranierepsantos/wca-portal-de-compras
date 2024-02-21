@@ -20,7 +20,7 @@
                       <v-timeline-item dot-color="grey" size="small" v-for="item in eventos">
                           <div class="d-flex">
                               <div>
-                                  <span class="text-caption" v-html="moment(item.dataHora).format('DD/MM/YYYY HH:mm:ss') + ' - ' + item.evento"></span>
+                                  <span class="text-body-1" v-html="moment(item.dataHora).format('DD/MM/YYYY HH:mm:ss') + ' - ' + item.evento"></span>
                               </div>
                           </div>
                       </v-timeline-item>

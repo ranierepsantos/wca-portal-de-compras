@@ -43,7 +43,7 @@ namespace wca.share.domain.Entities
         public DateTime DataSolicitacao { get; set; } = DateTime.Now;
         
         [Column("descricao", TypeName = "nvarchar(max)")]
-        public string Descricao { get; set; } = string.Empty;
+        public string? Descricao { get; set; } = string.Empty;
 
         [Column("status_id")]
         public int StatusSolicitacaoId { get; set; } = 1;
@@ -81,16 +81,16 @@ namespace wca.share.domain.Entities
         public bool TemContratoExperiencia { get; set; } = false;
         
         [Column("status_apontamento")]
-        public EnumFieldStatus StatusApontamento { get; set; } = EnumFieldStatus.Pendente;
+        public int? StatusApontamento { get; set; }
         
         [Column("status_aviso_previo")] 
-        public EnumStatusAvisoPrevio StatusAvisoPrevio { get; set; } = EnumStatusAvisoPrevio.NaoSeAplica;
+        public int? StatusAvisoPrevio { get; set; }
         
         [Column("status_homologacao_sindicato")]
-        public EnumFieldStatus StatusHomologacaoSindicato { get; set; } = EnumFieldStatus.Pendente;
+        public int? StatusHomologacaoSindicato { get; set; }
 
         [Column("status_exame_demissional")]
-        public EnumFieldStatus StatusExameDemissional { get; set; } = EnumFieldStatus.Pendente;
+        public int? StatusExameDemissional { get; set; }
 
         [Column("data_credito")]
         public DateTime? DataCredito { get; set; }

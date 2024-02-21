@@ -7,7 +7,8 @@ namespace wca.share.application.Features.Solicitacoes.Behaviors
     {
         public SolicitacaoCreateCommandBehavior()
         {
-            RuleFor(f => f.SolicitacaoTipoId).NotEmpty().NotNull().GreaterThan(0).WithMessage("O tipo de solicitação deve ser informado!");
+            RuleFor(f => f.SolicitacaoTipoId).NotEmpty().NotNull().GreaterThan(0)
+                .WithMessage("O tipo de solicitação deve ser informado!");
             RuleFor(f => f.FuncionarioId).NotEmpty().NotNull().GreaterThan(0).WithMessage("O funcionário deve ser informado!");
             RuleFor(f => f.ClienteId).NotEmpty().NotNull().GreaterThan(0).WithMessage("O cliente deve ser informado!");
             RuleFor(f => f.Desligamento.DataDemissao).NotEmpty().NotNull().When(f => f.SolicitacaoTipoId == 1).WithMessage("A data da demissão deve ser informada!");

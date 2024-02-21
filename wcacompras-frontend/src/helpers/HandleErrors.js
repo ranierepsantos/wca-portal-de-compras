@@ -10,7 +10,7 @@ const handleErrors = (error) =>
         message = error.response.status + ", " + (error.response.data.message || error.response.data.title);
         if (error.response.status === 404) {
             message = "O registro não foi localizado!";
-            if (error.response.data.trim() != '')
+            if (typeof(error.response.data) != 'object' && error.response.data.trim() != '')
                 message =error.response.data;
             messageType = "info";
         } else if (error.response.status === 403) {

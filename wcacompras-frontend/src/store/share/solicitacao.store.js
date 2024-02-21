@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import moment from "moment/moment";
 import api from "@/services/share/shareApi"
+import { TipoSolicitacao } from "@/helpers/share/data";
 
 const rotas = {
     Create: "Solicitacao",
@@ -22,14 +23,15 @@ export class Solicitacao {
         this.clienteId = data ? data.clienteId: null
         this.funcionarioId = data ? data.funcionarioId: null
         this.dataSolicitacao = data ?  moment(data.dataSolicitacao).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
-        this.descricao = data? data.descricao: "teste"
+        this.descricao = data? data.descricao: null
         this.statusSolicitacaoId = data? data.statusSolicitacaoId: null
         this.responsavelId = data ? data.responsavelId: null
         this.gestorId = data ? data.gestorId: null
         this.comunicado = data && data.comunicado ? data.comunicado :null
-        this.desligamento = data && data.desligamento ? data.desligamento : new Desligamento()
+        this.desligamento = data ? new Desligamento(data.desligamento) : new Desligamento()
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
         this.anexos = data && data.anexos ? data.anexos: []
+        this.historico = data && data.historico ? data.historico: []
     }
 }
 export class Anexo {
@@ -44,14 +46,14 @@ export class Anexo {
 export class Desligamento {
     constructor(data = null){
         this.solicitacaoId = data ? data.solicitacaoId : 0
-        this.dataDemissao = data? data.dataDemissao : null
+        this.dataDemissao = data && data.dataDemissao? moment(data.dataDemissao).format("YYYY-MM-DD") : null
         this.motivoDemissaoId = data ? data.motivoDemissaoId: null
         this.temContratoExperiencia = data? data.temContratoExperiencia: false
-        this.statusApontamento = data? data.statusApontamento: 0
-        this.statusAvisoPrevio = data? data.statusAvisoPrevio: 0
-        this.statusHomologacaoSindicato = data? data.statusHomologacaoSindicato: 0
-        this.statusExameDemissional = data? data.statusExameDemissional: 0
-        this.dataCredito = data? data.dataCredito : null
+        this.statusApontamento = data? data.statusApontamento: null
+        this.statusAvisoPrevio = data? data.statusAvisoPrevio: null
+        this.statusHomologacaoSindicato = data? data.statusHomologacaoSindicato: null
+        this.statusExameDemissional = data? data.statusExameDemissional: null
+        this.dataCredito = data && data.dataCredito ? moment(data.dataCredito).format("YYYY-MM-DD") : null
         
     }
 }
@@ -88,13 +90,13 @@ Trabalho =2  */
 export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
   state : () => ({
     fieldStatus : [
-        {text: "Pendente", value: 0},
-        {text: "Concluído", value: 1}
+        {text: "Pendente", value: 1},
+        {text: "Concluído", value: 2}
     ],
     avisoPrevioStatus: [
-        {text: "Não se aplica", value: 0},
-        {text: "Indenizado", value: 1},
-        {text: "Trabalho", value: 2},
+        {text: "Não se aplica", value: 1},
+        {text: "Indenizado", value: 2},
+        {text: "Trabalho", value: 3},
     ],
     statusSolicitacao: JSON.parse(localStorage.getItem("share-status-solicitacao")) || [],
     motivosDemissao: JSON.parse(localStorage.getItem("share-motivo-demissao")) || []
@@ -140,14 +142,28 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
     },
     async getById(id) {
         try {
-            await api.get(rotas.GetById, {params: {id: id}});
+            let response = await api.get(rotas.GetById, {params: {id: id}});
+            return new Solicitacao(response.data)
         } catch (error) {
             throw error
         }
     },
     async getPaginate(page = 1, pageSize = 10, filters) {
         try {
-            let response = await api.get(page, pageSize, filters)
+            let parametros = {
+                page: page,
+                pageSize: pageSize,
+                filialId: filters.filialId,
+                responsavelId: filters.responsavelId,
+                clienteId: filters.clienteId,
+                dataIni: filters.dataIni,
+                dataFim: filters.dataFim,
+                status: filters.status,
+                tipoSolicitacao: filters.tipoSolicitacao
+            }
+            
+
+            let response = await api.get(rotas.Paginar, {params: parametros} );
             return response.data        
         } catch (error) {
             throw error
