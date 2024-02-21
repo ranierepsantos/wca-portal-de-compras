@@ -133,6 +133,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Desligamento)
                 _repository.GetDbSet<SolicitacaoDesligamento>().Entry(dado.Desligamento).State = EntityState.Modified;
 
+
             _repository.GetDbSet<Solicitacao>().Entry(dado).State = EntityState.Modified;
 
             await _repository.SaveAsync();

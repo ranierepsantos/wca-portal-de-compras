@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace wca.share.application.Features.Solicitacoes.Common
 {
-    internal enum EnumTipoSolicitacao
+    public enum EnumTipoSolicitacao
     {
+        Todos = 0,
         Desligamento = 1,
         Comunicado =2,
         Ferias =3,

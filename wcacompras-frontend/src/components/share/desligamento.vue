@@ -9,6 +9,7 @@
           color="primary"
           density="compact"
           v-model="dataModel.dataDemissao"
+          :rules="[(v) => !!v || 'Campo obrigatório']"
           :readonly="!createMode"
           :bg-color="!createMode ? '#f2f2f2' : ''"
         ></v-text-field>
@@ -22,6 +23,7 @@
           :select-mode="createMode"
           :text-field-value="getMotivoDemissaoText(dataModel.motivoDemissaoId)"
           label-text="Motivo Demissão"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
     </v-row>

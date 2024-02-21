@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +6,16 @@ using Microsoft.Extensions.Logging;
 using wca.share.application.Common;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Solicitacoes.Common;
-using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Solicitacoes.Queries
 {
-    public record SolicitacaoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int UsuarioId = 0, int ClienteId = 0, int Status = 0) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
+    public record SolicitacaoPaginateQuery(
+        DateTime? DataIni, 
+        DateTime? DataFim, 
+        int ResponsavelId = 0, 
+        int ClienteId = 0, 
+        int Status = 0,
+        EnumTipoSolicitacao TipoSolicitacao = EnumTipoSolicitacao.Todos) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     internal sealed class SolicitacaoToPaginateQueryHandle :
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
     {
@@ -46,14 +50,17 @@ namespace wca.share.application.Features.Solicitacoes.Queries
             if (request.FilialId > 1)
                 query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
-            if (request.UsuarioId > 0)
-                query = query.Where(q => q.ResponsavelId.Equals(request.UsuarioId) || q.GestorId.Equals(request.UsuarioId));
+            if (request.ResponsavelId > 0)
+                query = query.Where(q => q.ResponsavelId.Equals(request.ResponsavelId));
 
             if (request.ClienteId > 0)
                 query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
 
             if (request.Status > 0)
                 query = query.Where(q => q.StatusSolicitacaoId.Equals(request.Status));
+
+            if (request.TipoSolicitacao != EnumTipoSolicitacao.Todos)
+                query = query.Where(q => q.SolicitacaoTipoId.Equals((int) request.TipoSolicitacao));
 
             if (request.DataIni != null && request.DataFim != null)
             {

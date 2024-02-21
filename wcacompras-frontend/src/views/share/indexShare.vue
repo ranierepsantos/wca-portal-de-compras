@@ -5,9 +5,10 @@
       <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
       <br />
-      <!-- <v-btn block color="orange" rounded="lg" class="text-capitalize">
-        <b>Nova Vaga</b>
-      </v-btn> -->
+      <v-btn block color="orange" rounded="lg" class="text-capitalize"
+        @click="router.push({ name: 'shareSolicitacaoCreate' })">
+        <b>Nova solicitação</b>
+      </v-btn>
       <br />
       <v-list class="text-left" density="compact">
         <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
@@ -59,7 +60,7 @@
           <v-col><card-list :list-data="list3" color="deep-purple-lighten-1" card-title="Concluídos"></card-list></v-col>
         </v-row> -->
         
-        <router-view></router-view>
+        <router-view :key="route.fullPath"></router-view>
         
       </v-container>
       
@@ -78,8 +79,12 @@ import headerUserMenu from "@/components/headerUserMenu.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
+import { useRouter,useRoute } from "vue-router";
+
 
 //VARIABLES
+const router = useRouter();
+const route = useRoute();
 const drawer = ref(true);
 const menuItems = ref([
   {
@@ -97,7 +102,7 @@ const menuItems = ref([
   {
     title: "Desligamento",
     value: 3,
-    route: "/share/desligamento/create",
+    route: "/share/desligamento",
     permissao: "livre"
   },
   {
