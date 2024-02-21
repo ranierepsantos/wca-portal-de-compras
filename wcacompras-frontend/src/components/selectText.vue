@@ -10,7 +10,7 @@
       color="primary"
       :model-value="modelValue"
       @update:model-value="val => $emit('update:modelValue',val)"
-      :rules="[(v) => !!v || 'Campo obrigatório']"
+      :rules="fieldRules"
       v-if="selectMode"
     ></v-select>
     <v-text-field
@@ -19,7 +19,7 @@
       variant="outlined"
       color="primary"
       density="compact"
-      :rules="[(v) => !!v || 'Campo obrigatório']"
+      
       :model-value="textFieldValue"
       :readonly="true"
       bg-color="#f2f2f2"
@@ -39,6 +39,19 @@ defineProps({
     comboItemValue: {type: String, default: "value"},
     modelValue: [String, Number],
     textFieldValue: {type: String, default: ''},
-    labelText: {type: String, default: ''}
+    labelText: {type: String, default: ''},
+    fieldRules: {
+        type: Array,
+        default: function() { return []; }
+    }
 })
+
+function validate(value) {
+  console.debug('validate', value)
+  if (value)
+    return true
+  else
+    return false
+}
+
 </script>

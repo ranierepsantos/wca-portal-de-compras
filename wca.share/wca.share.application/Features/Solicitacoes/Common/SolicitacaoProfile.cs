@@ -16,14 +16,17 @@ namespace wca.share.application.Features.Solicitacoes.Common
 
             CreateMap<Solicitacao, SolicitacaoToPaginateResponse>()
                 .ForMember(dest => dest.Id, opt =>  opt.MapFrom(src =>  src.Id))
+                .ForMember(dest => dest.FilialId, opt =>  opt.MapFrom(src =>  src.Cliente.FilialId))
                 .ForMember(dest => dest.Tipo, opt => opt.MapFrom(src => src.SolicitacaoTipo.Tipo))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusSolicitacaoId))
                 .ForMember(dest => dest.DataSolicitacao, opt =>  opt.MapFrom(src =>  src.DataSolicitacao))
                 .ForMember(dest => dest.ClienteNome, opt =>  opt.MapFrom(src =>  src.Cliente.Nome))
                 .ForMember(dest => dest.FuncionarioNome, opt =>  opt.MapFrom(src =>  src.Funcionario.Nome))
                 .ForMember(dest => dest.ResponsavelNome, opt => opt.MapFrom(src => src.Responsavel.Nome))
-                .ForMember(dest => dest.GestorNome, opt =>  opt.MapFrom(src =>  src.Gestor.Nome))
-                ;
+                .ForMember(dest => dest.GestorNome, opt =>  opt.MapFrom(src =>  src.Gestor.Nome));
+
+            CreateMap<StatusSolicitacao, StatusSolicitacaoResponse>();
+
         }
         /*
          int? Id,

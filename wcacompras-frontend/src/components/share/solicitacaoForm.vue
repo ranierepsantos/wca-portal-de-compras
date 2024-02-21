@@ -1,15 +1,14 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="4" v-show="comboTipoShow">
         <select-text
           v-model="solicitacao.solicitacaoTipoId"
           :combo-items="TipoSolicitacao"
           :select-mode="solicitacao.id == 0"
-          :text-field-value="
-            getTextFromListByCodigo(TipoSolicitacao, solicitacao.solicitacaoTipoId)
-          "
+          :text-field-value="getTextFromListByCodigo(TipoSolicitacao, solicitacao.solicitacaoTipoId)"
           label-text="Tipo Solicitação"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
       <v-col>
@@ -17,8 +16,9 @@
           v-model="solicitacao.clienteId"
           :combo-items="listClientes"
           :select-mode="solicitacao.id == 0"
-          text-field-value="Carapicuiba"
+          :text-field-value="getTextFromListByCodigo(listClientes, solicitacao.clienteId)"
           label-text="Cliente"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
     </v-row>
@@ -28,8 +28,9 @@
           v-model="solicitacao.funcionarioId"
           :combo-items="listFuncionarios"
           :select-mode="solicitacao.id == 0"
-          text-field-value="Carapicuiba"
+          :text-field-value="getTextFromListByCodigo(listFuncionarios, solicitacao.funcionarioId)"
           label-text="Funcionário"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
     </v-row>
@@ -39,8 +40,21 @@
           v-model="solicitacao.gestorId"
           :combo-items="listGestores"
           :select-mode="solicitacao.id == 0"
-          text-field-value="Carapicuiba"
+          :text-field-value="getTextFromListByCodigo(listGestores, solicitacao.gestorId)"
           label-text="Gestor"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+        ></select-text>
+      </v-col>
+      </v-row>
+      <v-row>
+      <v-col>
+        <select-text
+          v-model="solicitacao.responsavelId"
+          :combo-items="listResponsavel"
+          :select-mode="solicitacao.id != 0"
+          :text-field-value="getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)"
+          label-text="Responsável"
+          v-show="solicitacao.id != 0"
         ></select-text>
       </v-col>
     </v-row>
@@ -64,7 +78,7 @@ import { Solicitacao } from "@/store/share/solicitacao.store";
 import { TipoSolicitacao, getTextFromListByCodigo } from "@/helpers/share/data";
 import selectText from "../selectText.vue";
 
-defineProps({
+const props = defineProps({
   solicitacao: {
     type: Object,
     default: function () {
@@ -90,7 +104,14 @@ defineProps({
       return [];
     },
   },
+  listResponsavel: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
+
+  comboTipoShow: {type: Boolean, default: true},
 });
 
-//FUNCTIONS
 </script>

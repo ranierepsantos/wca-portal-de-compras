@@ -29,6 +29,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 .Include(x => x.Desligamento)
                 .Include(x => x.Anexos)
                 .Include(x => x.MudancaBase).ThenInclude(x => x.ItensMudanca)
+                .Include(q => q.Historico.OrderByDescending(f => f.DataHora))
                 .Where(q => q.Id.Equals(request.Id))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);

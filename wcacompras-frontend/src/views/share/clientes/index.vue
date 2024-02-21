@@ -59,7 +59,7 @@ import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import { useAuthStore } from "@/store/auth.store";
 import { useShareClienteStore } from "@/store/share/cliente.store";
-import { useshareUsuarioStore } from "@/store/share/usuario.store";
+import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import filialService from "@/services/filial.service";
 //DATA
 const page = ref(1);
@@ -72,12 +72,12 @@ const filiais = ref([])
 const filter = ref("");
 const swal = inject("$swal");
 const authStore = useAuthStore();
-
+const isMatriz = ref(false)
 //VUE METHODS
 onMounted(async () =>
 {
     await getFiliais();
-    let filialUsuario =(await useUsuarioStore().getFiliais(authStore.user.id))[0]
+    let filialUsuario =(await useShareUsuarioStore().getFiliais(authStore.user.id))[0]
     isMatriz.value = filialUsuario.text.toLowerCase() =="matriz"
     authStore.user.filial = filialUsuario.value
     await getItems();
@@ -89,7 +89,7 @@ watch(filter, () => getItems());
 //METHODS
 function editar(id)
 {
-    router.push({ name: "reembolsoCadastroCliente", query: { id: id } })
+    router.push({ name: "shareClienteCadastro", query: { id: id } })
 }
 
 async function enableDisable(item)
