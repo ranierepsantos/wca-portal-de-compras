@@ -176,7 +176,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         return await api.registrarEvento(evento);
     },
     async checarSeDespesaExiste(despesa) {
-        let response = await api.despesaChecaSeExiste(despesa.cnpj, despesa.numeroFiscal);
+        let response = await api.despesaChecaSeExiste(despesa.cnpj, despesa.numeroFiscal, despesa.id);
         return response.data
     },
     async gerarRelatorio(filters) {

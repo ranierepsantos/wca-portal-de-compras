@@ -64,11 +64,12 @@ export default {
     registrarEvento(evento) {
         return api.post(rotas.registrarEvento, evento);  
     },
-    despesaChecaSeExiste(cnpj, numeroFiscal) {
+    despesaChecaSeExiste(cnpj, numeroFiscal, despesaId = 0) {
 
         let query = {
             CNPJ: cnpj,
-            notaFiscal: numeroFiscal
+            notaFiscal: numeroFiscal,
+            despesaId: despesaId
         }
 
         return api.get(rotas.ChecaSeDespesaExiste, {params: query})
