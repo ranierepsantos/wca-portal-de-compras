@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.reembolso.application.Features.Clientes.Commands;
 using wca.reembolso.application.Features.Usuarios.Commands;
 
 namespace wca.reembolso.webapi.Controllers
@@ -23,6 +24,17 @@ namespace wca.reembolso.webapi.Controllers
 
             return Ok(result.Value);
         }
+
+        [HttpPost("RelacionarUsuarioCentroCusto")]
+        public async Task<IActionResult> RelacionarUsuarioCentroCusto(UsuarioCentroCustoAttachCommand usuarioCentroCustoAttachCommand)
+        {
+            var result = await _mediator.Send(usuarioCentroCustoAttachCommand);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
 
     }
 }

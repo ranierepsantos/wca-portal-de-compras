@@ -19,6 +19,7 @@ export class Usuario {
         this.tipoFornecimento = data? data.tipoFornecimento?? []: []
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
         this.usuarioReembolsoComplemento = data? data.usuarioReembolsoComplemento ?? new UsuarioReembolsoComplemento() : new UsuarioReembolsoComplemento()
+        this.centroCusto = []
     }
 }
 

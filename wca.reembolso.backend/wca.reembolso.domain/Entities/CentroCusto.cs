@@ -12,6 +12,9 @@ namespace wca.reembolso.domain.Entities
     [Table("CentrosDeCustos")]
     public sealed class CentroCusto
     {
+        [Column("id")]
+        public int Id { get; set; }
+
         [Column("centrocusto_id")]
         public int CentroCustoId { get; set; }
 

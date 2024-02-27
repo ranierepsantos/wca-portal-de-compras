@@ -36,14 +36,14 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             var query = _repository.SolicitacaoRepository.ToQuery();
             query = query.Include(i => i.Cliente)
                          .Include(q => q.Colaborador)
-                         .Include(q => q.Gestor)
+                         .Include(q => q.CentroCusto)
                          .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora));
 
             if (request.FilialId > 1)
              query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
             if (request.UsuarioId > 0)
-                query = query.Where(q => q.ColaboradorId.Equals(request.UsuarioId) || q.GestorId.Equals(request.UsuarioId));
+                query = query.Where(q => q.ColaboradorId.Equals(request.UsuarioId));
 
             if (request.ClienteId > 0)
                 query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
