@@ -99,5 +99,16 @@ namespace wca.reembolso.webapi.Controllers
 
             return Ok(result.Value);
         }
+
+
+        [HttpGet("ListarCentroCustoPorCliente")]
+        public async Task<IActionResult> ListarCentroCustoPorCliente([FromQuery] CentrodeCustoByClienteQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
             CreateMap<Solicitacao, SolicitacaoResponse>();
             CreateMap<SolicitacaoResponse, Solicitacao>()
                 .ForMember(src => src.Colaborador, dest => dest.Ignore())
-                .ForMember(src => src.Gestor, dest => dest.Ignore())
+                .ForMember(src => src.CentroCusto, dest => dest.Ignore())
                 .ForMember(src => src.Cliente, dest => dest.Ignore());
             CreateMap<SolicitacaoCreateCommand, Solicitacao>();
             CreateMap<SolicitacaoUpdateCommand, Solicitacao>();

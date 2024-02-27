@@ -4,9 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.application.Features.Solicitacoes.Common;
-using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacaos.Queries
 {
@@ -30,7 +28,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
                 .Include("Cliente")
                 .Include("Despesa")
                 .Include(q =>  q.Colaborador)
-                .Include(q => q.Gestor)
+                .Include(q =>  q.CentroCusto)
                 .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora))
                 .Where(q => q.Id.Equals(request.Id)).AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
