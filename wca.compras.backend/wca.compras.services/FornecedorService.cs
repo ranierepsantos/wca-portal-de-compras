@@ -163,8 +163,7 @@ namespace wca.compras.services
                     
                     for (var index = 0; index < rows.Count; index++)
                     {
-
-                        if (codigoProduto != rows[index].A.ToString())
+                        if (rows[index].A != null && !string.IsNullOrEmpty(rows[index].A.ToString()) && codigoProduto != rows[index].A.ToString())
                         {
                             produto = new Produto
                             {
@@ -179,12 +178,13 @@ namespace wca.compras.services
                             };
                             codigoProduto = produto.Codigo;
                             _rm.ProdutoRepository.Attach(produto);
-                        }
 
-                        produto.ProdutoIcmsEstado.Add(new ProdutoIcmsEstado() {
-                            UF = rows[index].H,
-                            Icms = (decimal)rows[index].I
-                        });
+                            produto.ProdutoIcmsEstado.Add(new ProdutoIcmsEstado()
+                            {
+                                UF = rows[index].H,
+                                Icms = (decimal)rows[index].I
+                            });
+                        }
                     }
                     await _rm.SaveAsync();
                 }
