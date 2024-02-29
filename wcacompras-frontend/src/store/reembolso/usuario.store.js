@@ -19,7 +19,7 @@ export class Usuario {
         this.tipoFornecimento = data? data.tipoFornecimento?? []: []
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
         this.usuarioReembolsoComplemento = data? data.usuarioReembolsoComplemento ?? new UsuarioReembolsoComplemento() : new UsuarioReembolsoComplemento()
-        this.centroCusto = []
+        this.centroCusto =data? data.centroCusto: []
     }
 }
 
@@ -41,9 +41,12 @@ export const useUsuarioStore = defineStore("usuario", {
             try {
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
-                
+
+                let centrosDeCusto = data.centroCusto.map(function (el) { return el.value; });
+                data.centroCusto = []
+
+               
                 let response = await userService.create(data);
-                
 
                 data.id = response.data.id;
                 
@@ -58,6 +61,15 @@ export const useUsuarioStore = defineStore("usuario", {
                     await clienteService.RelacionarClienteUsuario(userClientes);
                 }
                 
+                // relacionar usuario x centros de custos
+                if (centrosDeCusto.length > 0) {
+                    
+                    await reembolsoUsuarioService.relacionarUsuarioCentroCusto({
+                        usuarioId: data.id,
+                        centroCustoIds: centrosDeCusto
+                    });
+                }
+
             } catch (error) {
                 throw error
             }
@@ -72,12 +84,21 @@ export const useUsuarioStore = defineStore("usuario", {
                 
                 data.cliente = response.data.map( item => {return { text: item.nome, value: item.id}})
                 
+                response = await reembolsoUsuarioService.getCentrosdeCusto(id);
+
+                data.centroCusto = response.data.map(p => ({value:  p.id, text: p.nome, clienteId: p.clienteId}));
+
                 let usuario = new Usuario(data);
                 return usuario;
 
             } catch (error) {
                 throw error
             }
+        },
+
+        async getCentrosdeCusto (usuarioId) {
+            let response = await reembolsoUsuarioService.getCentrosdeCusto(usuarioId);
+            return response.data
         },
 
         async getPaginate(pageNumber = 1, pageSize = 10, filter = "") {
@@ -92,6 +113,9 @@ export const useUsuarioStore = defineStore("usuario", {
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
                 
+                let centrosDeCusto = data.centroCusto.map(function (el) { return el.value; });
+                data.centroCusto = []
+
                 data.usuarioReembolsoComplemento.usuarioId = data.id;
 
                 await userService.update(data);
@@ -104,6 +128,15 @@ export const useUsuarioStore = defineStore("usuario", {
                     clienteIds: clientes
                 }
                 await clienteService.RelacionarClienteUsuario(userClientes);
+
+                // relacionar usuario x centros de custos
+                if (centrosDeCusto.length > 0) {
+                    
+                    await reembolsoUsuarioService.relacionarUsuarioCentroCusto({
+                        usuarioId: data.id,
+                        centroCustoIds: centrosDeCusto
+                    });
+                }
         },
 
         async toComboList(filial =[]) {
@@ -171,6 +204,11 @@ export const useUsuarioStore = defineStore("usuario", {
             )
 
             return list;
+        },
+
+        async getUsuarioToNotificacaoByCentroDeCusto(idCentroCusto) {
+            let response = await reembolsoUsuarioService.getListByCentroCusto(idCentroCusto);
+            return response.data;
         }
 
     },

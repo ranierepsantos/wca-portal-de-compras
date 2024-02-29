@@ -15,6 +15,11 @@ builder.Services.ConfigureInfraStructure (builder.Configuration);
 //        .RequireAuthenticatedUser().Build()
 //    );
 //});
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.ValueLengthLimit = 100000000;
+    //options.MultipartBodyLengthLimit = 100000000; // In case of multipart
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

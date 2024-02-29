@@ -39,6 +39,7 @@ namespace wca.reembolso.application.Features.Clientes.Common
         bool Ativo,
         decimal ValorLimite,
         decimal ValorUtilizadoMes,
-        string? CodigoCliente
+        string? CodigoCliente,
+        IList<CentroCusto> CentroCusto
     );
 }
