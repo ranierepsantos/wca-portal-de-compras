@@ -228,7 +228,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in solicitacao.despesa" :key="index">
+              <tr v-for="(item, index) in solicitacao.despesa.sort(compararValor('dataEvento', 'desc'))" :key="index">
                 <td class="text-center">
                   {{ moment(item.dataEvento).format("DD/MM/YYYY") }}
                 </td>
