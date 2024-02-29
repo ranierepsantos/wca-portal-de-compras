@@ -59,9 +59,6 @@ export default {
             status: filters.status,
             centroCustoIds: filters.centroCustoIds
         }
-        console.log("parametros->", parametros)
-        console.log("filters->", filters)
-
         return api.get(rotas.Paginar, {params: parametros} );
     },
     registrarEvento(evento) {

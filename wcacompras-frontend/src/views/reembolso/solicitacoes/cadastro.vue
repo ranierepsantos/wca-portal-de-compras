@@ -228,7 +228,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in solicitacao.despesa.sort(compararValor('dataEvento', 'desc'))" :key="index">
+              <tr v-for="(item, index) in solicitacao.despesa.sort(compararValor('dataEvento', 'asc'))" :key="index">
                 <td class="text-center">
                   {{ moment(item.dataEvento).format("DD/MM/YYYY") }}
                 </td>
@@ -420,6 +420,13 @@ const isColaborador = computed(() => {
     );
   
 });
+
+const despesasOrdenadas = computed(() => {
+  let list = solicitacao.value.despesa.sort(compararValor('dataEvento', 'asc'))
+  console.log("despesasOrdenadas", list)
+  return list
+})
+
 
 //VUE FUNCTIONS
 onMounted(async () => {

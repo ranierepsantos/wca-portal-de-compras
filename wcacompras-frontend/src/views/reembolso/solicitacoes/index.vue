@@ -377,13 +377,10 @@ async function getItems() {
       throw new TypeError("Ambas as datas devem ser informadas!")
     else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
       throw new TypeError("A data fim deve ser maior que a data início!")
-    console.log("getItems.isGestor", isGestor.value)
+    
     if (isGestor.value) {
-      console.log(gestorCentrosDeCusto.value.map(x =>  x.id))
       filter.value.centroCustoIds = gestorCentrosDeCusto.value.map(x =>  x.id);
-      console.log("filter.value.centroCustoIds",filter.value.centroCustoIds)
     }
-
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
