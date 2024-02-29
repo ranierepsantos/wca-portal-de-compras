@@ -26,6 +26,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
 
             var query = _repository.ClienteRepository.ToQuery()
                 .Include("Solicitacoes")
+                .Include(n =>  n.CentroCusto)
                 .Where(q => q.UsuarioClientes.Any(sq => sq.UsuarioId == request.UsuarioId))
                 .Select(f => new ClienteResponseWithValorUsado(
                     f.Id,
@@ -41,7 +42,8 @@ namespace wca.reembolso.application.Features.Clientes.Queries
                     f.Ativo,
                     f.ValorLimite,
                     f.Solicitacoes.Where(q=> q.Status != 8 && q.DataSolicitacao.Month.Equals(DateTime.Now.Month)).Sum(q => q.ValorDespesa),
-                    f.CodigoCliente
+                    f.CodigoCliente,
+                    f.CentroCusto
                 ));
 
             List<ClienteResponseWithValorUsado> list = await query.ToListAsync<ClienteResponseWithValorUsado>(cancellationToken: cancellationToken);

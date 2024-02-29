@@ -69,6 +69,11 @@ export const useClienteStore = defineStore("cliente", {
     async ListByUsuario(usuarioId) {
         let response = await clienteService.getListByUser(usuarioId)
         return response.data;
+    },
+
+    async ListCentrosDeCusto(arrClienteIds) {
+        let response = await clienteService.getListCentroCustoByCliente(arrClienteIds)
+        return response.data.map(p => ({value:  p.id, text: p.nome, clienteId: p.clienteId}));
     }
   },
 });

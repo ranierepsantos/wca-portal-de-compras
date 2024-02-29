@@ -29,5 +29,8 @@ namespace wca.reembolso.domain.Entities
         [NotMapped]
         public Cliente? Cliente { get; set; }
 
+        [JsonIgnore]
+        public List<UsuarioCentrodeCustos> Usuarios { get; set; }
+
     }
 }

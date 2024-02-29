@@ -114,6 +114,7 @@
           <th class="text-center text-grey">DATA</th>
           <th class="text-left text-grey">CLIENTE</th>
           <th class="text-left text-grey">COLABORADOR</th>
+          <th class="text-left text-grey">CENTRO DE CUSTO</th>
           <th class="text-center text-grey">VALOR ADIANTAMENTO</th>
           <th class="text-center text-grey">VALOR DESPESA</th>
           <th class="text-left text-grey">TIPO SOLICITAÇÃO</th>
@@ -129,6 +130,7 @@
           </td>
           <td class="text-left">{{ item.cliente.nome }}</td>
           <td class="text-left">{{ item.colaboradorNome }}</td>
+          <td class="text-left">{{ item.centroCustoNome }}</td>
           <td class="text-right">
             {{ formatToCurrencyBRL(item.valorAdiantamento) }}
           </td>
@@ -264,7 +266,7 @@ const isLoading = ref({
   busy: false,
 });
 const formButtons = ref([])
-
+const gestorCentrosDeCusto = ref([])
 
 //COMPUTED'S
 const isColaborador = computed(() => {
@@ -298,12 +300,16 @@ onMounted(async () => {
     isLoading.value.form = true;
     await solicitacaoStore.loadListStatusSolicitacao();
     await getFiliaisToList();
-    let filialUsuario = (
-      await useUsuarioStore().getFiliais(authStore.user.id)
-    )[0];
+    let filialUsuario = (await useUsuarioStore().getFiliais(authStore.user.id))[0];
+
     isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
     authStore.user.filial = filialUsuario.value;
-    await clearFilters();
+
+    gestorCentrosDeCusto.value = []
+    if (isGestor.value) 
+      gestorCentrosDeCusto.value = (await useUsuarioStore().getCentrosdeCusto(authStore.user.id)) 
+
+      await clearFilters();
     await getItems();
     if (authStore.hasPermissao("solicitacao_relatorio")) {
       formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
@@ -314,6 +320,7 @@ onMounted(async () => {
     
 
   } catch (error) {
+    console.error("onMounted.error", error)
   } finally {
     isLoading.value.form = false;
   }
@@ -332,13 +339,14 @@ async function clearFilters() {
       status: null,
       dataIni: null,
       dataFim: null,
+      centroCustoIds: []
     };
     if (!isMatriz.value) {
       filter.value.filialId = authStore.user.filial;
     }
     await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
     // se tiver permissão de visualizar de outros usuario
-    if (isColaborador.value || isGestor.value || !isAprovador.value) {
+    if (isColaborador.value ||!isAprovador.value) {
       filter.value.usuarioId = authStore.user.id;
       await getClientesToList(filter.value.filialId, filter.value.usuarioId);
     } else {
@@ -369,7 +377,13 @@ async function getItems() {
       throw new TypeError("Ambas as datas devem ser informadas!")
     else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
       throw new TypeError("A data fim deve ser maior que a data início!")
-    
+    console.log("getItems.isGestor", isGestor.value)
+    if (isGestor.value) {
+      console.log(gestorCentrosDeCusto.value.map(x =>  x.id))
+      filter.value.centroCustoIds = gestorCentrosDeCusto.value.map(x =>  x.id);
+      console.log("filter.value.centroCustoIds",filter.value.centroCustoIds)
+    }
+
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
