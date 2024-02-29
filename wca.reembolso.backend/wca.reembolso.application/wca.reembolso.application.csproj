@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Faturamentos\Behaviors\" />
-    <Folder Include="Features\Usuarios\Queries\" />
   </ItemGroup>
 
 </Project>

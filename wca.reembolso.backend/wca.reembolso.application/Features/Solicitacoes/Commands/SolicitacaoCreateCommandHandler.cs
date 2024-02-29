@@ -17,7 +17,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         int ClienteId,
         DateTime DataSolicitacao,
         int ColaboradorId,
-        int? GestorId,
+        int? CentroCustoId,
         string? ColaboradorCargo,
         string Projeto,
         string Objetivo,

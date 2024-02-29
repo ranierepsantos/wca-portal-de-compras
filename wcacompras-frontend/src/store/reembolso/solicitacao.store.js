@@ -10,8 +10,8 @@ export class Solicitacao {
         this.dataSolicitacao= data == undefined? moment().format("YYYY-MM-DD"): data.dataSolicitacao
         this.colaboradorId= data == undefined? "": data.colaboradorId
         this.colaboradorNome = data ==undefined? "": data.colaboradorNome
-        this.gestorId = data == undefined? "": data.gestorId
-        this.gestorNome = data ==undefined? "": data.gestorNome
+        this.centroCustoId = data == undefined? "": data.centroCustoId
+        this.centroCustoNome = data ==undefined? "": data.centroCustoNome
         this.colaboradorCargo= data == undefined? "": data.colaboradorCargo
         this.projeto= data == undefined? "": data.projeto
         this.objetivo=data == undefined? "": data.objetivo
@@ -138,7 +138,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         }  
     },
     
-    async getListarPorColaboradorGestor(colaboradorId = 0, gestorId = 0)
+    async getListarPorColaboradorGestor(colaboradorId = 0)
     {
         try {
             let response = await api.getListarPorColaborador(colaboradorId, gestorId)

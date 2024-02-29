@@ -88,12 +88,12 @@
               </v-col>
               <v-col>
                 <v-text-field
-                  label="Gestor Responsável"
+                  label="Centro de Custo"
                   type="text"
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  v-model="solicitacao.gestorNome"
+                  v-model="solicitacao.centroCustoNome"
                   :readonly="true"
                   bg-color="#f2f2f2"
                 ></v-text-field>
@@ -116,16 +116,30 @@
                   :readonly="true"
                 ></v-text-field>
               </v-col>
-              <v-col>
+              <v-col v-show="solicitacao.id == 0 && !isColaborador">
+                <v-select
+                  label="Centro de Custo"
+                  :items="listCentroCusto"
+                  density="compact"
+                  item-title="nome"
+                  item-value="id"
+                  variant="outlined"
+                  color="primary"
+                  v-model="solicitacao.centroCustoId"
+                  :rules="[(v) => !!v || 'Campo obrigatório']"
+                  
+                ></v-select>
+              </v-col>
+              <v-col v-show="solicitacao.id == 0 && isColaborador">
                 <v-text-field
-                  label="Local Projeto"
+                  label="Centro de Custo"
                   type="text"
                   variant="outlined"
                   color="primary"
                   density="compact"
-                  v-model="solicitacao.projeto"
-                  :readonly="isReadonly"
-                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
+                  v-model="solicitacao.centroCustoNome"
+                  :readonly="true"
+                  bg-color = "#f2f2f2"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -348,7 +362,7 @@ import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
 import { formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { Usuario, useUsuarioStore } from "@/store/reembolso/usuario.store";
+import { IDPERFILCOLABORADOR, Usuario, useUsuarioStore } from "@/store/reembolso/usuario.store";
 import {
   Despesa,
   Solicitacao,
@@ -362,6 +376,7 @@ import { computed } from "vue";
 import { compararValor } from "@/helpers/functions";
 import historico from "@/components/reembolso/historico.vue";
 import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
+import { watch } from "vue";
 
 
 const authStore = useAuthStore();
@@ -382,6 +397,7 @@ const despesaTipos = ref([]);
 
 const formButtons = ref([]);
 const usuario = ref(new Usuario());
+const listCentroCusto = ref([])
 
 //COMPUTED
 const isReadonly = computed(() =>{
@@ -396,6 +412,14 @@ const showSecaoDespesa = computed(()=> {
 const despesaCanAdd = computed(() => (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id > 0 && "3,4".includes(solicitacao.value.status)))
 const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
 const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status)));
+
+const isColaborador = computed(() => {
+  
+    return (
+      authStore.sistema.perfil.id == IDPERFILCOLABORADOR
+    );
+  
+});
 
 //VUE FUNCTIONS
 onMounted(async () => {
@@ -429,7 +453,10 @@ onMounted(async () => {
       }
       solicitacao.value.colaboradorId = usuario.value.id;
       solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
-      solicitacao.value.gestorId = usuario.value.usuarioReembolsoComplemento.gestorId;
+      let centroCusto = clientes.value[0].centroCusto.find(q => q.centroCustoId == usuario.value.usuarioReembolsoComplemento.centroCustoId)
+      solicitacao.value.centroCustoId = centroCusto ? centroCusto.id: null
+      solicitacao.value.centroCustoNome = centroCusto? centroCusto.nome: ""
+      
       if (clientes.value.length ==1)
         solicitacao.value.clienteId = clientes.value[0].id
 
@@ -444,6 +471,17 @@ onMounted(async () => {
   }
 });
 
+watch(() => solicitacao.value.clienteId, (newValue,oldValue) => {
+  
+  if (newValue != oldValue) {
+    let cliente = clientes.value.find(q => q.id == newValue)
+    listCentroCusto.value = cliente.centroCusto
+    if (!isColaborador.value)
+      solicitacao.value.centroCustoId = null
+
+  }
+  
+})
 
 
 //FUNCTIONS
@@ -505,7 +543,7 @@ async function aprovarReprovar(isAprovado, comentario) {
       let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
       notificarUsuario = notificaList.map(q => {return q.value})
     }else if (reembolsoStatus.notifica == 2) //cliente
-      notificarUsuario.push(solicitacao.value.gestorId)
+      notificarUsuario = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(data.centroCustoId))
     else if (reembolsoStatus.notifica == 3) //gestor
       notificarUsuario.push(solicitacao.value.colaboradorId)
 
@@ -643,8 +681,8 @@ async function salvar() {
       let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, "wca_aprovacao")
       notificar = notificaList.map(q => {return q.value})
     }
-    else if (status.notifica == 2 && data.gestorId) //cliente
-      notificar.push (data.gestorId)
+    else if (status.notifica == 2 && data.centroCustoId) //cliente
+      notificar = ((await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(data.centroCustoId)))
     
     data.notificar = notificar;
 

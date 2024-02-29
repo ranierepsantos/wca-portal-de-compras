@@ -5,7 +5,7 @@ const rotas = {
     Update: "Solicitacao",
     GetById: "Solicitacao",
     Paginar: "Solicitacao/Paginar",
-    ListarPorColaboradorGestor: "Solicitacao/ListarPorColaboradorGestor",
+    ListarPorColaboradorGestor: "Solicitacao/ListarPorColaborador",
     ListarStatusSolicitacao: "Solicitacao/ListarStatusSolicitacao",
     AlterarStatus: "Solicitacao/AlterarStatus",
     RegistrarEvento: "Solicitacao/RegistrarEvento",
@@ -30,12 +30,11 @@ export default {
         return api.put(rotas.Update, data);
     },
 
-    ListarPorColaboradorGestor(colaboradorId = 0, gestorId = 0, status = [])
+    ListarPorColaboradorGestor(colaboradorId = 0, status = [])
     {
         let parametros ={
             params: {
                 colaboradorId: colaboradorId,
-                gestorId: gestorId,
                 status: status
             }
         }
@@ -57,8 +56,12 @@ export default {
             clienteId: filters.clienteId,
             dataIni: filters.dataIni,
             dataFim: filters.dataFim,
-            status: filters.status
+            status: filters.status,
+            centroCustoIds: filters.centroCustoIds
         }
+        console.log("parametros->", parametros)
+        console.log("filters->", filters)
+
         return api.get(rotas.Paginar, {params: parametros} );
     },
     registrarEvento(evento) {
