@@ -1,8 +1,8 @@
 {
   "name": "WCA-APP",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "private": true,
-  "enviroment": "Desenvolvimento",
+  "enviroment": "Homologação",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
