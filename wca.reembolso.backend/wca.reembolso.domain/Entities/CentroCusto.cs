@@ -30,7 +30,7 @@ namespace wca.reembolso.domain.Entities
         public Cliente? Cliente { get; set; }
 
         [JsonIgnore]
-        public List<UsuarioCentrodeCustos> Usuarios { get; set; }
+        public List<UsuarioCentrodeCustos>? Usuarios { get; set; }
 
     }
 }
