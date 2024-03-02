@@ -58,7 +58,8 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
-        ></v-select>
+          multiple
+      ></v-select>
       </v-col>
       <v-col cols="2">
         <v-text-field

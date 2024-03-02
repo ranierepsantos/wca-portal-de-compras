@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.reembolso.application.Features.Despesas.Command;
 using wca.reembolso.application.Features.Despesas.Queries;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
@@ -123,6 +124,38 @@ namespace wca.reembolso.webapi.Controllers
             if (result.IsError) { return Problem(result.Errors); }
 
             return new FileStreamResult(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"relatorio_solicitacoes.xlsx" };
+
+        }
+
+        [HttpPost("Despesa")]
+        public async Task<IActionResult> CreateDespesa([FromBody] DespesaCreateCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
+        [HttpPut("Despesa")]
+        public async Task<IActionResult> UpdateDespesa([FromBody] DespesaUpdateCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+        [HttpDelete("Despesa/{Id}")]
+        public async Task<IActionResult> DeleteDespesa([FromRoute] DespesaDeleteCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
 
         }
 
