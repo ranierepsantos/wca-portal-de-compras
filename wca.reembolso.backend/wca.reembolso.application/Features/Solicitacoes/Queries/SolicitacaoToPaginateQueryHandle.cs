@@ -10,9 +10,9 @@ using wca.reembolso.application.Features.Solicitacoes.Common;
 namespace wca.reembolso.application.Features.Solicitacaos.Queries
 {
 
-    public record SolicitacaoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int UsuarioId =0, int ClienteId = 0, int Status = 0, params int[]? CentroCustoIds) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoResponse>>>;
+    public record SolicitacaoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int UsuarioId =0, int ClienteId = 0, int Status = 0, params int[]? CentroCustoIds) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     public sealed class SolicitacaoToPaginateQueryHandle : 
-        IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoResponse>>>
+        IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
@@ -24,7 +24,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             _logger = logger;
         }
 
-        public async Task<ErrorOr<Pagination<SolicitacaoResponse>>> Handle(
+        public async Task<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>> Handle(
             SolicitacaoPaginateQuery request, CancellationToken cancellationToken)
         {
 
@@ -37,6 +37,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             query = query.Include(i => i.Cliente)
                          .Include(q => q.Colaborador)
                          .Include(q => q.CentroCusto)
+                         .Include(q => q.Despesa)
                          .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora));
 
             if (request.FilialId > 1)
@@ -63,7 +64,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
 
             query = query.OrderBy(q => q.Id);
 
-            var pagination = Pagination<SolicitacaoResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
+            var pagination = Pagination<SolicitacaoToPaginateResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 
             return await Task.FromResult(pagination) ;
         }
