@@ -10,6 +10,7 @@ using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Features.Notificacoes.Commands;
 using Microsoft.EntityFrameworkCore;
+using wca.reembolso.application.Features.Solicitacaos.Queries;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Commands
 {
@@ -93,7 +94,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             }
 
             //3. mapear para SolicitacaoResponse
-            return _mapper.Map<SolicitacaoResponse>(dado);
+            return await _mediator.Send(new SolicitacaoByIdQuerie(dado.Id), cancellationToken);
         }
     }
 }

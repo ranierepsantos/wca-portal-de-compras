@@ -76,6 +76,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 var despesa = _repository.DespesaRepository.ToQuery().Where(q => q.Id.Equals(item.Id)).FirstOrDefault();
                 if (despesa != null)
                 {
+                    HandleFile.DeleteFile(despesa.ImagePath);
                     _repository.DespesaRepository.Delete(despesa);
                 }
             }
