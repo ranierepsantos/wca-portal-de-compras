@@ -10,7 +10,10 @@ const rotas = {
     AlterarStatus: "Solicitacao/AlterarStatus",
     RegistrarEvento: "Solicitacao/RegistrarEvento",
     ChecaSeDespesaExiste: "Solicitacao/ChecarSeDespesaExiste",
-    ExportarParaExcel: "Solicitacao/ExportarParaExcel"
+    ExportarParaExcel: "Solicitacao/ExportarParaExcel",
+    DespesaCreate: "Solicitacao/Despesa",
+    DespesaUpdate: "Solicitacao/Despesa",
+    DespesaDelete: "Solicitacao/Despesa/{Id}"
 }
 
 export default {
@@ -77,5 +80,14 @@ export default {
     exportarParaExcel(filters)   {
         return api.get(rotas.ExportarParaExcel, {params: filters, responseType: 'blob'} );
     },
+    despesaCreate(despesa) {
+        return api.post(rotas.DespesaCreate, despesa)
+    },
+    despesaUpdate(despesa) {
+        return api.put(rotas.DespesaUpdate, despesa)
+    },
+    despesaDelete(despesaId) {
+        return api.delete(rotas.DespesaDelete.replace("{Id}", despesaId))
+    }
     
 }

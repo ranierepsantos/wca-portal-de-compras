@@ -10,7 +10,7 @@ using wca.reembolso.application.Features.Solicitacoes.Common;
 namespace wca.reembolso.application.Features.Solicitacaos.Queries
 {
 
-    public record SolicitacaoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int UsuarioId =0, int ClienteId = 0, int Status = 0, params int[]? CentroCustoIds) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
+    public record SolicitacaoPaginateQuery(int UsuarioId = 0, int ClienteId = 0, DateTime? DataIni = null, DateTime? DataFim = null, int[]? Status = null, int[]? CentroCustoIds = null) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     public sealed class SolicitacaoToPaginateQueryHandle : 
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
     {
@@ -49,8 +49,8 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
             if (request.ClienteId > 0)
                 query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
 
-            if (request.Status > 0)
-                query = query.Where(q => q.Status.Equals( request.Status));
+            if (request.Status?.Length > 0)
+                query = query.Where(q => request.Status.Contains(q.Status));
 
             if (request.CentroCustoIds?.Length > 0)
                 query = query.Where(c => request.CentroCustoIds.Contains(c.CentroCustoId));

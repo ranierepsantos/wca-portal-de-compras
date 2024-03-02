@@ -18,7 +18,7 @@ export class Solicitacao {
         this.periodoInicial= data == undefined? moment().format("YYYY-MM-DD"): data.periodoInicial
         this.periodoFinal= data == undefined? moment().format("YYYY-MM-DD"): data.periodoFinal
         this.valorAdiantamento= data == undefined? 0.00: data.valorAdiantamento
-        this.valorDespesa= data == undefined? 0.00: data.valorDespesado
+        this.valorDespesa= data == undefined? 0.00: data.valorDespesa
         this.status = data == undefined? 1: data.status
         this.statusAnterior = data == undefined? 1: data.statusAnterior
         this.cliente = data == undefined? {}: data.cliente
@@ -28,6 +28,7 @@ export class Solicitacao {
     }
 
     salvarDespesa(despesa) {
+        console.log("salvarDespesa->despesa: ", despesa)
         let index = -1        
         if (despesa.id == 0) {
             this.controlIdDespesa--
@@ -90,7 +91,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     
     async add (data) {
         try {
-            await api.create(data);
+            return await api.create(data);
         } catch (error) {
             throw error
         }  
@@ -184,6 +185,20 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
         return response
     },
 
+    async criarDespesa(despesa) {
+        let response = await api.despesaCreate(despesa)
+        return response.data
+    },
+
+    async atualizarDespesa(despesa) {
+        let response = await api.despesaUpdate(despesa)
+        return response.data
+    },
+
+    async excluirDespesa(despesa) {
+        let response = await api.despesaDelete(despesa.id)
+        return response.data
+    }
 
   },
 });

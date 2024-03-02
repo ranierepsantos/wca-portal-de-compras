@@ -402,16 +402,16 @@ const listCentroCusto = ref([])
 //COMPUTED
 const isReadonly = computed(() =>{
 
-  return (solicitacao.value.id > 0 && solicitacao.value.status != 4)
+  return (solicitacao.value.id > 0 && solicitacao.value.status != 4 && solicitacao.value.status != 10)
       || (solicitacao.value.colaboradorId != authStore.user.id)
 })
 const showSecaoDespesa = computed(()=> {
   return solicitacao.value.tipoSolicitacao == 1 ||
         (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
 })
-const despesaCanAdd = computed(() => (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id > 0 && "3,4".includes(solicitacao.value.status)))
-const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
-const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4".includes(solicitacao.value.status)));
+const despesaCanAdd = computed(() => (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id > 0 && "3,4,10".includes(solicitacao.value.status)))
+const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
+const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status)));
 
 const isColaborador = computed(() => {
   
@@ -657,7 +657,8 @@ async function salvar() {
     if (data.status == 4) {
       statusAtual = data.statusAnterior
     }else {
-      if (data.id == 0){
+      if (data.id == 0 || data.status == 10) //status 10 - pré cadastro
+      {
         if (data.tipoSolicitacao == 2 ) 
           data.status = 1; //1 - solicitado
         else 
@@ -781,40 +782,62 @@ async function registrarPagto() {
 }
 
 async function salvarDespesa() {
-
-  let tipoDespesa = despesaTipos.value.find(q =>  q.id == despesa.value.tipoDespesaId)
-  let hasDespesa = tipoDespesa.tipo == 1 ? await solicitacaoStore.checarSeDespesaExiste(despesa.value): false;
-  if (hasDespesa) {
+  try {
+    let tipoDespesa = despesaTipos.value.find(q =>  q.id == despesa.value.tipoDespesaId)
+    let hasDespesa = tipoDespesa.tipo == 1 ? await solicitacaoStore.checarSeDespesaExiste(despesa.value): false;
+    if (hasDespesa) {
+      limparDadosDespesa();
+      openDespesaForm.value = false;
+      swal.fire({
+          icon: "warning",
+          index: "top-end",
+          title: "Atenção!",
+          text: "Já existe despesa cadastrada com esta nota e cnpj!",
+          showConfirmButton: true
+        });
+        return 
+    }
+    if (solicitacao.value.id == 0){
+      solicitacao.value.status = 10 // pré cadastro
+      solicitacao.value.despesa.push({...despesa.value})
+      solicitacao.value.notificar = []
+      let response = await solicitacaoStore.add(solicitacao.value)
+      console.log(response)
+      solicitacao.value = new Solicitacao(response.data)
+    }else {
+      despesa.value.solicitacaoId = solicitacao.value.id  
+      despesa.value = despesa.value.id <= 0 ? (await solicitacaoStore.criarDespesa(despesa.value)): (await solicitacaoStore.atualizarDespesa(despesa.value))
+      solicitacao.value.salvarDespesa(despesa.value);
+    }
     limparDadosDespesa();
     openDespesaForm.value = false;
-    swal.fire({
-        icon: "warning",
-        index: "top-end",
-        title: "Atenção!",
-        text: "Já existe despesa cadastrada com esta nota e cnpj!",
-        showConfirmButton: true
-      });
-      return 
+  } catch (error) {
+    console.error("salvarDespesa.error", error)
+    handleErrors(error)
   }
-  solicitacao.value.salvarDespesa(despesa.value);
-  limparDadosDespesa();
-  openDespesaForm.value = false;
+    
 }
 
 async function removerDespesa(item) {
   let options = {
     title: "Confirma Exclusão?",
-    text: "Deseja realmente excluir o despesa: " + item.nroFiscal + "?",
+    text: "Deseja realmente excluir o despesa?",
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "Sim",
     cancelButtonText: "Não",
   };
-
-  let response = await swal.fire(options);
-  if (response.isConfirmed) {
-    solicitacao.value.removerDespesa(item);
+  try {
+    let response = await swal.fire(options);
+    if (response.isConfirmed) {
+      await solicitacaoStore.excluirDespesa(item)
+      solicitacao.value.removerDespesa(item);
+    }  
+  } catch (error) {
+    console.error("removerDespesa.error", error)
+    handleErrors(error)
   }
+  
 }
 function carregarBotoes() {
 
@@ -827,7 +850,7 @@ function carregarBotoes() {
   let podeSalvar = solicitacao.value.id == 0  || solicitacaoCanEdit.value
 
 
-  if (wcaAprova || clienteAprova) {
+  if ((wcaAprova || clienteAprova) && solicitacao.value.id > 0 && solicitacao.value.status != 10) {
     formButtons.value.push({
       text: "Aprovar / Reprovar",
       icon: "",
