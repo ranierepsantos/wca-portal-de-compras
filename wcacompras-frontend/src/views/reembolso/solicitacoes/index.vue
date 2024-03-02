@@ -114,10 +114,10 @@
           <th class="text-center text-grey">DATA</th>
           <th class="text-left text-grey">CLIENTE</th>
           <th class="text-left text-grey">COLABORADOR</th>
-          <th class="text-left text-grey">CENTRO DE CUSTO</th>
           <th class="text-center text-grey">VALOR ADIANTAMENTO</th>
           <th class="text-center text-grey">VALOR DESPESA</th>
           <th class="text-left text-grey">TIPO SOLICITAÇÃO</th>
+          <th class="text-left text-grey">PERÍODO</th>
           <th class="text-left text-grey">STATUS</th>
           <th></th>
         </tr>
@@ -128,9 +128,9 @@
           <td class="text-center">
             {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
           </td>
-          <td class="text-left">{{ item.cliente.nome }}</td>
+          <td class="text-left">{{ item.clienteNome }}</td>
           <td class="text-left">{{ item.colaboradorNome }}</td>
-          <td class="text-left">{{ item.centroCustoNome }}</td>
+          
           <td class="text-right">
             {{ formatToCurrencyBRL(item.valorAdiantamento) }}
           </td>
@@ -140,12 +140,14 @@
           <td class="text-left">
             {{ solicitacaoStore.getTipoSolicitacao(item.tipoSolicitacao).text }}
           </td>
+          <td class="text-left">{{ item.dataMenorDespesa ? `${moment(item.dataMenorDespesa).format("DD/MM/YY")} à ${moment(item.dataMaiorDespesa).format("DD/MM/YY")}` : "" }}</td>
           <td class="text-left">
             <v-btn
               :color="solicitacaoStore.getStatus(item.status).color"
               variant="tonal"
               density="compact"
               class="text-center"
+              
             >
               {{ solicitacaoStore.getStatus(item.status).status }}</v-btn
             >
@@ -201,7 +203,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="9">
+          <td colspan="10">
             <v-pagination
               v-model="page"
               :length="totalPages"
@@ -222,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import { ref, onMounted, watch } from "vue";
 import handleErrors from "@/helpers/HandleErrors";
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
@@ -256,7 +258,6 @@ const filter = ref({
   dataIni: null,
   dataFim: null,
 });
-const swal = inject("$swal");
 const solicitacaoStore = useSolicitacaoStore();
 const solicitacaoEventos = ref([]);
 const openHistorico = ref(false);
@@ -309,8 +310,8 @@ onMounted(async () => {
     if (isGestor.value) 
       gestorCentrosDeCusto.value = (await useUsuarioStore().getCentrosdeCusto(authStore.user.id)) 
 
-      await clearFilters();
-    await getItems();
+    await clearFilters();
+    // await getItems();
     if (authStore.hasPermissao("solicitacao_relatorio")) {
       formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
     }

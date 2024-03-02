@@ -421,12 +421,6 @@ const isColaborador = computed(() => {
   
 });
 
-const despesasOrdenadas = computed(() => {
-  let list = solicitacao.value.despesa.sort(compararValor('dataEvento', 'asc'))
-  console.log("despesasOrdenadas", list)
-  return list
-})
-
 
 //VUE FUNCTIONS
 onMounted(async () => {
@@ -542,18 +536,9 @@ async function aprovarReprovar(isAprovado, comentario) {
     }</b> por ${authStore.user.nome}, status alterado para <b>${
       reembolsoStatus.status
     }</b>. <br/> Comentário: ${comentario}`;
-    debugger  
-    let notificarUsuario = []
     
-    if (reembolsoStatus.notifica == 1) // wca
-    {
-      let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
-      notificarUsuario = notificaList.map(q => {return q.value})
-    }else if (reembolsoStatus.notifica == 2) //cliente
-      notificarUsuario = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(data.centroCustoId))
-    else if (reembolsoStatus.notifica == 3) //gestor
-      notificarUsuario.push(solicitacao.value.colaboradorId)
-
+    let notificarUsuario = await retornaUsuariosParaNotificar(reembolsoStatus)
+    
     let solicitacaoStatus = {
       solicitacaoId: solicitacao.value.id,
       evento: texto,
@@ -681,15 +666,8 @@ async function salvar() {
       statusAtual = data.status
     }
 
-    let notificar = []
     let status = solicitacaoStore.getStatus(statusAtual) 
-    if (status.notifica == 1) //wca
-    {
-      let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, "wca_aprovacao")
-      notificar = notificaList.map(q => {return q.value})
-    }
-    else if (status.notifica == 2 && data.centroCustoId) //cliente
-      notificar = ((await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(data.centroCustoId)))
+    let notificar = await retornaUsuariosParaNotificar(status);
     
     data.notificar = notificar;
 
@@ -723,20 +701,40 @@ async function registrarPagto() {
         ? solicitacao.value.valorAdiantamento
         : solicitacao.value.valorDespesa;
 
+    let dataDeposito = null
+    
     let options = {
-      title: "Confirmação",
-      text: `Confirma o registro de pagamento no valor de ${formatToCurrencyBRL(
-        valor
-      )}?`,
-      icon: "question",
+      title: 'Registrar Pagamento',
+      html: `
+      <input type="date" id="dataDeposito" class="swal2-input" placeholder="Data Depósito">  
+      <input type="text" id="valorDeposito" class="swal2-input text-right" style='background-color: #f2f2f2' readonly>
+        
+      `,
+      confirmButtonText: 'Registrar',
+      focusConfirm: false,
       showCancelButton: true,
-      confirmButtonText: "Sim",
-      cancelButtonText: "Não",
-    };
+      cancelButtonText: "Cancelar",
+      didOpen: () => {
+        const popup = swal.getPopup()
+        dataDeposito = popup.querySelector('#dataDeposito')
+        dataDeposito.value = moment().format("YYYY-MM-DD")
+        popup.querySelector('#valorDeposito').value = formatToCurrencyBRL(valor)
+        
+      },
+      preConfirm: () => {
+        let deposito = dataDeposito.value  
+      
+        if (!deposito) {
+          swal.showValidationMessage(`Por favor informar a data de depósito`)
+        }
+        return deposito
+      },
+    }
 
-    let response = await swal.fire(options);
-
-    if (response.isConfirmed) {
+    const {value: _dataDeposito } = await swal.fire(options);
+    
+    if (_dataDeposito) {
+      
       let transacao = new Transacao(
         `Crédito - solicitação ${solicitacao.value.id}`,
         "+",
@@ -750,20 +748,11 @@ async function registrarPagto() {
 
       let novoStatus = solicitacaoStore.getStatus(status);
       
-      let texto = `${authStore.user.nome} registrou pagamento ao colaborador no valor ${formatToCurrencyBRL(
-        valor
-      )}!`;
+      let texto = `${authStore.user.nome} registrou pagamento ao colaborador.
+                  <br/> Depositado em: ${moment(_dataDeposito).format("DD/MM/YYYY")}
+                  <br/> Valor: ${formatToCurrencyBRL(valor)}.`;
       
-      let notificarUsuario = []
-
-      if (novoStatus.notifica == 1) // wca
-      {
-        let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
-        notificarUsuario = notificaList.map(q => {return q.value})
-      }else if (novoStatus.notifica == 2) //cliente
-        notificarUsuario.push(solicitacao.value.gestorId)
-      else if (novoStatus.notifica == 3) //gestor
-        notificarUsuario.push(solicitacao.value.colaboradorId)
+      let notificarUsuario = await retornaUsuariosParaNotificar(novoStatus);
 
       let solicitacaoStatus = {
         solicitacaoId: solicitacao.value.id,
@@ -867,6 +856,20 @@ function hasValorLimiteExcedido(data) {
     return (parseFloat(valorSolicitacao) + parseFloat(_cliente.valorUtilizadoMes)) > parseFloat(_cliente.valorLimite);
   }
   return true
+}
+
+async function retornaUsuariosParaNotificar(status) {
+  let list = []
+  if (status.notifica == 1) // wca
+  {
+    let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
+    list = notificaList.map(q => {return q.value})
+  }else if (status.notifica == 2 && solicitacao.value.centroCustoId) //gestores
+    list = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(solicitacao.value.centroCustoId))
+  else if (status.notifica == 3) //colaborador
+    list.push(solicitacao.value.colaboradorId)
+
+  return list;
 }
 
 

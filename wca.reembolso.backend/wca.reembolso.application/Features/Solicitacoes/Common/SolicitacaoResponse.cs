@@ -26,4 +26,20 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         IList<Despesa> Despesa,
         IList<SolicitacaoHistorico> SolicitacaoHistorico
     );
+
+
+    public class SolicitacaoToPaginateResponse {
+        public int Id { get; init; }
+        public DateTime DataSolicitacao { get; init; }
+        public string? ClienteNome { get; init; }
+        public string? ColaboradorNome { get; init; }
+        public string? CentroCustoNome { get; init; }
+        public decimal ValorAdiantamento { get; init; }
+        public decimal ValorDespesa { get; init; }
+        public int Status { get; init; }
+        public int TipoSolicitacao { get; init; }
+        public DateTime? DataMenorDespesa { get; init; }
+        public DateTime? DataMaiorDespesa { get; init; }
+        public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; init; }
+    }
 }
