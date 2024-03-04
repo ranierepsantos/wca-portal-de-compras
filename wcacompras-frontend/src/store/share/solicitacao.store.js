@@ -51,7 +51,7 @@ export class Desligamento {
         this.temContratoExperiencia = data? data.temContratoExperiencia: false
         this.statusApontamento = data? data.statusApontamento: null
         this.statusAvisoPrevio = data? data.statusAvisoPrevio: null
-        this.statusHomologacaoSindicato = data? data.statusHomologacaoSindicato: null
+        this.statusFichaEpi = data? data.statusFichaEpi: null
         this.statusExameDemissional = data? data.statusExameDemissional: null
         this.dataCredito = data && data.dataCredito ? moment(data.dataCredito).format("YYYY-MM-DD") : null
         
@@ -65,21 +65,6 @@ export class Comunicado {
 export class MudancaBase {
     
 }
-
-let anexo = [
-    {
-        id: 1,
-        solicitacaoId: 0,
-        descricao: "Bonus 1 - The HTTP Reference Tables.pdf",
-        caminhoArquivo: "https://localhost:7283//Media//dea18476-4131-4be2-adaa-d8af7b6a8822.pdf"
-    },
-    {
-        id: 2,
-        solicitacaoId: 0,
-        descricao: "Bonus 2 - Teste.pdf",
-        caminhoArquivo: "https://localhost:7283//Media//dea18476-4131-4be2-adaa-d8af7b6a8822.pdf"
-    }
-]
 
 
 /**NaoSeAplica = 0,

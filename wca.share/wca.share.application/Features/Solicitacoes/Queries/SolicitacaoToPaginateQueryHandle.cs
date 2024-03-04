@@ -41,7 +41,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
             var query = _repository.SolicitacaoRepository.ToQuery();
             query = query.Include(i => i.Cliente)
                          .Include(q => q.Responsavel)
-                         .Include(q => q.Gestor)
+                         .Include(q => q.CentroCusto)
                          .Include(q => q.SolicitacaoTipo)
                          .Include(q => q.Funcionario)
                          .Include(q => q.StatusSolicitacao)

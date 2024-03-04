@@ -102,7 +102,7 @@ const menuItems = ref([
     title: "Desligamento",
     value: 3,
     route: "/share/desligamento",
-    permissao: "livre"
+    permissao: "desligamento-criar|desligamento-executar"
   },
   {
     title: "Mudança de base",

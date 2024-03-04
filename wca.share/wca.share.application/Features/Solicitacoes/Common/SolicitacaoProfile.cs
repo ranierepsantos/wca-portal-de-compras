@@ -23,7 +23,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.ClienteNome, opt =>  opt.MapFrom(src =>  src.Cliente.Nome))
                 .ForMember(dest => dest.FuncionarioNome, opt =>  opt.MapFrom(src =>  src.Funcionario.Nome))
                 .ForMember(dest => dest.ResponsavelNome, opt => opt.MapFrom(src => src.Responsavel.Nome))
-                .ForMember(dest => dest.GestorNome, opt =>  opt.MapFrom(src =>  src.Gestor.Nome));
+                .ForMember(dest => dest.CentroCustoNome, opt =>  opt.MapFrom(src =>  src.CentroCusto.Nome));
 
             CreateMap<StatusSolicitacao, StatusSolicitacaoResponse>();
 
