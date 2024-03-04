@@ -31,7 +31,7 @@
         <v-col>
             <v-checkbox v-model="dataModel.temContratoExperiencia" 
                         label="Contrato de Experiência?"
-                        color="primary" :disabled="createMode">
+                        color="primary" :disabled="!createMode">
             </v-checkbox>
         </v-col>
       <v-col>
@@ -40,7 +40,7 @@
           :combo-items="listAvisoPrevioStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="!createMode"
+          :select-mode="createMode"
           :text-field-value="
             getTextFromListByCodigo(
               listAvisoPrevioStatus,
@@ -50,7 +50,7 @@
           label-text="Aviso Prévio"
         ></select-text>
       </v-col>
-      <v-col>
+      <v-col v-show="!createMode">
         <select-text
           v-model="dataModel.statusApontamento"
           :combo-items="listFieldStatus"
@@ -64,13 +64,14 @@
             )
           "
           label-text="Apontamento"
+          
         ></select-text>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-show="!createMode">
         <v-col>
         <select-text
-          v-model="dataModel.statusHomologacaoSindicato"
+          v-model="dataModel.statusFichaEpi"
           :combo-items="listFieldStatus"
           combo-item-title="text"
           combo-item-value="value"
@@ -78,10 +79,10 @@
           :text-field-value="
             getTextFromListByCodigo(
               listFieldStatus,
-              dataModel.statusHomologacaoSindicato
+              dataModel.statusFichaEpi
             )
           "
-          label-text="Homologação Sindicato"
+          label-text="Ficha EPI"
         ></select-text>
       </v-col>
       <v-col>
@@ -110,6 +111,7 @@
           v-model="dataModel.dataCredito"
           :readonly="createMode"
           :bg-color="createMode ? '#f2f2f2' : ''"
+          
         ></v-text-field>
       </v-col>
     </v-row>

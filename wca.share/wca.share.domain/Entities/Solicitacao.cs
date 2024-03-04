@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using wca.share.domain.Common.Enum;
 
 namespace wca.share.domain.Entities
 {
@@ -33,12 +32,11 @@ namespace wca.share.domain.Entities
         [JsonIgnore]
         public Usuario? Responsavel { get; set; }
 
-        [Column("gestor_id")]
-        public int? GestorId { get; set; }
-
-        [JsonIgnore]
-        public Usuario? Gestor { get; set; }
-
+        [Column("centrocusto_id")]
+        public int? CentroCustoId { get; set; }
+        
+        public CentroCusto? CentroCusto { get; private set; }
+        
         [Column("data_solicitacao", TypeName = "smalldatetime")]
         public DateTime DataSolicitacao { get; set; } = DateTime.Now;
         
@@ -50,12 +48,10 @@ namespace wca.share.domain.Entities
 
         [JsonIgnore]
         public StatusSolicitacao? StatusSolicitacao { get; set; }
-
         public SolicitacaoComunicado? Comunicado { get; set; }
         public SolicitacaoDesligamento? Desligamento { get; set; }
         public SolicitacaoMudancaBase? MudancaBase { get; set; }
         public List<SolicitacaoArquivo> Anexos { get; set; } = new();
-
         public List<SolicitacaoHistorico> Historico { get; set; }
     }
 
@@ -86,8 +82,8 @@ namespace wca.share.domain.Entities
         [Column("status_aviso_previo")] 
         public int? StatusAvisoPrevio { get; set; }
         
-        [Column("status_homologacao_sindicato")]
-        public int? StatusHomologacaoSindicato { get; set; }
+        [Column("status_ficha_epi")]
+        public int? StatusFichaEpi { get; set; }
 
         [Column("status_exame_demissional")]
         public int? StatusExameDemissional { get; set; }

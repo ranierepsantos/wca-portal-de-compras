@@ -21,7 +21,7 @@
               :list-clientes="clienteList"
               :descricao-label="getObservacaoLabelDescricao(solicitacao.solicitacaoTipoId)"
               :list-funcionarios="funcionarioList"
-              :list-gestores="gestorList"
+              :list-centro-custos="centrosCustoList"
               :combo-tipo-show="comboTipoShow"
             >
               <desligamento
@@ -72,22 +72,27 @@ const clienteList = ref([]);
 const formButtons = ref([]);
 const comboTipoShow = ref(true);
 const funcionarioList = ref([]);
-const gestorList = ref([]);
+const centrosCustoList = ref([]);
 const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
+const permissao = ref("")
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
     solicitacao.value.solicitacaoTipoId = null;
     if (route.path.includes("desligamento")) {
       solicitacao.value.solicitacaoTipoId = 1;
+      permissao.value = 'desligamento' 
     } else if (route.path.includes("comunicado")) {
       solicitacao.value.solicitacaoTipoId = 2;
+      permissao.value = 'comunicado' 
     } else if (route.path.includes("ferias")) {
       solicitacao.value.solicitacaoTipoId = 3;
+      permissao.value = 'ferias' 
     } else if (route.path.includes("mudancabase")) {
       solicitacao.value.solicitacaoTipoId = 4;
+      permissao.value = 'mudancabase' 
     }
 
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
@@ -107,7 +112,7 @@ watch(
   async (clienteId) => {
     try {
       funcionarioList.value = [];
-      gestorList.value = [];
+      centrosCustoList.value = [];
       if (clienteId) {
         funcionarioList.value = (
           await api.get(
@@ -115,8 +120,8 @@ watch(
           )
         ).data;
 
-        //Trazer gestor por perfil
-        gestorList.value = await useShareUsuarioStore().getListByCliente(clienteId)
+        //Trazer centros de custo
+        //centrosCustoList.value = await useShareUsuarioStore().getListByCliente(clienteId)
         
       }  
     } catch (error) {
