@@ -37,11 +37,11 @@
     <v-row>
       <v-col>
         <select-text
-          v-model="solicitacao.gestorId"
-          :combo-items="listGestores"
+          v-model="solicitacao.centroCustoId"
+          :combo-items="listCentroCustos"
           :select-mode="solicitacao.id == 0"
-          :text-field-value="getTextFromListByCodigo(listGestores, solicitacao.gestorId)"
-          label-text="Gestor"
+          :text-field-value="getTextFromListByCodigo(listCentroCustos, solicitacao.centroCustoId)"
+          label-text="Centro de Custo"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
@@ -65,7 +65,7 @@
               variant="outlined"
               :label="descricaoLabel"
               class="text-primary"
-              v-model="solicitacao.Observacao"
+              v-model="solicitacao.descricao"
             >
             </v-textarea>
           </v-col>
@@ -98,7 +98,7 @@ const props = defineProps({
       return [];
     },
   },
-  listGestores: {
+  listCentroCustos: {
     type: Array,
     default: function () {
       return [];

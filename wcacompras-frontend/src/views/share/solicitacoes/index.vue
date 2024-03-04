@@ -1,6 +1,7 @@
 <template>
   <div>
     <bread-crumbs
+      :show-button="authStore.hasPermissao(pageTipo.tipo + '-criar')"
       :title="getPageTitle(pageTipo.id)"
       @novoClick="toPage()"
     />
@@ -296,7 +297,11 @@ onBeforeMount(async () => {
     isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
     authStore.user.filial = filialUsuario.value;
     await clearFilters();
-    formButtons.value.push({ text: "Novo", icon: "", event: "novoClick" });
+    console.log("hasPermissao." + pageTipo.value.tipo.toLowerCase() + '-criar',authStore.hasPermissao(pageTipo.value.tipo.toLowerCase() + '-criar'))
+    if (authStore.hasPermissao(pageTipo.value.tipo.toLowerCase() + '-criar')){
+      //formButtons.value.push({ text: "Novo", icon: "", event: "novoClick" });
+    }
+
   } catch (error) {
   } finally {
     isLoading.value.form = false;

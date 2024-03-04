@@ -64,7 +64,7 @@ export const share = {
       {
         path: 'desligamento',
         name: 'shareDesligamento',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "desligamento-criar|desligamento-executar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -74,7 +74,7 @@ export const share = {
       {
         path: 'desligamento/criar',
         name: 'shareDesligamentoCreate',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "desligamento-criar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -84,7 +84,7 @@ export const share = {
       {
         path: 'desligamento/editar',
         name: 'shareDesligamentoEdit',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "desligamento-executar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
