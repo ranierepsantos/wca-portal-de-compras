@@ -54,5 +54,14 @@ namespace wca.reembolso.domain.Entities
         [Column("km_percorrido", TypeName = "decimal(10,3)")]
         public decimal KmPercorrido { get; set; } = decimal.Zero;
 
+        [Column("conferida")]
+        public bool Conferida { get; set; } = false;
+
+        [Column("aprovada", TypeName ="tinyint")]
+        public int? Aprovada { get; set; } = 0;
+
+        [Column("observacao", TypeName = "varchar(500)")]
+        public string? Observacao { get; set; } = string.Empty;
+
     }
 }
