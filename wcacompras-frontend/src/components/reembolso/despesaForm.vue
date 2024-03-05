@@ -8,7 +8,17 @@
           color="primary"
           variant="outlined"
           class="text-capitalize"
+          @click="openAprovacaoForm=true"
+        >
+          <b>Aprovar/Rejeitar</b>
+        </v-btn>
+
+        <v-btn
+          color="primary"
+          variant="outlined"
+          class="text-capitalize"
           @click="emit('cancelaClick')"
+          style="margin-left: 5px"
         >
           <b>{{ readOnly? 'Voltar': 'Cancelar' }}</b>
         </v-btn>
@@ -41,6 +51,17 @@
                     :bg-color = 'readOnly ? "#f2f2f2":"" '
                   ></v-text-field>
                 </v-col>
+                <v-col class="text-right" v-show="despesa.aprovada !=0">
+                  <v-btn
+                  :color="despesa.aprovada ==1 ? 'success': 'error'"
+                  variant="tonal"
+                  class="text-center"
+                >
+                  {{
+                    despesa.aprovada ==1 ? 'Aprovada': 'Reprovada'
+                  }}</v-btn
+                >
+              </v-col>
               </v-row>
               <v-row>
                 <v-col>
@@ -236,10 +257,57 @@
                     class="text-primary"
                     v-model="despesa.motivo"
                     no-resize
-                    rows="3"
+                    rows="1"
                     :rules="[(v) => !!v || 'Campo obrigatório']"
                     :readonly="readOnly"
                     :bg-color = 'readOnly ? "#f2f2f2":"" '
+                  >
+                  </v-textarea>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-checkbox
+                    v-model="despesa.conferido"
+                    color="success"
+                    label="Conferido"
+                    hide-details
+                  ></v-checkbox>
+                </v-col>
+                <v-col>
+                  <v-radio-group
+                    v-model="despesa.aprovada"
+                    inline
+                    hide-details
+                  >
+                    <v-radio
+                      color="red"
+                      label="Reprovada"
+                      :value="-1"
+                      hide-details
+                    ></v-radio>
+                    <v-radio
+                      color="success"
+                      label="Aprovado"
+                      :value="1"
+                      hide-details
+                    ></v-radio>
+                  </v-radio-group>
+
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-textarea
+                    variant="outlined"
+                    label="Observação"
+                    class="text-primary"
+                    v-model="despesa.observacao"
+                    no-resize
+                    rows="1"
+                    :readonly="readOnly"
+                    :bg-color = 'readOnly ? "#f2f2f2":"" '
+                    v-show="despesa.observacao!=''"
                   >
                   </v-textarea>
                 </v-col>
@@ -287,6 +355,20 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <v-dialog
+        v-model="openAprovacaoForm"
+        max-width="700"
+        :absolute="false"
+        persistent
+      >
+        <aprovar-rejeitar-form
+          title="DESPESA - Aprovar / Rejeitar"
+          @aprovar-click="aprovarReprovar(true, $event)"
+          @reprovar-click="aprovarReprovar(false, $event)"
+          @close-form="openAprovacaoForm = false"
+          
+        />
+      </v-dialog>
   </v-container>
 </template>
 
@@ -294,9 +376,11 @@
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import dropzone from "@/components/dropzone.vue";
 import { Despesa } from "@/store/reembolso/solicitacao.store";
+import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
 import { watch } from "vue";
 import { computed } from "vue";
 import { ref,inject } from "vue";
+import handleErrors from "@/helpers/HandleErrors";
 
 const props = defineProps({
   despesa: {
@@ -316,9 +400,8 @@ const props = defineProps({
     default: true
   }
 });
-
+const openAprovacaoForm = ref(false)
 const despesaForm = ref(null);
-const swal = inject("$swal");
 const emit = defineEmits(["cancelaClick", "changeImage", "changeValor", "saveClick"]);
 
 const dropzoneFile = ref("");
@@ -360,7 +443,23 @@ const despesaTipo = computed(() => {
 });
 
 
+async function aprovarReprovar(isAprovado, comentario) {
+  try {
 
+    if (!isAprovado) 
+      props.despesa.aprovada = -1; //rejeitado
+    else
+      props.despesa.aprovada = 1; //rejeitado
+    
+    props.despesa.observacao = comentario;
+
+    openAprovacaoForm.value = false;
+    
+  } catch (error) {
+    console.log("aprovarReprovar.error:", error);
+    handleErrors(error);
+  }
+}
 function calcularValor() {
     let valor = parseFloat(props.despesa.kmPercorrido) * parseFloat(tipoEscolhido.value.valor)
     props.despesa.valor = parseFloat(valor.toFixed(2));

@@ -316,6 +316,7 @@
       <v-dialog
         v-model="openDespesaForm"
         min-width="1024"
+        
         :absolute="false"
         persistent
       >

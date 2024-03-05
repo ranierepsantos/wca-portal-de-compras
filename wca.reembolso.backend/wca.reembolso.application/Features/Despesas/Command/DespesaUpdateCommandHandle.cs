@@ -22,7 +22,10 @@ namespace wca.reembolso.application.Features.Despesas.Command
         string? Motivo,
         string? Origem,
         string? Destino,
-        decimal? KmPercorrido
+        decimal? KmPercorrido,
+        bool? Conferida,
+        int? Aprovada,
+        string? Observacao
     ) : IRequest<ErrorOr<Despesa>>;
 
     internal sealed class DespesaUpdateCommandHandle : IRequestHandler<DespesaUpdateCommand, ErrorOr<Despesa>>
