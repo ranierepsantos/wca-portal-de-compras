@@ -51,7 +51,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         int Id,
         DateTime DataSolicitacao,
         int ColaboradorId,
-        int GestorId,
+        int CentroCustoId,
         decimal ValorDespesa
     );
 }
