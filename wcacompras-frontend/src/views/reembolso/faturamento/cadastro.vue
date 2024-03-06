@@ -125,7 +125,7 @@
                 <th class="text-center text-grey">#</th>
                 <th class="text-center text-grey">DATA</th>
                 <th class="text-center text-grey">COLABORADOR</th>
-                <th class="text-center text-grey">GESTOR</th>
+                <th class="text-center text-grey">CENTRO DE CUSTO</th>
                 <th class="text-center text-grey">VALOR</th>
                 <th
                   class="text-center text-grey"
@@ -164,7 +164,7 @@
                     }}
                   </td>
                   <td class="text-left">{{ getNomeUsuario(item.solicitacao.colaboradorId) }}</td>
-                  <td class="text-left">{{ getNomeUsuario(item.solicitacao.gestorId) }}</td>
+                  <td class="text-left">{{ getNomeCentroCusto(item.solicitacao.centroCustoId) }}</td>
                   <td class="text-right">
                     {{
                       formatToCurrencyBRL(parseFloat(item.solicitacao.valorDespesa))
@@ -189,8 +189,8 @@
                   <td class="text-center">
                     {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
                   </td>
-                  <td class="text-left">{{ getNomeUsuario(item.colaboradorId) }}</td>
-                  <td class="text-left">{{ getNomeUsuario(item.gestorId) }}</td>
+                  <td class="text-left">{{ item.colaboradorNome }}</td>
+                  <td class="text-left">{{ item.centroCustoNome }}</td>
                   <td class="text-right">
                     {{ formatToCurrencyBRL(parseFloat(item.valorDespesa)) }}
                   </td>
@@ -421,6 +421,7 @@ const poFormData = ref ({
   numero: "",
   documento: null
 })
+const centrosDeCusto =ref([])
 
 //VUE - FUNCTIONS
 onMounted(async () => {
@@ -470,8 +471,9 @@ watch(() => faturamento.value.clienteId,
           faturamento.value.faturamentoItem = [];
         
         usuariosCliente.value = await usuarioStore.getListByCliente(faturamento.value.clienteId)
-        
-        clearFilters(faturamento.value.clienteId)
+        centrosDeCusto.value = await clienteStore.ListCentrosDeCusto([faturamento.value.clienteId])
+
+        await clearFilters(faturamento.value.clienteId)
       }
 );
 
@@ -636,6 +638,12 @@ function selecionarTodos() {
       addRemove(item);
     }
   }
+}
+
+function getNomeCentroCusto (id) {
+  let data = centrosDeCusto.value.find(q => q.value == id)
+  if (data) return data.text
+  return ""
 }
 
 function getNomeUsuario (id) {
