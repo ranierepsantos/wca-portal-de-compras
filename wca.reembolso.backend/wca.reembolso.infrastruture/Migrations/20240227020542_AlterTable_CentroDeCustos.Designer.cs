@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20240227020542_AlterTable_CentroDeCustos")]
+    partial class AlterTable_CentroDeCustos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -605,21 +608,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioCentrodeCustos", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CentroCustoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UsuarioId", "CentroCustoId");
-
-                    b.HasIndex("CentroCustoId");
-
-                    b.ToTable("UsuarioCentrodeCustos");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioClientes", b =>
                 {
                     b.Property<int>("UsuarioId")
@@ -743,25 +731,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasForeignKey("ContaCorrenteUsuarioId");
 
                     b.Navigation("ContaCorrente");
-                });
-
-            modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioCentrodeCustos", b =>
-                {
-                    b.HasOne("wca.reembolso.domain.Entities.CentroCusto", "CentroCusto")
-                        .WithMany()
-                        .HasForeignKey("CentroCustoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("wca.reembolso.domain.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CentroCusto");
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioClientes", b =>

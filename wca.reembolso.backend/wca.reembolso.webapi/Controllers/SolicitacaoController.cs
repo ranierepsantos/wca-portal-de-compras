@@ -60,8 +60,8 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("ListarPorColaboradorGestor")]
-        public async Task<IActionResult> ListarPorColaboradorGestor([FromQuery] SolicitacaoByColaboradorOrGestorQuerie querie)
+        [HttpGet("ListarPorColaborador")]
+        public async Task<IActionResult> ListarPorColaborador([FromQuery] SolicitacaoByColaboradorQuery querie)
         {
             var result = await _mediator.Send(querie);
 

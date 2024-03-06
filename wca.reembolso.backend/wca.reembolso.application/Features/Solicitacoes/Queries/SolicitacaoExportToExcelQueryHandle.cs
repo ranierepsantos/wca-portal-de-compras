@@ -45,7 +45,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
             var query = _repository.SolicitacaoRepository.ToQuery();
             query = query.Include(i => i.Cliente)
                          .Include(q => q.Colaborador)
-                         .Include(q => q.Gestor)
+                         .Include(q => q.CentroCusto)
                          .Include(q => q.Despesa)
                          .ThenInclude(x =>  x.TipoDespesa);
 
@@ -53,7 +53,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
                 query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
             if (request.UsuarioId > 0)
-                query = query.Where(q => q.ColaboradorId.Equals(request.UsuarioId) || q.GestorId.Equals(request.UsuarioId));
+                query = query.Where(q => q.ColaboradorId.Equals(request.UsuarioId));
 
             if (request.ClienteId > 0)
                 query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
@@ -94,7 +94,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
             sheet.Cell($"C{row}").SetValue("Data Solicitação");
             sheet.Cell($"D{row}").SetValue("Cliente");
             sheet.Cell($"E{row}").SetValue("Colaborador");
-            sheet.Cell($"F{row}").SetValue("Gestor");
+            sheet.Cell($"F{row}").SetValue("Centro de Custo");
             sheet.Cell($"G{row}").SetValue("Tipo Solicitação");
             sheet.Cell($"H{row}").SetValue("Status");
             sheet.Cell($"I{row}").SetValue("Valor Adiantamento");
@@ -104,7 +104,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
             sheetDespesas.Cell($"C{row}").SetValue("Data Solicitação");
             sheetDespesas.Cell($"D{row}").SetValue("Cliente");
             sheetDespesas.Cell($"E{row}").SetValue("Colaborador");
-            sheetDespesas.Cell($"F{row}").SetValue("Gestor");
+            sheetDespesas.Cell($"F{row}").SetValue("Centro de Custo");
             sheetDespesas.Cell($"G{row}").SetValue("Tipo Solicitação");
             sheetDespesas.Cell($"H{row}").SetValue("Status");
             sheetDespesas.Cell($"I{row}").SetValue("Valor Adiantamento");
@@ -126,7 +126,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
                 sheet.Cell($"C{row}").SetValue(item.DataSolicitacao).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center); ;
                 sheet.Cell($"D{row}").SetValue(item.Cliente.Nome);
                 sheet.Cell($"E{row}").SetValue(item.Colaborador?.Nome);
-                sheet.Cell($"F{row}").SetValue(item.Gestor?.Nome);
+                sheet.Cell($"F{row}").SetValue(item.CentroCusto?.CentroCustoId != null ? item.CentroCusto?.CentroCustoId + " - " + item.CentroCusto?.Nome : "");
                 sheet.Cell($"G{row}").SetValue(item.TipoSolicitacao switch
                 {
                     1 => "Reembolso",
@@ -144,7 +144,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
                     sheetDespesas.Cell($"C{rowDespesa}").SetValue(item.DataSolicitacao).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center); ;
                     sheetDespesas.Cell($"D{rowDespesa}").SetValue(item.Cliente.Nome);
                     sheetDespesas.Cell($"E{rowDespesa}").SetValue(item.Colaborador?.Nome);
-                    sheetDespesas.Cell($"F{rowDespesa}").SetValue(item.Gestor?.Nome);
+                    sheetDespesas.Cell($"F{rowDespesa}").SetValue(item.CentroCusto?.CentroCustoId != null ? item.CentroCusto?.CentroCustoId + " - " + item.CentroCusto?.Nome : "");
                     sheetDespesas.Cell($"G{rowDespesa}").SetValue(item.TipoSolicitacao switch
                     {
                         1 => "Reembolso",

@@ -26,6 +26,7 @@ namespace wca.reembolso.infrastruture.Context
         public DbSet<FaturamentoHistorico> FaturamentoHistorico { get; set; }
 
         public DbSet<CentroCusto> CentroCusto { get; set; }
+        public DbSet<UsuarioCentrodeCustos> UsuarioCentrodeCustos { get; set; }
 
         //public DbSet<Filial> Filial { get; set; }
         //public DbSet<FilialUsuario> FilialUsuario { get; set; }
@@ -43,7 +44,16 @@ namespace wca.reembolso.infrastruture.Context
                 .WithOne(t => t.ContaCorrente)
                 .HasPrincipalKey(t => t.UsuarioId);
 
-            modelBuilder.Entity<CentroCusto>().HasKey(pk => new { pk.CentroCustoId, pk.ClienteId });
+            //modelBuilder.Entity<CentroCusto>().HasKey(pk => new { pk.CentroCustoId, pk.ClienteId });
+
+            modelBuilder.Entity<CentroCusto>()
+                .HasIndex(entity => new { entity.ClienteId, entity.CentroCustoId})
+                .HasDatabaseName("IDX_CentrosDeCustos_ClienteId_CentroCustoId_Unique")
+                .IsUnique();
+
+            modelBuilder.Entity<UsuarioCentrodeCustos>().HasKey(pk => new { pk.UsuarioId, pk.CentroCustoId });
+
+
         }
     }
 }

@@ -15,6 +15,11 @@ namespace wca.reembolso.application.Features.Clientes.Common
             CreateMap<Cliente, ListItemCliente>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
+
+            CreateMap<CentroCusto, ListItem>()
+                .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
+
         }
     }
 }

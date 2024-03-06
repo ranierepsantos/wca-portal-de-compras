@@ -38,8 +38,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
                          .ThenInclude(n => n.Solicitacao)
                          .ThenInclude(n => n.Colaborador)
                          .Include(n => n.FaturamentoItem)
-                         .ThenInclude(faturamentoItem => faturamentoItem.Solicitacao)
-                         .ThenInclude(solicitacao => solicitacao.Gestor);
+                         .ThenInclude(faturamentoItem => faturamentoItem.Solicitacao);
+                         //.ThenInclude(solicitacao => solicitacao.Gestor);
 
 
 
@@ -99,7 +99,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
 
             sheetDespesas.Cell($"I{row}").SetValue("Código Solicitação");
             sheetDespesas.Cell($"J{row}").SetValue("Colaborador");
-            sheetDespesas.Cell($"K{row}").SetValue("Gestor");
+            sheetDespesas.Cell($"K{row}").SetValue("Centro de Custo");
             sheetDespesas.Cell($"L{row}").SetValue("Tipo Solicitação");
             sheetDespesas.Cell($"M{row}").SetValue("Valor Despesa");
 
@@ -135,7 +135,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
 
                     sheetDespesas.Cell($"I{rowDespesa}").SetValue(faturamentoItem.Solicitacao.Id).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
                     sheetDespesas.Cell($"J{rowDespesa}").SetValue(faturamentoItem.Solicitacao.Colaborador?.Nome);
-                    sheetDespesas.Cell($"K{rowDespesa}").SetValue(faturamentoItem.Solicitacao.Gestor?.Nome);
+                    sheetDespesas.Cell($"K{rowDespesa}").SetValue(faturamentoItem.Solicitacao.CentroCusto?.Nome);
                     sheetDespesas.Cell($"L{rowDespesa}").SetValue(faturamentoItem.Solicitacao.TipoSolicitacao ==1 ? "REEMBOLSO": "ADIANTAMENTO");
                     sheetDespesas.Cell($"M{rowDespesa}").SetValue(faturamentoItem.Solicitacao.ValorDespesa).Style.NumberFormat.Format = numberFormat;
 

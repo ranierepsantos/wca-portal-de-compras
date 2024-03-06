@@ -9,7 +9,8 @@ const rotas = {
     Paginar: "Cliente/Paginar",
     GetByUsuario: "Cliente/ListarClientesPorUsuario",
     RelacionarClienteUsuario: "Cliente/RelacionarClienteUsuario",
-    ListarUsuariosPorCliente: "Cliente/ListarUsuariosPorCliente"
+    ListarUsuariosPorCliente: "Cliente/ListarUsuariosPorCliente",
+    ListarCentroCustoPorCliente: "Cliente/ListarCentroCustoPorCliente"
 }
 
 
@@ -56,5 +57,10 @@ export default {
     getListUsersByCliente (clienteId)
     {
         return api.get(rotas.ListarUsuariosPorCliente , {params: {clienteId: clienteId}});
+    },
+    
+    getListCentroCustoByCliente (clienteId)
+    {
+        return api.get(rotas.ListarCentroCustoPorCliente , {params: {clienteId: clienteId}});
     },
 }
