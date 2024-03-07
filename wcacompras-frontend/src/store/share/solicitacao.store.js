@@ -21,12 +21,15 @@ export class Solicitacao {
         this.id = data ? data.id : 0
         this.solicitacaoTipoId = data ? data.solicitacaoTipoId: null
         this.clienteId = data ? data.clienteId: null
+        this.clienteNome = data ? data.clienteNome: null
         this.funcionarioId = data ? data.funcionarioId: null
+        this.funcionarioNome = data ? data.funcionarioNome: null
         this.dataSolicitacao = data ?  moment(data.dataSolicitacao).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
         this.descricao = data? data.descricao: null
         this.statusSolicitacaoId = data? data.statusSolicitacaoId: null
         this.responsavelId = data ? data.responsavelId: null
-        this.gestorId = data ? data.gestorId: null
+        this.centroCustoId = data ? data.centroCustoId: null
+        this.centroCustoNome = data ? data.centroCustoNome: null
         this.comunicado = data && data.comunicado ? data.comunicado :null
         this.desligamento = data ? new Desligamento(data.desligamento) : new Desligamento()
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null

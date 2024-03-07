@@ -25,6 +25,9 @@ namespace wca.share.application.Features.Solicitacoes.Queries
         {
 
             var dado = await _repository.SolicitacaoRepository.ToQuery()
+                .Include(x => x.Cliente)
+                .Include(x => x.Funcionario)
+                .Include(x => x.CentroCusto)
                 .Include(x => x.Comunicado)
                 .Include(x => x.Desligamento)
                 .Include(x => x.Anexos)

@@ -19,7 +19,6 @@
       variant="outlined"
       color="primary"
       density="compact"
-      
       :model-value="textFieldValue"
       :readonly="true"
       bg-color="#f2f2f2"
@@ -46,12 +45,5 @@ defineProps({
     }
 })
 
-function validate(value) {
-  console.debug('validate', value)
-  if (value)
-    return true
-  else
-    return false
-}
 
 </script>

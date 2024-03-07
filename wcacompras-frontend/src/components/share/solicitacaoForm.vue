@@ -16,7 +16,7 @@
           v-model="solicitacao.clienteId"
           :combo-items="listClientes"
           :select-mode="solicitacao.id == 0"
-          :text-field-value="getTextFromListByCodigo(listClientes, solicitacao.clienteId)"
+          :text-field-value="solicitacao.clienteNome"
           label-text="Cliente"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
@@ -28,7 +28,7 @@
           v-model="solicitacao.funcionarioId"
           :combo-items="listFuncionarios"
           :select-mode="solicitacao.id == 0"
-          :text-field-value="getTextFromListByCodigo(listFuncionarios, solicitacao.funcionarioId)"
+          :text-field-value="solicitacao.funcionarioNome"
           label-text="Funcionário"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
@@ -40,7 +40,7 @@
           v-model="solicitacao.centroCustoId"
           :combo-items="listCentroCustos"
           :select-mode="solicitacao.id == 0"
-          :text-field-value="getTextFromListByCodigo(listCentroCustos, solicitacao.centroCustoId)"
+          :text-field-value="solicitacao.centroCustoNome"
           label-text="Centro de Custo"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
@@ -51,7 +51,7 @@
         <select-text
           v-model="solicitacao.responsavelId"
           :combo-items="listResponsavel"
-          :select-mode="solicitacao.id != 0"
+          :select-mode="solicitacao.id != 0 && !isReadOnly"
           :text-field-value="getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)"
           label-text="Responsável"
           v-show="solicitacao.id != 0"
@@ -66,6 +66,8 @@
               :label="descricaoLabel"
               class="text-primary"
               v-model="solicitacao.descricao"
+              :readOnly = "isReadOnly"
+              :bg-color="isReadOnly ? '#f2f2f2' : ''"
             >
             </v-textarea>
           </v-col>
@@ -112,6 +114,7 @@ const props = defineProps({
   },
 
   comboTipoShow: {type: Boolean, default: true},
+  isReadOnly: {type: Boolean, default: false},
 });
 
 </script>

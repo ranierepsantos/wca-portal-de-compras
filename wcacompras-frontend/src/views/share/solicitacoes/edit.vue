@@ -19,26 +19,32 @@
           <v-form ref="mForm" lazy-validation>
             <SolicitacaoForm
               :solicitacao="solicitacao"
-              :list-clientes="clienteList"
+              :list-clientes="[]"
               :descricao-label="
                 getObservacaoLabelDescricao(solicitacao.solicitacaoTipoId)
               "
-              :list-funcionarios="funcionarioList"
-              :list-gestores="funcionarioList"
+              :list-funcionarios ="[]"
+              :list-centro-custos="[]"
               :combo-tipo-show="comboTipoShow"
               :list-responsavel="responsavelList"
+              :is-read-only="solicitacao.statusSolicitacaoId == 3"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
                 :create-mode="false"
                 v-show="solicitacao.solicitacaoTipoId == 1"
+                :is-read-only="solicitacao.statusSolicitacaoId == 3"
               />
               <Comunicado v-show="solicitacao.solicitacaoTipoId == 2" />
               <Ferias v-show="solicitacao.solicitacaoTipoId == 3" />
               <Mudancabase v-show="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
-
-            <table-file-upload :anexos="solicitacao.anexos" />
+            <v-card>
+            <v-card-text>
+              <table-file-upload :anexos="solicitacao.anexos" :is-read-only="solicitacao.statusSolicitacaoId == 3"/>
+            </v-card-text>
+            </v-card>
+            
 
             <Historico
               :eventos="solicitacao.historico"
@@ -67,9 +73,8 @@
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import SolicitacaoForm from "@/components/share/solicitacaoForm.vue";
 import desligamento from "@/components/share/desligamento.vue";
-import { useShareClienteStore } from "@/store/share/cliente.store";
 import { Solicitacao } from "@/store/share/solicitacao.store";
-import { ref } from "vue";
+import { readonly, ref } from "vue";
 import Comunicado from "@/components/share/comunicado.vue";
 import Ferias from "@/components/share/ferias.vue";
 import Mudancabase from "@/components/share/mudancabase.vue";
@@ -96,23 +101,26 @@ const isBusy = ref({
   save: false,
 });
 const solicitacao = ref(new Solicitacao());
-const clienteList = ref([]);
 const formButtons = ref([]);
 const comboTipoShow = ref(true);
-const funcionarioList = ref([]);
-const gestorList = ref([]);
 const responsavelList = ref([]);
 const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
 const openNotificacao = ref(false)
+const pageTipo = ref({
+    id: 0,
+    tipo: ""
+})
+
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
-    clienteList.value = await useShareClienteStore().toComboList();
     await getById(route.query.id);
-    formButtons.value.push({ text: "Notificar", icon: "", event: "nofiticar-click" });
-    formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+    if (solicitacao.value.statusSolicitacaoId!= 3) {
+      formButtons.value.push({ text: "Notificar", icon: "", event: "nofiticar-click" });
+      formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+    }
     comboTipoShow.value = false;
   } catch (error) {
     console.debug("edit.beforeMount.error", error);
@@ -126,21 +134,9 @@ watch(
   () => solicitacao.value.clienteId,
   async (clienteId) => {
     try {
-      funcionarioList.value = [];
-      gestorList.value = [];
       if (clienteId) {
-        funcionarioList.value = (
-          await api.get(
-            `/Funcionario/ListByClienteToCombo?ClienteId=${clienteId}`
-          )
-        ).data;
-
-        //Trazer responsáveis por permissão
-        responsavelList.value = await useShareUsuarioStore().getListByCliente(
-          clienteId
-        );
-        //trazer gestor por perfil
-        gestorList.value = responsavelList.value;
+        responsavelList.value = await useShareUsuarioStore()
+                                      .getListByCliente(clienteId);
       }
     } catch (error) {
       handleErrors(error);
@@ -166,6 +162,24 @@ async function salvar() {
         if (status && data.statusSolicitacaoId != status.id)
           data.statusSolicitacaoId = status.id;
       }
+
+      if (data.solicitacaoTipoId == 1) {
+        
+        if (data.desligamento.dataCredito &&
+            data.desligamento.statusApontamento == 2 &&
+            data.desligamento.statusExameDemissional == 2 && 
+            data.desligamento.statusFichaEpi == 2){
+              let status = useShareSolicitacaoStore().statusSolicitacao.find((x) => x.status.toLowerCase() == "concluído");
+              if (status && data.statusSolicitacaoId != status.id)
+                data.statusSolicitacaoId = status.id;
+            }
+            
+
+
+      }
+
+
+
 
       await useShareSolicitacaoStore().update(data);
 
