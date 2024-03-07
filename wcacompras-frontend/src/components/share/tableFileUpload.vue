@@ -15,6 +15,7 @@
       @change="handleFile()"
       :clearable="true" 
       v-model="fileInput"
+      v-show="!isReadOnly"
     ></v-file-input>
     <v-table>
       <thead>
@@ -42,6 +43,7 @@
               icon="mdi-trash-can-outline"
               title="Exluir"
               @click="removeFile(item)"
+              v-show="!isReadOnly"
             >
             </v-btn>
           </td>
@@ -67,6 +69,7 @@ const props = defineProps({
       return [];
     },
   },
+  isReadOnly: {type: Boolean, default: false},
 });
 
 const swal = inject("$swal");
