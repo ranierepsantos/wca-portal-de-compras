@@ -56,7 +56,7 @@
           :combo-items="listFieldStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="!createMode"
+          :select-mode="!createMode && !isReadOnly"
           :text-field-value="
             getTextFromListByCodigo(
               listFieldStatus,
@@ -75,7 +75,7 @@
           :combo-items="listFieldStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="!createMode"
+          :select-mode="!createMode && !isReadOnly"
           :text-field-value="
             getTextFromListByCodigo(
               listFieldStatus,
@@ -91,7 +91,7 @@
           :combo-items="listFieldStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="!createMode"
+          :select-mode="!createMode && !isReadOnly"
           :text-field-value="
             getTextFromListByCodigo(
               listFieldStatus,
@@ -109,8 +109,8 @@
           color="primary"
           density="compact"
           v-model="dataModel.dataCredito"
-          :readonly="createMode"
-          :bg-color="createMode ? '#f2f2f2' : ''"
+          :readonly="createMode || isReadOnly"
+          :bg-color="createMode || isReadOnly ? '#f2f2f2' : ''"
           
         ></v-text-field>
       </v-col>
@@ -138,6 +138,7 @@ defineProps({
     },
   },
   createMode: { type: Boolean, default: true },
+  isReadOnly: { type: Boolean, default: false },
 });
 const listMotivoDemissao = useShareSolicitacaoStore().motivosDemissao;
 const listAvisoPrevioStatus = useShareSolicitacaoStore().avisoPrevioStatus;

@@ -60,7 +60,6 @@ import { watch } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/services/share/shareApi";
 import { getObservacaoLabelDescricao, getPageTitle } from "@/helpers/share/data";
-import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import router from "@/router";
 
 const isBusy = ref({
@@ -121,10 +120,11 @@ watch(
         ).data;
 
         //Trazer centros de custo
-        //centrosCustoList.value = await useShareUsuarioStore().getListByCliente(clienteId)
+        centrosCustoList.value = await useShareClienteStore().ListCentrosDeCusto([clienteId])
         
       }  
     } catch (error) {
+      console.log('watch.clienteId', error)
       handleErrors(error);
     }
   }

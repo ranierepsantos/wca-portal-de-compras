@@ -1,19 +1,10 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using wca.share.application.Common;
 using wca.share.application.Contracts.Persistence;
-using wca.share.application.Features.Clientes.Common;
 using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
 using wca.share.application.Features.Solicitacoes.Behaviors;
@@ -28,7 +19,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         int FuncionarioId,
         StatusSolicitacao Status,
         string UsuarioCriador,
-        int? GestorId,
+        int? CentroCustoId,
         int? ResponsavelId,
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
@@ -106,11 +97,14 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             //notificar responsáveis
             for (var ii = 0; ii < request.NotificarUsuarioIds?.Length; ii++)
             {
-                string mensagem = request.Status.TemplateNotificacao.Replace("{id}", dado.Id.ToString());
+                if (request.Status.TemplateNotificacao is not null)
+                {
+                    string mensagem = request.Status.TemplateNotificacao.Replace("{id}", dado.Id.ToString());
 
-                var notificacao = new NotificacaoCreateCommand(request.NotificarUsuarioIds[ii], mensagem, dado.GetType().Name, dado.Id);
+                    var notificacao = new NotificacaoCreateCommand(request.NotificarUsuarioIds[ii], mensagem, dado.GetType().Name, dado.Id);
 
-                await _mediator.Send(notificacao, cancellationToken);
+                    await _mediator.Send(notificacao, cancellationToken);
+                }
             }
 
             // mapear para SolicitacaoResponse e retornar
