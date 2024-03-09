@@ -32,11 +32,6 @@
         </v-row>
         <v-row>
           <v-col class="text-right">
-            <v-progress-circular
-              color="primary"
-              indeterminate
-              v-show="isSaving"
-            ></v-progress-circular>
             <v-btn
               color="success"
               @click="aprovarReprovar(true)"

@@ -23,7 +23,6 @@ namespace wca.reembolso.application.Features.Despesas.Command
         string? Origem,
         string? Destino,
         decimal? KmPercorrido,
-        bool? Conferida,
         int? Aprovada,
         string? Observacao
     ) : IRequest<ErrorOr<Despesa>>;

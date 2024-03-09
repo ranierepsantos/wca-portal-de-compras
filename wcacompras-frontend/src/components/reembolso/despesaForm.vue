@@ -9,6 +9,7 @@
           variant="outlined"
           class="text-capitalize"
           @click="openAprovacaoForm=true"
+          v-show="canAprove && (despesa.aprovada == null || despesa.aprovada == 0)"
         >
           <b>Aprovar/Rejeitar</b>
         </v-btn>
@@ -29,7 +30,7 @@
           class="text-capitalize"
           @click="submitData()"
           style="margin-left: 5px"
-          v-show="!readOnly"
+          v-show="!readOnly && (despesa.aprovada == 0 || despesa.aprovada == 2 || despesa.aprovada == null)"
         >
           <b>Salvar</b>
         </v-btn>
@@ -51,7 +52,7 @@
                     :bg-color = 'readOnly ? "#f2f2f2":"" '
                   ></v-text-field>
                 </v-col>
-                <v-col class="text-right" v-show="despesa.aprovada !=0">
+                <v-col class="text-right" v-show="despesa.aprovada !=null && despesa.aprovada > 0 ">
                   <v-btn
                   :color="despesa.aprovada ==1 ? 'success': 'error'"
                   variant="tonal"
@@ -267,37 +268,6 @@
               </v-row>
               <v-row>
                 <v-col>
-                  <v-checkbox
-                    v-model="despesa.conferido"
-                    color="success"
-                    label="Conferido"
-                    hide-details
-                  ></v-checkbox>
-                </v-col>
-                <v-col>
-                  <v-radio-group
-                    v-model="despesa.aprovada"
-                    inline
-                    hide-details
-                  >
-                    <v-radio
-                      color="red"
-                      label="Reprovada"
-                      :value="-1"
-                      hide-details
-                    ></v-radio>
-                    <v-radio
-                      color="success"
-                      label="Aprovado"
-                      :value="1"
-                      hide-details
-                    ></v-radio>
-                  </v-radio-group>
-
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
                   <v-textarea
                     variant="outlined"
                     label="Observação"
@@ -398,7 +368,8 @@ const props = defineProps({
   readOnly: {
     type: Boolean,
     default: true
-  }
+  },
+  canAprove: {type: Boolean, default: false}
 });
 const openAprovacaoForm = ref(false)
 const despesaForm = ref(null);
@@ -447,13 +418,13 @@ async function aprovarReprovar(isAprovado, comentario) {
   try {
 
     if (!isAprovado) 
-      props.despesa.aprovada = -1; //rejeitado
+      props.despesa.aprovada = 2; //rejeitado
     else
-      props.despesa.aprovada = 1; //rejeitado
+      props.despesa.aprovada = 1; //aprovado
     
     props.despesa.observacao = comentario;
 
-    openAprovacaoForm.value = false;
+    submitData(false)
     
   } catch (error) {
     console.log("aprovarReprovar.error:", error);
@@ -495,9 +466,12 @@ function getImgData() {
   }
 }
 
-async function submitData() {
+async function submitData(fromSaveButton = true) {
   let { valid } = await despesaForm.value.validate();
   if (valid) {
+    if (fromSaveButton)
+      props.despesa.aprovada = null
+
     emit('saveClick')
   }
 }

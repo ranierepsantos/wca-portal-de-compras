@@ -160,10 +160,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("varchar(20)")
                         .HasColumnName("cnpj");
 
-                    b.Property<bool>("Conferida")
-                        .HasColumnType("bit")
-                        .HasColumnName("conferida");
-
                     b.Property<DateTime?>("DataEvento")
                         .HasColumnType("smalldatetime")
                         .HasColumnName("data_evento");

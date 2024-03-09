@@ -18,7 +18,7 @@ builder.Services.ConfigureInfraStructure (builder.Configuration);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
     options.ValueLengthLimit = 100000000;
-    //options.MultipartBodyLengthLimit = 100000000; // In case of multipart
+    options.MultipartBodyLengthLimit = 100000000; // In case of multipart
 });
 
 builder.Services.AddControllers();
@@ -29,8 +29,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "WCA Gestão de Reembolso",
-        Description = "Api sistema de gestão de reembolso"
+        Title = "WCA Gestï¿½o de Reembolso",
+        Description = "Api sistema de gestï¿½o de reembolso"
     });
 
     //c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
