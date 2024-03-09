@@ -4,7 +4,7 @@
       title="Solicitação"
       :show-button="false"
       :buttons="formButtons"
-      @aprovar-click="openAprovacaoForm = true"
+      @aprovar-click="aprovarReprovarOpen()"
       @salvar-click="salvar()"
       @registrarpgto-click="registrarPagto()"
     />
@@ -224,6 +224,7 @@
                 <th class="text-center text-grey">TIPO</th>
                 <th class="text-center text-grey" colspan="2">DESCRICAO</th>
                 <th class="text-center text-grey">VALOR</th>
+                <th class="text-center text-grey">STATUS</th>
                 <th class="text-center text-grey"></th>
               </tr>
             </thead>
@@ -247,6 +248,15 @@
                 <td class="text-right">
                   {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
                 </td>
+                <td v-if="!item.aprovada">
+                  <v-icon icon="mdi-eye-off-outline" variant="plain"
+                            color="gray" title="à conferir"></v-icon>
+                </td>
+                <td v-else>
+                  <v-icon :icon="item.aprovada == 1 ? 'mdi-eye-check-outline' : 'mdi-eye-remove-outline'" variant="plain"
+                            :color="item.aprovada == 1 ? 'success' : 'error'"
+                            :title="item.aprovada == 1 ? 'conferido' : 'reprovado'"></v-icon>
+                </td>
                 <td class="text-right">
                   <v-btn
                     icon="mdi-text-box-search-outline"
@@ -255,7 +265,7 @@
                     color="primary"
                     @click="editarDespesa(item)"
                     title="Visualizar"
-                    v-show ="despesaCanView"
+                    v-show ="despesaCanView && !despesaCanEdit"
                   ></v-btn>
                   <v-btn
                     icon="mdi-lead-pencil"
@@ -265,7 +275,7 @@
                     @click="editarDespesa(item)"
                     title="Editar"
                     :disabled="isBusy"
-                    v-show ="!despesaCanView && solicitacaoCanEdit"
+                    v-show ="!despesaCanView || despesaCanEdit"
                   ></v-btn>
                   <v-btn
                     icon="mdi-delete"
@@ -273,7 +283,7 @@
                     color="error"
                     @click="removerDespesa(item)"
                     :disabled="isBusy"
-                    v-show="!despesaCanView && solicitacaoCanEdit"
+                    v-show="!despesaCanView || (despesaCanEdit && authStore.user.id == solicitacao.colaboradorId)"
                   >
                   </v-btn>
                 </td>
@@ -281,14 +291,14 @@
             </tbody>
             <tfoot>
               <tr>
-                <td class="text-right" colspan="4"><b>TOTAL:</b></td>
+                <td class="text-right" colspan="5"><b>TOTAL:</b></td>
                 <td class="text-right">
                   {{ formatToCurrencyBRL(calcularTotalDespesa()) }}
                 </td>
                 <td></td>
               </tr>
               <tr v-show="solicitacao.tipoSolicitacao == 2">
-                <td class="text-right" colspan="4"><b>SALDO:</b></td>
+                <td class="text-right" colspan="5"><b>SALDO:</b></td>
                 <td></td>
                 <td class="text-right">
                   {{
@@ -330,8 +340,9 @@
               openDespesaForm = false;
             }
           "
-          @save-click="salvarDespesa()"
-          :read-only="despesaCanView"
+          @save-click="salvarDespesa($event)"
+          :read-only="!(despesaCanEdit && !(despesa.aprovada == 1))"
+          :can-aprove="despesa.aprovada !== 1 && authStore.hasPermissao('wca_aprovacao')"
         ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
@@ -410,8 +421,34 @@ const showSecaoDespesa = computed(()=> {
   return solicitacao.value.tipoSolicitacao == 1 ||
         (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
 })
-const despesaCanAdd = computed(() => (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id > 0 && "3,4,10".includes(solicitacao.value.status)))
+const despesaCanAdd = computed(() => {
+    
+    /**
+     * pode adicionar despesa quando:
+     * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
+     * colaborador != auth.user && status == 5 && hasPermissao('despesa-aprovar'))
+     */
+    let can = (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || 
+              (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10".includes(solicitacao.value.status)) 
+    return can
+  }
+)
+
+const despesaCanEdit = computed(() => {
+    
+    /**
+     * pode adicionar despesa quando:
+     * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
+     * colaborador != auth.user && status == 5 && hasPermissao('despesa-editar'))
+     */
+    let can = (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10".includes(solicitacao.value.status)) ||
+              (solicitacao.value.status == 5 && authStore.hasPermissao('despesa-editar'))
+    return can
+  }
+)
+
 const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
+
 const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status)));
 
 const isColaborador = computed(() => {
@@ -488,6 +525,23 @@ watch(() => solicitacao.value.clienteId, (newValue,oldValue) => {
 
 //FUNCTIONS
 
+function aprovarReprovarOpen() {
+    let semConferencia = solicitacao.value.despesa.filter(q => q.aprovada==null || q.aprovada==0)
+    if (semConferencia.length > 0 && solicitacao.value.status == 5) {
+      swal.fire({
+        toast: true,
+        icon: "warning",
+        index: "top-end",
+        title: "Atenção!",
+        text: "Há despesas sem conferência!",
+        showConfirmButton: false,
+        timer: 4000,
+      });
+      return 
+    }
+    openAprovacaoForm.value = true
+}
+
 async function aprovarReprovar(isAprovado, comentario) {
   try {
     isRunningEvent.value = true;
@@ -503,6 +557,8 @@ async function aprovarReprovar(isAprovado, comentario) {
       8 - Faturado
       9 - Cancelado
     **/
+
+    
     if (!isAprovado) solicitacao.value.status = 4; //rejeitado
     else {
       //tipoSolicitacao: Adiantamento, Status: Solicitado

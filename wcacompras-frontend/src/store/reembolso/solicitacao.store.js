@@ -68,7 +68,6 @@ export class Despesa {
         this.origem =data ?  data.origem :""
         this.destino = data ?  data.destino :""
         this.kmPercorrido = data ?  data.kmPercorrido :0
-        this.conferido = data? data.conferido: 0
         this.aprovada = data? data.aprovada : 0
         this.observacao = data? data.observacao: ""
     }
