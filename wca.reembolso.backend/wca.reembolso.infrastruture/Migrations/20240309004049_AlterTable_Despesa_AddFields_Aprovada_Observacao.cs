@@ -5,7 +5,7 @@
 namespace wca.reembolso.infrastruture.Migrations
 {
     /// <inheritdoc />
-    public partial class AlterTable_Despesas_AddFields : Migration
+    public partial class AlterTable_Despesa_AddFields_Aprovada_Observacao : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,19 +16,12 @@ namespace wca.reembolso.infrastruture.Migrations
                 type: "tinyint",
                 nullable: true);
 
-            migrationBuilder.AddColumn<bool>(
-                name: "conferida",
-                table: "Despesas",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
-
             migrationBuilder.AddColumn<string>(
                 name: "observacao",
                 table: "Despesas",
                 type: "varchar(500)",
                 nullable: true);
-
+            
         }
 
         /// <inheritdoc />
@@ -36,10 +29,6 @@ namespace wca.reembolso.infrastruture.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "aprovada",
-                table: "Despesas");
-
-            migrationBuilder.DropColumn(
-                name: "conferida",
                 table: "Despesas");
 
             migrationBuilder.DropColumn(
