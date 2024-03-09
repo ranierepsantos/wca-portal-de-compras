@@ -342,7 +342,7 @@
           "
           @save-click="salvarDespesa($event)"
           :read-only="!(despesaCanEdit && !(despesa.aprovada == 1))"
-          :can-aprove="despesa.aprovada !== 1 && authStore.hasPermissao('wca_aprovacao')"
+          :can-aprove="solicitacao.status == 5 && despesa.aprovada !== 1 && authStore.hasPermissao('wca_aprovacao')"
         ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
@@ -492,9 +492,11 @@ onMounted(async () => {
       }
       solicitacao.value.colaboradorId = usuario.value.id;
       solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
-      let centroCusto = clientes.value[0].centroCusto.find(q => q.centroCustoId == usuario.value.usuarioReembolsoComplemento.centroCustoId)
-      solicitacao.value.centroCustoId = centroCusto ? centroCusto.id: null
-      solicitacao.value.centroCustoNome = centroCusto? centroCusto.nome: ""
+      if (clientes.value.length > 0) {
+        let centroCusto = clientes.value[0].centroCusto.find(q => q.centroCustoId == usuario.value.usuarioReembolsoComplemento.centroCustoId)
+        solicitacao.value.centroCustoId = centroCusto ? centroCusto.id: null
+        solicitacao.value.centroCustoNome = centroCusto? centroCusto.nome: ""
+      }
       
       if (clientes.value.length ==1)
         solicitacao.value.clienteId = clientes.value[0].id
