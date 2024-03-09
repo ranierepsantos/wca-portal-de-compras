@@ -12,8 +12,8 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    [Migration("20240305010155_AlterTable_Despesas_AddFields")]
-    partial class AlterTable_Despesas_AddFields
+    [Migration("20240309004049_AlterTable_Despesa_AddFields_Aprovada_Observacao")]
+    partial class AlterTable_Despesa_AddFields_Aprovada_Observacao
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -162,10 +162,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(20)")
                         .HasColumnName("cnpj");
-
-                    b.Property<bool>("Conferida")
-                        .HasColumnType("bit")
-                        .HasColumnName("conferida");
 
                     b.Property<DateTime?>("DataEvento")
                         .HasColumnType("smalldatetime")

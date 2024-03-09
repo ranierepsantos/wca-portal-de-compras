@@ -23,7 +23,7 @@ namespace wca.reembolso.domain.Entities
         public Usuario? Colaborador { get; private set; }
 
         public int CentroCustoId { get; set; }
-        
+
         public CentroCusto? CentroCusto {get; private set; }
 
         [Column("colaborador_cargo", TypeName = "varchar(100)")]
