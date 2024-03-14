@@ -206,12 +206,19 @@ async function salvar()
     if (valid)
     {
       let data = filial.value;
+      let response = null
       if (data.id == 0)
       {
-        await filialService.create(data);
+        response = await filialService.create(data);
       } else
       {
-        await filialService.update(data);
+        response = await filialService.update(data);
+      }
+
+      let sistemaId = useAuthStore().sistema.id;
+
+      if (sistemaId == 3) {
+        filialService.shareCreate(response.data)
       }
       await getItems();
       closeDialog();

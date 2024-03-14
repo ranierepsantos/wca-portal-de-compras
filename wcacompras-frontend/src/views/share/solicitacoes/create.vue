@@ -96,7 +96,7 @@ onBeforeMount(async () => {
 
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
 
-    clienteList.value = await useShareClienteStore().toComboList();
+    clienteList.value = await useShareClienteStore().toComboList(0, useAuthStore().user.id);
     formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
   } catch (error) {
     console.debug("create.beforeMount.error", error);

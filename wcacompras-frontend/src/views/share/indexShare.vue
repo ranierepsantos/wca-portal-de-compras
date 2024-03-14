@@ -96,7 +96,7 @@ const menuItems = ref([
     title: "Clientes",
     value: 2,
     route: "/share/clientes",
-    permissao: "livre"
+    permissao: "cliente"
   },
   {
     title: "Desligamento",
@@ -120,19 +120,25 @@ const menuItems = ref([
     title: "Perfil",
     value: 6,
     route: "/share/perfil",
-    permissao: "livre"
+    permissao: "perfil"
   },
   {
     title: "Usuários",
     value: 7,
     route: "/share/usuarios",
-    permissao: "livre"
+    permissao: "usuario"
   },
   {
     title: "Férias",
     value: 8,
     route: "/share/ferias",
     permissao: "livre"
+  },
+  {
+    title: "Filiais",
+    value: 8,
+    route: "/share/filial",
+    permissao: "Filial"
   },
 ]);
 

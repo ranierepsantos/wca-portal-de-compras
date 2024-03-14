@@ -1,8 +1,10 @@
-﻿namespace wca.share.application.Features.Clientes.Common
+﻿using wca.share.domain.Entities;
+
+namespace wca.share.application.Features.Clientes.Common
 {
     public record ClienteResponse (
         int Id,
-        int FilialId, 
+        int FilialId,
         string Nome,
         string CNPJ,
         string InscricaoEstadual,
@@ -11,7 +13,9 @@
         string CEP,
         string Cidade,
         string UF,
-        bool Ativo
+        bool Ativo,
+        int? CodigoCliente,
+        IList<CentroCusto> CentroCusto
     );
 
 }

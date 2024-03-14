@@ -15,31 +15,35 @@ export const share = {
         path: 'clientes',
         name: 'shareClientes',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "cliente", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/clientes'),
       },
       {
         path: 'cliente',
-        name: 'shareClienteCadastroDisabled',
+        name: 'shareClienteCadastro',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "cliente", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/clientes/cadastro'),
+      },
+      {
+        path: 'filial',
+        name: 'shareFilial',
+        beforeEnter: protectRoute,
+        meta: {permissao: "filial", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/filiais'),
       },
       {
         path: 'perfil',
         name: 'sharePerfil',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "perfil", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/perfil'),
       },
       {
         path: 'perfil/cadastro',
         name: 'sharePerfilCadastro',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "perfil", sistema: 3},
         beforeEnter: protectRoute,
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "share" */ '../views/perfil/cadastro.vue'),
         props: route => ({ query: route.query.id })
       },
@@ -47,7 +51,7 @@ export const share = {
         path: 'usuarios',
         name: 'shareUsuarios',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "usuario", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/usuarios'),
       },
       {

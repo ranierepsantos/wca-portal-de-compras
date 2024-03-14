@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Clientes.Behaviors;
@@ -10,7 +11,7 @@ using wca.share.domain.Entities;
 namespace wca.share.application.Features.Clientes.Commands
 {
     public record ClienteCreateCommand (
-        int FilialId,
+        int CodigoCliente,
         string Nome,
         string CNPJ,
         string InscricaoEstadual,
@@ -19,7 +20,8 @@ namespace wca.share.application.Features.Clientes.Commands
         string CEP,
         string Cidade,
         string UF,
-        decimal ValorLimite
+        int? FilialId = 0,
+        IList<CentroCusto>? CentroCusto = null
     ) : IRequest<ErrorOr<ClienteResponse>>;
 
     internal sealed class ClienteCreateCommandHandler : IRequestHandler<ClienteCreateCommand, ErrorOr<ClienteResponse>>
@@ -49,6 +51,15 @@ namespace wca.share.application.Features.Clientes.Commands
 
             //2. mapear para cliente e adicionar
             Cliente cliente = _mapper.Map<Cliente>(request);
+
+            if (cliente.FilialId == 0)
+            {
+                var filial = await  _repository.GetDbSet<Filial>().Where(q => q.Nome.Equals("matriz")).FirstOrDefaultAsync();
+                if (filial != null)
+                {
+                    cliente.FilialId = filial.Id;
+                }
+            }
 
             _repository.ClienteRepository.Create(cliente);
 
