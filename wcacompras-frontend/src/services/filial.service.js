@@ -1,4 +1,5 @@
 import api from "./api"
+import shareApi from "./share/shareApi";
 import { route } from "./routeDictionary";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -35,5 +36,9 @@ export default {
         return api.get(route.filialListByAuthenticatedUser.replace("{sistemaId}", useAuthStore().sistema.id));
     },
 
+    shareCreate(data) {
+        let createFilialUrl = "Filial/CreateUpdate"
+        return shareApi.post(createFilialUrl, data)
+    }
    
 }
