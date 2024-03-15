@@ -342,7 +342,7 @@
           "
           @save-click="salvarDespesa($event)"
           :read-only="!(despesaCanEdit && !(despesa.aprovada == 1))"
-          :can-aprove="despesa.aprovada !== 1 && authStore.hasPermissao('wca_aprovacao')"
+          :can-aprove="solicitacao.status == 5 && despesa.aprovada !== 1 && authStore.hasPermissao('wca_aprovacao')"
         ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
