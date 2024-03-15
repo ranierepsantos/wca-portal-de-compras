@@ -277,7 +277,7 @@
                     rows="1"
                     :readonly="readOnly"
                     :bg-color = 'readOnly ? "#f2f2f2":"" '
-                    v-show="despesa.observacao!=''"
+                    v-show="despesa.observacao!= null && despesa.observacao!=''"
                   >
                   </v-textarea>
                 </v-col>
