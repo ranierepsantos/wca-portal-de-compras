@@ -6,7 +6,7 @@
       :buttons="formButtons"
       @aprovar-click="aprovarReprovarOpen()"
       @salvar-click="salvar()"
-      @registrarpgto-click="registrarPagto()"
+      @registrarpgto-click="abrirDepositoForm()"
     />
     <v-progress-linear
       color="primary"
@@ -360,12 +360,27 @@
           :is-running-event="isRunningEvent"
         />
       </v-dialog>
+      <!-- FORM PARA REGISTRAR PAGAMENTO -->
+      <v-dialog
+        v-model="openDepositoForm"
+        max-width="500"
+        :absolute="false"
+        persistent
+      >
+        <registrar-pagamento-form 
+          :data="dadosDeposito" 
+          @close-form="openDepositoForm = false"
+          @registrar-pagamento = "registrarPagto($event)"
+          />
+      </v-dialog>
     </v-container>
   </div>
 </template>
 
 <script setup>
 import breadCrumbs from "@/components/breadcrumbs.vue";
+import registrarPagamentoForm from "@/components/reembolso/registrarPagamentoForm.vue";
+
 import { ref, inject, onMounted } from "vue";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import DespesaForm from "@/components/reembolso/despesaForm.vue";
@@ -398,6 +413,7 @@ const contaStore = useContaStore();
 const route = useRoute();
 const solicitacaoStore = useSolicitacaoStore();
 const openDespesaForm = ref(false);
+const openDepositoForm = ref(false);
 const openAprovacaoForm = ref(false);
 const isRunningEvent = ref(false);
 const isBusy = ref(false);
@@ -410,7 +426,13 @@ const despesaTipos = ref([]);
 const formButtons = ref([]);
 const usuario = ref(new Usuario());
 const listCentroCusto = ref([])
-
+const dadosDeposito = ref(
+  {
+        saldo: 0,
+        dataDeposito: moment().format("YYYY-MM-DD"),
+        valorDeposito: 0,
+  }
+)
 //COMPUTED
 const isReadonly = computed(() =>{
 
@@ -754,51 +776,40 @@ async function salvar() {
   }
 }
 
-async function registrarPagto() {
-  try {
-    let valor =
-      solicitacao.value.tipoSolicitacao == 2
+async function abrirDepositoForm() {
+  
+  dadosDeposito.value.saldo = 0
+  let conta = await useContaStore().getByUsuarioId(solicitacao.value.colaboradorId)
+  if (conta) {
+    dadosDeposito.value.saldo = conta.saldo
+  }
+  dadosDeposito.value.valorDeposito = 
+        solicitacao.value.tipoSolicitacao == 2
         ? solicitacao.value.valorAdiantamento
         : solicitacao.value.valorDespesa;
+  openDepositoForm.value = true
 
-    let dataDeposito = null
-    
+}
+
+async function registrarPagto(dados) {
+  try {
+    openDepositoForm.value = false
     let options = {
-      title: 'Registrar Pagamento',
-      html: `
-      <input type="date" id="dataDeposito" class="swal2-input" placeholder="Data Depósito">  
-      <input type="text" id="valorDeposito" class="swal2-input text-right" style='background-color: #f2f2f2' readonly>
-        
-      `,
-      confirmButtonText: 'Registrar',
-      focusConfirm: false,
-      showCancelButton: true,
-      cancelButtonText: "Cancelar",
-      didOpen: () => {
-        const popup = swal.getPopup()
-        dataDeposito = popup.querySelector('#dataDeposito')
-        dataDeposito.value = moment().format("YYYY-MM-DD")
-        popup.querySelector('#valorDeposito').value = formatToCurrencyBRL(valor)
-        
-      },
-      preConfirm: () => {
-        let deposito = dataDeposito.value  
-      
-        if (!deposito) {
-          swal.showValidationMessage(`Por favor informar a data de depósito`)
-        }
-        return deposito
-      },
+        title: "Confirmar",
+        text: `Confirmar depósito na data ${moment(dados.dataDeposito).format("DD/MM/YYYY")}, no valor: ${formatToCurrencyBRL(dados.valorDeposito)}?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim",
+        cancelButtonText: "Não",
     }
 
-    const {value: _dataDeposito } = await swal.fire(options);
-    
-    if (_dataDeposito) {
+    let response = await swal.fire(options);
+    if (response.isConfirmed) {
       
       let transacao = new Transacao(
         `Crédito - solicitação ${solicitacao.value.id}`,
         "+",
-        valor
+        dados.valorDeposito
       );
 
       await contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
@@ -809,8 +820,8 @@ async function registrarPagto() {
       let novoStatus = solicitacaoStore.getStatus(status);
       
       let texto = `${authStore.user.nome} registrou pagamento ao colaborador.
-                  <br/> Depositado em: ${moment(_dataDeposito).format("DD/MM/YYYY")}
-                  <br/> Valor: ${formatToCurrencyBRL(valor)}.`;
+                  <br/> Depositado em: ${moment(dados.dataDeposito).format("DD/MM/YYYY")}
+                  <br/> Valor: ${formatToCurrencyBRL(dados.valorDeposito)}.`;
       
       let notificarUsuario = await retornaUsuariosParaNotificar(novoStatus);
 
