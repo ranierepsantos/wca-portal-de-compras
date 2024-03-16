@@ -44,6 +44,12 @@ namespace wca.reembolso.infrastruture.Context
                 .WithOne(t => t.ContaCorrente)
                 .HasPrincipalKey(t => t.UsuarioId);
 
+            modelBuilder.Entity<Usuario>()
+                .HasOne(c => c.ContaCorrente)
+                .WithOne(t => t.Usuario)
+                .HasPrincipalKey<ContaCorrente>(t => t.UsuarioId);
+                
+
             //modelBuilder.Entity<CentroCusto>().HasKey(pk => new { pk.CentroCustoId, pk.ClienteId });
 
             modelBuilder.Entity<CentroCusto>()
@@ -54,6 +60,13 @@ namespace wca.reembolso.infrastruture.Context
             modelBuilder.Entity<UsuarioCentrodeCustos>().HasKey(pk => new { pk.UsuarioId, pk.CentroCustoId });
 
 
+            modelBuilder.Entity<Usuario>()
+                .HasMany(c => c.UsuarioClientes)
+                .WithOne(t => t.Usuario);
+
+            modelBuilder.Entity<Usuario>()
+                .HasMany(c => c.UsuarioCentrodeCustos)
+                .WithOne(t => t.Usuario);
         }
     }
 }

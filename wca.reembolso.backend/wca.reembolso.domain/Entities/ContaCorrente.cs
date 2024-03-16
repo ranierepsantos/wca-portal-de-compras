@@ -15,6 +15,7 @@ namespace wca.reembolso.domain.Entities
         [Column("usuario_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int UsuarioId { get; set; }
+        public Usuario? Usuario { get; set; }
 
         [Column("saldo", TypeName ="money")]
         public decimal Saldo { get; set; } = decimal.Zero;

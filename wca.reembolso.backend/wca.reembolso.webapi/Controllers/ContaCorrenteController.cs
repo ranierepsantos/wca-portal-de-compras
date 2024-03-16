@@ -1,7 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using wca.reembolso.application.Features.Clientes.Commands;
-using wca.reembolso.application.Features.Clientes.Queries;
 using wca.reembolso.application.Features.Conta.Commands;
 using wca.reembolso.application.Features.Conta.Queries;
 
@@ -30,6 +28,17 @@ namespace wca.reembolso.webapi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ContaCorrenteCreateUpdateCommand command)
         {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("Paginar")]
+        public async Task<IActionResult> ToPaginate([FromQuery] ContaCorrenteToPaginateQuery command)
+        {
+
             var result = await _mediator.Send(command);
 
             if (result.IsError) { return Problem(result.Errors); }

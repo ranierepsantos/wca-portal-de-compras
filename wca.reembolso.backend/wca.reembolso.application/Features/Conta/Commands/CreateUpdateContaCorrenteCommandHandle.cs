@@ -62,7 +62,7 @@ namespace wca.reembolso.application.Features.Conta.Commands
             if (findResult.IsError)
                 _repository.ContaCorrenteRepository.Create(conta);
             else
-                _repository.ContaCorrenteRepository.Update(conta);
+                _repository.GetDbSet<ContaCorrente>().Entry(conta).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             await _repository.SaveAsync();   
                 

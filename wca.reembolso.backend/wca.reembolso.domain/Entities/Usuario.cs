@@ -21,5 +21,10 @@ namespace wca.reembolso.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
         
+        public ContaCorrente? ContaCorrente { get; set;}
+
+        public List<UsuarioClientes>? UsuarioClientes { get; set;}
+        public List<UsuarioCentrodeCustos>? UsuarioCentrodeCustos { get; set; }
     }
+
 }
