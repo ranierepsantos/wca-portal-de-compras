@@ -4,7 +4,8 @@ import api from "@/services/reembolso/api";
 
 const rotas = {
     AddTransacao: "ContaCorrente",
-    GetById: "ContaCorrente?UsuarioId={id}"
+    GetById: "ContaCorrente?UsuarioId={id}",
+    Paginar:  "ContaCorrente/Paginar"
 }
 
 export class ContaCorrente {
@@ -55,7 +56,22 @@ export const useContaStore = defineStore("contaCorrente", {
         async getByUsuarioId (usuarioId) {
             let response = await api.get (rotas.GetById.replace("{id}", usuarioId));
             return new ContaCorrente(response.data);
-        }
+        },
+
+        async getPaginate(page = 1, pageSize = 10, filters) {
+
+            let parametros = {
+                page: page,
+                pageSize: pageSize,
+                filialId: filters.filialId,
+                clienteIds: filters.clientesIds,
+                centroCustoIds: filters.centroCustoIds,
+                usuarioNome: filters.usuarioNome
+            }
+            let response = await api.get(rotas.Paginar, {params: parametros} );
+    
+            return response.data;
+        },
     },
   });
   

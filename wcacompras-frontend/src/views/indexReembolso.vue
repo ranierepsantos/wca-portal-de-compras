@@ -124,6 +124,12 @@ const menuItems = ref([
     route: "/reembolso/movimentacao-financeira",
     permissao: "contacorrente"
   },
+  {
+    title: "Contas",
+    value: 10,
+    route: "/reembolso/contas",
+    permissao: "contas"
+  },
   
 ]);
 const notificacoes = ref([])
