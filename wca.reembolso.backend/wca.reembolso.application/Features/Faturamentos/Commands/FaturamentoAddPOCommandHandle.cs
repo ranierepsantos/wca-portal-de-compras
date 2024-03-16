@@ -12,10 +12,10 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
 {
     public sealed record FaturamentoAddPOCommand(
         int Id,
-        string NumeroPO,
-        string DocumentoPO,
         StatusSolicitacao Status,
-        int[] Notificar
+        int[] Notificar,
+        string? NumeroPO,
+        string? DocumentoPO
     ) : IRequest<ErrorOr<bool>>;
 
     public sealed class FaturamentoAddPOCommandHandle : IRequestHandler<FaturamentoAddPOCommand, ErrorOr<bool>>
@@ -48,10 +48,10 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
 
             Faturamento faturamento = _mapper.Map<Faturamento>(findResutl.Value);
 
-            string nomeArquivo = $"fat_{faturamento.Id}_po_{request.NumeroPO}";
+            string nomeArquivo = $"faturamento_{faturamento.Id}_po_" + (String.IsNullOrEmpty(request.NumeroPO)? "naoinfo": request.NumeroPO);
 
             faturamento.NumeroPO = request.NumeroPO;
-            faturamento.DocumentoPO = HandleFile.SaveFile(request.DocumentoPO, nomeArquivo);
+            faturamento.DocumentoPO = String.IsNullOrEmpty(request.DocumentoPO) == false ? HandleFile.SaveFile(request.DocumentoPO, nomeArquivo) : "";
             faturamento.Status = 2;
 
             _repository.FaturamentoRepository.Update(faturamento);
@@ -59,18 +59,24 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
             await _repository.SaveAsync();
 
             // gerar evento
-            var historico = new FaturamentoHistoricoCreateCommand(faturamento.Id, $"<b>P.O Emitido</b> - numero: {faturamento.NumeroPO}");
+            string evento = "<b>P.O Emitido</b> - numero: " + (String.IsNullOrEmpty(faturamento.NumeroPO) ? " não informado" : faturamento.NumeroPO);
+            evento += "<br/> Documento: " + (String.IsNullOrEmpty(faturamento.DocumentoPO) ? " não informado" : nomeArquivo);
+
+            var historico = new FaturamentoHistoricoCreateCommand(faturamento.Id, evento);
 
             await _mediator.Send(historico, cancellationToken);
 
             //notificar usuario
-            for (var ii = 0; ii < request.Notificar.Length; ii++)
+            if (!String.IsNullOrEmpty(request.Status.TemplateNotificacao))
             {
-                string mensagem = request.Status.TemplateNotificacao.Replace("{id}", faturamento.Id.ToString());
+                for (var ii = 0; ii < request.Notificar.Length; ii++)
+                {
+                    string mensagem = request.Status.TemplateNotificacao.Replace("{id}", faturamento.Id.ToString());
 
-                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, faturamento.GetType().Name, faturamento.Id);
+                    var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, faturamento.GetType().Name, faturamento.Id);
 
-                await _mediator.Send(notificacao, cancellationToken);
+                    await _mediator.Send(notificacao, cancellationToken);
+                }
             }
 
             return true;
