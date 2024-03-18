@@ -380,10 +380,8 @@ async function getItems() {
     else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
       throw new TypeError("A data fim deve ser maior que a data início!")
     
-    if (isGestor.value) {
-      filter.value.centroCustoIds = gestorCentrosDeCusto.value.map(x =>  x.id);
-    }
-
+    filter.value.centroCustoIds = gestorCentrosDeCusto.value.map(x =>  x.id);
+    
     let response = await solicitacaoStore.getPaginate(
       page.value,
       pageSize,
