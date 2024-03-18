@@ -78,11 +78,8 @@ const isMatriz = ref(false)
 onMounted(async () =>
 {
   try {
-    let filiaisUsuario  = await usuarioStore.getFiliais();
-    if (filiaisUsuario.length > 0){
-      isMatriz.value = filiaisUsuario[0].text.toLowerCase() =="matriz"
-      authStore.user.filial = filiaisUsuario[0].value
-    }
+    isMatriz.value = authStore.sistema.isMatriz
+    authStore.user.filial = authStore.sistema.filial.value
     await getFilialToList();
     await getPerfilToList();
     await getItems();  

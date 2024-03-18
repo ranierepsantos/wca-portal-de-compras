@@ -244,11 +244,8 @@ const clientesUsuarios = ref([])
 //VUE METHODS
 onMounted(async () => {
   tab.value = authStore.sistema.id;
-  let filiaisUsuario = await usuarioStore.getFiliais();
-  if (filiaisUsuario.length > 0) {
-    isMatriz.value = filiaisUsuario[0].text.toLowerCase() == "matriz";
-    authStore.user.filial = filiaisUsuario[0].value;
-  }
+  isMatriz.value = authStore.sistema.isMatriz
+  authStore.user.filial = authStore.sistema.filial.value
   await getFilialToList();
   await getPerfilToList();
   clearData();
