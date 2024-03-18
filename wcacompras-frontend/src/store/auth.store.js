@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import authService from "@/services/auth.service";
 import apiReembolso from "@/services/reembolso/api"
+import filialService from "@/services/filial.service";
 
 const modelUser = {
   id: 0,
@@ -18,7 +19,9 @@ const modelSistema = {
     id: 0,
     nome: "",
     descricao: "",
-    perfil: {...modelPerfil}
+    perfil: {...modelPerfil},
+    filial: null,
+    isMatriz: false
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -44,11 +47,21 @@ export const useAuthStore = defineStore("auth", {
         this.sistema.perfil = response.data;
     },
 
+    async getFilialSistema () {
+      let response = await filialService.getListByAuthenticatedUser()
+      this.sistema.filial = response.data[0];
+      this.sistema.isMatriz = this.sistema.filial.text.toLowerCase() =="matriz"
+    },
+
     async setSistema (sistema) {
         this.sistema.id = sistema.id;
         this.sistema.nome = sistema.nome 
         this.sistema.descricao = sistema.descricao
         await this.getPerfilSistema()
+        this.sistema.filial = null
+        if (this.sistema.id == 2 || this.sistema.id == 3) {
+          await this.getFilialSistema()
+        }
         localStorage.setItem("sistema", JSON.stringify(this.sistema));
     },
 
@@ -79,12 +92,12 @@ export const useAuthStore = defineStore("auth", {
         )[0];
       }
 
-      // if (permissao == "filial") {
-      //   return perm != undefined && this.user.filial == 1;
-      // }
-      // if (permissao == "perfil") {
-      //   return perm != undefined && this.user.filial == 1;
-      // }
+      if (permissao == "filial") {
+        return perm != undefined && this.sistema.isMatriz;
+      }
+      if (permissao == "perfil") {
+        return perm != undefined && this.sistema.isMatriz;
+      }
       return perm != undefined;
     },
 

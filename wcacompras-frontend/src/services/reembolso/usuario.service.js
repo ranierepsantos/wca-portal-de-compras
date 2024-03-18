@@ -4,7 +4,7 @@ import api from "./api"
 const rotas = {
     CreateUpdate: "Usuario/CreateUpdate",
     ListFilialByUsuario: "Usuario/ListFilialByUsuario/{usuarioId}",
-    ListarCentroCusto: "Usuario/ListarCentroCusto/{usuarioId}",
+    ListarCentroCusto: "Usuario/ListarCentroCusto/{usuarioId}/{clienteId}",
     RelacionarUsuarioCentroCusto: "Usuario/RelacionarUsuarioCentroCusto",
     ListarPorCentroCusto: "Usuario/ListarPorCentroCusto/{id}"
 }
@@ -20,9 +20,9 @@ export default {
     {
         return api.get(rotas.ListFilialByUsuario.replace("{usuarioId}", id));
     },
-    getCentrosdeCusto (id) 
+    getCentrosdeCusto (id, clienteId = 0) 
     {
-        return api.get(rotas.ListarCentroCusto.replace("{usuarioId}", id));
+        return api.get(rotas.ListarCentroCusto.replace("{usuarioId}", id).replace("{clienteId}", clienteId));
     },
     relacionarUsuarioCentroCusto (data) {
         return api.post(rotas.RelacionarUsuarioCentroCusto, data)
