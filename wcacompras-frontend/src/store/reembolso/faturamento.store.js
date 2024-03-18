@@ -116,13 +116,11 @@ export const useFaturamentoStore = defineStore("faturamento", {
             page: page,
             pageSize: pageSize,
             filialId: filters.filialId,
-            clienteId: filters.clienteId,
+            clienteIds: filters.clienteIds,
             dataIni: filters.dataIni,
             dataFim: filters.dataFim,
             status: filters.status
         }
-        console.log("fat.paginate.filters", parametros)
-
         let response = await api.get(rotas.Paginar, {params: parametros} );
 
         return response.data;

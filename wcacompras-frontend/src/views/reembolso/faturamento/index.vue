@@ -233,12 +233,14 @@ onMounted(async () =>
 watch(
   () => filter.value.filialId,
   async () => {
+    
     let _filiais = [];
     if (filter.value.filialId != null) _filiais.push(filter.value.filialId);
     filter.value.clienteId = null;
     filter.value.usuarioId = null;
-    //filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
-    await getClientesToList(_filiais[0]);
+    
+    await getClientesToList(_filiais[0], authStore.user.id);
+
   }
 );
 
@@ -251,7 +253,7 @@ async function clearFilters() {
     isLoading.busy =true
     filter.value = {
       filialId: null,
-      clienteId: null,
+      clienteIds: null,
       status: null,
       dataIni: null,
       dataFim: null,
@@ -260,10 +262,12 @@ async function clearFilters() {
     if (!authStore.sistema.isMatriz) {
       filter.value.filialId = authStore.user.filial;
       filter.value.usuarioId = authStore.user.id;
-      await getClientesToList(filter.value.filialId, filter.value.usuarioId);
-    } else {
-      await getClientesToList(filter.value.filialId);
-    }
+    } 
+    await getClientesToList(filter.value.filialId, filter.value.usuarioId);
+
+    filter.value.clienteIds = clientes.value.map(x => x.value);
+
+
     await getItems();
   } catch (error) {
     console.error(error)
