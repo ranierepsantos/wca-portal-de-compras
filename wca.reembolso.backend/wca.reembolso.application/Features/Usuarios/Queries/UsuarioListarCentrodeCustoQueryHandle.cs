@@ -3,13 +3,13 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.application6.Common;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Usuarios.Queries
 {
     public record UsuarioListarCentrodeCustoQuery(
-        int UsuarioId    
+        int UsuarioId,
+        int ClienteId = 0
     ):IRequest<ErrorOr<IList<CentroCusto>>>;
     internal class UsuarioListarCentrodeCustoQueryHandle : IRequestHandler<UsuarioListarCentrodeCustoQuery, ErrorOr<IList<CentroCusto>>>
     {
@@ -26,8 +26,14 @@ namespace wca.reembolso.application.Features.Usuarios.Queries
         {
             var query = _repository.CentroCustoRepository.ToQuery()
                 .Include(q => q.Usuarios)
-                .Where(q => q.Usuarios.Any(c => c.UsuarioId.Equals(request.UsuarioId)))
-                .OrderBy(o => o.Nome);
+                .Where(q => q.Usuarios.Any(c => c.UsuarioId.Equals(request.UsuarioId)));
+                
+
+            if (request.ClienteId > 0)
+            {
+                query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
+            }
+            query = query.OrderBy(o => o.Nome);
 
             List<CentroCusto>? lista = await query.ToListAsync(cancellationToken: cancellationToken);
 

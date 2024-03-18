@@ -37,7 +37,7 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("ListarCentroCusto/{UsuarioId}")]
+        [HttpGet("ListarCentroCusto/{UsuarioId}/{ClienteId}")]
         public async Task<IActionResult> ListarCentroCusto([FromRoute]UsuarioListarCentrodeCustoQuery query)
         {
             var result = await _mediator.Send(query);

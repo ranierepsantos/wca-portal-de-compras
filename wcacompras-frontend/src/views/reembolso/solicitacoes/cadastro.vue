@@ -534,11 +534,11 @@ onMounted(async () => {
   }
 });
 
-watch(() => solicitacao.value.clienteId, (newValue,oldValue) => {
+watch(() => solicitacao.value.clienteId, async (newValue,oldValue) => {
   
   if (newValue != oldValue) {
     let cliente = clientes.value.find(q => q.id == newValue)
-    listCentroCusto.value = cliente.centroCusto
+    listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
     if (!isColaborador.value)
       solicitacao.value.centroCustoId = null
 

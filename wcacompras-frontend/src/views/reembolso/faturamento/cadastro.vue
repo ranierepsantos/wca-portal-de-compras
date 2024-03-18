@@ -69,6 +69,18 @@
           <v-row>
             <v-col>
               <v-select
+                label="Centro de Custo"
+                :items="centrosDeCusto"
+                density="compact"
+                item-title="nome"
+                item-value="id"
+                variant="outlined"
+                color="primary"
+                v-model="filter.centroCustoId"
+              ></v-select>
+            </v-col>
+            <v-col>
+              <v-select
                 label="Usuário"
                 :items="usuariosCliente"
                 density="compact"
@@ -423,7 +435,8 @@ const filter = ref({
     usuarioId: null,
     status: 7,
     dataIni: null,
-    dataFim: null
+    dataFim: null,
+    centroCustoId: null
 });
 const usuarios = ref([])
 const usuariosCliente = ref([])
@@ -483,7 +496,9 @@ watch(() => faturamento.value.clienteId,
           faturamento.value.faturamentoItem = [];
         
         usuariosCliente.value = await usuarioStore.getListByCliente(faturamento.value.clienteId)
-        centrosDeCusto.value = await clienteStore.ListCentrosDeCusto([faturamento.value.clienteId])
+        
+        let _cliente =  clientes.value.filter(q => q.id == faturamento.value.clienteId)
+        centrosDeCusto.value = _cliente[0].centroCusto;
 
         await clearFilters(faturamento.value.clienteId)
       }
@@ -573,7 +588,8 @@ async function clearFilters(cliente)
       usuarioId: null,
       status: 7,
       dataIni: null,
-      dataFim: null
+      dataFim: null,
+      centroCustoId: null
     }
     await getSolicitacoes()
 }
@@ -600,7 +616,13 @@ async function getSolicitacoes () {
     else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
       throw new TypeError("A data fim deve ser maior que a data início!")
 
-    items.value = (await solicitacaoStore.getPaginate(page, pageSize, filter.value)).items;
+
+    let filtro = {...filter.value}
+    filtro.centroCustoIds = [filter.value.centroCustoId]
+
+
+
+    items.value = (await solicitacaoStore.getPaginate(page, pageSize, filtro)).items;
   } catch (error) {
     console.error("getSolicitacoes.error:", error);
     handleErrors(error);

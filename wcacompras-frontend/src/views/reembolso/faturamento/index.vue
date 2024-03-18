@@ -232,6 +232,19 @@ onMounted(async () =>
     }
 });
 
+//WATCH'S
+watch(
+  () => filter.value.filialId,
+  async () => {
+    let _filiais = [];
+    if (filter.value.filialId != null) _filiais.push(filter.value.filialId);
+    filter.value.clienteId = null;
+    filter.value.usuarioId = null;
+    //filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
+    await getClientesToList(_filiais[0]);
+  }
+);
+
 watch(page, () => getItems());
 
 
@@ -248,7 +261,7 @@ async function clearFilters() {
       usuarioId:null
     };
     if (!isMatriz.value) {
-      filter.value.filialId = authStore.user.filial;
+      filter.value.filialId = authStore.user.filial.id;
       filter.value.usuarioId = authStore.user.id;
       await getClientesToList(filter.value.filialId, filter.value.usuarioId);
     } else {

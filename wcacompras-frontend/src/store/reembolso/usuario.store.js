@@ -96,8 +96,8 @@ export const useUsuarioStore = defineStore("usuario", {
             }
         },
 
-        async getCentrosdeCusto (usuarioId) {
-            let response = await reembolsoUsuarioService.getCentrosdeCusto(usuarioId);
+        async getCentrosdeCusto (usuarioId, clienteId = 0) {
+            let response = await reembolsoUsuarioService.getCentrosdeCusto(usuarioId, clienteId);
             return response.data
         },
 
