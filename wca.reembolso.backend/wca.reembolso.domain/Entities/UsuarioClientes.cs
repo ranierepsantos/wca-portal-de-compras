@@ -9,8 +9,7 @@ namespace wca.reembolso.domain.Entities
         [Column("usuario_id")]
         public int UsuarioId { get; set; }
 
-        [JsonIgnore]
-        public Usuario Usuario { get; set;}
+        public Usuario? Usuario { get; set;}
 
         [Column("cliente_id")]
         public int ClienteId { get; set; }

@@ -7,7 +7,7 @@
         />
         <!--FILTROS - INÍCIO-->
         <v-row v-show="!isLoading.form">
-            <v-col v-show="isMatriz">
+            <v-col v-show="authStore.sistema.isMatriz">
                 <v-select
                 label="Filiais"
                 v-model="filter.filialId"
@@ -206,7 +206,6 @@ const isLoading = ref({
   form: true,
   busy: false,
 });
-const isMatriz= ref(false)
 const formButtons= ref([])
 //VUE METHODS
 onMounted(async () =>
@@ -214,9 +213,7 @@ onMounted(async () =>
     try {
         isLoading.value.form = true
         await getFiliaisToList();
-        let filialUsuario = (await useUsuarioStore().getFiliais(authStore.user.id))[0];
-        isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
-        authStore.user.filial = filialUsuario.value;
+        authStore.user.filial = authStore.sistema.filial.value;
         await clearFilters();
         if (authStore.hasPermissao("faturamento_relatorio")) {
             formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
@@ -231,6 +228,19 @@ onMounted(async () =>
         isLoading.value.form = false
     }
 });
+
+//WATCH'S
+watch(
+  () => filter.value.filialId,
+  async () => {
+    let _filiais = [];
+    if (filter.value.filialId != null) _filiais.push(filter.value.filialId);
+    filter.value.clienteId = null;
+    filter.value.usuarioId = null;
+    //filter.value.usuarioId = hasPermissionAprovador.value ? null : authStore.user.id
+    await getClientesToList(_filiais[0]);
+  }
+);
 
 watch(page, () => getItems());
 
@@ -247,7 +257,7 @@ async function clearFilters() {
       dataFim: null,
       usuarioId:null
     };
-    if (!isMatriz.value) {
+    if (!authStore.sistema.isMatriz) {
       filter.value.filialId = authStore.user.filial;
       filter.value.usuarioId = authStore.user.id;
       await getClientesToList(filter.value.filialId, filter.value.usuarioId);

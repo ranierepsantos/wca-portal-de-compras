@@ -48,7 +48,7 @@
                 >
                   {{
                     faturamentoStore.getStatus(faturamento.status).status +
-                    (faturamento.status == 2 ? `: ${faturamento.numeroPO}`:"")
+                    (faturamento.status == 2 ? ` ${faturamento.numeroPO}`:"")
                   }}</v-btn
                 >
               </v-col>
@@ -67,6 +67,18 @@
         </v-card-title>
         <v-card-text>
           <v-row>
+            <v-col>
+              <v-select
+                label="Centro de Custo"
+                :items="centrosDeCusto"
+                density="compact"
+                item-title="nome"
+                item-value="id"
+                variant="outlined"
+                color="primary"
+                v-model="filter.centroCustoId"
+              ></v-select>
+            </v-col>
             <v-col>
               <v-select
                 label="Usuário"
@@ -222,85 +234,96 @@
             </tfoot>
           </v-table>
         </v-card-text>
+
+        <!-- FATURAMENTO - HISTÓRICO -->
+        <historico :eventos="faturamento.faturamentoHistorico"/>
       </v-card>
-      <!-- FORM PARA INFORMAR P.O -->
-      <v-dialog
-        v-model="openAprovacaoForm"
-        max-width="700"
-        :absolute="false"
-        persistent
-      >
-        <v-form ref="oForm">
-          <v-card>
+    </v-container>
+    <!-- FORM PARA INFORMAR P.O -->
+    <v-dialog
+      v-model="openAprovacaoForm"
+      max-width="700"
+      :absolute="false"
+      persistent
+    >
+      <v-form ref="oForm">
+        <v-card>
+          <v-row>
+            <v-col>
+              <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+                INFORMAR P.O.
+              </v-card-title>
+            </v-col>
+            <v-col class="text-right">
+              <v-btn
+                class="mb-2 mt-3 mr-2"
+                variant="plain"
+                color="grey"
+                @click="openAprovacaoForm=false"
+                icon="mdi-close-circle-outline"
+              ></v-btn>
+            </v-col>
+          </v-row>
+          <v-card-text>
             <v-row>
               <v-col>
-                <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
-                  INFORMAR P.O.
-                </v-card-title>
-              </v-col>
-              <v-col class="text-right">
-                <v-btn
-                  class="mb-2 mt-3 mr-2"
-                  variant="plain"
-                  color="grey"
-                  @click="openAprovacaoForm=false"
-                  icon="mdi-close-circle-outline"
-                ></v-btn>
+                <v-text-field
+                  label="Número P.O"
+                  type="text"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  v-model ="poFormData.numero"
+                  
+                ></v-text-field>
               </v-col>
             </v-row>
-            <v-card-text>
-              <v-row>
-                <v-col>
-                  <v-text-field
-                    label="Número P.O"
-                    type="text"
-                    variant="outlined"
-                    color="primary"
-                    density="compact"
-                    v-model ="poFormData.numero"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col>
-                  <v-file-input
-                    accept=".pdf,.doc,.docx"
-                    label="Informe o arquivo de P.O"
-                    variant="outlined"
-                    density="compact"
-                    @change ="handleFile"
-                  ></v-file-input>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col class="text-right">
-                  <v-progress-circular
-                    color="primary"
-                    indeterminate
-                    v-show="isRunningEvent"
-                  ></v-progress-circular>
-                  <v-btn
-                    color="success"
-                    @click="enviarPO()"
-                    :disabled="isRunningEvent"
-                    >Enviar</v-btn
-                  >
-                  &nbsp;
-                  <v-btn
-                    color="gray"
-                    class="mr-3"
-                    style="font-weight: bold"
-                    @click="openAprovacaoForm=false"
-                    :disabled="isRunningEvent"
-                    >Cancelar</v-btn
-                  >
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-form>
-      </v-dialog>
-    </v-container>
+            <v-row>
+              <v-col>
+                <v-file-input
+                  accept=".pdf,.doc,.docx"
+                  label="Informe o arquivo de P.O"
+                  variant="outlined"
+                  density="compact"
+                  @change ="handleFile"
+                  
+                ></v-file-input>
+              </v-col>
+            </v-row>
+            <v-row class="text-center text-red" v-show="isInvalidPOData">
+              <v-col>
+                Número do P.O e/ou Documento devem ser informados
+              </v-col>
+              
+            </v-row>
+            <v-row>
+              <v-col class="text-right">
+                <v-progress-circular
+                  color="primary"
+                  indeterminate
+                  v-show="isRunningEvent"
+                ></v-progress-circular>
+                <v-btn
+                  color="success"
+                  @click="enviarPO()"
+                  :disabled="isRunningEvent"
+                  >Enviar</v-btn
+                >
+                &nbsp;
+                <v-btn
+                  color="gray"
+                  class="mr-3"
+                  style="font-weight: bold"
+                  @click="openAprovacaoForm=false"
+                  :disabled="isRunningEvent"
+                  >Cancelar</v-btn
+                >
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-form>
+    </v-dialog>
     <!-- FORM PARA FINALIZAR FATURAMENTO -->
     <v-dialog
       v-model="finalizarDialog"
@@ -371,11 +394,10 @@ import { ref, inject, computed, watch, onMounted } from "vue";
 import { useAuthStore } from "@/store/auth.store";
 import { formatToCurrencyBRL, compararValor, toBase64 } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { Evento, useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
-import { IDPERFILCOLABORADOR, IDPERFILGESTOR, useUsuarioStore } from "@/store/reembolso/usuario.store";
+import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
+import { useUsuarioStore } from "@/store/reembolso/usuario.store";
 import {
   Faturamento,
-  FaturamentoEvento,
   FaturamentoItem,
   useFaturamentoStore,
 } from "@/store/reembolso/faturamento.store";
@@ -383,7 +405,7 @@ import moment from "moment";
 import { useRoute } from "vue-router";
 import router from "@/router";
 import handleErrors from "@/helpers/HandleErrors";
-import { Solicitacao } from "@/store/reembolso/solicitacao.store";
+import historico from "@/components/reembolso/historico.vue";
 
 const openAprovacaoForm = ref(false);
 const authStore = useAuthStore();
@@ -413,7 +435,8 @@ const filter = ref({
     usuarioId: null,
     status: 7,
     dataIni: null,
-    dataFim: null
+    dataFim: null,
+    centroCustoId: null
 });
 const usuarios = ref([])
 const usuariosCliente = ref([])
@@ -422,6 +445,7 @@ const poFormData = ref ({
   documento: null
 })
 const centrosDeCusto =ref([])
+const isInvalidPOData = ref(false)
 
 //VUE - FUNCTIONS
 onMounted(async () => {
@@ -439,12 +463,13 @@ onMounted(async () => {
         event: "add-po-click",
       });
     if (faturamento.value.status == 2){
-      formButtons.value.push({
-        text: "Visualizar P.O",
-        icon: "mdi-file-download-outline",
-        event: "view-po-click",
-      });
-
+      if (faturamento.value.documentoPO.trim() !=""){
+        formButtons.value.push({
+          text: "Visualizar P.O",
+          icon: "mdi-file-download-outline",
+          event: "view-po-click",
+        });
+      }        
       if (authStore.hasPermissao("faturamento"))
       {
         formButtons.value.push({
@@ -471,19 +496,13 @@ watch(() => faturamento.value.clienteId,
           faturamento.value.faturamentoItem = [];
         
         usuariosCliente.value = await usuarioStore.getListByCliente(faturamento.value.clienteId)
-        centrosDeCusto.value = await clienteStore.ListCentrosDeCusto([faturamento.value.clienteId])
+        
+        let _cliente =  clientes.value.filter(q => q.id == faturamento.value.clienteId)
+        centrosDeCusto.value = _cliente[0].centroCusto;
 
         await clearFilters(faturamento.value.clienteId)
       }
 );
-
-// watch(
-//   () => filter.value,
-//   async (newValue, oldValue) => {
-//     await getSolicitacoes()
-//   },
-//   { deep: true }
-// )
 
 const valorFaturamento = computed(() => {
   faturamento.value.valor = 0;
@@ -498,7 +517,12 @@ async function enviarPO() {
   try {
     isRunningEvent.value = true;
 
-
+    isInvalidPOData.value = false
+    if (poFormData.value.numero.trim() =="" && (poFormData.value.documento == null || poFormData.value.documento == ""))
+    {
+        isInvalidPOData.value = true;
+        return
+    }
 
     let data = {
       id: faturamento.value.id,
@@ -564,7 +588,8 @@ async function clearFilters(cliente)
       usuarioId: null,
       status: 7,
       dataIni: null,
-      dataFim: null
+      dataFim: null,
+      centroCustoId: null
     }
     await getSolicitacoes()
 }
@@ -591,7 +616,13 @@ async function getSolicitacoes () {
     else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
       throw new TypeError("A data fim deve ser maior que a data início!")
 
-    items.value = (await solicitacaoStore.getPaginate(page, pageSize, filter.value)).items;
+
+    let filtro = {...filter.value}
+    filtro.centroCustoIds = [filter.value.centroCustoId]
+
+
+
+    items.value = (await solicitacaoStore.getPaginate(page, pageSize, filtro)).items;
   } catch (error) {
     console.error("getSolicitacoes.error:", error);
     handleErrors(error);

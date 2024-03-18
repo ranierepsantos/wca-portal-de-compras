@@ -10,7 +10,7 @@ using wca.reembolso.application.Features.Faturamentos.Common;
 namespace wca.reembolso.application.Features.Faturamentos.Queries
 {
 
-    public record FaturamentoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int FilialId =0, int ClienteId = 0, int Status = 0) : PaginationQuery, IRequest<ErrorOr<Pagination<FaturamentoPaginateResponse>>>;
+    public record FaturamentoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int ClienteId = 0, int Status = 0) : PaginationQuery, IRequest<ErrorOr<Pagination<FaturamentoPaginateResponse>>>;
     public sealed class FaturamentoToPaginateQueryHandle : IRequestHandler<FaturamentoPaginateQuery, ErrorOr<Pagination<FaturamentoPaginateResponse>>>
     {
         private readonly IRepositoryManager _repository;
@@ -36,7 +36,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
                          .Include(i => i.FaturamentoHistorico.OrderByDescending(f => f.DataHora));
             
 
-            if (request.FilialId > 1)
+            if (request.FilialId > 0)
                 query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
             if (request.ClienteId > 0)

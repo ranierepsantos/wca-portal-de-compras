@@ -179,7 +179,7 @@
                       :list-destino="usuario.centroCusto"
                       list-origem-titulo="Selecione o(s) Centro(s) de Custo"
                       list-destino-titulo="Centro(s) de Custo do usuário"
-                      v-show="isGestor"
+                      v-show="!isColaborador"
                     />
                   </v-window-item>
                 </v-window>
@@ -244,11 +244,8 @@ const clientesUsuarios = ref([])
 //VUE METHODS
 onMounted(async () => {
   tab.value = authStore.sistema.id;
-  let filiaisUsuario = await usuarioStore.getFiliais();
-  if (filiaisUsuario.length > 0) {
-    isMatriz.value = filiaisUsuario[0].text.toLowerCase() == "matriz";
-    authStore.user.filial = filiaisUsuario[0].value;
-  }
+  isMatriz.value = authStore.sistema.isMatriz
+  authStore.user.filial = authStore.sistema.filial.value
   await getFilialToList();
   await getPerfilToList();
   clearData();
@@ -286,13 +283,7 @@ watch(
         let objB = JSON.parse(JSON.stringify(clientesUsuarios.value));
         if (objB.length > 0) objB.forEach((e) => delete e.selected);
 
-
-        console.log("objA->", objA)
-        console.log("objB->", objB)
-
         if (JSON.stringify(objA) !== JSON.stringify(objB)) {
-          console.log("objA!== objB")
-
           //carregar os centros de custos
           centros.value = await useClienteStore().ListCentrosDeCusto(newClientes.map((p) => { return p.value;}));
           

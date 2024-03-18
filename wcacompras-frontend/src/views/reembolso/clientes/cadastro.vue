@@ -135,10 +135,8 @@ const centroCustoForm = ref(null)
 onMounted(async () => {
     try {
         isLoading.value.form = true
-        let filialUsuario =(await useUsuarioStore().getFiliais(authStore.user.id))[0]
-        isMatriz.value = filialUsuario.text.toLowerCase() =="matriz"
-        authStore.user.filial = filialUsuario.value;
-        cliente.value.filialId = authStore.user.filial
+        isMatriz.value = authStore.sistema.isMatriz
+        cliente.value.filialId = authStore.sistema.filial.value;
         await getFilialToList()
         if (parseInt(route.query.id) > 0) {
             await getCliente(route.query.id)

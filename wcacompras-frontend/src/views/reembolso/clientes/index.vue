@@ -15,7 +15,7 @@
                     <th class="text-left text-grey">COD.CLIENTE</th>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CNPJ</th>
-                    <th class="text-left text-grey" v-show="isMatriz">FILIAL</th>
+                    <th class="text-left text-grey" v-show="authStore.sistema.isMatriz">FILIAL</th>
                     <th class="text-center text-grey">ATIVO</th>
                     <th></th>
                 </tr>
@@ -28,7 +28,7 @@
                     </td>
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-left">{{ item.cnpj }}</td>
-                    <td class="text-left" v-show="isMatriz">{{ getFilialNome(item.filialId) }}</td>
+                    <td class="text-left" v-show="authStore.sistema.isMatriz">{{ getFilialNome(item.filialId) }}</td>
                     <td class="text-center">
                         <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
                             :color="item.ativo ? 'success' : 'error'"></v-icon>
@@ -45,7 +45,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td :colspan="isMatriz ? 5 : 4">
+                    <td :colspan="authStore.sistema.isMatriz ? 5 : 4">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -74,14 +74,12 @@ const filiais = ref([])
 const filter = ref("");
 const swal = inject("$swal");
 const authStore = useAuthStore();
-const isMatriz = ref(false)
+
 //VUE METHODS
 onMounted(async () =>
 {
     await getFiliais();
-    let filialUsuario =(await useUsuarioStore().getFiliais(authStore.user.id))[0]
-    isMatriz.value = filialUsuario.text.toLowerCase() =="matriz"
-    authStore.user.filial = filialUsuario.value
+    authStore.user.filial = authStore.sistema.filial.value
     await getItems();
 });
 
@@ -148,7 +146,7 @@ async function getItems()
     try
     {
         isBusy.value = true;
-        let response = await clienteStore.getClientesByPaginate(isMatriz.value ? 0: authStore.user.filial, page.value, pageSize, filter.value);
+        let response = await clienteStore.getClientesByPaginate(authStore.sistema.isMatriz ? 0: authStore.user.filial, page.value, pageSize, filter.value);
         clientes.value = response.items;
         totalPages.value = response.totalPages;
     } catch (error)

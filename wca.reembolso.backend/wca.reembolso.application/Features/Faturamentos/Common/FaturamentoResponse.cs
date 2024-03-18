@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using wca.reembolso.domain.Entities;
+﻿using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Faturamentos.Common
 {
@@ -14,6 +6,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
     (
         int Id,
         int UsuarioId,
+        DateTime DataCriacao,
         int ClienteId,
         string ClienteNome,
         int Status,

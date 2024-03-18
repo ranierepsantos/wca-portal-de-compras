@@ -302,10 +302,9 @@ onMounted(async () => {
     isLoading.value.form = true;
     await solicitacaoStore.loadListStatusSolicitacao();
     await getFiliaisToList();
-    let filialUsuario = (await useUsuarioStore().getFiliais(authStore.user.id))[0];
-
-    isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
-    authStore.user.filial = filialUsuario.value;
+    
+    isMatriz.value = authStore.sistema.isMatriz
+    authStore.user.filial = authStore.sistema.filial.value;
 
     gestorCentrosDeCusto.value = []
     if (isGestor.value) 
