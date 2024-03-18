@@ -49,7 +49,12 @@ namespace wca.share.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
+        [Column("codigo_cliente")]
+        public int? CodigoCliente { get; set; } = null;
+
         public IList<UsuarioClientes> UsuarioClientes { get; set; } = new List<UsuarioClientes>();
+        
+        public IList<CentroCusto> CentroCusto { get; set; } = new List<CentroCusto>();
 
     }
 }

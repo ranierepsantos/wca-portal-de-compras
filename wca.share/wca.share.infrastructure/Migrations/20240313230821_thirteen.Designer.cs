@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240313230821_thirteen")]
+    partial class thirteen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("SolicitacaoMudancaBaseSolicitacaoId");
 
-                    b.ToTable("ItemMudancaSolicitacaoMudancaBase", (string)null);
+                    b.ToTable("ItemMudancaSolicitacaoMudancaBase");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Assunto", b =>
@@ -53,7 +56,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Assuntos", (string)null);
+                    b.ToTable("Assuntos");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
@@ -83,7 +86,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("CentrosDeCusto", (string)null);
+                    b.ToTable("CentrosDeCusto");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Cliente", b =>
@@ -151,7 +154,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes", (string)null);
+                    b.ToTable("Clientes");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Filial", b =>
@@ -172,7 +175,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Filiais", (string)null);
+                    b.ToTable("Filiais");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Funcionario", b =>
@@ -208,7 +211,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("GestorId");
 
-                    b.ToTable("Funcionarios", (string)null);
+                    b.ToTable("Funcionarios");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.ItemMudanca", b =>
@@ -226,7 +229,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItensMudanca", (string)null);
+                    b.ToTable("ItensMudanca");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.MotivoDemissao", b =>
@@ -245,7 +248,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MotivosDemissao", (string)null);
+                    b.ToTable("MotivosDemissao");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Notificacao", b =>
@@ -285,7 +288,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notificacoes", (string)null);
+                    b.ToTable("Notificacoes");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Solicitacao", b =>
@@ -343,7 +346,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("StatusSolicitacaoId");
 
-                    b.ToTable("Solicitacoes", (string)null);
+                    b.ToTable("Solicitacoes");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoArquivo", b =>
@@ -373,7 +376,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("SolicitacaoId");
 
-                    b.ToTable("SolicitacaoArquivos", (string)null);
+                    b.ToTable("SolicitacaoArquivos");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoComunicado", b =>
@@ -398,7 +401,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("AssuntoId");
 
-                    b.ToTable("SolicitacaoComunicado", (string)null);
+                    b.ToTable("SolicitacaoComunicado");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoDesligamento", b =>
@@ -443,7 +446,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("MotivoDemissaoId");
 
-                    b.ToTable("SolicitacaoDesligamento", (string)null);
+                    b.ToTable("SolicitacaoDesligamento");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoHistorico", b =>
@@ -472,7 +475,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("SolicitacaoId");
 
-                    b.ToTable("SolicitacaoHistorico", (string)null);
+                    b.ToTable("SolicitacaoHistorico");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoMudancaBase", b =>
@@ -497,7 +500,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("ClienteDestinoId");
 
-                    b.ToTable("SolicitacaoMudancaBase", (string)null);
+                    b.ToTable("SolicitacaoMudancaBase");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoTipo", b =>
@@ -516,7 +519,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SolicitacaoTipo", (string)null);
+                    b.ToTable("SolicitacaoTipo");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.StatusSolicitacao", b =>
@@ -557,7 +560,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatusSolicitacao", (string)null);
+                    b.ToTable("StatusSolicitacao");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Usuario", b =>
@@ -584,7 +587,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.UsuarioClientes", b =>
@@ -601,7 +604,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("UsuarioClientes", (string)null);
+                    b.ToTable("UsuarioClientes");
                 });
 
             modelBuilder.Entity("ItemMudancaSolicitacaoMudancaBase", b =>

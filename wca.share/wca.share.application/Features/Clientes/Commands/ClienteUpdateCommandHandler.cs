@@ -12,6 +12,7 @@ namespace wca.share.application.Features.Clientes.Commands
 {
     public record ClienteUpdateCommand(
         int id,
+        int CodigoCliente,
         int FilialId,
         string Nome,
         string CNPJ,
@@ -22,7 +23,7 @@ namespace wca.share.application.Features.Clientes.Commands
         string Cidade,
         string UF,
         bool Ativo,
-        decimal ValorLimite
+        IList<CentroCusto> CentroCusto
     ) : IRequest<ErrorOr<ClienteResponse>>;
 
     public class ClienteUpdateCommandHandler : IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>
@@ -42,7 +43,7 @@ namespace wca.share.application.Features.Clientes.Commands
 
         async Task<ErrorOr<ClienteResponse>> IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>.Handle(ClienteUpdateCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("CreateClienteCommandHandler - validation");
+            _logger.LogInformation("validation");
             //1. validar dados
             UpdateClienteCommandBehavior validator = new UpdateClienteCommandBehavior();
             var validationResult = validator.Validate(request);
@@ -53,10 +54,29 @@ namespace wca.share.application.Features.Clientes.Commands
             }
             //1. localizar cliente
             ClienteByIdQuerie querie = new ClienteByIdQuerie(request.id);
-            
+
             var findResult = await _mediator.Send(querie);
 
             if (findResult.IsError) return findResult;
+
+            var dado = findResult.Value;
+            //3. remover centro de custo que foi excluído!
+            List<CentroCusto> centroCustoRemover = dado.CentroCusto
+                .Where(x => !request.CentroCusto.Where(q => q.Id == x.Id).Any())
+                .Where(x => x.Id != 0)
+                .ToList();
+
+            foreach (var item in centroCustoRemover)
+            {
+                var centro = _reposistory.GetDbSet<CentroCusto>()
+                            .Where(q => q.Id.Equals(item.Id)
+                                     && q.ClienteId.Equals(item.ClienteId))
+                            .FirstOrDefault();
+                if (centro != null)
+                {
+                    _reposistory.GetDbSet<CentroCusto>().Remove(centro);
+                }
+            }
 
             //2. mapear para cliente e adicionar
             Cliente cliente = _mapper.Map<Cliente>(request);
