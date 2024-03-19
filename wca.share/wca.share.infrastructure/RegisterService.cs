@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using wca.share.application.Contracts.Integration.GI;
 using wca.share.application.Contracts.Persistence;
+using wca.share.infrastructure.Integration.GI;
 using wca.share.infrastruture.Context;
 using wca.share.infrastruture.Persistence;
 
@@ -17,7 +19,7 @@ namespace wca.share.infrastructure
             );
 
             services.AddScoped<IRepositoryManager, RepositoryManager>();
-
+            services.AddScoped<IIntegrationGI, IntegrationGI>();
 
         }
     }
