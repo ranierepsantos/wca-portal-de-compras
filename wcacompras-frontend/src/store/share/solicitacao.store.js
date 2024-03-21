@@ -42,6 +42,7 @@ export class Anexo {
         this.id = data? data.id: 0
         this.solicitacaoId = data ?data.solicitacaoId : 0
         this.descricao = data? data.descricao: ''
+        this.tipo = data? data.tipo: null
         this.caminhoArquivo = data? data.caminhoArquivo: ''
     }
 }
@@ -52,14 +53,13 @@ export class Desligamento {
         this.dataDemissao = data && data.dataDemissao? moment(data.dataDemissao).format("YYYY-MM-DD") : null
         this.motivoDemissaoId = data ? data.motivoDemissaoId: null
         this.temContratoExperiencia = data? data.temContratoExperiencia: false
-        this.statusApontamento = data? data.statusApontamento: null
+        this.statusApontamento = data? data.statusApontamento: 1
         this.statusAvisoPrevio = data? data.statusAvisoPrevio: null
-        this.statusFichaEpi = data? data.statusFichaEpi: null
-        this.statusExameDemissional = data? data.statusExameDemissional: null
+        this.statusFichaEpi = data? data.statusFichaEpi: 1
+        this.statusExameDemissional = data? data.statusExameDemissional: 1
         this.dataCredito = data && data.dataCredito ? moment(data.dataCredito).format("YYYY-MM-DD") : null
-        this.statusBeneficio = data? data.statusBeneficio: null
-        this.statusReembolso = data? data.statusReembolso: null
-        
+        this.statusBeneficio = data? data.statusBeneficio: 1
+        this.statusReembolso = data? data.statusReembolso: 1
     }
 }
 
@@ -84,9 +84,9 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
         {text: "Concluído", value: 2}
     ],
     exameAdmissionalStatus : [
-        {text: "Não se aplica", value: 2},
+        {text: "Não se aplica", value: 3},
         {text: "Pendente", value: 1},
-        {text: "Concluído", value: 3}
+        {text: "Concluído", value: 2}
     ],
     avisoPrevioStatus: [
         {text: "Não se aplica", value: 1},

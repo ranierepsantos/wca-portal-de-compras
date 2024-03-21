@@ -158,6 +158,9 @@ namespace wca.share.domain.Entities
         [JsonIgnore]
         public Solicitacao? Solicitacao { get; set; }
 
+        [Column("tipo", TypeName = "varchar(50)")]
+        public string? Tipo { get; set; } = string.Empty;
+
         [Column("descricao", TypeName ="varchar(300)")]
         public string Descricao { get; set; } = string.Empty;
 

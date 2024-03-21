@@ -46,15 +46,17 @@
             </SolicitacaoForm>
             <v-card>
             <v-card-text>
-              <table-file-upload :anexos="solicitacao.anexos" :is-read-only="solicitacao.statusSolicitacaoId == 3"/>
+              <table-file-upload 
+                :anexos="solicitacao.anexos" 
+                :is-read-only="solicitacao.statusSolicitacaoId == 3" 
+                :combo-items="tableUploadItems"
+                @change-status="changeFieldStatus($event)"
+              />
             </v-card-text>
             </v-card>
-            
-
             <Historico
               :eventos="solicitacao.historico"
               style="margin-top: 15px"
-
             />
           </v-form>
         </v-card-text>
@@ -100,6 +102,7 @@ import { inject } from "vue";
 import Historico from "@/components/reembolso/historico.vue";
 import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
 import moment from "moment";
+const tableUploadItems = ref([{text: "Outros"}])
 
 const isBusy = ref({
   form: true,
@@ -118,6 +121,18 @@ onBeforeMount(async () => {
   try {
     await getById(route.query.id);
     comboTipoShow.value = false;
+
+    if (solicitacao.value.solicitacaoTipoId == 1) //desligamento
+    {
+      tableUploadItems.value.push({text: "Apontamento"})
+      let dias = moment(solicitacao.value.desligamento.dataDemissao).diff(solicitacao.value.funcionarioDataAdmissao, "days");
+      if (dias > 90 )
+        tableUploadItems.value.push({text: "Exame demissional"})
+        
+      tableUploadItems.value.push({text: "Ficha EPI"})
+    }
+
+
   } catch (error) {
     console.debug("edit.beforeMount.error", error);
     handleErrors(error);
@@ -159,17 +174,17 @@ async function salvar() {
           data.statusSolicitacaoId = status.id;
       }
 
-      if (data.solicitacaoTipoId == 1) {
+      // if (data.solicitacaoTipoId == 1) {
         
-        if (data.desligamento.dataCredito &&
-            data.desligamento.statusApontamento == 2 &&
-            (data.desligamento.statusExameDemissional == 2 || data.desligamento.statusExameDemissional == 3) && 
-            data.desligamento.statusFichaEpi == 2){
-              let status = useShareSolicitacaoStore().statusSolicitacao.find((x) => x.status.toLowerCase() == "concluído");
-              if (status && data.statusSolicitacaoId != status.id)
-                data.statusSolicitacaoId = status.id;
-            }
-      }
+      //   if (data.desligamento.dataCredito &&
+      //       data.desligamento.statusApontamento == 2 &&
+      //       (data.desligamento.statusExameDemissional == 2 || data.desligamento.statusExameDemissional == 3) && 
+      //       data.desligamento.statusFichaEpi == 2){
+      //         let status = useShareSolicitacaoStore().statusSolicitacao.find((x) => x.status.toLowerCase() == "concluído");
+      //         if (status && data.statusSolicitacaoId != status.id)
+      //           data.statusSolicitacaoId = status.id;
+      //       }
+      // }
       await useShareSolicitacaoStore().update(data);
 
       swal.fire({
@@ -197,12 +212,23 @@ async function getById(id) {
 
     if (solicitacao.value.solicitacaoTipoId == 1 && solicitacao.value.statusSolicitacaoId !== 3) {
       let dias = moment(solicitacao.value.desligamento.dataDemissao).diff(solicitacao.value.funcionarioDataAdmissao, "days");
-      solicitacao.value.desligamento.statusExameDemissional = dias <= 90 ? 2 : solicitacao.value.desligamento.statusExameDemissional
+      solicitacao.value.desligamento.statusExameDemissional = dias <= 90 ? 3 : solicitacao.value.desligamento.statusExameDemissional
     }
 
   } catch (error) {
     console.debug("getById->", error);
     handleErrors(error);
   }
+}
+
+function changeFieldStatus(tipo) {
+
+  if (tipo.toLowerCase() =="ficha epi")
+    solicitacao.value.desligamento.statusFichaEpi = 2
+  else if (tipo.toLowerCase() =="apontamento")
+    solicitacao.value.desligamento.statusApontamento = 2
+  else if (tipo.toLowerCase() =="exame demissional")
+    solicitacao.value.desligamento.statusApontamento = 3
+
 }
 </script>

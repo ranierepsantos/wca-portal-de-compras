@@ -116,7 +116,7 @@
         ></v-text-field>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-show="!createMode">
       <v-col>
           <select-text
           v-model="dataModel.statusBeneficio"

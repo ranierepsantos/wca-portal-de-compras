@@ -34,7 +34,11 @@
               <Mudancabase v-show="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
 
-            <table-file-upload :anexos="solicitacao.anexos" />
+            <table-file-upload 
+              :anexos="solicitacao.anexos" 
+              :combo-items="tableUploadItems"
+              @change-status="changeFieldStatus($event)"
+            />
           </v-form>
         </v-card-text>
       </v-card>
@@ -75,6 +79,7 @@ const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
 const permissao = ref("")
+const tableUploadItems = ref([{text: "Outros"}])
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -82,6 +87,8 @@ onBeforeMount(async () => {
     if (route.path.includes("desligamento")) {
       solicitacao.value.solicitacaoTipoId = 1;
       permissao.value = 'desligamento' 
+
+      tableUploadItems.value.push({text: "Ficha EPI"})
     } else if (route.path.includes("comunicado")) {
       solicitacao.value.solicitacaoTipoId = 2;
       permissao.value = 'comunicado' 
@@ -137,6 +144,17 @@ watch(() => solicitacao.value.funcionarioId, () => {
 
 
 //FUNCTIONS
+
+function changeFieldStatus(tipo) {
+  console.log('changeFieldStatus', tipo)
+  if (tipo.toLowerCase() =="ficha epi")
+    solicitacao.value.desligamento.statusFichaEpi = 2
+  else if (tipo.toLowerCase() =="apontamento")
+    solicitacao.value.desligamento.statusApontamento = 2
+  else if (tipo.toLowerCase() =="exame demissional")
+    solicitacao.value.desligamento.statusApontamento = 3
+}
+
 async function salvar() {
   try {
     isBusy.value.save = true;
