@@ -3,7 +3,12 @@
     <Breadcrumbs
       :title="getPageTitle(solicitacao.solicitacaoTipoId)"
       :show-button="false"
-      :buttons="formButtons"
+      :buttons="solicitacao.statusSolicitacaoId!= 3 ?
+      [
+        { text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.save },
+        { text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.save }
+      ]:
+      []"      
       @salvar-click="salvar()"
       @nofiticar-click="openNotificacao=true"
     />
@@ -74,7 +79,7 @@ import Breadcrumbs from "@/components/breadcrumbs.vue";
 import SolicitacaoForm from "@/components/share/solicitacaoForm.vue";
 import desligamento from "@/components/share/desligamento.vue";
 import { Solicitacao } from "@/store/share/solicitacao.store";
-import { readonly, ref } from "vue";
+import { ref } from "vue";
 import Comunicado from "@/components/share/comunicado.vue";
 import Ferias from "@/components/share/ferias.vue";
 import Mudancabase from "@/components/share/mudancabase.vue";
@@ -84,7 +89,6 @@ import { useAuthStore } from "@/store/auth.store";
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import { watch } from "vue";
 import { useRoute } from "vue-router";
-import api from "@/services/share/shareApi";
 import { onBeforeMount } from "vue";
 import {
   getObservacaoLabelDescricao,
@@ -95,32 +99,24 @@ import router from "@/router";
 import { inject } from "vue";
 import Historico from "@/components/reembolso/historico.vue";
 import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
+import moment from "moment";
 
 const isBusy = ref({
   form: true,
   save: false,
 });
 const solicitacao = ref(new Solicitacao());
-const formButtons = ref([]);
 const comboTipoShow = ref(true);
 const responsavelList = ref([]);
 const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
 const openNotificacao = ref(false)
-const pageTipo = ref({
-    id: 0,
-    tipo: ""
-})
 
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
     await getById(route.query.id);
-    if (solicitacao.value.statusSolicitacaoId!= 3) {
-      formButtons.value.push({ text: "Notificar", icon: "", event: "nofiticar-click" });
-      formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
-    }
     comboTipoShow.value = false;
   } catch (error) {
     console.debug("edit.beforeMount.error", error);
@@ -167,23 +163,16 @@ async function salvar() {
         
         if (data.desligamento.dataCredito &&
             data.desligamento.statusApontamento == 2 &&
-            data.desligamento.statusExameDemissional == 2 && 
+            (data.desligamento.statusExameDemissional == 2 || data.desligamento.statusExameDemissional == 3) && 
             data.desligamento.statusFichaEpi == 2){
               let status = useShareSolicitacaoStore().statusSolicitacao.find((x) => x.status.toLowerCase() == "concluído");
               if (status && data.statusSolicitacaoId != status.id)
                 data.statusSolicitacaoId = status.id;
             }
-            
-
-
       }
-
-
-
-
       await useShareSolicitacaoStore().update(data);
 
-      await swal.fire({
+      swal.fire({
         toast: true,
         icon: "success",
         index: "top-end",
@@ -205,6 +194,12 @@ async function salvar() {
 async function getById(id) {
   try {
     solicitacao.value = await useShareSolicitacaoStore().getById(id);
+
+    if (solicitacao.value.solicitacaoTipoId == 1 && solicitacao.value.statusSolicitacaoId !== 3) {
+      let dias = moment(solicitacao.value.desligamento.dataDemissao).diff(solicitacao.value.funcionarioDataAdmissao, "days");
+      solicitacao.value.desligamento.statusExameDemissional = dias <= 90 ? 2 : solicitacao.value.desligamento.statusExameDemissional
+    }
+
   } catch (error) {
     console.debug("getById->", error);
     handleErrors(error);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace wca.share.application.Contracts.Integration.GI.Models
 {
-    public class VerificarConexao
+    public sealed class VerificarConexao
     {
         public class Request
         {
@@ -27,7 +27,7 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         }
     }
 
-    public class LoginRequest
+    public sealed class LoginRequest
     {
 
         [JsonPropertyName("login")]
@@ -40,7 +40,7 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         public bool EsqueciMinhaSenha { get; set; } = false;
     }
 
-    public class ClienteResponse
+    public sealed class ClienteResponse
     {
         [JsonPropertyName("codigoCliente")]
         public int CodigoCliente { get; set; }
@@ -71,5 +71,20 @@ namespace wca.share.application.Contracts.Integration.GI.Models
 
         [JsonPropertyName("clienteAtivo")]
         public bool ClienteAtivo { get; set; }
+    }
+
+    public sealed class CentroCustoResponse
+    {
+        [JsonPropertyName("codigoCliente")]
+        public int CodigoCliente { get; set; }
+
+        [JsonPropertyName("codigoCentroCusto")]
+        public int CodigoCentroCusto { get; set; }
+
+        [JsonPropertyName("nomeCentroCusto")]
+        public string Nome { get; set; }
+
+        [JsonPropertyName("centroCustoAtivo")]
+        public bool centroCustoAtivo { get; set; }
     }
 }

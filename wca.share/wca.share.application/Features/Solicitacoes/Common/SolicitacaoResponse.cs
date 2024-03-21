@@ -15,6 +15,8 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public int FuncionarioId { get;  set; }
 
         public string FuncionarioNome { get; init; }
+
+        public DateTime FuncionarioDataAdmissao { get; init; }
         public DateTime DataSolicitacao { get;  set; }
         public string Descricao { get;  set; }
         public int StatusSolicitacaoId { get;  set; }

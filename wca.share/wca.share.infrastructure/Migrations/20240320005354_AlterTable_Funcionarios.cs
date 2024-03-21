@@ -52,8 +52,7 @@ namespace wca.share.infrastructure.Migrations
                 name: "centrocusto_id",
                 table: "Funcionarios",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "cep",
@@ -142,7 +141,7 @@ namespace wca.share.infrastructure.Migrations
                 column: "centrocusto_id",
                 principalTable: "CentrosDeCusto",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Funcionarios_Clientes_cliente_id",
@@ -150,7 +149,7 @@ namespace wca.share.infrastructure.Migrations
                 column: "cliente_id",
                 principalTable: "Clientes",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />

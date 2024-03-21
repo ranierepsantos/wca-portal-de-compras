@@ -136,9 +136,15 @@ const menuItems = ref([
   },
   {
     title: "Filiais",
-    value: 8,
+    value: 9,
     route: "/share/filial",
     permissao: "Filial"
+  },
+  {
+    title: "Funcionáros",
+    value: 10,
+    route: "/share/funcionarios",
+    permissao: "livre"
   },
 ]);
 

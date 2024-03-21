@@ -1,18 +1,16 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using wca.share.application.Common;
 using wca.share.application.Contracts.Persistence;
-using wca.share.application.Features.Solicitacoes.Queries;
+using wca.share.application.Features.Funcionarios.Common;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Funcionarios.Queries
 {
-    public record FuncionarioListByClienteQuery (int ClienteId):IRequest<ErrorOr<IList<ListItem>>>;
-    internal class FuncionarioListByClienteQueryHandle : IRequestHandler<FuncionarioListByClienteQuery, ErrorOr<IList<ListItem>>>
+    public record FuncionarioListByClienteQuery (int ClienteId):IRequest<ErrorOr<IList<FuncionarioListItem>>>;
+    internal class FuncionarioListByClienteQueryHandle : IRequestHandler<FuncionarioListByClienteQuery, ErrorOr<IList<FuncionarioListItem>>>
     {
         private readonly IRepositoryManager _repository;
         private readonly ILogger<FuncionarioListByClienteQueryHandle> _logger;
@@ -25,7 +23,7 @@ namespace wca.share.application.Features.Funcionarios.Queries
             _mapper = mapper;
         }
 
-        public async Task<ErrorOr<IList<ListItem>>> Handle(FuncionarioListByClienteQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<IList<FuncionarioListItem>>> Handle(FuncionarioListByClienteQuery request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Funcionario - ListByCliente");
 
@@ -33,10 +31,11 @@ namespace wca.share.application.Features.Funcionarios.Queries
                         .AsQueryable()
                         .AsNoTracking()
                         .Where(q =>  q.ClienteId.Equals(request.ClienteId))
+                        .Include("CentroCusto")
                         .OrderBy(o => o.Nome);
             List<Funcionario> items = await query.ToListAsync();
 
-            return _mapper.Map<List<ListItem>>(items);
+            return _mapper.Map<List<FuncionarioListItem>>(items);
         }
     }
 }

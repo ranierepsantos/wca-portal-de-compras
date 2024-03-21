@@ -5,5 +5,6 @@ namespace wca.share.application.Contracts.Integration.GI
     public interface IIntegrationGI
     {
         Task<IEnumerable<ClienteResponse>> ClienteGetAllAsync();
+        Task<IEnumerable<CentroCustoResponse>> CentroCustoGetAllAsync();
     }
 }

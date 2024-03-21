@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240320175751_AlterTable_Funcionarios_DropColumn_CodigoCliente_CodigoCentroCusto")]
+    partial class AlterTable_Funcionarios_DropColumn_CodigoCliente_CodigoCentroCusto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -470,10 +473,6 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("status_aviso_previo");
 
-                    b.Property<int?>("StatusBeneficio")
-                        .HasColumnType("int")
-                        .HasColumnName("status_beneficio");
-
                     b.Property<int?>("StatusExameDemissional")
                         .HasColumnType("int")
                         .HasColumnName("status_exame_demissional");
@@ -481,10 +480,6 @@ namespace wca.share.infrastructure.Migrations
                     b.Property<int?>("StatusFichaEpi")
                         .HasColumnType("int")
                         .HasColumnName("status_ficha_epi");
-
-                    b.Property<int?>("StatusReembolso")
-                        .HasColumnType("int")
-                        .HasColumnName("status_reembolso");
 
                     b.Property<bool>("TemContratoExperiencia")
                         .HasColumnType("bit")

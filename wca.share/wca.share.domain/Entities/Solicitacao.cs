@@ -90,6 +90,12 @@ namespace wca.share.domain.Entities
 
         [Column("data_credito")]
         public DateTime? DataCredito { get; set; }
+
+        [Column("status_beneficio")]
+        public int? StatusBeneficio { get; set; }
+
+        [Column("status_reembolso")]
+        public int? StatusReembolso { get; set; }
     }
 
     public sealed class SolicitacaoMudancaBase

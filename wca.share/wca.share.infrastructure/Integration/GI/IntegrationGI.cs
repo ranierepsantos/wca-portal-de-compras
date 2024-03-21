@@ -5,7 +5,7 @@ using wca.share.application.Contracts.Integration.GI.Models;
 
 namespace wca.share.infrastructure.Integration.GI
 {
-    public class IntegrationGI: IIntegrationGI
+    public class IntegrationGI : IIntegrationGI
     {
         private readonly IGIRefitService _client;
         private readonly IConfiguration _config;
@@ -44,6 +44,11 @@ namespace wca.share.infrastructure.Integration.GI
         public async Task<IEnumerable<ClienteResponse>> ClienteGetAllAsync()
         {
             return await _client.ClienteGetAll(token.Token);
+        }
+
+        public async Task<IEnumerable<CentroCustoResponse>> CentroCustoGetAllAsync()
+        {
+            return await _client.CentroCustoGetAll(token.Token);
         }
     }
 }

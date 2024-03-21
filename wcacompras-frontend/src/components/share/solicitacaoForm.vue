@@ -39,7 +39,7 @@
         <select-text
           v-model="solicitacao.centroCustoId"
           :combo-items="listCentroCustos"
-          :select-mode="solicitacao.id == 0"
+          :select-mode="false"
           :text-field-value="solicitacao.centroCustoNome"
           label-text="Centro de Custo"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
