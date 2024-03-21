@@ -592,7 +592,20 @@ async function aprovarReprovar(isAprovado, comentario) {
       //Status: 5 - Aguardando conferência
       else if (solicitacao.value.status == 5){
         solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
+        //21.03.2024 - Luciano solicitou para adicionar débito quando cliente aprovar
+        // let transacao = new Transacao(
+        //   `Débito - solicitação ${solicitacao.value.id}`,
+        //   "-",
+        //   solicitacao.value.valorDespesa
+        // );
+        // contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
 
+      }
+      //Status: 6 - Aguardando Aprovação Cliente
+      else if (solicitacao.value.status == 6) {
+        solicitacao.value.status = 7; //7 - Aguardando Faturamento
+
+        //Adicionar o valor da despesa com débito do colaborador
         let transacao = new Transacao(
           `Débito - solicitação ${solicitacao.value.id}`,
           "-",
@@ -600,10 +613,7 @@ async function aprovarReprovar(isAprovado, comentario) {
         );
         contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
 
-      }
-      //Status: 6 - Aguardando Aprovação Cliente
-      else if (solicitacao.value.status == 6) {
-        solicitacao.value.status = 7; //7 - Aguardando Faturamento
+
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
         if (solicitacao.value.tipoSolicitacao == 1)
           solicitacao.value.status = 2; //2 - Aguardando Depósito

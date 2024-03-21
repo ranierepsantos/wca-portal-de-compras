@@ -147,7 +147,7 @@ onMounted(async () => {
   clearInterval(checkNotificacoes.value)
   notificacoes.value = []
   notificacoes.value = await authStore.getNotificacoesReembolso();
-  startCheckNotificacoes();
+  //startCheckNotificacoes();
 });
 
 onUnmounted(() => {  clearInterval(checkNotificacoes.value) }) 

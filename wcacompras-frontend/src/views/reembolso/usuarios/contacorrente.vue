@@ -28,7 +28,7 @@
             <tbody>
                 <template v-for="(item,index) in conta.transacoes" :key="index">
                     <tr :class="item.operador == '+' ?'text-success':'text-error'">
-                        <td class="text-center">{{ moment(item.data).format("DD/MM/YYYY") }}</td>
+                        <td class="text-center">{{ moment(item.dataHora).format("DD/MM/YYYY") }}</td>
                         <td class="text-left">{{ item.descricao }}</td>
                         <td class="text-right">{{ item.operador == "+" ? formatToCurrencyBRL(item.valor): "" }}</td>
                         <td class="text-right">{{ item.operador == "-" ? formatToCurrencyBRL(item.valor): "" }}</td>
