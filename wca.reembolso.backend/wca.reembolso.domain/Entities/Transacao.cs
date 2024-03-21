@@ -27,7 +27,9 @@ namespace wca.reembolso.domain.Entities
         [Column("valor", TypeName = "money")]
         public decimal Valor { get; set; } = decimal.Zero;
 
-        [NotMapped]
+        [Column("ContaCorrenteUsuarioId")]
+        public int ContaCorrenteUsuarioId { get; set; }
+        
         [JsonIgnore]
         public ContaCorrente? ContaCorrente { get; set; }
     }

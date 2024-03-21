@@ -95,9 +95,9 @@ export const useAuthStore = defineStore("auth", {
       if (permissao == "filial") {
         return perm != undefined && this.sistema.isMatriz;
       }
-      if (permissao == "perfil") {
-        return perm != undefined && this.sistema.isMatriz;
-      }
+      // if (permissao == "perfil") {
+      //   return perm != undefined && this.sistema.isMatriz;
+      // }
       return perm != undefined;
     },
 
