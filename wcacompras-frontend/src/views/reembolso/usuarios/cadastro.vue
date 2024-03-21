@@ -404,6 +404,14 @@ async function salvar() {
     if (valid) {
       isSaving.value = true;
       let data = {...usuario.value};
+      console.debug('salvar.data', data);
+
+      if (isColaborador.value) {
+        let _centro = centrosDeCusto.value.find(x => x.centroCustoId == data.usuarioReembolsoComplemento.centroCustoId);
+        data.centroCusto = []
+        if (_centro)
+          data.centroCusto.push({value: _centro.id, text: _centro.nome})
+      }
       if (data.id == 0) {
         await usuarioStore.add(data);
       } else {
