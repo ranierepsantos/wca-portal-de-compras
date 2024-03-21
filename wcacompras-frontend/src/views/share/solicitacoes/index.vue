@@ -20,7 +20,7 @@
         ></v-select>
       </v-col>
       <v-col>
-        <v-select
+        <v-autocomplete
           label="Clientes"
           v-model="filter.clienteId"
           :items="clientes"
@@ -30,10 +30,10 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
-        ></v-select>
+        ></v-autocomplete>
       </v-col>
       <v-col>
-        <v-select
+        <v-autocomplete
           label="Responsável"
           v-model="filter.responsavelId"
           :items="usuarios"
@@ -43,7 +43,7 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
-        ></v-select>
+        ></v-autocomplete>
       </v-col>
     </v-row>
     <v-row v-show="!isLoading.form">
@@ -291,17 +291,10 @@ onBeforeMount(async () => {
     }
 
     await getFiliaisToList();
-    let filialUsuario = (
-      await useShareUsuarioStore().getFiliais(authStore.user.id)
-    )[0];
-    isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
-    authStore.user.filial = filialUsuario.value;
+    isMatriz.value = authStore.sistema.isMatriz;
+    authStore.user.filial = authStore.sistema.filial.value;
     await clearFilters();
-    console.log("hasPermissao." + pageTipo.value.tipo.toLowerCase() + '-criar',authStore.hasPermissao(pageTipo.value.tipo.toLowerCase() + '-criar'))
-    if (authStore.hasPermissao(pageTipo.value.tipo.toLowerCase() + '-criar')){
-      //formButtons.value.push({ text: "Novo", icon: "", event: "novoClick" });
-    }
-
+    
   } catch (error) {
   } finally {
     isLoading.value.form = false;
@@ -334,7 +327,6 @@ async function clearFilters() {
 }
 
 function toPage(id = null) {
-    console.log("toPage")
     if (id && id > 0)
         router.push({ name: `share${pageTipo.value.tipo}Edit`, query: { id: id } });
     else

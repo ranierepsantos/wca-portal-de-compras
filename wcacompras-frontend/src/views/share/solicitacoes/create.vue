@@ -3,7 +3,7 @@
     <Breadcrumbs
       :title="getPageTitle(solicitacao.solicitacaoTipoId)"
       :show-button="false"
-      :buttons="formButtons"
+      :buttons="[{ text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.save }]"
       @salvar-click="salvar()"
     />
     <v-progress-linear
@@ -58,9 +58,9 @@ import { useAuthStore } from "@/store/auth.store";
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import { watch } from "vue";
 import { useRoute } from "vue-router";
-import api from "@/services/share/shareApi";
 import { getObservacaoLabelDescricao, getPageTitle } from "@/helpers/share/data";
 import router from "@/router";
+import {useShareFuncionarioStore} from "@/store/share/funcionario.store"
 
 const isBusy = ref({
   form: true,
@@ -68,7 +68,6 @@ const isBusy = ref({
 });
 const solicitacao = ref(new Solicitacao());
 const clienteList = ref([]);
-const formButtons = ref([]);
 const comboTipoShow = ref(true);
 const funcionarioList = ref([]);
 const centrosCustoList = ref([]);
@@ -97,7 +96,7 @@ onBeforeMount(async () => {
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
 
     clienteList.value = await useShareClienteStore().toComboList(0, useAuthStore().user.id);
-    formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+    
   } catch (error) {
     console.debug("create.beforeMount.error", error);
     handleErrors(error);
@@ -113,11 +112,7 @@ watch(
       funcionarioList.value = [];
       centrosCustoList.value = [];
       if (clienteId) {
-        funcionarioList.value = (
-          await api.get(
-            `/Funcionario/ListByClienteToCombo?ClienteId=${clienteId}`
-          )
-        ).data;
+        funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId)
 
         //Trazer centros de custo
         centrosCustoList.value = await useShareClienteStore().ListCentrosDeCusto([clienteId])
@@ -129,6 +124,17 @@ watch(
     }
   }
 );
+
+watch(() => solicitacao.value.funcionarioId, () => {
+  
+  let oFunc = funcionarioList.value.find(q => q.value == solicitacao.value.funcionarioId)
+  if (oFunc) {
+    solicitacao.value.centroCustoNome = oFunc.centroCustoNome
+    solicitacao.value.centroCustoId = oFunc.centroCustoId
+  }
+});
+
+
 
 //FUNCTIONS
 async function salvar() {

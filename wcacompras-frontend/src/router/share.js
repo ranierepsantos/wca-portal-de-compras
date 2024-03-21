@@ -33,6 +33,20 @@ export const share = {
         component: () => import(/* webpackChunkName: "share" */ '../views/filiais'),
       },
       {
+        path: 'funcionarios',
+        name: 'shareFuncionarios',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/funcionarios'),
+      },
+      {
+        path: 'funcionario',
+        name: 'shareFuncionarioCadastro',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/funcionarios/cadastro'),
+      },
+      {
         path: 'perfil',
         name: 'sharePerfil',
         beforeEnter: protectRoute,

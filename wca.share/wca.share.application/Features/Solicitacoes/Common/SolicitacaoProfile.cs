@@ -12,6 +12,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForSourceMember(src =>src.StatusSolicitacao, opt => opt.DoNotValidate())
                 .ForMember(dest => dest.ClienteNome, opt => opt.MapFrom(src => src.Cliente.Nome))
                 .ForMember(dest => dest.FuncionarioNome, opt => opt.MapFrom(src => src.Funcionario.Nome))
+                .ForMember(dest => dest.FuncionarioDataAdmissao, opt => opt.MapFrom(src => src.Funcionario.DataAdmissao))
                 .ForMember(dest => dest.CentroCustoNome, opt => opt.MapFrom(src => src.CentroCusto.Nome));
             CreateMap<SolicitacaoCreateCommand, Solicitacao>();
             CreateMap<SolicitacaoUpdateCommand, Solicitacao>()

@@ -12,7 +12,7 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    [Migration("20240318234832_AlterTable_Funcionarios")]
+    [Migration("20240320005354_AlterTable_Funcionarios")]
     partial class AlterTable_Funcionarios
     {
         /// <inheritdoc />

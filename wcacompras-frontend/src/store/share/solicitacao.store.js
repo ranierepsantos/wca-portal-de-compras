@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import moment from "moment/moment";
 import api from "@/services/share/shareApi"
-import { TipoSolicitacao } from "@/helpers/share/data";
 
 const rotas = {
     Create: "Solicitacao",
@@ -24,6 +23,7 @@ export class Solicitacao {
         this.clienteNome = data ? data.clienteNome: null
         this.funcionarioId = data ? data.funcionarioId: null
         this.funcionarioNome = data ? data.funcionarioNome: null
+        this.funcionarioDataAdmissao = data && data.funcionarioDataAdmissao ?  moment(data.funcionarioDataAdmissao).format("YYYY-MM-DD"): null
         this.dataSolicitacao = data ?  moment(data.dataSolicitacao).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
         this.descricao = data? data.descricao: null
         this.statusSolicitacaoId = data? data.statusSolicitacaoId: null
@@ -57,6 +57,8 @@ export class Desligamento {
         this.statusFichaEpi = data? data.statusFichaEpi: null
         this.statusExameDemissional = data? data.statusExameDemissional: null
         this.dataCredito = data && data.dataCredito ? moment(data.dataCredito).format("YYYY-MM-DD") : null
+        this.statusBeneficio = data? data.statusBeneficio: null
+        this.statusReembolso = data? data.statusReembolso: null
         
     }
 }
@@ -80,6 +82,11 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
     fieldStatus : [
         {text: "Pendente", value: 1},
         {text: "Concluído", value: 2}
+    ],
+    exameAdmissionalStatus : [
+        {text: "Não se aplica", value: 2},
+        {text: "Pendente", value: 1},
+        {text: "Concluído", value: 3}
     ],
     avisoPrevioStatus: [
         {text: "Não se aplica", value: 1},

@@ -35,6 +35,8 @@ namespace wca.share.application.Features.Clientes.Queries
             if (!string.IsNullOrEmpty(request.Termo))
                 query = query.Where(q => q.Nome.Contains(request.Termo));
 
+            query = query.OrderBy(o => o.Nome).AsQueryable();
+
             var pagination = Pagination<ClienteResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 
             return await Task.FromResult(pagination) ;
