@@ -51,9 +51,9 @@
         <v-select
           label="Status"
           v-model="filter.status"
-          :items="solicitacaoStore.statusSolicitacao"
+          :items="solicitacaoStore.statusSolicitacao.sort(compararValor('statusIntermediario'))"
           density="compact"
-          item-title="status"
+          item-title="statusIntermediario"
           item-value="id"
           variant="outlined"
           color="primary"
@@ -221,6 +221,7 @@ import { useShareClienteStore } from "@/store/share/cliente.store";
 import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import { getPageTitle } from "@/helpers/share/data";
 import { useRoute } from "vue-router";
+import { compararValor } from "@/helpers/functions";
 //DATA
 const route = useRoute();
 const authStore = useAuthStore();
@@ -328,7 +329,7 @@ async function clearFilters() {
 
 function toPage(id = null) {
     if (id && id > 0)
-        router.push({ name: `share${pageTipo.value.tipo}Edit`, query: { id: id } });
+        router.push({ name: `share${pageTipo.value.tipo}Cadastro`, query: { id: id } });
     else
         router.push({ name: `share${pageTipo.value.tipo}Create`});
 }

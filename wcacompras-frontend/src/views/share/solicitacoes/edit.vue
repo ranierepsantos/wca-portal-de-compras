@@ -3,13 +3,9 @@
     <Breadcrumbs
       :title="getPageTitle(solicitacao.solicitacaoTipoId)"
       :show-button="false"
-      :buttons="solicitacao.statusSolicitacaoId!= 3 ?
-      [
-        { text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.save },
-        { text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.save }
-      ]:
-      []"      
+      :buttons="getButtons()"      
       @salvar-click="salvar()"
+      @aprovar-click ="openAprovacaoForm=true"
       @nofiticar-click="openNotificacao=true"
     />
     <v-progress-linear
@@ -32,13 +28,13 @@
               :list-centro-custos="[]"
               :combo-tipo-show="comboTipoShow"
               :list-responsavel="responsavelList"
-              :is-read-only="solicitacao.statusSolicitacaoId == 3"
+              :is-read-only="modeReadOnly"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
                 :create-mode="false"
                 v-show="solicitacao.solicitacaoTipoId == 1"
-                :is-read-only="solicitacao.statusSolicitacaoId == 3"
+                :is-read-only="modeReadOnly"
               />
               <Comunicado v-show="solicitacao.solicitacaoTipoId == 2" />
               <Ferias v-show="solicitacao.solicitacaoTipoId == 3" />
@@ -48,7 +44,7 @@
             <v-card-text>
               <table-file-upload 
                 :anexos="solicitacao.anexos" 
-                :is-read-only="solicitacao.statusSolicitacaoId == 3" 
+                :is-read-only="modeReadOnly" 
                 :combo-items="tableUploadItems"
                 @change-status="changeFieldStatus($event)"
               />
@@ -73,6 +69,22 @@
     >
       <NotificacaoEnvio :usuario-list="responsavelList" @closeForm="openNotificacao=false"></NotificacaoEnvio>
     </v-dialog>
+    <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
+    <v-dialog
+        v-model="openAprovacaoForm"
+        max-width="700"
+        :absolute="false"
+        persistent
+      >
+        <aprovar-rejeitar-form
+          :title="getPageTitle(solicitacao.solicitacaoTipoId) + ' - Aprovar / Reprovar'"
+          @aprovar-click="aprovarReprovar(true, $event)"
+          @reprovar-click="aprovarReprovar(false, $event)"
+          @close-form="openAprovacaoForm = false"
+          :is-running-event="isRunningEvent"
+          reprovar-title="Reprovar"
+        />
+      </v-dialog>
   </div>
 </template>
 
@@ -102,8 +114,11 @@ import { inject } from "vue";
 import Historico from "@/components/reembolso/historico.vue";
 import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
 import moment from "moment";
-const tableUploadItems = ref([{text: "Outros"}])
+import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
+import { computed } from "vue";
 
+
+const tableUploadItems = ref([{text: "Outros"}])
 const isBusy = ref({
   form: true,
   save: false,
@@ -115,26 +130,34 @@ const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
 const openNotificacao = ref(false)
-
+const openAprovacaoForm = ref(false)
+const permissao = ref("")
+const isRunningEvent = ref(false)
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
+
+    
     await getById(route.query.id);
     comboTipoShow.value = false;
-
-    if (solicitacao.value.solicitacaoTipoId == 1) //desligamento
-    {
+    if (solicitacao.value.solicitacaoTipoId == 1) {
+      permissao.value = 'desligamento' 
       tableUploadItems.value.push({text: "Apontamento"})
       let dias = moment(solicitacao.value.desligamento.dataDemissao).diff(solicitacao.value.funcionarioDataAdmissao, "days");
       if (dias > 90 )
         tableUploadItems.value.push({text: "Exame demissional"})
         
       tableUploadItems.value.push({text: "Ficha EPI"})
+    } else if (solicitacao.value.solicitacaoTipoId == 2) {
+      permissao.value = 'comunicado' 
+    } else if (solicitacao.value.solicitacaoTipoId == 3) {
+      permissao.value = 'ferias' 
+    } else if (solicitacao.value.solicitacaoTipoId == 4) {
+      permissao.value = 'mudancabase' 
     }
 
-
   } catch (error) {
-    console.debug("edit.beforeMount.error", error);
+    console.error("edit.beforeMount.error", error);
     handleErrors(error);
   } finally {
     isBusy.value.form = false;
@@ -155,7 +178,79 @@ watch(
   }
 );
 
+const modeReadOnly = computed(() => {
+  console.debug('concluído: ', solicitacao.value.status.status.toLowerCase())
+  console.debug('autorizar: ', solicitacao.value.status.autorizar)
+  console.debug("readOnly:", solicitacao.value.status.status.toLowerCase() == 'concluído' || solicitacao.value.status.autorizar)
+  
+  return solicitacao.value.status.status.toLowerCase() == 'concluído' || solicitacao.value.status.autorizar
+})
+
+
 //FUNCTIONS
+async function aprovarReprovar(isAprovado, comentario) {
+  debugger
+  isRunningEvent.value = true;
+  try
+  {
+    let status = null;
+    let texto  = null;
+    let permissaoNotificar = permissao.value
+    if (!isAprovado) {
+      solicitacao.value.statusSolicitacaoId = 5; //reprovado
+      permissaoNotificar += '-criar'
+    }
+    else 
+    {
+      //checar através do status atual, qual é o proximo status
+      if (solicitacao.value.status && solicitacao.value.status.proximoStatusId)
+        solicitacao.value.statusSolicitacaoId = solicitacao.value.status.proximoStatusId
+
+      permissaoNotificar += '-executar'
+    }
+    status = useShareSolicitacaoStore().getStatus(solicitacao.value.statusSolicitacaoId);
+    
+    texto = `Solicitação  <b>${ isAprovado ? "APROVADA" : "REPROVADA"}</b> por ${useAuthStore().user.nome}!`
+    if (isAprovado)
+      texto += `<br/>Status alterado para <b>${status.statusIntermediario}</b>.`
+
+    if (comentario && comentario.trim() != ""){
+      texto += `<br/>Comentário: ${comentario}`
+    }
+    
+    let notificarUsuario = await useShareSolicitacaoStore().retornaUsuariosParaNotificar(status, solicitacao.value.clienteId, permissaoNotificar);
+    
+    let solicitacaoStatus = {
+      solicitacaoId: solicitacao.value.id,
+      evento: texto,
+      status: status,
+      notificar: notificarUsuario
+    };
+
+    await useShareSolicitacaoStore().changeStatus(solicitacaoStatus);
+
+    openAprovacaoForm.value = false;
+
+    let mensagem = (isAprovado ? "Aprovação" : "Reprovação") + " realizada com sucesso!";
+    
+    swal.fire({
+      toast: true,
+      icon: "success",
+      index: "top-end",
+      title: "Sucesso!",
+      html: mensagem,
+      showConfirmButton: false,
+      timer: 4000,
+    });
+
+    router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
+  } catch (error) {
+    console.error("aprovarReprovar.error:", error);
+    handleErrors(error);
+  } finally {
+    isRunningEvent.value = false;
+  }
+}
 async function salvar() {
   try {
     isBusy.value.save = true;
@@ -174,17 +269,6 @@ async function salvar() {
           data.statusSolicitacaoId = status.id;
       }
 
-      // if (data.solicitacaoTipoId == 1) {
-        
-      //   if (data.desligamento.dataCredito &&
-      //       data.desligamento.statusApontamento == 2 &&
-      //       (data.desligamento.statusExameDemissional == 2 || data.desligamento.statusExameDemissional == 3) && 
-      //       data.desligamento.statusFichaEpi == 2){
-      //         let status = useShareSolicitacaoStore().statusSolicitacao.find((x) => x.status.toLowerCase() == "concluído");
-      //         if (status && data.statusSolicitacaoId != status.id)
-      //           data.statusSolicitacaoId = status.id;
-      //       }
-      // }
       await useShareSolicitacaoStore().update(data);
 
       swal.fire({
@@ -197,9 +281,10 @@ async function salvar() {
         timer: 2000,
       });
 
-      router.push({ name: "shareDesligamento" });
+      router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
     }
   } catch (error) {
+    console.error("salvar.error:", error);
     handleErrors(error);
   } finally {
     isBusy.value.save = false;
@@ -208,15 +293,16 @@ async function salvar() {
 
 async function getById(id) {
   try {
-    solicitacao.value = await useShareSolicitacaoStore().getById(id);
-
-    if (solicitacao.value.solicitacaoTipoId == 1 && solicitacao.value.statusSolicitacaoId !== 3) {
-      let dias = moment(solicitacao.value.desligamento.dataDemissao).diff(solicitacao.value.funcionarioDataAdmissao, "days");
-      solicitacao.value.desligamento.statusExameDemissional = dias <= 90 ? 3 : solicitacao.value.desligamento.statusExameDemissional
+    let data = await useShareSolicitacaoStore().getById(id);
+    data.status = useShareSolicitacaoStore().getStatus(data.statusSolicitacaoId);
+    if (data.solicitacaoTipoId == 1 && data.statusSolicitacaoId !== 3) {
+      let dias = moment(data.desligamento.dataDemissao).diff(data.funcionarioDataAdmissao, "days");
+      data.desligamento.statusExameDemissional = dias <= 90 ? 3 : data.desligamento.statusExameDemissional
     }
 
+    solicitacao.value = data;
   } catch (error) {
-    console.debug("getById->", error);
+    console.error("getById.error:", error);
     handleErrors(error);
   }
 }
@@ -230,5 +316,21 @@ function changeFieldStatus(tipo) {
   else if (tipo.toLowerCase() =="exame demissional")
     solicitacao.value.desligamento.statusApontamento = 3
 
+}
+
+function getButtons() {
+  debugger
+  if (solicitacao.value.status.status.toLowerCase() == 'concluído')
+      return []
+  else if (solicitacao.value.status.autorizar) {
+    if (useAuthStore().hasPermissao(permissao.value + '-aprovar'))
+      return [{ text: 'Aprovar/Reprovar', icon: '', event: 'aprovar-click', disabled: isBusy.save }]
+    else
+      return []
+  }else if (useAuthStore().hasPermissao(permissao.value + '-criar|'+ permissao.value + '-executar'))
+      return [
+        { text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.save },
+        { text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.save }
+      ]
 }
 </script>

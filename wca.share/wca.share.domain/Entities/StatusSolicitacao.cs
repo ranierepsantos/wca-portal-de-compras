@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using wca.share.domain.Common.Enum;
 
@@ -27,6 +28,10 @@ namespace wca.share.domain.Entities
 
         [Column("template_notificacao")]
         public string? TemplateNotificacao { get; set; } = string.Empty;
+        
+        [Column("proximo_status_id")]
+        [Comment("Utilizado quando campo autorizar = 1, após aprovação mudará para o status indicado aqui")]
+        public int? ProximoStatusId { get; set; }
     }
 
 

@@ -164,6 +164,8 @@ async function salvar() {
       let data = { ...solicitacao.value };
       data.notificarUsuarioIds = [];
       data.usuarioCriador = useAuthStore().user.nome;
+      data.regra = permissao.value
+
 
       await useShareSolicitacaoStore().add(data);
       await swal.fire({
@@ -176,7 +178,7 @@ async function salvar() {
         timer: 2000,
       });
 
-      router.push({name: "shareDesligamento"})
+      router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
     }
   } catch (error) {
     console.debug(error);

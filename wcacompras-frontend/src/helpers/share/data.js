@@ -19,7 +19,7 @@ export function getPageTitle(solicitacaoTipoId) {
     case 2:
       return "Comunicado";
     case 3:
-      return "Férais";
+      return "Férias";
     case 4:
       return "Mudança de Base";
     default:

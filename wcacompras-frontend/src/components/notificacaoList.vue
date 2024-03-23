@@ -7,7 +7,7 @@
         <template v-slot:prepend>
           <v-icon :icon="nota.lido? 'mdi-checkbox-marked-circle-outline':'mdi-circle-outline'" size="small" @click="marcarLido(nota)"></v-icon>
         </template>
-        <router-link :to="{name: 'reembolso'+ nota.entidade +'Cadastro', query: {id: nota.entidadeId}}" style="text-decoration: none;">
+        <router-link :to="{name: useAuthStore().sistema.nome + nota.entidade +'Cadastro', query: {id: nota.entidadeId}}" style="text-decoration: none;">
           <v-list-item-title>
             {{nota.nota}}
           </v-list-item-title>
@@ -30,6 +30,6 @@ import { useAuthStore } from "@/store/auth.store";
 
   function marcarLido(nota) {
     nota.lido = true
-    useAuthStore().marcarNotificaoReembolso(nota.id)
+    useAuthStore().marcarNotificao(nota.id)
   }
 </script>

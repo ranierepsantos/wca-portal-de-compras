@@ -26,6 +26,7 @@ namespace wca.share.infrastruture.Context
         public DbSet<StatusSolicitacao> StatusSolicitacao { get; set; }
         public DbSet<SolicitacaoArquivo> SolicitacaoArquivos { get; set; }
         public DbSet<Filial> Filiais { get; set; }
+        public DbSet<Configuracao> Configuracoes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

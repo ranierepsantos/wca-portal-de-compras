@@ -1,22 +1,14 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Office.CustomUI;
-using DocumentFormat.OpenXml.Vml.Office;
 using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.share.application.Common;
 using wca.share.application.Contracts.Persistence;
+using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
 using wca.share.application.Features.Solicitacoes.Behaviors;
 using wca.share.application.Features.Solicitacoes.Common;
-using wca.share.domain.Common.Interfaces;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Solicitacoes.Commands
@@ -35,6 +27,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         SolicitacaoDesligamento? Desligamento,
         SolicitacaoMudancaBase? MudancaBase,
         List<SolicitacaoArquivo>? Anexos,
+        StatusSolicitacao? Status,
         int[]? NotificarUsuarioIds
     ) : IRequest<ErrorOr<SolicitacaoResponse>>;
     internal class SolicitacaoUpdateCommandHandle : IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>
@@ -43,6 +36,29 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly ILogger<SolicitacaoUpdateCommandHandle> _logger;
+
+
+        private string GetDescricaoTipoSolicitacao(int Tipo)
+        {
+            return Tipo switch
+            {
+                (int)EnumTipoSolicitacao.Comunicado => "Comunicado",
+                (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
+                (int)EnumTipoSolicitacao.Ferias => "Férias",
+                (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
+            };
+        }
+
+        private string GetEntidadeTipoSolicitacao(int Tipo)
+        {
+            return Tipo switch
+            {
+                (int)EnumTipoSolicitacao.Comunicado => EnumTipoSolicitacao.Comunicado.ToString(),
+                (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
+                (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
+                (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
+            };
+        }
 
         public SolicitacaoUpdateCommandHandle(IRepositoryManager repository, IMapper mapper, IMediator mediator, ILogger<SolicitacaoUpdateCommandHandle> logger)
         {
@@ -142,8 +158,18 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             var querie = new SolicitacaoHistorioCreateCommand(dado.Id, $"Solicitação alterada por {request.UsuarioAtualizador}!");
             await _mediator.Send(querie, cancellationToken);
 
+            //notificar responsáveis
+            for (var ii = 0; ii < request.NotificarUsuarioIds?.Length; ii++)
+            {
+                if (request.Status?.TemplateNotificacao is not null)
+                {
+                    string mensagem = request.Status.TemplateNotificacao.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao(dado.SolicitacaoTipoId)).Replace("{id}", dado.Id.ToString());
 
+                    var notificacao = new NotificacaoCreateCommand(request.NotificarUsuarioIds[ii], mensagem, GetEntidadeTipoSolicitacao(dado.SolicitacaoTipoId), dado.Id);
 
+                    await _mediator.Send(notificacao, cancellationToken);
+                }
+            }
 
             // mapear para SolicitacaoResponse e retornar
             return _mapper.Map<SolicitacaoResponse>(dado);
