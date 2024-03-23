@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Conta.Common;
@@ -42,16 +43,21 @@ namespace wca.reembolso.application.Features.Conta.Commands
                 return errors;
             }
 
-            var findResult = await _mediator.Send(new ContaCorrenteByUsuarioQuery(request.UsuarioId), cancellationToken);
-            ContaCorrente conta = new();
-            if (findResult.IsError)
+
+            var query = _repository.ContaCorrenteRepository.ToQuery();
+            query = query.Where(q => q.UsuarioId.Equals(request.UsuarioId));
+            query = query.Include(q => q.Transacoes);
+
+            ContaCorrente? conta = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            bool hasConta = false;
+            if (conta is null)
                 conta = _mapper.Map<ContaCorrente>(request);
             else
-                conta = _mapper.Map<ContaCorrente>(findResult.Value);
+                hasConta = true;
 
             foreach (var transacao in request.Transacoes)
             {
-                if (!findResult.IsError)
+                if (hasConta)
                 {
                     transacao.ContaCorrenteUsuarioId = conta.UsuarioId;
                     _repository.GetDbSet<Transacao>().Add(transacao);
@@ -63,10 +69,11 @@ namespace wca.reembolso.application.Features.Conta.Commands
                     conta.Saldo -= transacao.Valor;
             }
 
-            if (findResult.IsError)
-                _repository.ContaCorrenteRepository.Create(conta);
-            else
+            if (hasConta)
                 _repository.GetDbSet<ContaCorrente>().Entry(conta).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            else
+                _repository.ContaCorrenteRepository.Create(conta);
+
 
             await _repository.SaveAsync();   
                 
