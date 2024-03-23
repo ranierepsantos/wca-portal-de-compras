@@ -7,6 +7,7 @@
       @salvar-click="salvar()"
       @aprovar-click ="openAprovacaoForm=true"
       @nofiticar-click="openNotificacao=true"
+      @finalizar-click="FinalizarSolicitacao()"
     />
     <v-progress-linear
       color="primary"
@@ -179,17 +180,12 @@ watch(
 );
 
 const modeReadOnly = computed(() => {
-  console.debug('concluído: ', solicitacao.value.status.status.toLowerCase())
-  console.debug('autorizar: ', solicitacao.value.status.autorizar)
-  console.debug("readOnly:", solicitacao.value.status.status.toLowerCase() == 'concluído' || solicitacao.value.status.autorizar)
-  
   return solicitacao.value.status.status.toLowerCase() == 'concluído' || solicitacao.value.status.autorizar
 })
 
 
 //FUNCTIONS
 async function aprovarReprovar(isAprovado, comentario) {
-  debugger
   isRunningEvent.value = true;
   try
   {
@@ -218,17 +214,8 @@ async function aprovarReprovar(isAprovado, comentario) {
       texto += `<br/>Comentário: ${comentario}`
     }
     
-    let notificarUsuario = await useShareSolicitacaoStore().retornaUsuariosParaNotificar(status, solicitacao.value.clienteId, permissaoNotificar);
+    await AlterarStatus(solicitacao.value, status, texto, permissaoNotificar);
     
-    let solicitacaoStatus = {
-      solicitacaoId: solicitacao.value.id,
-      evento: texto,
-      status: status,
-      notificar: notificarUsuario
-    };
-
-    await useShareSolicitacaoStore().changeStatus(solicitacaoStatus);
-
     openAprovacaoForm.value = false;
 
     let mensagem = (isAprovado ? "Aprovação" : "Reprovação") + " realizada com sucesso!";
@@ -319,18 +306,69 @@ function changeFieldStatus(tipo) {
 }
 
 function getButtons() {
-  debugger
   if (solicitacao.value.status.status.toLowerCase() == 'concluído')
       return []
-  else if (solicitacao.value.status.autorizar) {
+  else if (solicitacao.value.status.autorizar) 
+  {
     if (useAuthStore().hasPermissao(permissao.value + '-aprovar'))
-      return [{ text: 'Aprovar/Reprovar', icon: '', event: 'aprovar-click', disabled: isBusy.save }]
+      return [{ text: 'Aprovar/Reprovar', icon: '', event: 'aprovar-click', disabled: isBusy.value.save }]
     else
       return []
-  }else if (useAuthStore().hasPermissao(permissao.value + '-criar|'+ permissao.value + '-executar'))
-      return [
-        { text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.save },
-        { text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.save }
-      ]
+  } else if (useAuthStore().hasPermissao(permissao.value + '-executar') || useAuthStore().hasPermissao(permissao.value + '-finalizar')) 
+  {
+      let buttons = [{ text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.value.save }]
+      if (useAuthStore().hasPermissao(permissao.value + '-finalizar')){
+        buttons.push({ text: 'Finalizar', icon: '', event: 'finalizar-click',disabled: isBusy.value.save })
+      }
+      buttons.push({ text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.value.save })
+      return buttons;
+  }
+
+}
+
+async function AlterarStatus(solicitacao, status, evento, notificarPermissao) {
+  let notificarUsuario = []
+    if (status.notifica == 1) //verificar se precisa notificar
+      notificarUsuario = await useShareSolicitacaoStore().retornaUsuariosParaNotificar(status, solicitacao.clienteId, notificarPermissao)
+    
+    let solicitacaoStatus = {
+      solicitacaoId: solicitacao.id,
+      evento: evento,
+      status: status,
+      notificar: notificarUsuario
+    };
+    
+    await useShareSolicitacaoStore().changeStatus(solicitacaoStatus);
+}
+
+async function FinalizarSolicitacao() {
+
+  let options = {
+    title: "Confirmação",
+    html: "Confirma a finalização da " + getPageTitle(solicitacao.value.solicitacaoTipoId)  + "?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sim",
+    cancelButtonText: "Não",
+  };
+
+  let response = await swal.fire(options);
+  if (response.isConfirmed) {
+    let texto = `Solicitação  <b>FINALIZADA</b> por ${useAuthStore().user.nome}!`
+    let status = useShareSolicitacaoStore().getStatus(3)
+    await AlterarStatus(solicitacao.value, status, texto, "")
+
+    await swal.fire({
+        toast: true,
+        icon: "success",
+        index: "top-end",
+        title: "Sucesso!",
+        text: "Solicitação finalizada com sucesso!",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
+  }
+
 }
 </script>
