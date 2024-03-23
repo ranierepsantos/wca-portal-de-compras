@@ -13,7 +13,8 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.ClienteNome, opt => opt.MapFrom(src => src.Cliente.Nome))
                 .ForMember(dest => dest.FuncionarioNome, opt => opt.MapFrom(src => src.Funcionario.Nome))
                 .ForMember(dest => dest.FuncionarioDataAdmissao, opt => opt.MapFrom(src => src.Funcionario.DataAdmissao))
-                .ForMember(dest => dest.CentroCustoNome, opt => opt.MapFrom(src => src.CentroCusto.Nome));
+                .ForMember(dest => dest.CentroCustoNome, opt => opt.MapFrom(src => src.CentroCusto.Nome))
+                .ReverseMap();
             CreateMap<SolicitacaoCreateCommand, Solicitacao>();
             CreateMap<SolicitacaoUpdateCommand, Solicitacao>()
                 .ForMember(dest => dest.Anexos, src => src.Ignore());

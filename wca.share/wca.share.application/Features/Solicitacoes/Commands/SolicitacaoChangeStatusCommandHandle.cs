@@ -2,14 +2,11 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
+using wca.share.application.Features.Solicitacoes.Common;
 using wca.share.application.Features.Solicitacoes.Queries;
 using wca.share.domain.Entities;
 
@@ -39,7 +36,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
 
         public async Task<ErrorOr<bool>> Handle(SolicitacaoChangeStatusCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Solicitação - alteração de status");
+            _logger.LogInformation($"Solicitação - alteração de status, request {JsonSerializer.Serialize(request)}");
 
             var querie = new SolicitacaoByIdQuerie(request.SolicitacaoId);
 
@@ -52,7 +49,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
 
             dado.StatusSolicitacaoId = request.Status.Id;
 
-            _repository.SolicitacaoRepository.Update(dado);
+            _repository.GetDbSet<Solicitacao>().Entry(dado).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             await _repository.SaveAsync();
 
@@ -63,15 +60,40 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             // gerar notificação
             for (var ii = 0; ii < request.Notificar?.Length; ii++)
             {
-                string mensagem = request.Status.TemplateNotificacao.Replace("{id}", request.SolicitacaoId.ToString());
+                if (request.Status.TemplateNotificacao is not null)
+                {
+                    string mensagem = request.Status.TemplateNotificacao.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao(dado.SolicitacaoTipoId)).Replace("{id}", dado.Id.ToString());
 
-                var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, dado.GetType().Name, dado.Id);
+                    var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, GetEntidadeTipoSolicitacao(dado.SolicitacaoTipoId), dado.Id);
 
-                await _mediator.Send(notificacao, cancellationToken);
+                    await _mediator.Send(notificacao, cancellationToken);
+                }
             }
 
             // return 
             return true;
+        }
+
+        private string GetDescricaoTipoSolicitacao(int Tipo)
+        {
+            return Tipo switch
+            {
+                (int)EnumTipoSolicitacao.Comunicado => "Comunicado",
+                (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
+                (int)EnumTipoSolicitacao.Ferias => "Férias",
+                (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
+            };
+        }
+
+        private string GetEntidadeTipoSolicitacao(int Tipo)
+        {
+            return Tipo switch
+            {
+                (int)EnumTipoSolicitacao.Comunicado => EnumTipoSolicitacao.Comunicado.ToString(),
+                (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
+                (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
+                (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
+            };
         }
     }
 }

@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import moment from "moment/moment";
 import api from "@/services/share/shareApi"
+import configuracaoService from "@/services/share/configuracao.service";
+import { useShareUsuarioStore } from "./usuario.store";
 
 const rotas = {
     Create: "Solicitacao",
@@ -35,6 +37,16 @@ export class Solicitacao {
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
         this.anexos = data && data.anexos ? data.anexos: []
         this.historico = data && data.historico ? data.historico: []
+        this.status = {
+            id: 0,
+            status: "",
+            statusIntermediario: "",
+            color: "",
+            notifica: 0,
+            autorizar: false,
+            templateNotificacao: null,
+            proximoStatusId: null
+        };
     }
 }
 export class Anexo {
@@ -99,19 +111,41 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
   actions: {
     async add (data) {
         try {
-            console.debug("solicitacao.store.add",data);
-            if (data.solicitacaoTipoId == 1) {
+            if (data.solicitacaoTipoId == 1) //Desligamento
+            {
                 data.comunicado  = null
                 data.mudancaBase = null 
-            }else if (data.solicitacaoTipoId == 2) {
+                data.ferias = null
+            }else if (data.solicitacaoTipoId == 2)  //Comunicado
+            {
                 data.desligamento  = null
                 data.mudancaBase = null 
-            }else if (data.solicitacaoTipoId == 4) {
+                data.ferias = null
+            }else if (data.solicitacaoTipoId == 3) //Férias
+            {
+                data.comunicado  = null
+                data.desligamento  = null
+                data.mudancaBase = null 
+            }else if (data.solicitacaoTipoId == 4) //Mudança de Base
+            {
                 data.comunicado  = null
                 data.desligamento = null 
+                data.ferias = null
             }
-            data.status = this.statusSolicitacao.find(x => x.id == 1);
-            console.debug("add=>data.status",data.status);
+            //traz o status inicial da solicitação
+            let notificacaopermissao = data.regra + '-executar'
+            data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
+
+            //verifica se requer aprovação
+            let configuracao = (await configuracaoService.getByChave(data.regra.toLowerCase()+'.requer.aprovacao')).data;
+            if (configuracao && configuracao.valor == "true"){
+                notificacaopermissao = data.regra + '-aprovar'
+                data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'aguardando aprovação');
+            }
+
+            //retorna a lista de usuários que serão notificados
+            data.notificarUsuarioIds = await this.retornaUsuariosParaNotificar(data.status, data.clienteId, notificacaopermissao)
+
             await api.post(rotas.Create, data);
         } catch (error) {
             throw error
@@ -190,5 +224,26 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             throw error
         }  
     },
+    async retornaUsuariosParaNotificar(status, clienteId, permissao) {
+        let list = []
+        if (status.notifica == 1)
+        {
+          let notificaList = await useShareUsuarioStore().getUsuarioToNotificacaoByCliente(clienteId, permissao)
+          list = notificaList.map(q => {return q.value})
+        }
+        return list;
+    },
+    async changeStatus (data) {
+        try {
+            await api.put(rotas.AlterarStatus, data);
+        } catch (error) {
+            throw error
+        }
+    },
+    getStatus(statusId) {
+        let data = this.statusSolicitacao.find(q => q.id == statusId)
+        return data
+    },
+
   }
 })

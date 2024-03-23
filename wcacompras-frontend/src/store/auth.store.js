@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import authService from "@/services/auth.service";
 import apiReembolso from "@/services/reembolso/api"
+import apiShare from "@/services/share/shareApi"
 import filialService from "@/services/filial.service";
 
 const modelUser = {
@@ -127,15 +128,22 @@ export const useAuthStore = defineStore("auth", {
       localStorage.setItem("expireIn", this.expireIn);
     },
 
-    async getNotificacoesReembolso () {
-
-      let response = await apiReembolso.get("Notificacao/ListarPorUsuario", {params: {usuarioId: this.user.id}})
+    async getNotificacoes () {
+      let response = {data: []}
+      if (this.sistema.nome =='share')
+        response = await apiShare.get("Notificacao/ListarPorUsuario", {params: {usuarioId: this.user.id}})
+      else if (this.sistema.nome =='reembolso')
+        response = await apiReembolso.get("Notificacao/ListarPorUsuario", {params: {usuarioId: this.user.id}})
+      
       return response.data
 
     },
 
-    async marcarNotificaoReembolso(notificacaoId) {
-      await apiReembolso.put("Notificacao/MarcarComoLido", {id: notificacaoId})
+    async marcarNotificao(notificacaoId) {
+      if (this.sistema.nome =='share')
+        await apiShare.put("Notificacao/MarcarComoLido", {id: notificacaoId})
+      else if (this.sistema.nome =='reembolso')
+        await apiReembolso.put("Notificacao/MarcarComoLido", {id: notificacaoId})
     }
 
 

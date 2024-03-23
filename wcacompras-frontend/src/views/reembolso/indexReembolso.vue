@@ -146,7 +146,6 @@ onMounted(async () => {
   await useSolicitacaoStore().loadListStatusSolicitacao();
   clearInterval(checkNotificacoes.value)
   notificacoes.value = []
-  notificacoes.value = await authStore.getNotificacoesReembolso();
   startCheckNotificacoes();
 });
 
@@ -162,7 +161,7 @@ function checkPermissao(permissao)
 function startCheckNotificacoes () {
   checkNotificacoes.value = setInterval(async () => {
     //notificacoes.value = []
-    notificacoes.value = await authStore.getNotificacoesReembolso();
+    notificacoes.value = await authStore.getNotificacoes();
   },5000)
 }
 

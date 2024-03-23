@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240322001727_AddTable_Configuracoes")]
+    partial class AddTable_Configuracoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -638,11 +641,6 @@ namespace wca.share.infrastructure.Migrations
                     b.Property<int>("Notifica")
                         .HasColumnType("int")
                         .HasColumnName("notifica");
-
-                    b.Property<int?>("ProximoStatusId")
-                        .HasColumnType("int")
-                        .HasColumnName("proximo_status_id")
-                        .HasComment("Utilizado quando campo autorizar = 1, após aprovação mudará para o status indicado aqui");
 
                     b.Property<string>("Status")
                         .IsRequired()
