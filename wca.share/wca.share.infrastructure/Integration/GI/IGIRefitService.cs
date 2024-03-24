@@ -16,5 +16,8 @@ namespace wca.share.infrastructure.Integration.GI
         [Get("/CentroCusto/GetAll")]
         Task<IEnumerable<CentroCustoResponse>> CentroCustoGetAll([Authorize("Bearer")] string token);
 
+        [Get("/Funcionario/GetAll")]
+        Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAll([Authorize("Bearer")] string token);
+
     }
 }

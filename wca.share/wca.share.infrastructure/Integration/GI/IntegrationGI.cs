@@ -50,5 +50,10 @@ namespace wca.share.infrastructure.Integration.GI
         {
             return await _client.CentroCustoGetAll(token.Token);
         }
+
+        public async Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllAsync()
+        {
+            return await _client.FuncionarioGetAll(token.Token);
+        }
     }
 }
