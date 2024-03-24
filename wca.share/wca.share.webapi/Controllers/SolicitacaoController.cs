@@ -75,5 +75,16 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
 
         }
+
+        [HttpPut("AlterarStatus")]
+        public async Task<IActionResult> AlterarStatus([FromBody] SolicitacaoChangeStatusCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
     }
 }

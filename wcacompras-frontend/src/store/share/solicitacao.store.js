@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import moment from "moment/moment";
 import api from "@/services/share/shareApi"
-import { TipoSolicitacao } from "@/helpers/share/data";
+import configuracaoService from "@/services/share/configuracao.service";
+import { useShareUsuarioStore } from "./usuario.store";
 
 const rotas = {
     Create: "Solicitacao",
@@ -24,6 +25,7 @@ export class Solicitacao {
         this.clienteNome = data ? data.clienteNome: null
         this.funcionarioId = data ? data.funcionarioId: null
         this.funcionarioNome = data ? data.funcionarioNome: null
+        this.funcionarioDataAdmissao = data && data.funcionarioDataAdmissao ?  moment(data.funcionarioDataAdmissao).format("YYYY-MM-DD"): null
         this.dataSolicitacao = data ?  moment(data.dataSolicitacao).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
         this.descricao = data? data.descricao: null
         this.statusSolicitacaoId = data? data.statusSolicitacaoId: null
@@ -35,6 +37,16 @@ export class Solicitacao {
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
         this.anexos = data && data.anexos ? data.anexos: []
         this.historico = data && data.historico ? data.historico: []
+        this.status = {
+            id: 0,
+            status: "",
+            statusIntermediario: "",
+            color: "",
+            notifica: 0,
+            autorizar: false,
+            templateNotificacao: null,
+            proximoStatusId: null
+        };
     }
 }
 export class Anexo {
@@ -42,6 +54,7 @@ export class Anexo {
         this.id = data? data.id: 0
         this.solicitacaoId = data ?data.solicitacaoId : 0
         this.descricao = data? data.descricao: ''
+        this.tipo = data? data.tipo: null
         this.caminhoArquivo = data? data.caminhoArquivo: ''
     }
 }
@@ -52,12 +65,13 @@ export class Desligamento {
         this.dataDemissao = data && data.dataDemissao? moment(data.dataDemissao).format("YYYY-MM-DD") : null
         this.motivoDemissaoId = data ? data.motivoDemissaoId: null
         this.temContratoExperiencia = data? data.temContratoExperiencia: false
-        this.statusApontamento = data? data.statusApontamento: null
+        this.statusApontamento = data? data.statusApontamento: 1
         this.statusAvisoPrevio = data? data.statusAvisoPrevio: null
-        this.statusFichaEpi = data? data.statusFichaEpi: null
-        this.statusExameDemissional = data? data.statusExameDemissional: null
+        this.statusFichaEpi = data? data.statusFichaEpi: 1
+        this.statusExameDemissional = data? data.statusExameDemissional: 1
         this.dataCredito = data && data.dataCredito ? moment(data.dataCredito).format("YYYY-MM-DD") : null
-        
+        this.statusBeneficio = data? data.statusBeneficio: 1
+        this.statusReembolso = data? data.statusReembolso: 1
     }
 }
 
@@ -81,6 +95,11 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
         {text: "Pendente", value: 1},
         {text: "Concluído", value: 2}
     ],
+    exameAdmissionalStatus : [
+        {text: "Não se aplica", value: 3},
+        {text: "Pendente", value: 1},
+        {text: "Concluído", value: 2}
+    ],
     avisoPrevioStatus: [
         {text: "Não se aplica", value: 1},
         {text: "Indenizado", value: 2},
@@ -92,19 +111,41 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
   actions: {
     async add (data) {
         try {
-            console.debug("solicitacao.store.add",data);
-            if (data.solicitacaoTipoId == 1) {
+            if (data.solicitacaoTipoId == 1) //Desligamento
+            {
                 data.comunicado  = null
                 data.mudancaBase = null 
-            }else if (data.solicitacaoTipoId == 2) {
+                data.ferias = null
+            }else if (data.solicitacaoTipoId == 2)  //Comunicado
+            {
                 data.desligamento  = null
                 data.mudancaBase = null 
-            }else if (data.solicitacaoTipoId == 4) {
+                data.ferias = null
+            }else if (data.solicitacaoTipoId == 3) //Férias
+            {
+                data.comunicado  = null
+                data.desligamento  = null
+                data.mudancaBase = null 
+            }else if (data.solicitacaoTipoId == 4) //Mudança de Base
+            {
                 data.comunicado  = null
                 data.desligamento = null 
+                data.ferias = null
             }
-            data.status = this.statusSolicitacao.find(x => x.id == 1);
-            console.debug("add=>data.status",data.status);
+            //traz o status inicial da solicitação
+            let notificacaopermissao = data.regra + '-executar'
+            data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
+
+            //verifica se requer aprovação
+            let configuracao = (await configuracaoService.getByChave(data.regra.toLowerCase()+'.requer.aprovacao')).data;
+            if (configuracao && configuracao.valor == "true"){
+                notificacaopermissao = data.regra + '-aprovar'
+                data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'aguardando aprovação');
+            }
+
+            //retorna a lista de usuários que serão notificados
+            data.notificarUsuarioIds = await this.retornaUsuariosParaNotificar(data.status, data.clienteId, notificacaopermissao)
+
             await api.post(rotas.Create, data);
         } catch (error) {
             throw error
@@ -183,5 +224,26 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             throw error
         }  
     },
+    async retornaUsuariosParaNotificar(status, clienteId, permissao) {
+        let list = []
+        if (status.notifica == 1)
+        {
+          let notificaList = await useShareUsuarioStore().getUsuarioToNotificacaoByCliente(clienteId, permissao)
+          list = notificaList.map(q => {return q.value})
+        }
+        return list;
+    },
+    async changeStatus (data) {
+        try {
+            await api.put(rotas.AlterarStatus, data);
+        } catch (error) {
+            throw error
+        }
+    },
+    getStatus(statusId) {
+        let data = this.statusSolicitacao.find(q => q.id == statusId)
+        return data
+    },
+
   }
 })

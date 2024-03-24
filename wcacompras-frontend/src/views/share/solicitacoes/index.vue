@@ -20,7 +20,7 @@
         ></v-select>
       </v-col>
       <v-col>
-        <v-select
+        <v-autocomplete
           label="Clientes"
           v-model="filter.clienteId"
           :items="clientes"
@@ -30,10 +30,10 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
-        ></v-select>
+        ></v-autocomplete>
       </v-col>
       <v-col>
-        <v-select
+        <v-autocomplete
           label="Responsável"
           v-model="filter.responsavelId"
           :items="usuarios"
@@ -43,7 +43,7 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
-        ></v-select>
+        ></v-autocomplete>
       </v-col>
     </v-row>
     <v-row v-show="!isLoading.form">
@@ -51,9 +51,9 @@
         <v-select
           label="Status"
           v-model="filter.status"
-          :items="solicitacaoStore.statusSolicitacao"
+          :items="solicitacaoStore.statusSolicitacao.sort(compararValor('statusIntermediario'))"
           density="compact"
-          item-title="status"
+          item-title="statusIntermediario"
           item-value="id"
           variant="outlined"
           color="primary"
@@ -221,6 +221,7 @@ import { useShareClienteStore } from "@/store/share/cliente.store";
 import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import { getPageTitle } from "@/helpers/share/data";
 import { useRoute } from "vue-router";
+import { compararValor } from "@/helpers/functions";
 //DATA
 const route = useRoute();
 const authStore = useAuthStore();
@@ -291,17 +292,10 @@ onBeforeMount(async () => {
     }
 
     await getFiliaisToList();
-    let filialUsuario = (
-      await useShareUsuarioStore().getFiliais(authStore.user.id)
-    )[0];
-    isMatriz.value = filialUsuario.text.toLowerCase() == "matriz";
-    authStore.user.filial = filialUsuario.value;
+    isMatriz.value = authStore.sistema.isMatriz;
+    authStore.user.filial = authStore.sistema.filial.value;
     await clearFilters();
-    console.log("hasPermissao." + pageTipo.value.tipo.toLowerCase() + '-criar',authStore.hasPermissao(pageTipo.value.tipo.toLowerCase() + '-criar'))
-    if (authStore.hasPermissao(pageTipo.value.tipo.toLowerCase() + '-criar')){
-      //formButtons.value.push({ text: "Novo", icon: "", event: "novoClick" });
-    }
-
+    
   } catch (error) {
   } finally {
     isLoading.value.form = false;
@@ -334,9 +328,8 @@ async function clearFilters() {
 }
 
 function toPage(id = null) {
-    console.log("toPage")
     if (id && id > 0)
-        router.push({ name: `share${pageTipo.value.tipo}Edit`, query: { id: id } });
+        router.push({ name: `share${pageTipo.value.tipo}Cadastro`, query: { id: id } });
     else
         router.push({ name: `share${pageTipo.value.tipo}Create`});
 }

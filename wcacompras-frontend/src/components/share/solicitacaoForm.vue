@@ -1,6 +1,19 @@
 <template>
   <div>
     <v-row>
+      <v-col v-show="solicitacao.id > 0" class="text-right">
+      <v-btn
+        :color="solicitacao.status.color"
+        variant="tonal"
+        class="text-center"
+      >
+        {{
+          solicitacao.status.statusIntermediario
+        }}</v-btn
+      >
+    </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="4" v-show="comboTipoShow">
         <select-text
           v-model="solicitacao.solicitacaoTipoId"
@@ -39,7 +52,7 @@
         <select-text
           v-model="solicitacao.centroCustoId"
           :combo-items="listCentroCustos"
-          :select-mode="solicitacao.id == 0"
+          :select-mode="false"
           :text-field-value="solicitacao.centroCustoNome"
           label-text="Centro de Custo"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"

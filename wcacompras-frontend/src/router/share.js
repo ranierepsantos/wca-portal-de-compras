@@ -26,11 +26,36 @@ export const share = {
         component: () => import(/* webpackChunkName: "share" */ '../views/share/clientes/cadastro'),
       },
       {
+        path: 'configuracoes',
+        name: 'shareConfiguracoes',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/configuracoes/configuracoes'),
+        
+      },
+      {
         path: 'filial',
         name: 'shareFilial',
         beforeEnter: protectRoute,
         meta: {permissao: "filial", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/filiais'),
+      },
+      {
+        path: 'funcionarios',
+        name: 'shareFuncionarios',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/funcionarios'),
+      },
+      {
+        path: 'funcionario',
+        name: 'shareFuncionarioCadastro',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/funcionarios/cadastro'),
       },
       {
         path: 'perfil',
@@ -68,7 +93,7 @@ export const share = {
       {
         path: 'desligamento',
         name: 'shareDesligamento',
-        meta: {permissao: "desligamento-criar|desligamento-executar", sistema: 3},
+        meta: {permissao: "desligamento-criar|desligamento-executar|desligamento-aprovar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -87,8 +112,8 @@ export const share = {
       },
       {
         path: 'desligamento/editar',
-        name: 'shareDesligamentoEdit',
-        meta: {permissao: "desligamento-executar", sistema: 3},
+        name: 'shareDesligamentoCadastro',
+        meta: {permissao: "desligamento-executar|desligamento-aprovar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route

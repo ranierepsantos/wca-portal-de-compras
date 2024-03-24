@@ -45,7 +45,7 @@
               style="color: #950000; font-weight: bold"
               @click="aprovarReprovar(false)"
               :disabled="isRunningEvent"
-              >Rejeitar</v-btn
+              >{{reprovarTitle}}</v-btn
             >
           </v-col>
         </v-row>
@@ -60,7 +60,8 @@ import { ref } from 'vue';
 // data
 const props =  defineProps({
     title: "",
-    isRunningEvent: false
+    isRunningEvent: false,
+    reprovarTitle: {Type: String, default: "Rejeitar"}
 });
 const emit = defineEmits(['closeForm', 'aprovarClick', 'reprovarClick'])
 

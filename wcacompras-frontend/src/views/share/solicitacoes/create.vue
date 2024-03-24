@@ -3,7 +3,7 @@
     <Breadcrumbs
       :title="getPageTitle(solicitacao.solicitacaoTipoId)"
       :show-button="false"
-      :buttons="formButtons"
+      :buttons="[{ text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.save }]"
       @salvar-click="salvar()"
     />
     <v-progress-linear
@@ -34,7 +34,11 @@
               <Mudancabase v-show="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
 
-            <table-file-upload :anexos="solicitacao.anexos" />
+            <table-file-upload 
+              :anexos="solicitacao.anexos" 
+              :combo-items="tableUploadItems"
+              @change-status="changeFieldStatus($event)"
+            />
           </v-form>
         </v-card-text>
       </v-card>
@@ -58,9 +62,9 @@ import { useAuthStore } from "@/store/auth.store";
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import { watch } from "vue";
 import { useRoute } from "vue-router";
-import api from "@/services/share/shareApi";
 import { getObservacaoLabelDescricao, getPageTitle } from "@/helpers/share/data";
 import router from "@/router";
+import {useShareFuncionarioStore} from "@/store/share/funcionario.store"
 
 const isBusy = ref({
   form: true,
@@ -68,7 +72,6 @@ const isBusy = ref({
 });
 const solicitacao = ref(new Solicitacao());
 const clienteList = ref([]);
-const formButtons = ref([]);
 const comboTipoShow = ref(true);
 const funcionarioList = ref([]);
 const centrosCustoList = ref([]);
@@ -76,6 +79,7 @@ const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
 const permissao = ref("")
+const tableUploadItems = ref([{text: "Outros"}])
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -83,6 +87,8 @@ onBeforeMount(async () => {
     if (route.path.includes("desligamento")) {
       solicitacao.value.solicitacaoTipoId = 1;
       permissao.value = 'desligamento' 
+
+      tableUploadItems.value.push({text: "Ficha EPI"})
     } else if (route.path.includes("comunicado")) {
       solicitacao.value.solicitacaoTipoId = 2;
       permissao.value = 'comunicado' 
@@ -97,7 +103,7 @@ onBeforeMount(async () => {
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
 
     clienteList.value = await useShareClienteStore().toComboList(0, useAuthStore().user.id);
-    formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+    
   } catch (error) {
     console.debug("create.beforeMount.error", error);
     handleErrors(error);
@@ -113,11 +119,7 @@ watch(
       funcionarioList.value = [];
       centrosCustoList.value = [];
       if (clienteId) {
-        funcionarioList.value = (
-          await api.get(
-            `/Funcionario/ListByClienteToCombo?ClienteId=${clienteId}`
-          )
-        ).data;
+        funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId)
 
         //Trazer centros de custo
         centrosCustoList.value = await useShareClienteStore().ListCentrosDeCusto([clienteId])
@@ -130,7 +132,29 @@ watch(
   }
 );
 
+watch(() => solicitacao.value.funcionarioId, () => {
+  
+  let oFunc = funcionarioList.value.find(q => q.value == solicitacao.value.funcionarioId)
+  if (oFunc) {
+    solicitacao.value.centroCustoNome = oFunc.centroCustoNome
+    solicitacao.value.centroCustoId = oFunc.centroCustoId
+  }
+});
+
+
+
 //FUNCTIONS
+
+function changeFieldStatus(tipo) {
+  console.log('changeFieldStatus', tipo)
+  if (tipo.toLowerCase() =="ficha epi")
+    solicitacao.value.desligamento.statusFichaEpi = 2
+  else if (tipo.toLowerCase() =="apontamento")
+    solicitacao.value.desligamento.statusApontamento = 2
+  else if (tipo.toLowerCase() =="exame demissional")
+    solicitacao.value.desligamento.statusApontamento = 3
+}
+
 async function salvar() {
   try {
     isBusy.value.save = true;
@@ -140,6 +164,8 @@ async function salvar() {
       let data = { ...solicitacao.value };
       data.notificarUsuarioIds = [];
       data.usuarioCriador = useAuthStore().user.nome;
+      data.regra = permissao.value
+
 
       await useShareSolicitacaoStore().add(data);
       await swal.fire({
@@ -152,7 +178,7 @@ async function salvar() {
         timer: 2000,
       });
 
-      router.push({name: "shareDesligamento"})
+      router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
     }
   } catch (error) {
     console.debug(error);

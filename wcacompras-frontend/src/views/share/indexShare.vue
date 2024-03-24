@@ -4,11 +4,11 @@
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px;">
       <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
-      <br />
+      <!-- <br />
       <v-btn block color="orange" rounded="lg" class="text-capitalize"
         @click="router.push({ name: 'shareSolicitacaoCreate' })">
         <b>Nova solicitação</b>
-      </v-btn>
+      </v-btn> -->
       <br />
       <v-list class="text-left" density="compact">
         <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
@@ -19,9 +19,9 @@
             </v-list-item-title>
           </router-link>
         </v-list-item>
-        <v-list-item v-show="checkPermissao('livre')" active-color="info">
+        <v-list-item v-show="checkPermissao('livre')" active-color="info" key="configuracoes" value="9999">
           <router-link to="/share/configuracoes" class="text-decoration-none">
-            <v-list-item-title>
+            <v-list-item-title >
               Configurações
             </v-list-item-title>
           </router-link>
@@ -33,15 +33,14 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
 
-      
-
-    <!-- <v-btn class="text-none" stacked>
-      <v-badge :content="notificacoes.length" color="error">
-        <v-icon>mdi-bell-outline</v-icon>
-      </v-badge>
-      <notificacao-list :notificacoes="notificacoes"/>
-    </v-btn> -->
-
+    <!--NOTIFICAÇÕES
+      <v-btn class="text-none" stacked>
+        <v-badge :content="notificacoes.length" color="error">
+          <v-icon>mdi-bell-outline</v-icon>
+        </v-badge>
+        <notificacao-list :notificacoes="notificacoes"/>
+      </v-btn>
+    -->
       <v-btn variant="text" class="text-capitalize" color="primary">
         <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
         {{ usuario.nome }}
@@ -78,11 +77,11 @@ import headerUserMenu from "@/components/headerUserMenu.vue";
 import { compararValor } from "@/helpers/functions";
 import { onMounted } from "vue";
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
-import { useRouter,useRoute } from "vue-router";
-
+import { useRoute } from "vue-router";
+import { onUnmounted } from "vue";
+import notificacaoList from "@/components/notificacaoList.vue";
 
 //VARIABLES
-const router = useRouter();
 const route = useRoute();
 const drawer = ref(true);
 const menuItems = ref([
@@ -102,7 +101,7 @@ const menuItems = ref([
     title: "Desligamento",
     value: 3,
     route: "/share/desligamento",
-    permissao: "desligamento-criar|desligamento-executar"
+    permissao: "desligamento-criar|desligamento-executar|desligamento-aprovar"
   },
   {
     title: "Mudança de base",
@@ -134,11 +133,17 @@ const menuItems = ref([
     route: "/share/ferias",
     permissao: "livre"
   },
+  // {
+  //   title: "Filiais",
+  //   value: 9,
+  //   route: "/share/filial",
+  //   permissao: "Filial"
+  // },
   {
-    title: "Filiais",
-    value: 8,
-    route: "/share/filial",
-    permissao: "Filial"
+    title: "Funcionáros",
+    value: 10,
+    route: "/share/funcionarios",
+    permissao: "livre"
   },
 ]);
 
@@ -147,18 +152,33 @@ const usuario = computed(() =>
 {
   return authStore.user;
 })
-
+const checkNotificacoes = ref(null);
+const notificacoes = ref ([])
 
 //VUE - FUNCTIONS
 onMounted(async () => {
   useShareSolicitacaoStore().listarStatusSolicitacao();
   useShareSolicitacaoStore().listarMotivosDemissao();
+  clearInterval(checkNotificacoes.value)
+  //notificacoes.value = []
+  //startCheckNotificacoes()
 });
+
+onUnmounted(() => {  clearInterval(checkNotificacoes.value) }) 
+
 
 //FUNCTIONS
 function checkPermissao(permissao)
 {
   return authStore.hasPermissao(permissao)
+}
+
+
+function startCheckNotificacoes () {
+  checkNotificacoes.value = setInterval(async () => {
+    //notificacoes.value = []
+    notificacoes.value = await authStore.getNotificacoes();
+  },10000)
 }
 
 </script>

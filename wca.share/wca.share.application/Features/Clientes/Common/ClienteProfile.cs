@@ -15,6 +15,14 @@ namespace wca.share.application.Features.Clientes.Common
             CreateMap<Cliente, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
+
+            CreateMap<Contracts.Integration.GI.Models.ClienteResponse, ClienteCreateCommand>()
+                .ForMember(dest => dest.Nome , opt => opt.MapFrom(src => src.RazaoSocial))
+                .ForMember(dest => dest.Ativo, opt => opt.MapFrom(src => src.ClienteAtivo))
+                .ForMember(dest => dest.CNPJ, opt => opt.MapFrom(src => src.Cgc))
+                .ForMember(dest => dest.CNPJ, opt => opt.MapFrom(src => src.Ie))
+
+                ;
         }
     }
 }

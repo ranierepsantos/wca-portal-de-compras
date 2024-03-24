@@ -50,8 +50,27 @@
           label-text="Aviso Prévio"
         ></select-text>
       </v-col>
-      <v-col v-show="!createMode">
+      <v-col>
         <select-text
+          v-model="dataModel.statusFichaEpi"
+          :combo-items="listFieldStatus"
+          combo-item-title="text"
+          combo-item-value="value"
+          :select-mode="createMode"
+          :text-field-value="
+            getTextFromListByCodigo(
+              listFieldStatus,
+              dataModel.statusFichaEpi
+            )
+          "
+          label-text="Ficha EPI"
+        ></select-text>
+        
+      </v-col>
+    </v-row>
+    <v-row v-show="!createMode">
+        <v-col>
+          <select-text
           v-model="dataModel.statusApontamento"
           :combo-items="listFieldStatus"
           combo-item-title="text"
@@ -67,34 +86,16 @@
           
         ></select-text>
       </v-col>
-    </v-row>
-    <v-row v-show="!createMode">
-        <v-col>
-        <select-text
-          v-model="dataModel.statusFichaEpi"
-          :combo-items="listFieldStatus"
-          combo-item-title="text"
-          combo-item-value="value"
-          :select-mode="!createMode && !isReadOnly"
-          :text-field-value="
-            getTextFromListByCodigo(
-              listFieldStatus,
-              dataModel.statusFichaEpi
-            )
-          "
-          label-text="Ficha EPI"
-        ></select-text>
-      </v-col>
       <v-col>
         <select-text
           v-model="dataModel.statusExameDemissional"
-          :combo-items="listFieldStatus"
+          :combo-items="listExameAdmissionalStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="!createMode && !isReadOnly"
+          :select-mode="!createMode && !isReadOnly && dataModel.statusExameDemissional != 2"
           :text-field-value="
             getTextFromListByCodigo(
-              listFieldStatus,
+              listExameAdmissionalStatus,
               dataModel.statusExameDemissional
             )
           "
@@ -115,7 +116,42 @@
         ></v-text-field>
       </v-col>
     </v-row>
-    
+    <v-row v-show="!createMode">
+      <v-col>
+          <select-text
+          v-model="dataModel.statusBeneficio"
+          :combo-items="listFieldStatus"
+          combo-item-title="text"
+          combo-item-value="value"
+          :select-mode="!createMode && !isReadOnly"
+          :text-field-value="
+            getTextFromListByCodigo(
+              listFieldStatus,
+              dataModel.statusBeneficio
+            )
+          "
+          label-text="Beneficíos"
+          
+        ></select-text>
+      </v-col>
+      <v-col>
+          <select-text
+          v-model="dataModel.statusReembolso"
+          :combo-items="listFieldStatus"
+          combo-item-title="text"
+          combo-item-value="value"
+          :select-mode="!createMode && !isReadOnly"
+          :text-field-value="
+            getTextFromListByCodigo(
+              listFieldStatus,
+              dataModel.statusReembolso
+            )
+          "
+          label-text="Reembolso"
+          
+        ></select-text>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -129,6 +165,7 @@ import selectText from "../selectText.vue";
 import {
   getTextFromListByCodigo,
 } from "@/helpers/share/data";
+import moment from "moment";
 
 defineProps({
   dataModel: {
@@ -143,6 +180,7 @@ defineProps({
 const listMotivoDemissao = useShareSolicitacaoStore().motivosDemissao;
 const listAvisoPrevioStatus = useShareSolicitacaoStore().avisoPrevioStatus;
 const listFieldStatus = useShareSolicitacaoStore().fieldStatus;
+const listExameAdmissionalStatus = useShareSolicitacaoStore().exameAdmissionalStatus;
 
 function getMotivoDemissaoText(motivoId) {
   let _motivo = listMotivoDemissao.find((x) => x.id == motivoId);

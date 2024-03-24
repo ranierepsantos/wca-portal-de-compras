@@ -21,6 +21,7 @@ namespace wca.share.application.Features.Clientes.Commands
         string Cidade,
         string UF,
         int? FilialId = 0,
+        bool Ativo = true,
         IList<CentroCusto>? CentroCusto = null
     ) : IRequest<ErrorOr<ClienteResponse>>;
 

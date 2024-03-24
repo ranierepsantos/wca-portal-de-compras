@@ -90,6 +90,12 @@ namespace wca.share.domain.Entities
 
         [Column("data_credito")]
         public DateTime? DataCredito { get; set; }
+
+        [Column("status_beneficio")]
+        public int? StatusBeneficio { get; set; }
+
+        [Column("status_reembolso")]
+        public int? StatusReembolso { get; set; }
     }
 
     public sealed class SolicitacaoMudancaBase
@@ -151,6 +157,9 @@ namespace wca.share.domain.Entities
 
         [JsonIgnore]
         public Solicitacao? Solicitacao { get; set; }
+
+        [Column("tipo", TypeName = "varchar(50)")]
+        public string? Tipo { get; set; } = string.Empty;
 
         [Column("descricao", TypeName ="varchar(300)")]
         public string Descricao { get; set; } = string.Empty;

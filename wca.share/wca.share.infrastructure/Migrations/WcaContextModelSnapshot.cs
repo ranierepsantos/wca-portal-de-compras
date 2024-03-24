@@ -34,7 +34,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("SolicitacaoMudancaBaseSolicitacaoId");
 
-                    b.ToTable("ItemMudancaSolicitacaoMudancaBase", (string)null);
+                    b.ToTable("ItemMudancaSolicitacaoMudancaBase");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Assunto", b =>
@@ -53,7 +53,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Assuntos", (string)null);
+                    b.ToTable("Assuntos");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
@@ -83,7 +83,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("CentrosDeCusto", (string)null);
+                    b.ToTable("CentrosDeCusto");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Cliente", b =>
@@ -151,7 +151,50 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes", (string)null);
+                    b.ToTable("Clientes");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Configuracao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Chave")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("chave");
+
+                    b.Property<string>("ComboValores")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("varchar(8000)")
+                        .HasColumnName("combo_valores");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("descricao");
+
+                    b.Property<int>("TipoCampo")
+                        .HasMaxLength(500)
+                        .HasColumnType("int")
+                        .HasColumnName("tipo_campo");
+
+                    b.Property<string>("Valor")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configuracoes");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Filial", b =>
@@ -172,7 +215,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Filiais", (string)null);
+                    b.ToTable("Filiais");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Funcionario", b =>
@@ -184,31 +227,74 @@ namespace wca.share.infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ClienteId")
+                    b.Property<string>("Bairro")
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("bairro");
+
+                    b.Property<int>("CentroCustoId")
+                        .HasColumnType("int")
+                        .HasColumnName("centrocusto_id");
+
+                    b.Property<string>("Cep")
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("cep");
+
+                    b.Property<string>("Cidade")
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("cidade");
+
+                    b.Property<int>("ClienteId")
                         .HasColumnType("int")
                         .HasColumnName("cliente_id");
 
-                    b.Property<string>("CodigoGI")
-                        .IsRequired()
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("codigo_gi");
-
-                    b.Property<int?>("GestorId")
+                    b.Property<int?>("CodigoFuncionario")
                         .HasColumnType("int")
-                        .HasColumnName("gestor_id");
+                        .HasColumnName("codigo_funcionario");
+
+                    b.Property<string>("Complemento")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("complemento");
+
+                    b.Property<int?>("DDDCelular")
+                        .HasColumnType("int")
+                        .HasColumnName("ddd_celular");
+
+                    b.Property<DateTime?>("DataAdmissao")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("data_admissao");
+
+                    b.Property<DateTime?>("DataDemissao")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("data_demissao");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Endereco")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("endereco");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("varchar(200)")
                         .HasColumnName("nome");
 
+                    b.Property<int?>("NumeroCelular")
+                        .HasColumnType("int")
+                        .HasColumnName("numero_celular");
+
+                    b.Property<string>("UF")
+                        .HasColumnType("varchar(2)")
+                        .HasColumnName("uf");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CentroCustoId");
 
                     b.HasIndex("ClienteId");
 
-                    b.HasIndex("GestorId");
-
-                    b.ToTable("Funcionarios", (string)null);
+                    b.ToTable("Funcionarios");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.ItemMudanca", b =>
@@ -226,7 +312,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItensMudanca", (string)null);
+                    b.ToTable("ItensMudanca");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.MotivoDemissao", b =>
@@ -245,7 +331,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MotivosDemissao", (string)null);
+                    b.ToTable("MotivosDemissao");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Notificacao", b =>
@@ -285,7 +371,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notificacoes", (string)null);
+                    b.ToTable("Notificacoes");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Solicitacao", b =>
@@ -343,7 +429,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("StatusSolicitacaoId");
 
-                    b.ToTable("Solicitacoes", (string)null);
+                    b.ToTable("Solicitacoes");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoArquivo", b =>
@@ -369,11 +455,15 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("solicitacao_id");
 
+                    b.Property<string>("Tipo")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("tipo");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SolicitacaoId");
 
-                    b.ToTable("SolicitacaoArquivos", (string)null);
+                    b.ToTable("SolicitacaoArquivos");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoComunicado", b =>
@@ -398,7 +488,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("AssuntoId");
 
-                    b.ToTable("SolicitacaoComunicado", (string)null);
+                    b.ToTable("SolicitacaoComunicado");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoDesligamento", b =>
@@ -427,6 +517,10 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("status_aviso_previo");
 
+                    b.Property<int?>("StatusBeneficio")
+                        .HasColumnType("int")
+                        .HasColumnName("status_beneficio");
+
                     b.Property<int?>("StatusExameDemissional")
                         .HasColumnType("int")
                         .HasColumnName("status_exame_demissional");
@@ -434,6 +528,10 @@ namespace wca.share.infrastructure.Migrations
                     b.Property<int?>("StatusFichaEpi")
                         .HasColumnType("int")
                         .HasColumnName("status_ficha_epi");
+
+                    b.Property<int?>("StatusReembolso")
+                        .HasColumnType("int")
+                        .HasColumnName("status_reembolso");
 
                     b.Property<bool>("TemContratoExperiencia")
                         .HasColumnType("bit")
@@ -443,7 +541,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("MotivoDemissaoId");
 
-                    b.ToTable("SolicitacaoDesligamento", (string)null);
+                    b.ToTable("SolicitacaoDesligamento");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoHistorico", b =>
@@ -472,7 +570,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("SolicitacaoId");
 
-                    b.ToTable("SolicitacaoHistorico", (string)null);
+                    b.ToTable("SolicitacaoHistorico");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoMudancaBase", b =>
@@ -497,7 +595,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("ClienteDestinoId");
 
-                    b.ToTable("SolicitacaoMudancaBase", (string)null);
+                    b.ToTable("SolicitacaoMudancaBase");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoTipo", b =>
@@ -516,7 +614,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SolicitacaoTipo", (string)null);
+                    b.ToTable("SolicitacaoTipo");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.StatusSolicitacao", b =>
@@ -541,6 +639,11 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("notifica");
 
+                    b.Property<int?>("ProximoStatusId")
+                        .HasColumnType("int")
+                        .HasColumnName("proximo_status_id")
+                        .HasComment("Utilizado quando campo autorizar = 1, após aprovação mudará para o status indicado aqui");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("varchar(150)")
@@ -557,7 +660,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatusSolicitacao", (string)null);
+                    b.ToTable("StatusSolicitacao");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Usuario", b =>
@@ -584,7 +687,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.UsuarioClientes", b =>
@@ -601,7 +704,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("UsuarioClientes", (string)null);
+                    b.ToTable("UsuarioClientes");
                 });
 
             modelBuilder.Entity("ItemMudancaSolicitacaoMudancaBase", b =>
@@ -622,7 +725,7 @@ namespace wca.share.infrastructure.Migrations
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
                 {
                     b.HasOne("wca.share.domain.Entities.Cliente", "Cliente")
-                        .WithMany()
+                        .WithMany("CentroCusto")
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -632,17 +735,21 @@ namespace wca.share.infrastructure.Migrations
 
             modelBuilder.Entity("wca.share.domain.Entities.Funcionario", b =>
                 {
+                    b.HasOne("wca.share.domain.Entities.CentroCusto", "CentroCusto")
+                        .WithMany()
+                        .HasForeignKey("CentroCustoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("wca.share.domain.Entities.Cliente", "Cliente")
                         .WithMany()
-                        .HasForeignKey("ClienteId");
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("wca.share.domain.Entities.Usuario", "Gestor")
-                        .WithMany()
-                        .HasForeignKey("GestorId");
+                    b.Navigation("CentroCusto");
 
                     b.Navigation("Cliente");
-
-                    b.Navigation("Gestor");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Solicitacao", b =>
@@ -788,6 +895,8 @@ namespace wca.share.infrastructure.Migrations
 
             modelBuilder.Entity("wca.share.domain.Entities.Cliente", b =>
                 {
+                    b.Navigation("CentroCusto");
+
                     b.Navigation("UsuarioClientes");
                 });
 

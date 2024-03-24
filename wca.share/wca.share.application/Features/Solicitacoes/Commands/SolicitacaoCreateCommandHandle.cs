@@ -99,9 +99,9 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             {
                 if (request.Status.TemplateNotificacao is not null)
                 {
-                    string mensagem = request.Status.TemplateNotificacao.Replace("{id}", dado.Id.ToString());
+                    string mensagem = request.Status.TemplateNotificacao.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao(dado.SolicitacaoTipoId)).Replace("{id}", dado.Id.ToString());
 
-                    var notificacao = new NotificacaoCreateCommand(request.NotificarUsuarioIds[ii], mensagem, dado.GetType().Name, dado.Id);
+                    var notificacao = new NotificacaoCreateCommand(request.NotificarUsuarioIds[ii], mensagem, GetEntidadeTipoSolicitacao(dado.SolicitacaoTipoId), dado.Id);
 
                     await _mediator.Send(notificacao, cancellationToken);
                 }
@@ -110,6 +110,28 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             // mapear para SolicitacaoResponse e retornar
             return _mapper.Map<SolicitacaoResponse>(dado);
 
+        }
+
+        private string  GetDescricaoTipoSolicitacao(int Tipo)
+        {
+            return Tipo switch
+            {
+                (int)EnumTipoSolicitacao.Comunicado => "Comunicado",
+                (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
+                (int)EnumTipoSolicitacao.Ferias => "Férias",
+                (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
+            };
+        }
+
+        private string GetEntidadeTipoSolicitacao(int Tipo)
+        {
+            return Tipo switch
+            {
+                (int)EnumTipoSolicitacao.Comunicado => EnumTipoSolicitacao.Comunicado.ToString(),
+                (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
+                (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
+                (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
+            };
         }
     }
 }

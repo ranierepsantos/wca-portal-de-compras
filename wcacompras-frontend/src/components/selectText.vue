@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-select
+    <v-autocomplete
       :label="labelText"
       :items="comboItems"
       density="compact"
@@ -12,7 +12,7 @@
       @update:model-value="val => $emit('update:modelValue',val)"
       :rules="fieldRules"
       v-if="selectMode"
-    ></v-select>
+    ></v-autocomplete>
     <v-text-field
       :label="labelText"
       type="text"
