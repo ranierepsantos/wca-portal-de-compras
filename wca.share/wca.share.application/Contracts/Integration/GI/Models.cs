@@ -87,4 +87,57 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         [JsonPropertyName("centroCustoAtivo")]
         public bool centroCustoAtivo { get; set; }
     }
+
+    public sealed class FuncionarioResponse {
+        [JsonPropertyName("codigoFuncionario")]
+        public int? CodigoFuncionario { get; set; }
+
+        [JsonPropertyName("nome")]
+        public string? Nome { get; set; }
+
+        [JsonPropertyName("codigoCliente")]
+        public int? CodigoCliente { get; set; }
+
+        [JsonPropertyName("codigoCentroCusto")]
+        public int? CodigoCentroCusto { get; set; }
+
+        [JsonPropertyName("dataAdmissao")]
+        public DateTime? DataAdmissao { get; set; }
+
+        [JsonPropertyName("dataDemissao")]
+        public DateTime? DataDemissao { get; set; }
+
+        [JsonPropertyName("email")]
+        public string? Email { get; set; }
+
+        [JsonPropertyName("cepResid")]
+        public string? CepResid { get; set; }
+
+        [JsonPropertyName("bairroResid")]
+        public string? BairroResid { get; set; }
+
+        [JsonPropertyName("cidadeResid")]
+        public string? CidadeResid { get; set; }
+
+        [JsonPropertyName("ufResid")]
+        public string? UfResid { get; set; }
+
+        [JsonPropertyName("tipoEndereco")]
+        public string? TipoEndereco { get; set; }
+
+        [JsonPropertyName("enderecoResid")]
+        public string? EnderecoResid { get; set; }
+
+        [JsonPropertyName("nroEndereco")]
+        public int? NroEndereco { get; set; }
+
+        [JsonPropertyName("cplEndereco")]
+        public string? CplEndereco { get; set; }
+
+        [JsonPropertyName("smsdddCel")]
+        public int? SmsdddCel { get; set; }
+
+        [JsonPropertyName("smsNroCel")]
+        public int? SmsNroCel { get; set; }
+    }
 }

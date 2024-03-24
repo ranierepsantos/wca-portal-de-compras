@@ -27,7 +27,7 @@ namespace wca.share.domain.Entities
         public int? CodigoFuncionario { get; set; }
 
         [Column("data_admissao")]
-        public DateTime DataAdmissao { get; set; }
+        public DateTime? DataAdmissao { get; set; }
 
         [Column("data_demissao")]
         public DateTime? DataDemissao { get; set; }

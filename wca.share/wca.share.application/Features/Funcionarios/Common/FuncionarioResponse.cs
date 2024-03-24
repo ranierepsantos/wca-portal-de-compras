@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using wca.share.domain.Entities;
-
-namespace wca.share.application.Features.Funcionarios.Common
+﻿namespace wca.share.application.Features.Funcionarios.Common
 {
     public record FuncionarioResponse (
         int Id,
@@ -24,8 +15,8 @@ namespace wca.share.application.Features.Funcionarios.Common
         string? Bairro = null,
         string? Cidade = null,
         string? UF = null,
-        string? DDDCelular = null,
-        string? NumeroCelular = null
+        int? DDDCelular = null,
+        int? NumeroCelular = null
     );
     public sealed class FuncionarioToPaginateResponse
     {
