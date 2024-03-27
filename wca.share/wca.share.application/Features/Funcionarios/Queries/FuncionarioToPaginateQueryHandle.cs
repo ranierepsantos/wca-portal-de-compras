@@ -37,7 +37,7 @@ namespace wca.share.application.Features.Funcionarios.Queries
             var query = _repository.GetDbSet<Funcionario>().AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Termo))
-                query = query.Where(q => q.Nome.Contains(request.Termo));
+                query = query.Where(q => q.Nome.Contains(request.Termo) || q.CodigoFuncionario.ToString().Contains(request.Termo));
            
             if (request.ClienteIds?.Length > 0)
                 query = query.Where(q => request.ClienteIds.Contains(q.ClienteId));

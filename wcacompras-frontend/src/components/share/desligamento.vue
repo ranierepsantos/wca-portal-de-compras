@@ -1,7 +1,20 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="2">
+        <v-text-field
+          label="Data Admissão"
+          type="date"
+          variant="outlined"
+          color="primary"
+          density="compact"
+          v-model="dataAdmissao"
+          :rules="[(v) => !!v || 'Campo obrigatório']"
+          :readonly="true"
+          bg-color="#f2f2f2"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="2">
         <v-text-field
           label="Data Demissão"
           type="date"
@@ -165,7 +178,6 @@ import selectText from "../selectText.vue";
 import {
   getTextFromListByCodigo,
 } from "@/helpers/share/data";
-import moment from "moment";
 
 defineProps({
   dataModel: {
@@ -174,6 +186,7 @@ defineProps({
       return new Desligamento();
     },
   },
+  dataAdmissao: {type: String, default: ""},
   createMode: { type: Boolean, default: true },
   isReadOnly: { type: Boolean, default: false },
 });

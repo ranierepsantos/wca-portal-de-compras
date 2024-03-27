@@ -29,6 +29,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
             foreach(var ofunc in funcionarios)
             {
                 Funcionario? _func = await _repository.GetDbSet<Funcionario>()
+                    .AsNoTracking()
                     .Where(q => q.CodigoFuncionario == ofunc.CodigoFuncionario)
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -48,12 +49,16 @@ namespace wca.share.application.Features.Funcionarios.Commands
                         if (centroCusto is not null)
                         {
                             FuncionarioCreateCommand command = new(ofunc.Nome, cliente.Id, centroCusto.Id, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
-                                ofunc.DataDemissao, ofunc.Email, ofunc.CepResid, ofunc.EnderecoResid, ofunc.CplEndereco, ofunc.BairroResid, ofunc.CidadeResid,
-                                ofunc.UfResid, ofunc.SmsdddCel, ofunc.SmsNroCel);
+                                ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.Pis?.ToString());
 
                             _ = await _mediator.Send(command, cancellationToken);
                         }
                     }
+                } else
+                {
+                    FuncionarioUpdateCommand command = new(_func.Id, ofunc.Nome, _func.ClienteId, _func.CentroCustoId, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
+                                                           ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.Pis?.ToString());
+                    _ = await _mediator.Send(command, cancellationToken);
                 }
                 
             }

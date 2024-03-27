@@ -25,6 +25,7 @@ export class Solicitacao {
         this.clienteNome = data ? data.clienteNome: null
         this.funcionarioId = data ? data.funcionarioId: null
         this.funcionarioNome = data ? data.funcionarioNome: null
+        this.numeroPis = data ? data.numeroPis: null
         this.funcionarioDataAdmissao = data && data.funcionarioDataAdmissao ?  moment(data.funcionarioDataAdmissao).format("YYYY-MM-DD"): null
         this.dataSolicitacao = data ?  moment(data.dataSolicitacao).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
         this.descricao = data? data.descricao: null
@@ -111,11 +112,19 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
   actions: {
     async add (data) {
         try {
+            let checarAprovacao = true
             if (data.solicitacaoTipoId == 1) //Desligamento
             {
                 data.comunicado  = null
                 data.mudancaBase = null 
                 data.ferias = null
+
+                //Não checar aprovação se motivo demissão for:
+                //  3 - PEDIDO DE DEMISSÃO ou 
+                //  6 - TERMINO CONTRATO DETERMINADO
+                if (data.desligamento.motivoDemissaoId == 3 || data.desligamento.motivoDemissaoId == 6)
+                    checarAprovacao = false;
+
             }else if (data.solicitacaoTipoId == 2)  //Comunicado
             {
                 data.desligamento  = null
@@ -137,12 +146,14 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
 
             //verifica se requer aprovação
-            let configuracao = (await configuracaoService.getByChave(data.regra.toLowerCase()+'.requer.aprovacao')).data;
-            if (configuracao && configuracao.valor == "true"){
-                notificacaopermissao = data.regra + '-aprovar'
-                data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'aguardando aprovação');
+            if (checarAprovacao){
+                let configuracao = (await configuracaoService.getByChave(data.regra.toLowerCase()+'.requer.aprovacao')).data;
+                if (configuracao && configuracao.valor == "true"){
+                    notificacaopermissao = data.regra + '-aprovar'
+                    data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'aguardando aprovação');
+                }
             }
-
+            
             //retorna a lista de usuários que serão notificados
             data.notificarUsuarioIds = await this.retornaUsuariosParaNotificar(data.status, data.clienteId, notificacaopermissao)
 

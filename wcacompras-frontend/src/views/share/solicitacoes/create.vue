@@ -27,6 +27,7 @@
               <desligamento
                 :data-model="solicitacao.desligamento"
                 :create-mode="true"
+                :data-admissao="solicitacao.funcionarioDataAdmissao"
                 v-show="solicitacao.solicitacaoTipoId == 1"
               />
               <Comunicado v-show="solicitacao.solicitacaoTipoId == 2" />
@@ -65,6 +66,7 @@ import { useRoute } from "vue-router";
 import { getObservacaoLabelDescricao, getPageTitle } from "@/helpers/share/data";
 import router from "@/router";
 import {useShareFuncionarioStore} from "@/store/share/funcionario.store"
+import moment from "moment";
 
 const isBusy = ref({
   form: true,
@@ -138,6 +140,8 @@ watch(() => solicitacao.value.funcionarioId, () => {
   if (oFunc) {
     solicitacao.value.centroCustoNome = oFunc.centroCustoNome
     solicitacao.value.centroCustoId = oFunc.centroCustoId
+    solicitacao.value.numeroPis = oFunc.numeroPis
+    solicitacao.value.funcionarioDataAdmissao = moment(oFunc.dataAdmissao).format("YYYY-MM-DD");
   }
 });
 

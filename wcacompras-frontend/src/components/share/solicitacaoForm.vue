@@ -46,6 +46,19 @@
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
+        <v-col cols="2">
+        <v-text-field
+              variant="outlined"
+              label="PIS"
+              class="text-primary"
+              v-model="solicitacao.numeroPis"
+              :readOnly = "true"
+              bg-color="#f2f2f2"
+              density="compact"
+            >
+          </v-text-field>
+      </v-col>
+      
     </v-row>
     <v-row>
       <v-col>

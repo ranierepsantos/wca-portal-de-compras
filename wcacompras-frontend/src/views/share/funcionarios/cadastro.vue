@@ -1,12 +1,19 @@
 <template>
   <div>
-    <Breadcrumbs title="Funcionário" :show-button="false" 
-    :buttons="[
-                { text: 'Cancelar', icon: '', event: 'cancelar-click', disabled: isBusy },
-                { text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy }
-              ]"
-    @salvar-click="salvar()"
-    @cancelar-click="router.go(-1)"
+    <Breadcrumbs
+      title="Funcionário"
+      :show-button="false"
+      :buttons="[
+        {
+          text: 'Cancelar',
+          icon: '',
+          event: 'cancelar-click',
+          disabled: isBusy,
+        },
+        { text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy },
+      ]"
+      @salvar-click="salvar()"
+      @cancelar-click="router.go(-1)"
     />
     <v-progress-linear
       color="primary"
@@ -73,85 +80,19 @@
             </v-row>
             <v-row>
               <v-col>
-                <h3 class="text-left text-grey">Endereço</h3>
-                <v-divider class="mt-3"></v-divider>
                 <v-row>
-                  <v-col>
+                  <v-col cols="3">
                     <v-text-field
-                      label="Endereço"
-                      v-model="funcionario.endereco"
-                      type="text"
+                      label="Número PIS"
+                      v-model="funcionario.numeroPis"
+                      type="number"
+                      required
                       variant="outlined"
                       color="primary"
                       density="compact"
-                      maxlength="150"
-                    >
-                    </v-text-field>
+                      :rules="[(v) => !!v || 'Campo é obrigatório']"
+                    ></v-text-field>
                   </v-col>
-                </v-row>
-                <v-row>
-                  <v-col>
-                    <v-text-field
-                      label="Complemento"
-                      v-model="funcionario.complemento"
-                      type="text"
-                      variant="outlined"
-                      color="primary"
-                      density="compact"
-                    >
-                    </v-text-field>
-                  </v-col>
-                  <v-col>
-                    <v-text-field
-                      label="Bairro"
-                      v-model="funcionario.bairro"
-                      type="text"
-                      variant="outlined"
-                      color="primary"
-                      density="compact"
-                    >
-                    </v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="2">
-                    <v-text-field
-                      label="Cep"
-                      v-model="funcionario.cep"
-                      type="text"
-                      variant="outlined"
-                      color="primary"
-                      density="compact"
-                      v-maska="'#####-###'"
-                    >
-                    </v-text-field>
-                  </v-col>
-                  <v-col>
-                    <v-text-field
-                      label="Cidade"
-                      v-model="funcionario.cidade"
-                      type="text"
-                      variant="outlined"
-                      color="primary"
-                      density="compact"
-                      maxlength="100"
-                    >
-                    </v-text-field>
-                  </v-col>
-                  <v-col cols="2">
-                    <v-text-field
-                      label="UF"
-                      v-model="funcionario.uf"
-                      type="text"
-                      variant="outlined"
-                      color="primary"
-                      density="compact"
-                      v-maska="'AA'"
-                    >
-                    </v-text-field>
-                  </v-col>
-                </v-row>
-                <v-row>
                   <v-col>
                     <v-text-field
                       label="E-mail"
@@ -234,66 +175,70 @@ const funcionario = ref(new Funcionario());
 const clientes = ref([]);
 const centrosCusto = ref([]);
 const oForm = ref(null);
-const isBusy = ref(false)
+const isBusy = ref(false);
 const route = useRoute();
 const swal = inject("$swal");
 
 //VUE FUNCTIONS
 onBeforeMount(async () => {
-    try {
-        isBusy.value = true
-        clientes.value = await useShareClienteStore().toComboList(useAuthStore().sistema.filial.value, useAuthStore().user.id)    
-        await getItem(parseInt(route.query.id))
-    } catch (error) {
-        console.debug("onBeforeMount.error => ", error)
-        handleError(error)
-    }finally{
-        isBusy.value = false
-    }
-    
-}) 
+  try {
+    isBusy.value = true;
+    clientes.value = await useShareClienteStore().toComboList(
+      useAuthStore().sistema.filial.value,
+      useAuthStore().user.id
+    );
+    await getItem(parseInt(route.query.id));
+  } catch (error) {
+    console.debug("onBeforeMount.error => ", error);
+    handleError(error);
+  } finally {
+    isBusy.value = false;
+  }
+});
 
-watch(()=> funcionario.value.clienteId, async () => {
-    centrosCusto.value = await useShareClienteStore().ListCentrosDeCusto([funcionario.value.clienteId])
-})
+watch(
+  () => funcionario.value.clienteId,
+  async () => {
+    centrosCusto.value = await useShareClienteStore().ListCentrosDeCusto([
+      funcionario.value.clienteId,
+    ]);
+  }
+);
 
 //FUNCTIONS
 async function getItem(id = 0) {
-    try {
-        if (id > 0) 
-            funcionario.value = await useShareFuncionarioStore().getById(id);
-    } catch (error) {
-        console.debug("getItem.error => ", error)
-        handleError(error)
-    }
+  try {
+    if (id > 0)
+      funcionario.value = await useShareFuncionarioStore().getById(id);
+  } catch (error) {
+    console.debug("getItem.error => ", error);
+    handleError(error);
+  }
 }
 
 async function salvar() {
-    try {
-        isBusy.value = true
-        if (funcionario.value.id > 0) 
-            await useShareFuncionarioStore().update(funcionario.value)
-        else
-            await useShareFuncionarioStore().add(funcionario.value)
-        
-            await swal.fire({
-                toast: true,
-                icon: "success",
-                index: "top-end",
-                title: "Sucesso!",
-                text: "Dados salvos com sucesso!",
-                showConfirmButton: false,
-                timer: 2000,
-            });
+  try {
+    isBusy.value = true;
+    if (funcionario.value.id > 0)
+      await useShareFuncionarioStore().update(funcionario.value);
+    else await useShareFuncionarioStore().add(funcionario.value);
 
-        router.push({name: "shareFuncionarios"})
+    await swal.fire({
+      toast: true,
+      icon: "success",
+      index: "top-end",
+      title: "Sucesso!",
+      text: "Dados salvos com sucesso!",
+      showConfirmButton: false,
+      timer: 2000,
+    });
 
-    } catch (error) {
-        console.debug("getItem.error => ", error)
-        handleError(error)
-    }finally {
-        isBusy.value = false
-    }
-
+    router.push({ name: "shareFuncionarios" });
+  } catch (error) {
+    console.debug("getItem.error => ", error);
+    handleError(error);
+  } finally {
+    isBusy.value = false;
+  }
 }
 </script>

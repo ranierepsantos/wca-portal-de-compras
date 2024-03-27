@@ -19,14 +19,9 @@ namespace wca.share.application.Features.Funcionarios.Commands
         int? CodigoFuncionario = null,
         DateTime? DataDemissao = null,
         string? Email = null,
-        string? Cep = null,
-        string? Endereco = null,
-        string? Complemento = null,
-        string? Bairro = null,
-        string? Cidade = null,
-        string? UF = null,
         int? DDDCelular = null,
-        int? NumeroCelular = null
+        int? NumeroCelular = null,
+        string? NumeroPis = null
     ) : IRequest<ErrorOr<FuncionarioResponse>>;
     internal class FuncionarioCreateCommandHandle : IRequestHandler<FuncionarioCreateCommand, ErrorOr<FuncionarioResponse>>
     {

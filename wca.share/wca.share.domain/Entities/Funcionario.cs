@@ -35,28 +35,13 @@ namespace wca.share.domain.Entities
         [Column("email", TypeName ="varchar(200)")]
         public string? Email { get; set; }
 
-        [Column("cep", TypeName = "varchar(10)")]
-        public string? Cep { get;set; }
-        
-        [Column("bairro", TypeName = "varchar(150)")]
-        public string? Bairro { get;set; }
-
-        [Column("cidade", TypeName = "varchar(150)")]
-        public string? Cidade { get;set; }
-        
-        [Column("uf", TypeName = "varchar(2)")]
-        public string? UF { get;set; }
-        
-        [Column("endereco", TypeName = "varchar(200)")]
-        public string? Endereco { get;set; }
-
-        [Column("complemento", TypeName = "varchar(200)")]
-        public string? Complemento { get; set; }
-
         [Column("ddd_celular")]
         public int? DDDCelular { get;set; }
         
         [Column("numero_celular")]
         public int? NumeroCelular { get;set; }
+
+        [Column("numero_pis", TypeName ="varchar(20)")]
+        public string? NumeroPis { get; set; }
     }
 }

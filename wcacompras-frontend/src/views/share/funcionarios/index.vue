@@ -3,7 +3,7 @@
         <bread-crumbs title="Funcionários" @novoClick="editar('novo')" />
         <v-row>
             <v-col cols="6">
-                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter.termo" density="compact"
+                <v-text-field label="Pesquisar" placeholder="(Nome ou Código Funcionário)" v-model="filter.termo" density="compact"
                     variant="outlined" color="info">
                 </v-text-field>
             </v-col>
@@ -12,7 +12,7 @@
         <v-table class="elevation-2">
             <thead>
                 <tr>
-                    <th class="text-left text-grey">#</th>
+                    <th class="text-left text-grey">COD. FUNCIONÁRIO</th>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">CENTRO DE CUSTO</th>
@@ -23,7 +23,7 @@
             </thead>
             <tbody>
                 <tr v-for="item in funcionarios" :key="item.id">
-                    <td class="text-left">{{ item.id }}</td>
+                    <td class="text-left">{{ item.codigoFuncionario }}</td>
                     <td class="text-left">{{ item.nome }}</td>
                     <td class="text-left">{{ item.clienteNome }}</td>
                     <td class="text-left">{{ item.centroCustoNome }}</td>

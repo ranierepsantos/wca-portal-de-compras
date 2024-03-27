@@ -16,18 +16,13 @@ namespace wca.share.application.Features.Funcionarios.Commands
         string Nome,
         int ClienteId,
         int CentroCustoId,
-        DateTime DataAdmissao,
+        DateTime? DataAdmissao,
         int? CodigoFuncionario = null,
         DateTime? DataDemissao = null,
         string? Email = null,
-        string? Cep = null,
-        string? Endereco = null,
-        string? Complemento = null,
-        string? Bairro = null,
-        string? Cidade = null,
-        string? UF = null,
-        string? DDDCelular = null,
-        string? NumeroCelular = null
+        int? DDDCelular = null,
+        int? NumeroCelular = null,
+        string? NumeroPis = null
     ) : IRequest<ErrorOr<FuncionarioResponse>>;
     internal class FuncionarioUpdateCommandHandle : IRequestHandler<FuncionarioUpdateCommand, ErrorOr<FuncionarioResponse>>
     {
