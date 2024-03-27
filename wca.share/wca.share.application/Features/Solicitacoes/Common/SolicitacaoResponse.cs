@@ -23,6 +23,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public int? ResponsavelId { get;  set; }
         public int? CentroCustoId { get;  set; }
         public string? CentroCustoNome { get; set; }
+        public string? NumeroPis { get; set; }
 
         public SolicitacaoComunicado? Comunicado { get;  set; }
         public SolicitacaoDesligamento? Desligamento { get;  set; }

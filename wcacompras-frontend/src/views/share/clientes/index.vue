@@ -3,7 +3,7 @@
         <bread-crumbs title="Clientes" @novoClick="editar('novo')" />
         <v-row>
             <v-col cols="6">
-                <v-text-field label="Pesquisar" placeholder="(Nome)" v-model="filter" density="compact"
+                <v-text-field label="Pesquisar" placeholder="(Nome ou Código Cliente)" v-model="filter" density="compact"
                     variant="outlined" color="info">
                 </v-text-field>
             </v-col>
@@ -12,6 +12,7 @@
         <v-table class="elevation-2">
             <thead>
                 <tr>
+                    <th class="text-left text-grey">COD. CLIENTE</th>
                     <th class="text-left text-grey">NOME</th>
                     <th class="text-left text-grey">CNPJ</th>
                     <th class="text-left text-grey" v-show="isMatriz">FILIAL</th>
@@ -21,10 +22,8 @@
             </thead>
             <tbody>
                 <tr v-for="item in clientes" :key="item.id">
-                    <td class="text-left">
-                        <v-icon icon="mdi-home-outline"></v-icon>
-                        &nbsp;{{ item.nome }}
-                    </td>
+                    <td class="text-left">{{ item.codigoCliente }}</td>
+                    <td class="text-left">{{ item.nome }}</td>
                     <td class="text-left">{{ item.cnpj }}</td>
                     <td class="text-left" v-show="isMatriz">{{ getFilialNome(item.filialId) }}</td>
                     <td class="text-center">

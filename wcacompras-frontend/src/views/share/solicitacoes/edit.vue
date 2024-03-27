@@ -36,6 +36,7 @@
                 :create-mode="false"
                 v-show="solicitacao.solicitacaoTipoId == 1"
                 :is-read-only="modeReadOnly"
+                :data-admissao="solicitacao.funcionarioDataAdmissao"
               />
               <Comunicado v-show="solicitacao.solicitacaoTipoId == 2" />
               <Ferias v-show="solicitacao.solicitacaoTipoId == 3" />

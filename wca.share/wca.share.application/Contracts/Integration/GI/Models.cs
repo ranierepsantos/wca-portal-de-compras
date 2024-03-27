@@ -139,5 +139,8 @@ namespace wca.share.application.Contracts.Integration.GI.Models
 
         [JsonPropertyName("smsNroCel")]
         public int? SmsNroCel { get; set; }
+
+        [JsonPropertyName("pis")]
+        public double? Pis { get; set; }
     }
 }

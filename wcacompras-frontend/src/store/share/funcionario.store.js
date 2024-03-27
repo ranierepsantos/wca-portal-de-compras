@@ -20,14 +20,9 @@ export class Funcionario {
         this.dataDemissao = data && data.dataDemissao ?  moment(data.dataDemissao).format("YYYY-MM-DD"): null
         this.codigoFuncionario = data ? data.codigoFuncionario: null
         this.email = data ? data.email: null
-        this.cep = data ? data.cep: null
-        this.endereco = data ? data.endereco: null
-        this.complemento = data ? data.complemento: null
-        this.bairro = data ? data.bairro: null
-        this.cidade = data ? data.cidade: null
-        this.uf = data ? data.uf: null
         this.dddCelular = data ? data.dddCelular: null
         this.numeroCelular = data ? data.numeroCelular: null
+        this.numeroPis = data ? data.numeroPis: null
     }
 }
 

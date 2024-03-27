@@ -33,7 +33,7 @@ namespace wca.share.application.Features.Clientes.Queries
                 query = query.Where(q => q.FilialId.Equals(request.FilialId));
 
             if (!string.IsNullOrEmpty(request.Termo))
-                query = query.Where(q => q.Nome.Contains(request.Termo));
+                query = query.Where(q => q.Nome.Contains(request.Termo) || q.CodigoCliente.ToString().Contains(request.Termo));
 
             query = query.OrderBy(o => o.Nome).AsQueryable();
 
