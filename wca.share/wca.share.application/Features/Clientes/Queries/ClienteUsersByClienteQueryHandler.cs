@@ -25,7 +25,10 @@ namespace wca.share.application.Features.Clientes.Queries
             _logger.LogInformation("Listando id de usuários por cliente");
 
             var query = _repository.UsuarioClientesRepository.ToQuery()
-                        .Where(q => q.ClienteId.Equals(request.ClienteId));
+                .Include(u => u.Usuario)
+                .Where(q => q.ClienteId.Equals(request.ClienteId)
+                         && q.Usuario.Ativo
+                );
             
             var list = await query.Select(q => new
             {
