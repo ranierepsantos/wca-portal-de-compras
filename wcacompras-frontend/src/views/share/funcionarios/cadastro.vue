@@ -125,6 +125,7 @@
                       color="primary"
                       density="compact"
                       v-maska="'#####-####'"
+                      
                     />
                   </v-col>
                   <v-col>

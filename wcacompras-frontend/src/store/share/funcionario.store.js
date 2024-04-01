@@ -30,7 +30,10 @@ export class Funcionario {
 export const useShareFuncionarioStore = defineStore("shareFuncionario", {
   actions: {
     async add (data) {
-        try {
+        try 
+        {
+            data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
+            data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
             let response = await api.post(rotas.Create, data);
             return new Funcionario(response.data);
         } catch (error) {
@@ -39,6 +42,8 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
     },
     async update (data) {
         try {
+            data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
+            data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
             let response = await api.put(rotas.Update, data);
             return new Funcionario(response.data);
         } catch (error) {
