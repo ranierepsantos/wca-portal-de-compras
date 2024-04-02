@@ -3,6 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using wca.share.application.Common;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Solicitacoes.Common;
@@ -32,6 +33,8 @@ namespace wca.share.application.Features.Solicitacoes.Queries
         public async Task<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>> Handle(
             SolicitacaoPaginateQuery request, CancellationToken cancellationToken)
         {
+
+            _logger.LogInformation($"Parâmetros {JsonSerializer.Serialize(request)}");
 
             if (request.DataIni > request.DataFim || (request.DataIni != null && request.DataFim is null) || (request.DataFim != null && request.DataIni is null))
             {

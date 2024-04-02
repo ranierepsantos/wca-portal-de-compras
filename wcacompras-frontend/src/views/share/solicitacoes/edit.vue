@@ -69,7 +69,13 @@
       :absolute="false"
       persistent
     >
-      <NotificacaoEnvio :usuario-list="responsavelList" @closeForm="openNotificacao=false"></NotificacaoEnvio>
+      <NotificacaoEnvio 
+        :usuario-list="responsavelList" 
+        @closeForm="openNotificacao=false"
+        :entidade="permissao.charAt(0).toUpperCase() + permissao.slice(1)"
+        :entidade-id="solicitacao.id"
+      />
+                    
     </v-dialog>
     <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
     <v-dialog
@@ -317,8 +323,8 @@ function getButtons() {
       return []
   } else if (useAuthStore().hasPermissao(permissao.value + '-executar') || useAuthStore().hasPermissao(permissao.value + '-finalizar')) 
   {
-      //let buttons = [{ text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.value.save }]
-      let buttons = []
+      let buttons = [{ text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.value.save }]
+      //let buttons = []
       if (useAuthStore().hasPermissao(permissao.value + '-finalizar')){
         buttons.push({ text: 'Finalizar', icon: '', event: 'finalizar-click',disabled: isBusy.value.save })
       }

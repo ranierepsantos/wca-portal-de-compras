@@ -33,14 +33,14 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
 
-    <!--NOTIFICAÇÕES
+    <!--NOTIFICAÇÕES-->
       <v-btn class="text-none" stacked>
         <v-badge :content="notificacoes.length" color="error">
           <v-icon>mdi-bell-outline</v-icon>
         </v-badge>
         <notificacao-list :notificacoes="notificacoes"/>
       </v-btn>
-    -->
+    
       <v-btn variant="text" class="text-capitalize" color="primary">
         <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
         {{ usuario.nome }}
@@ -143,6 +143,12 @@ const menuItems = ref([
     title: "Funcionáros",
     value: 10,
     route: "/share/funcionarios",
+    permissao: "funcionario"
+  },
+  {
+    title: "Notificações",
+    value: 10,
+    route: "/share/notificacoes",
     permissao: "livre"
   },
 ]);
@@ -160,8 +166,7 @@ onMounted(async () => {
   useShareSolicitacaoStore().listarStatusSolicitacao();
   useShareSolicitacaoStore().listarMotivosDemissao();
   clearInterval(checkNotificacoes.value)
-  //notificacoes.value = []
-  //startCheckNotificacoes()
+  startCheckNotificacoes()
 });
 
 onUnmounted(() => {  clearInterval(checkNotificacoes.value) }) 

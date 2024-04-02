@@ -249,7 +249,6 @@ const isLoading = ref({
   form: true,
   busy: false,
 });
-const formButtons = ref([]);
 const pageTipo = ref({
     id: 0,
     tipo: ""
@@ -398,35 +397,4 @@ async function getUsuarioToList(filiais = []) {
   }
 }
 
-async function gerarRelatorio() {
-  try {
-    isLoading.value.busy = true;
-    if (
-      (filter.value.dataIni && !filter.value.dataFim) ||
-      (filter.value.dataFim && !filter.value.dataIni)
-    )
-      throw new TypeError("Ambas as datas devem ser informadas!");
-    else if (moment(filter.value.dataFim) < moment(filter.value.dataIni))
-      throw new TypeError("A data fim deve ser maior que a data início!");
-
-    let response = await solicitacaoStore.gerarRelatorio(filter.value);
-
-    if (response.status == 200) {
-      let nomeArquivo = `relatorio_solicitacoes_${moment().format(
-        "DDMMYYYY_HHmmSS"
-      )}.xlsx`;
-      await new Promise((r) => setTimeout(r, 2000));
-      realizarDownload(
-        response,
-        nomeArquivo,
-        response.headers.getContentType()
-      );
-    }
-  } catch (error) {
-    console.log("solicitacoes.gerarRelatorio.error:", error.response);
-    handleErrors(error);
-  } finally {
-    isLoading.value.busy = false;
-  }
-}
 </script>

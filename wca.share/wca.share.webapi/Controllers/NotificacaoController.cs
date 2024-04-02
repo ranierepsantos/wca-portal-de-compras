@@ -1,8 +1,4 @@
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using wca.share.application.Features.Notificacoes.Queries;
 using wca.share.application.Features.Notificacoes.Commands;
@@ -38,5 +34,26 @@ namespace wca.share.webapi.Controllers
 
             return Ok(result.Value);
         }
+
+        [HttpPost("EnviarNotificacao")]
+        public async Task<IActionResult> EnviarNotificacao(NotificacaoCreateCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("Paginar")]
+        public async Task<IActionResult> ToPaginate([FromQuery] NotificacaoToPaginateQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
     }
 }
