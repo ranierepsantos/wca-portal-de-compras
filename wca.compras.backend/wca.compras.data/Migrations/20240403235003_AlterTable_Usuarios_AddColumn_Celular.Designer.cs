@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240403235003_AlterTable_Usuarios_AddColumn_Celular")]
+    partial class AlterTable_Usuarios_AddColumn_Celular
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1227,31 +1229,6 @@ namespace wca.compras.data.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("wca.compras.domain.Entities.UsuarioConfiguracoes", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_id");
-
-                    b.Property<int>("SistemaId")
-                        .HasColumnType("int")
-                        .HasColumnName("sistema_id");
-
-                    b.Property<bool>("NotificarPorChatBot")
-                        .HasColumnType("bit")
-                        .HasColumnName("notificar_por_chatbot");
-
-                    b.Property<bool>("NotificarPorEmail")
-                        .HasColumnType("bit")
-                        .HasColumnName("notificar_por_email");
-
-                    b.HasKey("UsuarioId", "SistemaId");
-
-                    b.HasIndex("SistemaId");
-
-                    b.ToTable("UsuarioConfiguracoes");
-                });
-
             modelBuilder.Entity("wca.compras.domain.Entities.UsuarioReembolsoComplemento", b =>
                 {
                     b.Property<int>("UsuarioId")
@@ -1597,25 +1574,6 @@ namespace wca.compras.data.Migrations
                     b.Navigation("Usuarios");
                 });
 
-            modelBuilder.Entity("wca.compras.domain.Entities.UsuarioConfiguracoes", b =>
-                {
-                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
-                        .WithMany()
-                        .HasForeignKey("SistemaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("wca.compras.domain.Entities.Usuario", "Usuario")
-                        .WithMany("UsuarioConfiguracoes")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Sistema");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("wca.compras.domain.Entities.UsuarioReembolsoComplemento", b =>
                 {
                     b.HasOne("wca.compras.domain.Entities.Usuario", "Gestor")
@@ -1705,8 +1663,6 @@ namespace wca.compras.data.Migrations
 
             modelBuilder.Entity("wca.compras.domain.Entities.Usuario", b =>
                 {
-                    b.Navigation("UsuarioConfiguracoes");
-
                     b.Navigation("UsuarioReembolsoComplemento");
 
                     b.Navigation("UsuarioSistemaPerfil");
