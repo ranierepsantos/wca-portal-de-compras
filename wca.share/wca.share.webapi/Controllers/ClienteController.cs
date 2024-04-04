@@ -99,8 +99,8 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("ListarCentroCustoPorCliente")]
-        public async Task<IActionResult> ListarCentroCustoPorCliente([FromQuery] CentrodeCustoByClienteQuery query)
+        [HttpPost("ListarCentroCustoPorCliente")]
+        public async Task<IActionResult> ListarCentroCustoPorCliente([FromBody] CentrodeCustoByClienteQuery query)
         {
             var result = await _mediator.Send(query);
 

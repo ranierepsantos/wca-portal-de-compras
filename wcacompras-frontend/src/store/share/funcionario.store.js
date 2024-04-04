@@ -68,7 +68,7 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
                 clienteIds: filters.clienteIds,
                 centroCustoIds: filters.centroCustoIds,
             }
-            let response = await api.get(rotas.Paginar, {params: parametros} );
+            let response = await api.post(rotas.Paginar, parametros);
             return response.data        
         } catch (error) {
             throw error

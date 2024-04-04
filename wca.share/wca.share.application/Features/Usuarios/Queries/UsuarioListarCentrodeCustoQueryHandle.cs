@@ -25,8 +25,8 @@ namespace wca.share.application.Features.Usuarios.Queries
         public async Task<ErrorOr<IList<CentroCusto>>> Handle(UsuarioListarCentrodeCustoQuery request, CancellationToken cancellationToken)
         {
             var query = _repository.GetDbSet<CentroCusto>()
-                .Include(q => q.Usuarios)
-                .Where(q => q.Usuarios.Any(c => c.UsuarioId.Equals(request.UsuarioId)));
+                .Include(q => q.UsuarioCentrodeCustos)
+                .Where(q => q.UsuarioCentrodeCustos.Any(c => c.UsuarioId.Equals(request.UsuarioId)));
 
 
             if (request.ClienteId > 0)
