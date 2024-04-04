@@ -13,9 +13,10 @@ namespace wca.reembolso.application.Features.Usuarios.Commands
       int Id,
       string Nome,
       string Email,
-      bool Ativo, 
-      IList<ListItem>? Filial
-    ): IRequest<ErrorOr<bool>>;
+      bool Ativo,
+      string? Celular,
+      UsuarioConfiguracoes? Configuracoes
+    ) : IRequest<ErrorOr<bool>>;
 
     public sealed class UsuarioCreateUpdateCommandHandle : IRequestHandler<UsuarioCreateUpdateCommand, ErrorOr<bool>>
     {
@@ -47,35 +48,28 @@ namespace wca.reembolso.application.Features.Usuarios.Commands
                 usuario.Nome = request.Nome;
                 usuario.Email = request.Email;
                 usuario.Ativo = request.Ativo;
+                usuario.Celular = request.Celular;
+
                 _repository.GetDbSet<Usuario>().Entry(usuario).State = EntityState.Modified;
             }
 
-            //if (request.Filial != null)
-            //{
-            //    List<FilialUsuario> toRemove = usuario.FilialUsuario
-            //    .Where(x => !request.Filial.Where(q => q.Value == x.FilialId).Any())
-            //    .Where(x => x.FilialId != 0)
-            //    .ToList();
+            UsuarioConfiguracoes _userConfig = new()
+            {
+                UsuarioId = request.Id,
+                NotificarPorChatBot = request.Configuracoes?.NotificarPorChatBot ?? false,
+                NotificarPorEmail = request.Configuracoes?.NotificarPorEmail ?? false
+            };
 
-            //    foreach (var item in toRemove)
-            //    {
-            //        _repository.FilialUsuarioRepository.Delete(item);
-            //    }
+            UsuarioConfiguracoes? configuracoes = await _repository.GetDbSet<UsuarioConfiguracoes>()
+                                                 .Where(q => q.UsuarioId.Equals(request.Id))
+                                                 .AsNoTracking()
+                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (configuracoes == null)
+                _repository.GetDbSet<UsuarioConfiguracoes>().Add(_userConfig);
+            else
+                _repository.GetDbSet<UsuarioConfiguracoes>().Entry(_userConfig).State = EntityState.Modified;
 
-            //    List<ListItem> toAdd = request.Filial
-            //        .Where(x => !usuario.FilialUsuario.Any(q => q.FilialId.Equals(x.Value)))
-            //    .ToList();
 
-            //    foreach (var item in toAdd)
-            //    {
-            //        var _filial = new FilialUsuario() { 
-            //            FilialId = item.Value,
-            //            UsuarioId = request.Id
-            //        };
-                    
-            //        usuario.FilialUsuario.Add(_filial);
-            //    }
-            //}
             await _repository.SaveAsync();
             return true;
         }

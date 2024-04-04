@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20240403232832_AlterTable_Usuarios_AddColumn_Celular")]
+    partial class AlterTable_Usuarios_AddColumn_Celular
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -650,25 +653,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.ToTable("UsuarioClientes");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioConfiguracoes", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_id");
-
-                    b.Property<bool>("NotificarPorChatBot")
-                        .HasColumnType("bit")
-                        .HasColumnName("notificar_por_chatbot");
-
-                    b.Property<bool>("NotificarPorEmail")
-                        .HasColumnType("bit")
-                        .HasColumnName("notificar_por_email");
-
-                    b.HasKey("UsuarioId");
-
-                    b.ToTable("UsuarioConfiguracoes");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.CentroCusto", b =>
                 {
                     b.HasOne("wca.reembolso.domain.Entities.Cliente", null)
@@ -830,17 +814,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("wca.reembolso.domain.Entities.UsuarioConfiguracoes", b =>
-                {
-                    b.HasOne("wca.reembolso.domain.Entities.Usuario", "Usuario")
-                        .WithOne("UsuarioConfiguracoes")
-                        .HasForeignKey("wca.reembolso.domain.Entities.UsuarioConfiguracoes", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("wca.reembolso.domain.Entities.CentroCusto", b =>
                 {
                     b.Navigation("Usuarios");
@@ -881,8 +854,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.Navigation("UsuarioCentrodeCustos");
 
                     b.Navigation("UsuarioClientes");
-
-                    b.Navigation("UsuarioConfiguracoes");
                 });
 #pragma warning restore 612, 618
         }
