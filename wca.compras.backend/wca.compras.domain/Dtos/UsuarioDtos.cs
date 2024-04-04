@@ -10,10 +10,12 @@ namespace wca.compras.domain.Dtos
         string Email,
         bool Ativo,
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
+        string? Celular,
         IList<ListItem>? Filial,
         IList<ListItem>? Cliente,
         IList<ListItem>? TipoFornecimento,
-        UsuarioReembolsoComplemento? UsuarioReembolsoComplemento
+        UsuarioReembolsoComplemento? UsuarioReembolsoComplemento,
+        IList<UsuarioConfiguracoes>? UsuarioConfiguracoes
     );
 
     public record CreateUsuarioDto (
@@ -24,10 +26,12 @@ namespace wca.compras.domain.Dtos
         string Email,
         [Required(ErrorMessage ="O campo é obrigatório")]
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
+        string? Celular,
         IList<ListItem>? Filial,
         IList<ListItem>? Cliente,
         IList<ListItem>? TipoFornecimento,
-        UsuarioReembolsoComplemento? UsuarioReembolsoComplemento
+        UsuarioReembolsoComplemento? UsuarioReembolsoComplemento,
+        IList<UsuarioConfiguracoes>? UsuarioConfiguracoes
     );
 
     public record UpdateUsuarioDto(
@@ -39,11 +43,13 @@ namespace wca.compras.domain.Dtos
         [EmailAddress(ErrorMessage ="Infome um e-mail válido")]
         string Email,
         bool Ativo,
-        [MinLength(1, ErrorMessage ="Informe pelo menos 1 filial")]
         IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil,
+        [MinLength(1, ErrorMessage ="Informe pelo menos 1 filial")]
         IList<ListItem>? Filial,
+        string? Celular,
         IList<ListItem>? Cliente,
         IList<ListItem>? TipoFornecimento,
-        UsuarioReembolsoComplemento? UsuarioReembolsoComplemento
+        UsuarioReembolsoComplemento? UsuarioReembolsoComplemento,
+        IList<UsuarioConfiguracoes>? UsuarioConfiguracoes
     );
 }
