@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using wca.share.application.Common;
+using wca.share.application.Contracts;
 
 namespace wca.share.application
 {
@@ -15,6 +16,7 @@ namespace wca.share.application
             services.AddMediatR(_ => _.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<INotificacaoHandle, NotificacaoHandle>();
             HandleFile.Configure(configuration);
         }
 

@@ -11,10 +11,11 @@ export class Usuario {
         this.nome = data ? data.nome : ""
         this.email = data ? data.email: ""
         this.ativo = data ? data.ativo: true
+        this.celular = data? data.celular: null
         this.filial = data ? data.filial: []
         this.cliente = data? data.cliente: []
-        this.tipoFornecimento = data? data.tipoFornecimento?? []: []
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
+        this.usuarioConfiguracoes = data? data.usuarioConfiguracoes: []
     }
 }
 
@@ -28,12 +29,15 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
             try {
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
-                
                 let response = await userService.create(data);
                 
 
                 data.id = response.data.id;
                 
+                let configuracoes = data.usuarioConfiguracoes[0]
+                delete data.usuarioConfiguracoes
+                data.usuarioConfiguracoes = configuracoes
+
                 await usuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
@@ -84,6 +88,10 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
                 data.cliente = [];
                 
                 await userService.update(data);
+
+                let configuracoes = data.usuarioConfiguracoes[0]
+                delete data.usuarioConfiguracoes
+                data.usuarioConfiguracoes = configuracoes
 
                 await usuarioService.createUpdate(data)
             

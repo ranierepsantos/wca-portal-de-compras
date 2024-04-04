@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240403234309_AlterTable_Usuarios_AddColumn_Celular")]
+    partial class AlterTable_Usuarios_AddColumn_Celular
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -706,25 +709,6 @@ namespace wca.share.infrastructure.Migrations
                     b.ToTable("UsuarioClientes");
                 });
 
-            modelBuilder.Entity("wca.share.domain.Entities.UsuarioConfiguracoes", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_id");
-
-                    b.Property<bool>("NotificarPorChatBot")
-                        .HasColumnType("bit")
-                        .HasColumnName("notificar_por_chatbot");
-
-                    b.Property<bool>("NotificarPorEmail")
-                        .HasColumnType("bit")
-                        .HasColumnName("notificar_por_email");
-
-                    b.HasKey("UsuarioId");
-
-                    b.ToTable("UsuarioConfiguracoes");
-                });
-
             modelBuilder.Entity("ItemMudancaSolicitacaoMudancaBase", b =>
                 {
                     b.HasOne("wca.share.domain.Entities.ItemMudanca", null)
@@ -930,17 +914,6 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("wca.share.domain.Entities.UsuarioConfiguracoes", b =>
-                {
-                    b.HasOne("wca.share.domain.Entities.Usuario", "Usuario")
-                        .WithOne("UsuarioConfiguracoes")
-                        .HasForeignKey("wca.share.domain.Entities.UsuarioConfiguracoes", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
                 {
                     b.Navigation("Usuarios");
@@ -969,8 +942,6 @@ namespace wca.share.infrastructure.Migrations
             modelBuilder.Entity("wca.share.domain.Entities.Usuario", b =>
                 {
                     b.Navigation("UsuarioCentrodeCustos");
-
-                    b.Navigation("UsuarioConfiguracoes");
                 });
 #pragma warning restore 612, 618
         }

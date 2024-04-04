@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace wca.reembolso.domain.Entities
 {
@@ -21,10 +22,29 @@ namespace wca.reembolso.domain.Entities
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
         
+        [Column("celular", TypeName = "varchar(30)")]
+        public string? Celular { get; set; }
+
         public ContaCorrente? ContaCorrente { get; set;}
 
         public List<UsuarioClientes>? UsuarioClientes { get; set;}
         public List<UsuarioCentrodeCustos>? UsuarioCentrodeCustos { get; set; }
+        public UsuarioConfiguracoes? UsuarioConfiguracoes { get; set; }
     }
 
+    [Table("UsuarioConfiguracoes")]
+    public sealed class UsuarioConfiguracoes
+    {
+        [Column("usuario_id")]
+        public int UsuarioId { get; set; }
+
+        [JsonIgnore]
+        public Usuario? Usuario { get; set; }
+
+        [Column("notificar_por_email")]
+        public bool NotificarPorEmail { get; set; } = false;
+
+        [Column("notificar_por_chatbot")]
+        public bool NotificarPorChatBot { get; set; } = false;
+    }
 }

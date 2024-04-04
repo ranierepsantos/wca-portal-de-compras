@@ -12,34 +12,52 @@
         <v-card-text>
           <v-form @submit.prevent="salvar()" ref="userForm">
             <usuario-form :user="usuario" :list-filial="filiais" @emailChange="checkUserExistsByEmail($event)"></usuario-form>
-                <v-row style="margin-top: 3px;">
-                  <v-col>
-                    <v-select
-                      label="Perfil"
-                      :model-value="getSistemaPerfil(authStore.sistema.id)"
-                      :items="listPerfil"
-                      item-title="text"
-                      item-value="value"
-                      variant="outlined"
-                      color="primary"
-                      :rules="[(v) => !!v || 'Perfil é obrigatório']"
-                      density="compact"
-                      @update:model-value="setPerfilUsuario($event)"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-                <box-transfer 
-                  :list-origem="filiais" 
-                  :list-destino="usuario.filial"
-                  list-origem-titulo = "Selecione a filial"
-                  list-destino-titulo = "Filiais do usuário"
-                />
-                <box-transfer 
-                  :list-origem="clientes" 
-                  :list-destino="usuario.cliente"
-                  list-origem-titulo = "Selecione os clientes"
-                  list-destino-titulo = "Clientes do usuário"
-                />
+            <v-row style="margin-top: 3px;">
+              <v-col>
+                <v-switch
+                v-model="usuarioConfiguracoes.notificarPorEmail"
+                color="primary"
+                hide-details
+                label="Receber notificação por e-mail?"
+              />
+              </v-col>
+              <v-col>
+                <v-switch
+                v-model="usuarioConfiguracoes.notificarPorChatBot"
+                color="primary"
+                hide-details
+                label="Receber notificação por chatbot?"
+              />
+              </v-col>
+            </v-row>
+            <v-row style="margin-top: 3px;">
+              <v-col>
+                <v-select
+                  label="Perfil"
+                  :model-value="getSistemaPerfil(authStore.sistema.id)"
+                  :items="listPerfil"
+                  item-title="text"
+                  item-value="value"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Perfil é obrigatório']"
+                  density="compact"
+                  @update:model-value="setPerfilUsuario($event)"
+                ></v-select>
+              </v-col>
+            </v-row>
+            <box-transfer 
+              :list-origem="filiais" 
+              :list-destino="usuario.filial"
+              list-origem-titulo = "Selecione a filial"
+              list-destino-titulo = "Filiais do usuário"
+            />
+            <box-transfer 
+              :list-origem="clientes" 
+              :list-destino="usuario.cliente"
+              list-origem-titulo = "Selecione os clientes"
+              list-destino-titulo = "Clientes do usuário"
+            />
             <v-row style="margin-top: 5px;">
               <v-col class="text-right">
                 <v-btn variant="outlined" color="primary" @click="router.go(-1)"
@@ -83,7 +101,12 @@ let filialUsuario = [];
 const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
-
+const usuarioConfiguracoes = ref({
+  usuarioId: 0,
+  sistemaId: authStore.sistema.id,
+  notificarPorEmail: false,
+  notificarPorChatBot: false
+})
 //VUE METHODS
 onMounted(async () => {
   clearData();
@@ -173,7 +196,8 @@ async function salvar() {
   try {
     let { valid } = await userForm.value.validate();
     if (valid) {
-      let data = usuario.value;
+      let data = {... usuario.value };
+      data.usuarioConfiguracoes[0] = usuarioConfiguracoes.value
       if (data.id == 0) {
         await usuarioStore.add(data);
       } else {
@@ -241,6 +265,9 @@ async function getUsuario(usuarioId) {
     debugger
     isBusy.value = true;
     usuario.value = await usuarioStore.getById(usuarioId);
+    if (usuario.value.usuarioConfiguracoes.length > 0)
+      usuarioConfiguracoes.value = {...usuario.value.usuarioConfiguracoes[0]}
+
     clientesListRemove();
     filiaisListRemove();
   } catch (error) {
@@ -262,18 +289,21 @@ function filiaisListRemove(removerTodos = false) {
 }
 
 async function checkUserExistsByEmail(email) {
-  // try {
-  //   let user = (await userService.getByEmail(email)).data;
-  //   let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
-  //   console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
-  //   if (hasUserInTheSameSystem.length > 0) {
-  //     throw new Error("Email já cadastrado, neste sistema!")
-  //   }
-  //   usuario.value.nome = user.nome
-  // } catch (error) {
-  //   if( !error.response || error.response.status != 404)
-  //     handleErrors(error)
-  // }
+  try {
+    let user = (await userService.getByEmail(email)).data;
+    let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
+    console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
+    if (hasUserInTheSameSystem.length > 0 && usuario.value.id == 0) {
+      throw new Error("Email já cadastrado, neste sistema!")
+    }
+    usuario.value.id = user.id
+    usuario.value.nome = user.nome
+    usuario.value.celular = user.celular
+
+  } catch (error) {
+    if( !error.response || error.response.status != 404)
+      handleErrors(error)
+  }
   
 }
 </script>

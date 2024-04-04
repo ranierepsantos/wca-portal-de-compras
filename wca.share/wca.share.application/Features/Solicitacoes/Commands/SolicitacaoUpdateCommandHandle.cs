@@ -3,7 +3,9 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
 using wca.share.application.Common;
+using wca.share.application.Contracts;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
@@ -36,36 +38,16 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly ILogger<SolicitacaoUpdateCommandHandle> _logger;
+        private readonly INotificacaoHandle _nofiticacaoHandle;
 
 
-        private string GetDescricaoTipoSolicitacao(int Tipo)
-        {
-            return Tipo switch
-            {
-                (int)EnumTipoSolicitacao.Comunicado => "Comunicado",
-                (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
-                (int)EnumTipoSolicitacao.Ferias => "Férias",
-                (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
-            };
-        }
-
-        private string GetEntidadeTipoSolicitacao(int Tipo)
-        {
-            return Tipo switch
-            {
-                (int)EnumTipoSolicitacao.Comunicado => EnumTipoSolicitacao.Comunicado.ToString(),
-                (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
-                (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
-                (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
-            };
-        }
-
-        public SolicitacaoUpdateCommandHandle(IRepositoryManager repository, IMapper mapper, IMediator mediator, ILogger<SolicitacaoUpdateCommandHandle> logger)
+        public SolicitacaoUpdateCommandHandle(IRepositoryManager repository, IMapper mapper, IMediator mediator, ILogger<SolicitacaoUpdateCommandHandle> logger, INotificacaoHandle nofiticacaoHandle)
         {
             _repository = repository;
             _mapper = mapper;
             _mediator = mediator;
             _logger = logger;
+            _nofiticacaoHandle = nofiticacaoHandle;
         }
 
         public async Task<ErrorOr<SolicitacaoResponse>> Handle(SolicitacaoUpdateCommand request, CancellationToken cancellationToken)
@@ -159,18 +141,9 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             await _mediator.Send(querie, cancellationToken);
 
             //notificar responsáveis
-            for (var ii = 0; ii < request.NotificarUsuarioIds?.Length; ii++)
-            {
-                if (request.Status?.TemplateNotificacao is not null)
-                {
-                    string mensagem = request.Status.TemplateNotificacao.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao(dado.SolicitacaoTipoId)).Replace("{id}", dado.Id.ToString());
-
-                    var notificacao = new NotificacaoCreateCommand(request.NotificarUsuarioIds[ii], mensagem, GetEntidadeTipoSolicitacao(dado.SolicitacaoTipoId), dado.Id);
-
-                    await _mediator.Send(notificacao, cancellationToken);
-                }
-            }
-
+            if (request.Status?.TemplateNotificacao is not null && request.NotificarUsuarioIds?.Length > 0)
+                await _nofiticacaoHandle.SolicitacaoEnviarNotificacaoAsync(request.NotificarUsuarioIds, request.Status.TemplateNotificacao, dado, cancellationToken);
+            
             // mapear para SolicitacaoResponse e retornar
             return _mapper.Map<SolicitacaoResponse>(dado);
         }

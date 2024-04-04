@@ -3,6 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using wca.share.application.Contracts;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
@@ -25,13 +26,14 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoChangeStatusCommandHandle> _logger;
         private readonly IMediator _mediator;
-
-        public SolicitacaoChangeStatusCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoChangeStatusCommandHandle> logger, IMediator mediator)
+        private readonly INotificacaoHandle _nofiticacaoHandle;
+        public SolicitacaoChangeStatusCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoChangeStatusCommandHandle> logger, IMediator mediator, INotificacaoHandle nofiticacaoHandle)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
+            _nofiticacaoHandle = nofiticacaoHandle;
         }
 
         public async Task<ErrorOr<bool>> Handle(SolicitacaoChangeStatusCommand request, CancellationToken cancellationToken)
@@ -58,42 +60,11 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             await _mediator.Send(eventoCommand);
 
             // gerar notificação
-            for (var ii = 0; ii < request.Notificar?.Length; ii++)
-            {
-                if (request.Status.TemplateNotificacao is not null)
-                {
-                    string mensagem = request.Status.TemplateNotificacao.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao(dado.SolicitacaoTipoId)).Replace("{id}", dado.Id.ToString());
-
-                    var notificacao = new NotificacaoCreateCommand(request.Notificar[ii], mensagem, GetEntidadeTipoSolicitacao(dado.SolicitacaoTipoId), dado.Id);
-
-                    await _mediator.Send(notificacao, cancellationToken);
-                }
-            }
+            if (request.Status?.TemplateNotificacao is not null && request.Notificar?.Length > 0)
+                await _nofiticacaoHandle.SolicitacaoEnviarNotificacaoAsync(request.Notificar, request.Status.TemplateNotificacao, dado, cancellationToken);
 
             // return 
             return true;
-        }
-
-        private string GetDescricaoTipoSolicitacao(int Tipo)
-        {
-            return Tipo switch
-            {
-                (int)EnumTipoSolicitacao.Comunicado => "Comunicado",
-                (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
-                (int)EnumTipoSolicitacao.Ferias => "Férias",
-                (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
-            };
-        }
-
-        private string GetEntidadeTipoSolicitacao(int Tipo)
-        {
-            return Tipo switch
-            {
-                (int)EnumTipoSolicitacao.Comunicado => EnumTipoSolicitacao.Comunicado.ToString(),
-                (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
-                (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
-                (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
-            };
         }
     }
 }

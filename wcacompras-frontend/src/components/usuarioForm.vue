@@ -14,13 +14,13 @@
           @blur="$emit('emailChange', $event.target.value)"
         ></v-text-field>
       </v-col>
-      <v-col cols="2" v-show="user.id > 0">
+      <!-- <v-col cols="2" v-show="user.id > 0">
         <v-checkbox
           v-model="user.ativo"
           label="Ativo"
           color="primary"
         ></v-checkbox>
-      </v-col>
+      </v-col> -->
     </v-row>
     <v-row>
       <v-col>
@@ -32,6 +32,18 @@
           variant="outlined"
           color="primary"
           :rules="[(v) => !!v || 'Nome é obrigatório']"
+          density="compact"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="2">
+        <v-text-field
+          label="Celular"
+          v-model="user.celular"
+          type="text"
+          required
+          variant="outlined"
+          color="primary"
+          v-maska="'(##) #####-####'"
           density="compact"
         ></v-text-field>
       </v-col>

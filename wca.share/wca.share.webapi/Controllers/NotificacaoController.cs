@@ -36,7 +36,7 @@ namespace wca.share.webapi.Controllers
         }
 
         [HttpPost("EnviarNotificacao")]
-        public async Task<IActionResult> EnviarNotificacao(NotificacaoCreateCommand command)
+        public async Task<IActionResult> EnviarNotificacao(NotificacaoSendCommand command)
         {
             var result = await _mediator.Send(command);
 

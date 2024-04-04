@@ -12,8 +12,10 @@ namespace wca.share.application.Features.Usuarios.Commands
       int Id,
       string Nome,
       string Email,
-      bool Ativo
-    ): IRequest<ErrorOr<bool>>;
+      bool Ativo,
+      string? Celular,
+      UsuarioConfiguracoes? UsuarioConfiguracoes
+    ) : IRequest<ErrorOr<bool>>;
 
     internal sealed class UsuarioCreateUpdateCommandHandle : IRequestHandler<UsuarioCreateUpdateCommand, ErrorOr<bool>>
     {
@@ -48,6 +50,23 @@ namespace wca.share.application.Features.Usuarios.Commands
                 _repository.GetDbSet<Usuario>().Entry(usuario).State = EntityState.Modified;
                 _logger.LogInformation($"Atualizando usuario {usuario.Nome}");
             }
+
+            UsuarioConfiguracoes _userConfig = new()
+            {
+                UsuarioId = request.Id,
+                NotificarPorChatBot = request.UsuarioConfiguracoes?.NotificarPorChatBot ?? false,
+                NotificarPorEmail = request.UsuarioConfiguracoes?.NotificarPorEmail ?? false
+            };
+
+            UsuarioConfiguracoes? configuracoes = await _repository.GetDbSet<UsuarioConfiguracoes>()
+                                                 .Where(q => q.UsuarioId.Equals(request.Id))
+                                                 .AsNoTracking()
+                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (configuracoes == null)
+                _repository.GetDbSet<UsuarioConfiguracoes>().Add(_userConfig);
+            else
+                _repository.GetDbSet<UsuarioConfiguracoes>().Entry(_userConfig).State = EntityState.Modified;
+
             await _repository.SaveAsync();
             return true;
         }

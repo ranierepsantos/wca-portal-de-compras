@@ -60,7 +60,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/store/auth.store";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
 import notificacaoList from "@/components/notificacaoList.vue";
 import { compararValor } from "@/helpers/functions";
@@ -68,6 +68,7 @@ import { onMounted } from "vue";
 import { onUnmounted } from "vue";
 import { useSolicitacaoStore } from "@/store/reembolso/solicitacao.store";
 //VARIABLES
+const route = useRoute();
 const drawer = ref(true);
 const menuItems = ref([
   {
