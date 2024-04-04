@@ -24,7 +24,7 @@ namespace wca.share.domain.Entities
         public Cliente? Cliente { get; set; }
 
         [JsonIgnore]
-        public List<UsuarioCentrodeCustos>? Usuarios { get; set; }
+        public List<UsuarioCentrodeCustos>? UsuarioCentrodeCustos { get; set; }
 
     }
 }

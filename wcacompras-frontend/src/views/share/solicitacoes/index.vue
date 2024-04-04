@@ -17,6 +17,7 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
+          v-show="isMatriz"
         ></v-select>
       </v-col>
       <v-col>
@@ -233,7 +234,6 @@ const clientes = ref([]);
 const filiais = ref([]);
 const usuarios = ref([]);
 const filter = ref({
-  
   filialId: null,
   clienteId: null,
   responsavelId: null,
@@ -253,7 +253,8 @@ const pageTipo = ref({
     id: 0,
     tipo: ""
 })
-
+const meusClientesId = ref([])
+const meusCentrosDeCustoId = ref([])
 //COMPUTED'S
 
 //WATCH'S
@@ -273,7 +274,6 @@ watch(
 //VUE METHODS
 onBeforeMount(async () => {
   try {
-    debugger
     isLoading.value.form = true;
 
     if (route.path.includes("desligamento")) {
@@ -289,6 +289,12 @@ onBeforeMount(async () => {
         pageTipo.value.id = 4
         pageTipo.value = "MudancaBase";
     }
+
+    meusClientesId.value = await useShareClienteStore().ListByUsuario(authStore.user.id)
+    meusClientesId.value = meusClientesId.value.map(x =>{ return x.id})
+
+    meusCentrosDeCustoId.value = await useShareUsuarioStore().getCentrosdeCusto(authStore.user.id);
+    meusCentrosDeCustoId.value = meusCentrosDeCustoId.value.map(x =>{ return x.id})
 
     await getFiliaisToList();
     isMatriz.value = authStore.sistema.isMatriz;
@@ -317,7 +323,8 @@ async function clearFilters() {
     };
 
     await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
-    await getClientesToList(filter.value.filialId);
+    await getClientesToList(filter.value.filialId, authStore.user.id);
+
     await getItems();
   } catch (error) {
     console.error(error);
@@ -340,6 +347,7 @@ async function showHistorico(item) {
 
 async function getItems() {
   try {
+    debugger
     isLoading.value.busy = true;
     if (
       (filter.value.dataIni && !filter.value.dataFim) ||
@@ -351,8 +359,16 @@ async function getItems() {
 
 
     let filtros = {...filter.value }
+    delete filtros.clienteId
+
+
+    filtros.filialId = filtros.filialId ?? 0
+    filtros.clienteIds = meusClientesId.value
+    filtros.centroCustoIds = meusCentrosDeCustoId.value 
     filtros.tipoSolicitacao = pageTipo.value.id
 
+    if (filter.value.clienteId != null) 
+      filtros.clienteIds = [filter.value.clienteId]
 
     let response = await solicitacaoStore.getPaginate(
       page.value,

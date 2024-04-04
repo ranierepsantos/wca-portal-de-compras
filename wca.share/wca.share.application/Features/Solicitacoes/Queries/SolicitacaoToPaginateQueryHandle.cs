@@ -13,9 +13,10 @@ namespace wca.share.application.Features.Solicitacoes.Queries
     public record SolicitacaoPaginateQuery(
         DateTime? DataIni, 
         DateTime? DataFim, 
-        int ResponsavelId = 0, 
-        int ClienteId = 0, 
-        int Status = 0,
+        int? ResponsavelId, 
+        int[]? ClienteIds,
+        int[]? CentroCustoIds,
+        int? Status,
         EnumTipoSolicitacao TipoSolicitacao = EnumTipoSolicitacao.Todos) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     internal sealed class SolicitacaoToPaginateQueryHandle :
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
@@ -56,8 +57,11 @@ namespace wca.share.application.Features.Solicitacoes.Queries
             if (request.ResponsavelId > 0)
                 query = query.Where(q => q.ResponsavelId.Equals(request.ResponsavelId));
 
-            if (request.ClienteId > 0)
-                query = query.Where(q => q.ClienteId.Equals(request.ClienteId));
+            if (request.ClienteIds?.Length > 0)
+                query = query.Where(q => request.ClienteIds.Contains(q.ClienteId));
+
+            if (request.CentroCustoIds?.Length > 0)
+                query = query.Where(q => request.CentroCustoIds.Contains(q.CentroCustoId));
 
             if (request.Status > 0)
                 query = query.Where(q => q.StatusSolicitacaoId.Equals(request.Status));

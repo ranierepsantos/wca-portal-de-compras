@@ -59,6 +59,6 @@ export default {
     },
     getListCentroCustoByCliente (arrClienteIds)
     {
-        return api.get(rotas.ListarCentroCustoPorCliente , {params: {clienteId: arrClienteIds}});
+        return api.post(rotas.ListarCentroCustoPorCliente , {clienteId: arrClienteIds});
     },
 }

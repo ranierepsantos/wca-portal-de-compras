@@ -25,8 +25,8 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("Paginar")]
-        public async Task<IActionResult> Paginar([FromQuery] FuncionarioToPaginateQuery query)
+        [HttpPost("Paginar")]
+        public async Task<IActionResult> Paginar([FromBody] FuncionarioToPaginateQuery query)
         {
             var result = await _mediator.Send(query);
 

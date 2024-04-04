@@ -53,6 +53,7 @@ import router from "@/router";
 import { useAuthStore } from "@/store/auth.store";
 import { useShareFuncionarioStore } from "@/store/share/funcionario.store";
 import { useShareClienteStore } from "@/store/share/cliente.store";
+import { useShareUsuarioStore } from "@/store/share/usuario.store";
 //DATA
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
@@ -77,6 +78,13 @@ onMounted(async () =>
     {
         filter.value.clienteIds = list.map(x => x.value);
     }
+
+    list = await useShareUsuarioStore().getCentrosdeCusto(authStore.user.id);
+    if (list.length > 0)
+    {
+        filter.value.centroCustoIds = list.map(x => x.id);
+    }
+
     await getItems();
 });
 

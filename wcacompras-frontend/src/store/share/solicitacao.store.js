@@ -195,7 +195,8 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 pageSize: pageSize,
                 filialId: filters.filialId,
                 responsavelId: filters.responsavelId,
-                clienteId: filters.clienteId,
+                clienteIds: filters.clienteIds,
+                centroCustoIds: filters.centroCustoIds,
                 dataIni: filters.dataIni,
                 dataFim: filters.dataFim,
                 status: filters.status,
@@ -203,7 +204,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             }
             
 
-            let response = await api.get(rotas.Paginar, {params: parametros} );
+            let response = await api.post(rotas.Paginar, parametros );
             return response.data        
         } catch (error) {
             throw error
