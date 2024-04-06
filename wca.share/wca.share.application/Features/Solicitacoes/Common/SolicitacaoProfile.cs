@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using wca.share.application.Common;
 using wca.share.application.Features.Solicitacoes.Commands;
 using wca.share.domain.Entities;
+using ListItem = wca.share.application.Common.ListItem;
 
 namespace wca.share.application.Features.Solicitacoes.Common
 {
@@ -32,6 +35,9 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.CentroCustoNome, opt =>  opt.MapFrom(src =>  src.CentroCusto.Nome));
 
             CreateMap<StatusSolicitacao, StatusSolicitacaoResponse>();
+            CreateMap<Assunto, ListItem>()
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome))
+                .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id));
 
         }
         /*

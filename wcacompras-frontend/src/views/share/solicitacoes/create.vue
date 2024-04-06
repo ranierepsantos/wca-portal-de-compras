@@ -28,11 +28,14 @@
                 :data-model="solicitacao.desligamento"
                 :create-mode="true"
                 :data-admissao="solicitacao.funcionarioDataAdmissao"
-                v-show="solicitacao.solicitacaoTipoId == 1"
+                v-if="solicitacao.solicitacaoTipoId == 1"
               />
-              <Comunicado v-show="solicitacao.solicitacaoTipoId == 2" />
-              <Ferias v-show="solicitacao.solicitacaoTipoId == 3" />
-              <Mudancabase v-show="solicitacao.solicitacaoTipoId == 4" />
+              <Comunicado v-else-if="solicitacao.solicitacaoTipoId == 2" 
+                :data-model="solicitacao.comunicado"
+                :create-mode="true"
+                />
+              <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" />
+              <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
 
             <table-file-upload 
@@ -67,6 +70,7 @@ import { getObservacaoLabelDescricao, getPageTitle } from "@/helpers/share/data"
 import router from "@/router";
 import {useShareFuncionarioStore} from "@/store/share/funcionario.store"
 import moment from "moment";
+import { useShareUsuarioStore } from "@/store/share/usuario.store";
 
 const isBusy = ref({
   form: true,
@@ -89,11 +93,16 @@ onBeforeMount(async () => {
     if (route.path.includes("desligamento")) {
       solicitacao.value.solicitacaoTipoId = 1;
       permissao.value = 'desligamento' 
+      
+      await useShareSolicitacaoStore().listarStatusSolicitacao();
+      await useShareSolicitacaoStore().listarMotivosDemissao();
 
       tableUploadItems.value.push({text: "Ficha EPI"})
     } else if (route.path.includes("comunicado")) {
       solicitacao.value.solicitacaoTipoId = 2;
       permissao.value = 'comunicado' 
+      await useShareSolicitacaoStore().getListaAssuntos();
+
     } else if (route.path.includes("ferias")) {
       solicitacao.value.solicitacaoTipoId = 3;
       permissao.value = 'ferias' 
@@ -121,11 +130,10 @@ watch(
       funcionarioList.value = [];
       centrosCustoList.value = [];
       if (clienteId) {
-        funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId)
+        funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId, useAuthStore().user.id)
 
         //Trazer centros de custo
-        centrosCustoList.value = await useShareClienteStore().ListCentrosDeCusto([clienteId])
-        
+        centrosCustoList.value = await useShareUsuarioStore().getCentrosdeCusto(useAuthStore().user.id, clienteId)       
       }  
     } catch (error) {
       console.log('watch.clienteId', error)
@@ -150,7 +158,6 @@ watch(() => solicitacao.value.funcionarioId, () => {
 //FUNCTIONS
 
 function changeFieldStatus(tipo) {
-  console.log('changeFieldStatus', tipo)
   if (tipo.toLowerCase() =="ficha epi")
     solicitacao.value.desligamento.statusFichaEpi = 2
   else if (tipo.toLowerCase() =="apontamento")
@@ -162,6 +169,7 @@ function changeFieldStatus(tipo) {
 async function salvar() {
   try {
     isBusy.value.save = true;
+
     const { valid } = await mForm.value.validate();
 
     if (valid) {
@@ -185,7 +193,7 @@ async function salvar() {
       router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
     }
   } catch (error) {
-    console.debug(error);
+    console.debug('salvar.error', error);
     handleErrors(error);
   }finally {
     isBusy.value.save = false;

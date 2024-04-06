@@ -76,6 +76,17 @@ namespace wca.share.webapi.Controllers
 
         }
 
+        [HttpGet("ListarAssuntos")]
+        public async Task<IActionResult> ListarAssuntos()
+        {
+            var result = await _mediator.Send(new AssuntoListQuery());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
         [HttpPut("AlterarStatus")]
         public async Task<IActionResult> AlterarStatus([FromBody] SolicitacaoChangeStatusCommand command)
         {

@@ -19,7 +19,7 @@
             </v-list-item-title>
           </router-link>
         </v-list-item>
-        <v-list-item v-show="checkPermissao('livre')" active-color="info" key="configuracoes" value="9999">
+        <v-list-item v-show="checkPermissao('configuracao')" active-color="info" key="configuracoes" value="9999">
           <router-link to="/share/configuracoes" class="text-decoration-none">
             <v-list-item-title >
               Configurações
@@ -101,7 +101,7 @@ const menuItems = ref([
     title: "Desligamento",
     value: 3,
     route: "/share/desligamento",
-    permissao: "desligamento-criar|desligamento-executar|desligamento-aprovar"
+    permissao: "desligamento-criar|desligamento-executar|desligamento-aprovar|desligamento-finalizar"
   },
   {
     title: "Mudança de base",
@@ -112,8 +112,8 @@ const menuItems = ref([
   {
     title: "Comunicados",
     value: 5,
-    route: "/share/comunicados",
-    permissao: "livre"
+    route: "/share/comunicado",
+    permissao: "comunicado-criar|comunicado-executar|comunicado-finalizar"
   },
   {
     title: "Perfil",
@@ -163,8 +163,7 @@ const notificacoes = ref ([])
 
 //VUE - FUNCTIONS
 onMounted(async () => {
-  useShareSolicitacaoStore().listarStatusSolicitacao();
-  useShareSolicitacaoStore().listarMotivosDemissao();
+  await useShareSolicitacaoStore().listarStatusSolicitacao();
   clearInterval(checkNotificacoes.value)
   startCheckNotificacoes()
 });

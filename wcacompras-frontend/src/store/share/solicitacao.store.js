@@ -14,7 +14,8 @@ const rotas = {
     ExportarParaExcel: "Solicitacao/ExportarParaExcel",
     ListarPorColaboradorGestor: "Solicitacao/ListarPorColaboradorGestor",
     ListarStatusSolicitacao: "Solicitacao/ListarStatusSolicitacao",
-    ListarMotivoDemissao: "Solicitacao/ListarMotivoDemissao"
+    ListarMotivoDemissao: "Solicitacao/ListarMotivoDemissao",
+    ListarAssuntos: "Solicitacao/ListarAssuntos"
 }
 
 export class Solicitacao {
@@ -33,7 +34,7 @@ export class Solicitacao {
         this.responsavelId = data ? data.responsavelId: null
         this.centroCustoId = data ? data.centroCustoId: null
         this.centroCustoNome = data ? data.centroCustoNome: null
-        this.comunicado = data && data.comunicado ? data.comunicado :null
+        this.comunicado = data && data.comunicado ? new Comunicado(data.comunicado) : new Comunicado()
         this.desligamento = data ? new Desligamento(data.desligamento) : new Desligamento()
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
         this.anexos = data && data.anexos ? data.anexos: []
@@ -77,7 +78,12 @@ export class Desligamento {
 }
 
 export class Comunicado {
-    
+    constructor(data = null) {
+        this.solicitacaoId = data ? data.solicitacaoId : 0
+        this.dataAlteracao = data && data.dataAlteracao? moment(data.dataAlteracao).format("YYYY-MM-DD") : null
+        this.assuntoId = data ? data.assuntoId: null
+        this.observacao = data? data.observacao: ""
+    }
 }
 
 export class MudancaBase {
@@ -107,7 +113,8 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
         {text: "Trabalho", value: 3},
     ],
     statusSolicitacao: JSON.parse(localStorage.getItem("share-status-solicitacao")) || [],
-    motivosDemissao: JSON.parse(localStorage.getItem("share-motivo-demissao")) || []
+    motivosDemissao: JSON.parse(localStorage.getItem("share-motivo-demissao")) || [],
+    assuntos: JSON.parse(localStorage.getItem("share-assuntos")) || []
   }),
   actions: {
     async add (data) {
@@ -232,10 +239,27 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 this.motivosDemissao = response.data 
                 localStorage.setItem('share-motivo-demissao',JSON.stringify(this.motivosDemissao))
             }
+            return this.motivosDemissao;
         } catch (error) {
             throw error
         }  
     },
+
+    async getListaAssuntos() {
+        try {
+            if (this.assuntos.length == 0)
+            {
+                let response = await api.get(rotas.ListarAssuntos);
+            
+                this.assuntos = response.data 
+                localStorage.setItem('share-assuntos',JSON.stringify(this.assuntos))
+            }
+            return this.assuntos;
+        } catch (error) {
+            throw error
+        }  
+    },
+
     async retornaUsuariosParaNotificar(status, clienteId, permissao) {
         let list = []
         if (status.notifica == 1)

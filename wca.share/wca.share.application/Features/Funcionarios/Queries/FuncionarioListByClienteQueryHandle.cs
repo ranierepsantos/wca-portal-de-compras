@@ -9,7 +9,7 @@ using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Funcionarios.Queries
 {
-    public record FuncionarioListByClienteQuery (int ClienteId):IRequest<ErrorOr<IList<FuncionarioListItem>>>;
+    public record FuncionarioListByClienteQuery (int ClienteId, int UsuarioId):IRequest<ErrorOr<IList<FuncionarioListItem>>>;
     internal class FuncionarioListByClienteQueryHandle : IRequestHandler<FuncionarioListByClienteQuery, ErrorOr<IList<FuncionarioListItem>>>
     {
         private readonly IRepositoryManager _repository;
@@ -31,7 +31,9 @@ namespace wca.share.application.Features.Funcionarios.Queries
                         .AsQueryable()
                         .AsNoTracking()
                         .Where(q =>  q.ClienteId.Equals(request.ClienteId))
-                        .Include("CentroCusto")
+                        .Include(i => i.CentroCusto)
+                        .ThenInclude(i => i.UsuarioCentrodeCustos)
+                        .Where(x =>  x.CentroCusto.UsuarioCentrodeCustos.Count(x =>  x.UsuarioId.Equals(request.UsuarioId)) > 0)
                         .OrderBy(o => o.Nome);
             List<Funcionario> items = await query.ToListAsync();
 
