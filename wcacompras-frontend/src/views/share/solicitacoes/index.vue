@@ -281,13 +281,13 @@ onBeforeMount(async () => {
         pageTipo.value.tipo = "Desligamento";
     } else if (route.path.includes("comunicado")) {
         pageTipo.value.id = 2
-        pageTipo.value = "Comunicado";
+        pageTipo.value.tipo = "Comunicado";
     } else if (route.path.includes("ferias")) {
         pageTipo.value.id = 3
-        pageTipo.value = "Ferias";
+        pageTipo.value.tipo = "Ferias";
     } else if (route.path.includes("mudancabase")) {
         pageTipo.value.id = 4
-        pageTipo.value = "MudancaBase";
+        pageTipo.value.tipo = "MudancaBase";
     }
 
     meusClientesId.value = await useShareClienteStore().ListByUsuario(authStore.user.id)

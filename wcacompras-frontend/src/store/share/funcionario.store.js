@@ -74,9 +74,9 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
             throw error
         }
     },
-    async getToComboByCliente(clienteId){
+    async getToComboByCliente(clienteId, usuarioId){
         try {
-            let response = await api.get(rotas.ListByClienteToCombo, {params: {clienteId: clienteId}} );
+            let response = await api.get(rotas.ListByClienteToCombo, {params: {clienteId: clienteId, usuarioId: usuarioId}} );
             return response.data;    
         } catch (error) {
             throw error
