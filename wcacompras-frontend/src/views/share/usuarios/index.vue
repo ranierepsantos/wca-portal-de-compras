@@ -76,6 +76,8 @@ const isMatriz = ref(false)
 onMounted(async () =>
 {
   try {
+    authStore.user.filial = authStore.sistema.filial.value
+    isMatriz.value  = authStore.sistema.isMatriz
     await getFilialToList();
     await getPerfilToList();
     await getItems();  
