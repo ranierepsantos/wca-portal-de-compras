@@ -41,6 +41,7 @@
               <Comunicado v-else-if="solicitacao.solicitacaoTipoId == 2"
                 :data-model="solicitacao.comunicado"
                 :create-mode="false"
+                :is-read-only="true"
               />
               <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" />
               <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />

@@ -32,7 +32,7 @@ export function getObservacaoLabelDescricao(solicitacaoTipoId) {
     case 1:
       return "Observação do Desligamento";
     case 2:
-      return "Considerações";
+      return "Observação";
     case 3:
       return "Observação Férias";
     case 4:

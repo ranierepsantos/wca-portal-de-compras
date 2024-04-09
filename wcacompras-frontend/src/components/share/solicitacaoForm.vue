@@ -94,6 +94,7 @@
               v-model="solicitacao.descricao"
               :readOnly = "isReadOnly"
               :bg-color="isReadOnly ? '#f2f2f2' : ''"
+              v-show="descricaoShow"
             >
             </v-textarea>
           </v-col>
@@ -114,6 +115,7 @@ const props = defineProps({
     },
   },
   descricaoLabel: {type: String, default: "Observação"},
+  descricaoShow: {type: Boolean, default: true},
   listClientes: {
     type: Array,
     default: function () {
