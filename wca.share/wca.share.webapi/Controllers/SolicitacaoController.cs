@@ -44,8 +44,8 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("Paginar")]
-        public async Task<IActionResult> ToPaginate([FromQuery] SolicitacaoPaginateQuery querie)
+        [HttpPost("Paginar")]
+        public async Task<IActionResult> ToPaginate([FromBody] SolicitacaoPaginateQuery querie)
         {
             var result = await _mediator.Send(querie);
 
@@ -69,6 +69,17 @@ namespace wca.share.webapi.Controllers
         public async Task<IActionResult> ListarMotivoDemissao()
         {
             var result = await _mediator.Send(new MotivoDemissaoListQuery());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
+        [HttpGet("ListarAssuntos")]
+        public async Task<IActionResult> ListarAssuntos()
+        {
+            var result = await _mediator.Send(new AssuntoListQuery());
 
             if (result.IsError) { return Problem(result.Errors); }
 

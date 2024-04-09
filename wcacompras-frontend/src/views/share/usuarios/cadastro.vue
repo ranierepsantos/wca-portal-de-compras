@@ -12,34 +12,68 @@
         <v-card-text>
           <v-form @submit.prevent="salvar()" ref="userForm">
             <usuario-form :user="usuario" :list-filial="filiais" @emailChange="checkUserExistsByEmail($event)"></usuario-form>
-                <v-row style="margin-top: 3px;">
-                  <v-col>
-                    <v-select
-                      label="Perfil"
-                      :model-value="getSistemaPerfil(authStore.sistema.id)"
-                      :items="listPerfil"
-                      item-title="text"
-                      item-value="value"
-                      variant="outlined"
-                      color="primary"
-                      :rules="[(v) => !!v || 'Perfil é obrigatório']"
-                      density="compact"
-                      @update:model-value="setPerfilUsuario($event)"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-                <box-transfer 
-                  :list-origem="filiais" 
-                  :list-destino="usuario.filial"
-                  list-origem-titulo = "Selecione a filial"
-                  list-destino-titulo = "Filiais do usuário"
-                />
-                <box-transfer 
-                  :list-origem="clientes" 
-                  :list-destino="usuario.cliente"
-                  list-origem-titulo = "Selecione os clientes"
-                  list-destino-titulo = "Clientes do usuário"
-                />
+            <v-row style="margin-top: 3px;">
+              <v-col>
+                <v-switch
+                v-model="usuarioConfiguracoes.notificarPorEmail"
+                color="primary"
+                hide-details
+                label="Receber notificação por e-mail?"
+              />
+              </v-col>
+              <v-col>
+                <v-switch v-show="false"
+                v-model="usuarioConfiguracoes.notificarPorChatBot"
+                color="primary"
+                hide-details
+                label="Receber notificação por chatbot?"
+              />
+              </v-col>
+            </v-row>
+            <v-row style="margin-top: 3px;">
+              <v-col>
+                <v-select
+                  label="Filial"
+                  :model-value="getFilialUsuario()"
+                  :items="filiais"
+                  item-title="text"
+                  item-value="value"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Filial é obrigatória']"
+                  density="compact"
+                  @update:model-value="setFilialUsuario($event)"
+                  :disabled="!isMatriz"
+                ></v-select>
+              </v-col>
+              <v-col>
+                <v-select
+                  label="Perfil"
+                  :model-value="getSistemaPerfil(authStore.sistema.id)"
+                  :items="listPerfil"
+                  item-title="text"
+                  item-value="value"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Perfil é obrigatório']"
+                  density="compact"
+                  @update:model-value="setPerfilUsuario($event)"
+                ></v-select>
+              </v-col>
+            </v-row>
+            <box-transfer 
+              :list-origem="clientes" 
+              :list-destino="usuario.cliente"
+              list-origem-titulo = "Selecione os clientes"
+              list-destino-titulo = "Clientes do usuário"
+            />
+            <br />
+            <box-transfer
+              :list-origem="centros"
+              :list-destino="usuario.centroCusto"
+              list-origem-titulo="Selecione o(s) Centro(s) de Custo"
+              list-destino-titulo="Centro(s) de Custo do usuário"
+            />
             <v-row style="margin-top: 5px;">
               <v-col class="text-right">
                 <v-btn variant="outlined" color="primary" @click="router.go(-1)"
@@ -69,6 +103,7 @@ import usuarioForm from "@/components/usuarioForm.vue";
 import boxTransfer from "@/components/boxTransfer.vue";
 import { Usuario, useShareUsuarioStore } from "@/store/share/usuario.store";
 import userService from "@/services/user.service";
+import { useShareClienteStore } from "@/store/share/cliente.store";
 
 //DATA
 const isBusy = ref(false);
@@ -83,9 +118,19 @@ let filialUsuario = [];
 const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
-
+const usuarioConfiguracoes = ref({
+  usuarioId: 0,
+  sistemaId: authStore.sistema.id,
+  notificarPorEmail: false,
+  notificarPorChatBot: false
+})
+const centros = ref([]);
+const clientesUsuarios = ref([])
+const isMatriz = ref(false)
 //VUE METHODS
 onMounted(async () => {
+  isMatriz.value = authStore.sistema.isMatriz;
+  authStore.user.filial = authStore.sistema.filial.value;
   clearData();
   await getFilialToList();
   await getPerfilToList();
@@ -122,7 +167,65 @@ watch(
   {deep: true}
 );
 
+watch( 
+  () => usuario.value.cliente,
+  async (newClientes) => {
+      if (newClientes.length > 0) {
+        let objA = JSON.parse(JSON.stringify(newClientes));
+        if (objA.length > 0) objA.forEach((e) => delete e.selected);
+        let objB = JSON.parse(JSON.stringify(clientesUsuarios.value));
+        if (objB.length > 0) objB.forEach((e) => delete e.selected);
+
+        if (JSON.stringify(objA) !== JSON.stringify(objB)) {
+          //carregar os centros de custos
+          centros.value = await useShareClienteStore().ListCentrosDeCusto(newClientes.map((p) => { return p.value;}));
+          
+          //remover o que estiver no usuario
+          centroCustoListRemove();
+
+          //pega a lista de id dos clientes selecionados
+          let listIds = newClientes.map((p) =>{ return p.value})
+          console.log("clientes selecionados: ",listIds)
+
+          //pega a lista de ids que foram removidos
+          let listToRemove = clientesUsuarios.value.length > 0 ? clientesUsuarios.value.filter(p => !listIds.includes(p.value)):[]
+          console.log("clientes removidos: ",listToRemove)
+
+          // remover os centros de custo do cliente removido da lista do usuario
+          usuarioRemoveCentroCusto(listToRemove.map(p => {return p.value}))
+          
+          clientesUsuarios.value = JSON.parse(JSON.stringify(newClientes));
+        }
+      } else {
+        centros.value = [];
+        usuarioRemoveCentroCusto(clientesUsuarios.value.map(p => {return p.value}))
+        clientesUsuarios.value =[]
+      }
+  },
+  { deep: true }
+);
+
+
+
 //METHODS
+function getFilialUsuario() {
+  if (usuario.value.filial.length > 0) {
+    return usuario.value.filial[0].value;
+  }
+  return null;
+}
+
+async function setFilialUsuario(filialId) {
+  let _filial = filiais.value.find((q) => q.value == filialId);
+  if (_filial) {
+    usuario.value.filial = [];
+    usuario.value.filial.push(_filial);
+    usuario.value.cliente = [];
+    colaboradorClienteId.value = null;
+    await getClienteToList(_filial.value);
+  }
+}
+
 function setPerfilUsuario(perfilId) {
   let index = -1;
   if ( usuario.value.usuarioSistemaPerfil.length > 0) {
@@ -173,7 +276,8 @@ async function salvar() {
   try {
     let { valid } = await userForm.value.validate();
     if (valid) {
-      let data = usuario.value;
+      let data = {... usuario.value };
+      data.usuarioConfiguracoes[0] = usuarioConfiguracoes.value
       if (data.id == 0) {
         await usuarioStore.add(data);
       } else {
@@ -241,8 +345,10 @@ async function getUsuario(usuarioId) {
     debugger
     isBusy.value = true;
     usuario.value = await usuarioStore.getById(usuarioId);
+    if (usuario.value.usuarioConfiguracoes.length > 0)
+      usuarioConfiguracoes.value = {...usuario.value.usuarioConfiguracoes[0]}
+
     clientesListRemove();
-    filiaisListRemove();
   } catch (error) {
     console.log("getUsuario.error:", error);
     handleErrors(error);
@@ -251,31 +357,55 @@ async function getUsuario(usuarioId) {
   }
 }
 
-function filiaisListRemove(removerTodos = false) {
-  if (removerTodos == true) tipos.value.splice(0, clientes.value.length);
+// function filiaisListRemove(removerTodos = false) {
+//   if (removerTodos == true) tipos.value.splice(0, clientes.value.length);
+//   else {
+//     usuario.value.filial.forEach((tipo) => {
+//       let index = filiais.value.findIndex((c) => c.value == tipo.value);
+//       if (index > -1) filiais.value.splice(index, 1);
+//     });
+//   }
+// }
+
+async function checkUserExistsByEmail(email) {
+  try {
+    let user = (await userService.getByEmail(email)).data;
+    let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
+    console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
+    if (hasUserInTheSameSystem.length > 0 && usuario.value.id == 0) {
+      throw new Error("Email já cadastrado, neste sistema!")
+    }
+    usuario.value.id = user.id
+    usuario.value.nome = user.nome
+    usuario.value.celular = user.celular
+
+  } catch (error) {
+    if( !error.response || error.response.status != 404)
+      handleErrors(error)
+  }
+  
+}
+
+function centroCustoListRemove(removerTodos = false) {
+  if (removerTodos == true) centros.value.splice(0, centros.value.length);
   else {
-    usuario.value.filial.forEach((tipo) => {
-      let index = filiais.value.findIndex((c) => c.value == tipo.value);
-      if (index > -1) filiais.value.splice(index, 1);
+    usuario.value.centroCusto.forEach((cc) => {
+      let index = centros.value.findIndex((c) => c.value == cc.value);
+      if (index > -1) centros.value.splice(index, 1);
     });
   }
 }
 
-async function checkUserExistsByEmail(email) {
-  // try {
-  //   let user = (await userService.getByEmail(email)).data;
-  //   let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
-  //   console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
-  //   if (hasUserInTheSameSystem.length > 0) {
-  //     throw new Error("Email já cadastrado, neste sistema!")
-  //   }
-  //   usuario.value.nome = user.nome
-  // } catch (error) {
-  //   if( !error.response || error.response.status != 404)
-  //     handleErrors(error)
-  // }
-  
+function usuarioRemoveCentroCusto(clientesToRemove = []) {
+  let removeList = usuario.value.centroCusto.filter(q =>  clientesToRemove.includes(q.clienteId));
+  removeList.forEach(r => {
+    let index = usuario.value.centroCusto.findIndex(q =>  q.value == r.value);
+    usuario.value.centroCusto.splice(index, 1);
+  })
 }
+
+
+
 </script>
 
 <style scoped>

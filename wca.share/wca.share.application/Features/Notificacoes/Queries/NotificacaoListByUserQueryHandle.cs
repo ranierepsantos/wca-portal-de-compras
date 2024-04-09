@@ -8,7 +8,7 @@ using wca.share.application.Features.Notificacoes.Common;
 
 namespace wca.share.application.Features.Notificacoes.Queries
 {
-    public sealed record NotificacaoListByUserQuery(int UsuarioId): IRequest<ErrorOr<IList<NotificacaoResponse>>>;
+    public sealed record NotificacaoListByUserQuery(int UsuarioId, bool NotRead = true): IRequest<ErrorOr<IList<NotificacaoResponse>>>;
     public sealed class NotificacaoListByUserQueryHandle : IRequestHandler<NotificacaoListByUserQuery, ErrorOr<IList<NotificacaoResponse>>>
     {
         private readonly IRepositoryManager _repository;
@@ -26,9 +26,13 @@ namespace wca.share.application.Features.Notificacoes.Queries
         {
             _logger.Log(LogLevel.Information, $"Listando notificações por usuário {request.UsuarioId}");
 
-            var query = _repository.NotificacaoRepository.ToQuery();
-            
-            query = query.Where(q => q.Lido == false && q.UsuarioId.Equals(request.UsuarioId)).OrderByDescending(o => o.DataHora);
+            var query = _repository.NotificacaoRepository.ToQuery()
+                        .Where(q => q.UsuarioId.Equals(request.UsuarioId));
+
+            if (request.NotRead)
+                query = query.Where(q => q.Lido == false);
+
+            query = query.OrderByDescending(o => o.DataHora);
 
             var list = await query.ToListAsync();
 

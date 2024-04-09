@@ -126,8 +126,8 @@ namespace wca.compras.data.DataAccess
             modelBuilder.Entity<UsuarioReembolsoComplemento>()
                 .HasOne(en => en.Usuario)
                 .WithOne(us => us.UsuarioReembolsoComplemento);
-                
 
+            modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId, pk.SistemaId });
 
         }
     }

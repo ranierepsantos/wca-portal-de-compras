@@ -39,7 +39,7 @@
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <!-- If using vue-router -->
-        <router-view></router-view>
+        <router-view :key="route.fullPath"></router-view>
       </v-container>
     </v-main>
 
@@ -52,9 +52,10 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/store/auth.store";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import headerUserMenu from "@/components/headerUserMenu.vue";
 //VARIABLES
+const route = useRoute();
 const drawer = ref(true);
 const menuItems = ref([
   {

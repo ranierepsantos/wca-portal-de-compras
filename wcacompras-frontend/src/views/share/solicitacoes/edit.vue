@@ -34,13 +34,17 @@
               <desligamento
                 :data-model="solicitacao.desligamento"
                 :create-mode="false"
-                v-show="solicitacao.solicitacaoTipoId == 1"
+                v-if="solicitacao.solicitacaoTipoId == 1"
                 :is-read-only="modeReadOnly"
                 :data-admissao="solicitacao.funcionarioDataAdmissao"
               />
-              <Comunicado v-show="solicitacao.solicitacaoTipoId == 2" />
-              <Ferias v-show="solicitacao.solicitacaoTipoId == 3" />
-              <Mudancabase v-show="solicitacao.solicitacaoTipoId == 4" />
+              <Comunicado v-else-if="solicitacao.solicitacaoTipoId == 2"
+                :data-model="solicitacao.comunicado"
+                :create-mode="false"
+                :is-read-only="true"
+              />
+              <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" />
+              <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
             <v-card>
             <v-card-text>
@@ -69,7 +73,13 @@
       :absolute="false"
       persistent
     >
-      <NotificacaoEnvio :usuario-list="responsavelList" @closeForm="openNotificacao=false"></NotificacaoEnvio>
+      <NotificacaoEnvio 
+        :usuario-list="responsavelList" 
+        @closeForm="openNotificacao=false"
+        :entidade="permissao.charAt(0).toUpperCase() + permissao.slice(1)"
+        :entidade-id="solicitacao.id"
+      />
+                    
     </v-dialog>
     <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
     <v-dialog
@@ -138,12 +148,27 @@ const isRunningEvent = ref(false)
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
+    await useShareSolicitacaoStore().listarStatusSolicitacao();
+    comboTipoShow.value = false;
+    if (route.path.includes("desligamento")) {
+      permissao.value = 'desligamento' 
+      await useShareSolicitacaoStore().listarStatusSolicitacao();
+      await useShareSolicitacaoStore().listarMotivosDemissao();
 
+      tableUploadItems.value.push({text: "Ficha EPI"})
+    } else if (route.path.includes("comunicado")) {
+      permissao.value = 'comunicado' 
+      await useShareSolicitacaoStore().getListaAssuntos();
+
+    } else if (route.path.includes("ferias")) {
+      permissao.value = 'ferias' 
+    } else if (route.path.includes("mudancabase")) {
+      permissao.value = 'mudancabase' 
+    }
     
     await getById(route.query.id);
-    comboTipoShow.value = false;
+
     if (solicitacao.value.solicitacaoTipoId == 1) {
-      permissao.value = 'desligamento' 
       tableUploadItems.value.push({text: "Apontamento"})
       let dias = moment(solicitacao.value.desligamento.dataDemissao).diff(solicitacao.value.funcionarioDataAdmissao, "days");
       if (dias > 90 )
@@ -151,13 +176,10 @@ onBeforeMount(async () => {
         
       tableUploadItems.value.push({text: "Ficha EPI"})
     } else if (solicitacao.value.solicitacaoTipoId == 2) {
-      permissao.value = 'comunicado' 
     } else if (solicitacao.value.solicitacaoTipoId == 3) {
-      permissao.value = 'ferias' 
     } else if (solicitacao.value.solicitacaoTipoId == 4) {
-      permissao.value = 'mudancabase' 
     }
-
+    
   } catch (error) {
     console.error("edit.beforeMount.error", error);
     handleErrors(error);
@@ -317,8 +339,8 @@ function getButtons() {
       return []
   } else if (useAuthStore().hasPermissao(permissao.value + '-executar') || useAuthStore().hasPermissao(permissao.value + '-finalizar')) 
   {
-      //let buttons = [{ text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.value.save }]
-      let buttons = []
+      let buttons = [{ text: 'Notificar', icon: '', event: 'nofiticar-click',disabled: isBusy.value.save }]
+      //let buttons = []
       if (useAuthStore().hasPermissao(permissao.value + '-finalizar')){
         buttons.push({ text: 'Finalizar', icon: '', event: 'finalizar-click',disabled: isBusy.value.save })
       }
@@ -347,7 +369,7 @@ async function FinalizarSolicitacao() {
 
   let options = {
     title: "Confirmação",
-    html: "Confirma a finalização da " + getPageTitle(solicitacao.value.solicitacaoTipoId)  + "?",
+    html: "Confirma a finalização da(o) " + getPageTitle(solicitacao.value.solicitacaoTipoId)  + "?",
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "Sim",

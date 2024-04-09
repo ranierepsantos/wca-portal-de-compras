@@ -46,7 +46,7 @@
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
-        <v-col cols="2">
+        <v-col cols="2" v-show="solicitacao.solicitacaoTipoId!=2">
         <v-text-field
               variant="outlined"
               label="PIS"
@@ -94,6 +94,7 @@
               v-model="solicitacao.descricao"
               :readOnly = "isReadOnly"
               :bg-color="isReadOnly ? '#f2f2f2' : ''"
+              v-show="descricaoShow"
             >
             </v-textarea>
           </v-col>
@@ -114,6 +115,7 @@ const props = defineProps({
     },
   },
   descricaoLabel: {type: String, default: "Observação"},
+  descricaoShow: {type: Boolean, default: true},
   listClientes: {
     type: Array,
     default: function () {

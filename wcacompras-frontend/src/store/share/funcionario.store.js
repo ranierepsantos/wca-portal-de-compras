@@ -32,8 +32,11 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
     async add (data) {
         try 
         {
-            data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
-            data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+            if (data.dddCelular) 
+                data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
+            if (data.numeroCelular)
+                data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+
             let response = await api.post(rotas.Create, data);
             return new Funcionario(response.data);
         } catch (error) {
@@ -42,8 +45,11 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
     },
     async update (data) {
         try {
-            data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
-            data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+            if (data.dddCelular) 
+                data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
+            if (data.numeroCelular)
+                data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+            
             let response = await api.put(rotas.Update, data);
             return new Funcionario(response.data);
         } catch (error) {
@@ -68,15 +74,15 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
                 clienteIds: filters.clienteIds,
                 centroCustoIds: filters.centroCustoIds,
             }
-            let response = await api.get(rotas.Paginar, {params: parametros} );
+            let response = await api.post(rotas.Paginar, parametros);
             return response.data        
         } catch (error) {
             throw error
         }
     },
-    async getToComboByCliente(clienteId){
+    async getToComboByCliente(clienteId, usuarioId){
         try {
-            let response = await api.get(rotas.ListByClienteToCombo, {params: {clienteId: clienteId}} );
+            let response = await api.get(rotas.ListByClienteToCombo, {params: {clienteId: clienteId, usuarioId: usuarioId}} );
             return response.data;    
         } catch (error) {
             throw error

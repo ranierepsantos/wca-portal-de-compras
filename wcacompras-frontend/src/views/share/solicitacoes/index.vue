@@ -17,6 +17,7 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
+          v-show="isMatriz"
         ></v-select>
       </v-col>
       <v-col>
@@ -233,7 +234,6 @@ const clientes = ref([]);
 const filiais = ref([]);
 const usuarios = ref([]);
 const filter = ref({
-  
   filialId: null,
   clienteId: null,
   responsavelId: null,
@@ -249,12 +249,12 @@ const isLoading = ref({
   form: true,
   busy: false,
 });
-const formButtons = ref([]);
 const pageTipo = ref({
     id: 0,
     tipo: ""
 })
-
+const meusClientesId = ref([])
+const meusCentrosDeCustoId = ref([])
 //COMPUTED'S
 
 //WATCH'S
@@ -274,7 +274,6 @@ watch(
 //VUE METHODS
 onBeforeMount(async () => {
   try {
-    debugger
     isLoading.value.form = true;
 
     if (route.path.includes("desligamento")) {
@@ -282,14 +281,20 @@ onBeforeMount(async () => {
         pageTipo.value.tipo = "Desligamento";
     } else if (route.path.includes("comunicado")) {
         pageTipo.value.id = 2
-        pageTipo.value = "Comunicado";
+        pageTipo.value.tipo = "Comunicado";
     } else if (route.path.includes("ferias")) {
         pageTipo.value.id = 3
-        pageTipo.value = "Ferias";
+        pageTipo.value.tipo = "Ferias";
     } else if (route.path.includes("mudancabase")) {
         pageTipo.value.id = 4
-        pageTipo.value = "MudancaBase";
+        pageTipo.value.tipo = "MudancaBase";
     }
+
+    meusClientesId.value = await useShareClienteStore().ListByUsuario(authStore.user.id)
+    meusClientesId.value = meusClientesId.value.map(x =>{ return x.id})
+
+    meusCentrosDeCustoId.value = await useShareUsuarioStore().getCentrosdeCusto(authStore.user.id);
+    meusCentrosDeCustoId.value = meusCentrosDeCustoId.value.map(x =>{ return x.id})
 
     await getFiliaisToList();
     isMatriz.value = authStore.sistema.isMatriz;
@@ -318,7 +323,8 @@ async function clearFilters() {
     };
 
     await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
-    await getClientesToList(filter.value.filialId);
+    await getClientesToList(filter.value.filialId, authStore.user.id);
+
     await getItems();
   } catch (error) {
     console.error(error);
@@ -341,6 +347,7 @@ async function showHistorico(item) {
 
 async function getItems() {
   try {
+    debugger
     isLoading.value.busy = true;
     if (
       (filter.value.dataIni && !filter.value.dataFim) ||
@@ -352,8 +359,16 @@ async function getItems() {
 
 
     let filtros = {...filter.value }
+    delete filtros.clienteId
+
+
+    filtros.filialId = filtros.filialId ?? 0
+    filtros.clienteIds = meusClientesId.value
+    filtros.centroCustoIds = meusCentrosDeCustoId.value 
     filtros.tipoSolicitacao = pageTipo.value.id
 
+    if (filter.value.clienteId != null) 
+      filtros.clienteIds = [filter.value.clienteId]
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
@@ -398,35 +413,4 @@ async function getUsuarioToList(filiais = []) {
   }
 }
 
-async function gerarRelatorio() {
-  try {
-    isLoading.value.busy = true;
-    if (
-      (filter.value.dataIni && !filter.value.dataFim) ||
-      (filter.value.dataFim && !filter.value.dataIni)
-    )
-      throw new TypeError("Ambas as datas devem ser informadas!");
-    else if (moment(filter.value.dataFim) < moment(filter.value.dataIni))
-      throw new TypeError("A data fim deve ser maior que a data início!");
-
-    let response = await solicitacaoStore.gerarRelatorio(filter.value);
-
-    if (response.status == 200) {
-      let nomeArquivo = `relatorio_solicitacoes_${moment().format(
-        "DDMMYYYY_HHmmSS"
-      )}.xlsx`;
-      await new Promise((r) => setTimeout(r, 2000));
-      realizarDownload(
-        response,
-        nomeArquivo,
-        response.headers.getContentType()
-      );
-    }
-  } catch (error) {
-    console.log("solicitacoes.gerarRelatorio.error:", error.response);
-    handleErrors(error);
-  } finally {
-    isLoading.value.busy = false;
-  }
-}
 </script>

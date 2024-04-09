@@ -8,7 +8,8 @@ namespace wca.share.application.Features.Usuarios.Common
     {
             public UsuarioProfile()
             {
-                CreateMap<UsuarioCreateUpdateCommand, Usuario>();
+                CreateMap<UsuarioCreateUpdateCommand, Usuario>()
+                .ForMember(dest =>  dest.UsuarioConfiguracoes, src =>  src.Ignore());
             }
     }
 }

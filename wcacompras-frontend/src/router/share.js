@@ -29,7 +29,7 @@ export const share = {
         path: 'configuracoes',
         name: 'shareConfiguracoes',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "configuracao", sistema: 3},
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
@@ -113,7 +113,7 @@ export const share = {
       {
         path: 'desligamento/editar',
         name: 'shareDesligamentoCadastro',
-        meta: {permissao: "desligamento-executar|desligamento-aprovar", sistema: 3},
+        meta: {permissao: "desligamento-executar|desligamento-aprovar|desligamento-finalizar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -122,14 +122,45 @@ export const share = {
         props: route => ({ query: route.query.id })
       },
       {
-        path: 'solicitacao/create',
-        name: 'shareSolicitacaoCreate',
+        path: 'notificacoes',
+        name: 'shareNotificacoes',
         meta: {permissao: "livre", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/notificacoes'),
+      },
+      {
+        path: 'comunicado',
+        name: 'shareComunicado',
+        meta: {permissao: "comunicado-criar|comunicado-executar|comunicado-finalizar", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes'),
+      },
+      {
+        path: 'comunicado/criar',
+        name: 'shareComunicadoCreate',
+        meta: {permissao: "comunicado-criar", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/create'),
+      },
+      {
+        path: 'comunicado/editar',
+        name: 'shareComunicadoCadastro',
+        meta: {permissao: "comunicado-executar|comunicado-finalizar", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/edit'),
+        props: route => ({ query: route.query.id })
       },
     ]
 }

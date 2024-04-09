@@ -1201,6 +1201,10 @@ namespace wca.compras.data.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("ativo");
 
+                    b.Property<string>("Celular")
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("celular");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -1223,6 +1227,31 @@ namespace wca.compras.data.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("wca.compras.domain.Entities.UsuarioConfiguracoes", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int")
+                        .HasColumnName("usuario_id");
+
+                    b.Property<int>("SistemaId")
+                        .HasColumnType("int")
+                        .HasColumnName("sistema_id");
+
+                    b.Property<bool>("NotificarPorChatBot")
+                        .HasColumnType("bit")
+                        .HasColumnName("notificar_por_chatbot");
+
+                    b.Property<bool>("NotificarPorEmail")
+                        .HasColumnType("bit")
+                        .HasColumnName("notificar_por_email");
+
+                    b.HasKey("UsuarioId", "SistemaId");
+
+                    b.HasIndex("SistemaId");
+
+                    b.ToTable("UsuarioConfiguracoes");
+                });
+
             modelBuilder.Entity("wca.compras.domain.Entities.UsuarioReembolsoComplemento", b =>
                 {
                     b.Property<int>("UsuarioId")
@@ -1232,6 +1261,10 @@ namespace wca.compras.data.Migrations
                     b.Property<string>("Cargo")
                         .HasColumnType("varchar(100)")
                         .HasColumnName("cargo");
+
+                    b.Property<int?>("CentroCustoId")
+                        .HasColumnType("int")
+                        .HasColumnName("centrocusto_id");
 
                     b.Property<int?>("GestorId")
                         .HasColumnType("int")
@@ -1564,6 +1597,25 @@ namespace wca.compras.data.Migrations
                     b.Navigation("Usuarios");
                 });
 
+            modelBuilder.Entity("wca.compras.domain.Entities.UsuarioConfiguracoes", b =>
+                {
+                    b.HasOne("wca.compras.domain.Entities.Sistema", "Sistema")
+                        .WithMany()
+                        .HasForeignKey("SistemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.compras.domain.Entities.Usuario", "Usuario")
+                        .WithMany("UsuarioConfiguracoes")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sistema");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("wca.compras.domain.Entities.UsuarioReembolsoComplemento", b =>
                 {
                     b.HasOne("wca.compras.domain.Entities.Usuario", "Gestor")
@@ -1653,6 +1705,8 @@ namespace wca.compras.data.Migrations
 
             modelBuilder.Entity("wca.compras.domain.Entities.Usuario", b =>
                 {
+                    b.Navigation("UsuarioConfiguracoes");
+
                     b.Navigation("UsuarioReembolsoComplemento");
 
                     b.Navigation("UsuarioSistemaPerfil");

@@ -11,10 +11,12 @@ export class Usuario {
         this.nome = data ? data.nome : ""
         this.email = data ? data.email: ""
         this.ativo = data ? data.ativo: true
+        this.celular = data? data.celular: null
         this.filial = data ? data.filial: []
         this.cliente = data? data.cliente: []
-        this.tipoFornecimento = data? data.tipoFornecimento?? []: []
         this.usuarioSistemaPerfil = data? data.usuarioSistemaPerfil: []
+        this.usuarioConfiguracoes = data? data.usuarioConfiguracoes: []
+        this.centroCusto = data? data.centroCusto: []
     }
 }
 
@@ -28,12 +30,17 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
             try {
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
-                
-                let response = await userService.create(data);
-                
 
+                let centrosDeCusto = data.centroCusto.map(function (el) { return el.value; });
+                data.centroCusto = []
+
+                let response = await userService.create(data);
                 data.id = response.data.id;
                 
+                let configuracoes = data.usuarioConfiguracoes[0]
+                delete data.usuarioConfiguracoes
+                data.usuarioConfiguracoes = configuracoes
+
                 await usuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
@@ -43,6 +50,15 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
                         clienteIds: clientes
                     }
                     await clienteService.RelacionarClienteUsuario(userClientes);
+                }
+                
+                // relacionar usuario x centros de custos
+                if (centrosDeCusto.length > 0) {
+                    
+                    await usuarioService.relacionarUsuarioCentroCusto({
+                        usuarioId: response.data.id,
+                        centroCustoIds: centrosDeCusto
+                    });
                 }
                 
             } catch (error) {
@@ -61,7 +77,11 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
                     data.cliente = response.data.map( item => {return { text: item.nome, value: item.id}})
                 else
                     data.cliente = []
-                
+
+                response = await usuarioService.getCentrosdeCusto(id)
+
+                data.centroCusto = response.data.map(p => ({value:  p.id, text: p.nome, clienteId: p.clienteId}));
+    
                 let usuario = new Usuario(data);
                 return usuario;
 
@@ -69,7 +89,10 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
                 throw error
             }
         },
-
+        async getCentrosdeCusto (usuarioId, clienteId = 0) {
+            let response = await usuarioService.getCentrosdeCusto(usuarioId, clienteId);
+            return response.data
+        },
         async getPaginate(pageNumber = 1, pageSize = 10, filter = "") {
             let response = await userService.paginate(pageSize, pageNumber, filter)
             return response.data
@@ -83,16 +106,35 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
                 
+                let centrosDeCusto = data.centroCusto.map(function (el) { return el.value; });
+                data.centroCusto = []
+
+
                 await userService.update(data);
+
+                let configuracoes = data.usuarioConfiguracoes[0]
+                delete data.usuarioConfiguracoes
+                data.usuarioConfiguracoes = configuracoes
 
                 await usuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
-                let userClientes = {
-                    usuarioId: data.id,
-                    clienteIds: clientes
+                if (clientes.length > 0){
+                    let userClientes = {
+                        usuarioId: data.id,
+                        clienteIds: clientes
+                    }
+                    await clienteService.RelacionarClienteUsuario(userClientes);
                 }
-                await clienteService.RelacionarClienteUsuario(userClientes);
+
+                // relacionar usuario x centros de custos
+                if (centrosDeCusto.length > 0) {
+                    
+                    await usuarioService.relacionarUsuarioCentroCusto({
+                        usuarioId: data.id,
+                        centroCustoIds: centrosDeCusto
+                    });
+                }
         },
 
         async toComboList(filial =[]) {

@@ -19,7 +19,7 @@
             </v-list-item-title>
           </router-link>
         </v-list-item>
-        <v-list-item v-show="checkPermissao('livre')" active-color="info" key="configuracoes" value="9999">
+        <v-list-item v-show="checkPermissao('configuracao')" active-color="info" key="configuracoes" value="9999">
           <router-link to="/share/configuracoes" class="text-decoration-none">
             <v-list-item-title >
               Configurações
@@ -33,14 +33,14 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
 
-    <!--NOTIFICAÇÕES
+    <!--NOTIFICAÇÕES-->
       <v-btn class="text-none" stacked>
         <v-badge :content="notificacoes.length" color="error">
           <v-icon>mdi-bell-outline</v-icon>
         </v-badge>
         <notificacao-list :notificacoes="notificacoes"/>
       </v-btn>
-    -->
+    
       <v-btn variant="text" class="text-capitalize" color="primary">
         <v-icon icon="mdi-account-circle-outline" size="x-large"></v-icon>
         {{ usuario.nome }}
@@ -101,7 +101,7 @@ const menuItems = ref([
     title: "Desligamento",
     value: 3,
     route: "/share/desligamento",
-    permissao: "desligamento-criar|desligamento-executar|desligamento-aprovar"
+    permissao: "desligamento-criar|desligamento-executar|desligamento-aprovar|desligamento-finalizar"
   },
   {
     title: "Mudança de base",
@@ -112,8 +112,8 @@ const menuItems = ref([
   {
     title: "Comunicados",
     value: 5,
-    route: "/share/comunicados",
-    permissao: "livre"
+    route: "/share/comunicado",
+    permissao: "comunicado-criar|comunicado-executar|comunicado-finalizar"
   },
   {
     title: "Perfil",
@@ -143,6 +143,12 @@ const menuItems = ref([
     title: "Funcionáros",
     value: 10,
     route: "/share/funcionarios",
+    permissao: "funcionario"
+  },
+  {
+    title: "Notificações",
+    value: 10,
+    route: "/share/notificacoes",
     permissao: "livre"
   },
 ]);
@@ -157,11 +163,11 @@ const notificacoes = ref ([])
 
 //VUE - FUNCTIONS
 onMounted(async () => {
-  useShareSolicitacaoStore().listarStatusSolicitacao();
-  useShareSolicitacaoStore().listarMotivosDemissao();
+  await useShareSolicitacaoStore().listarStatusSolicitacao();
+  await useShareSolicitacaoStore().getListaAssuntos();
+  await useShareSolicitacaoStore().listarMotivosDemissao();
   clearInterval(checkNotificacoes.value)
-  //notificacoes.value = []
-  //startCheckNotificacoes()
+  startCheckNotificacoes()
 });
 
 onUnmounted(() => {  clearInterval(checkNotificacoes.value) }) 

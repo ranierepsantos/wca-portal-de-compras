@@ -66,10 +66,8 @@ namespace wca.compras.services
             {
                 var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id)
                                .Include(q => q.Filial.Where(c =>  c.SistemaId == sistemaId))
-                               .Include(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == sistemaId));
-
-
-                //query = query.Where(c => c.UsuarioSistemaPerfil.Any(q => q.SistemaId == sistemaId));
+                               .Include(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == sistemaId))
+                               .Include(q => q.UsuarioConfiguracoes.Where(c => c.SistemaId == sistemaId));
 
                 Usuario data = new Usuario();
 
@@ -156,7 +154,8 @@ namespace wca.compras.services
 
                 query = query.Include("UsuarioSistemaPerfil")
                              .Include(c =>  c.Filial.Where(q =>  q.SistemaId.Equals(sistemaId)))
-                             .Include("UsuarioReembolsoComplemento");
+                             .Include("UsuarioReembolsoComplemento")
+                             .Include("UsuarioConfiguracoes");
 
                 //Retorna dados especificos do sistema
                 if (sistemaId == 1 ) //compras
@@ -225,9 +224,23 @@ namespace wca.compras.services
                     baseData.UsuarioSistemaPerfil[index] = usuario.UsuarioSistemaPerfil[0];
                 }
 
+                //atualizar/incluir configuracoes do usuario
+                if (usuario.UsuarioConfiguracoes != null)
+                {
+                    var userConfiguracao = baseData.UsuarioConfiguracoes.FirstOrDefault(q => q.SistemaId == sistemaId);
+                    if (userConfiguracao == null)
+                        baseData.UsuarioConfiguracoes.Add(usuario.UsuarioConfiguracoes[0]);
+                    else
+                    {
+                        int index = baseData.UsuarioConfiguracoes.IndexOf(userConfiguracao);
+                        baseData.UsuarioConfiguracoes[index] = usuario.UsuarioConfiguracoes[0];
+                    }
+                }
+
                 baseData.Ativo = usuario.Ativo;
                 baseData.Email = usuario.Email;
                 baseData.Nome = usuario.Nome;
+                baseData.Celular = usuario.Celular;
                 
                 await _rm.SaveAsync();
                 
@@ -317,7 +330,7 @@ namespace wca.compras.services
         {
             try
             {
-                string query = "select u.id, u.nome, u.email, u.password, u.ativo from Usuarios u " +
+                string query = "select u.id, u.nome, u.email, u.password, u.ativo, u.celular from Usuarios u " +
                     "inner join Usuario_Sistema_Perfil up on up.usuario_id  = u.id " +
                     "inner join PerfilPermissao pp on pp.PerfilId  = up.perfil_id " +
                     "inner join Permissao p on p.id  = pp.PermissaoId " +

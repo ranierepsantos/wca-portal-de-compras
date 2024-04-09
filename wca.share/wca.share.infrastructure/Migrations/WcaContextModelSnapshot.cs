@@ -653,6 +653,10 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("ativo");
 
+                    b.Property<string>("Celular")
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("celular");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -670,6 +674,21 @@ namespace wca.share.infrastructure.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("wca.share.domain.Entities.UsuarioCentrodeCustos", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CentroCustoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UsuarioId", "CentroCustoId");
+
+                    b.HasIndex("CentroCustoId");
+
+                    b.ToTable("UsuarioCentrodeCustos");
+                });
+
             modelBuilder.Entity("wca.share.domain.Entities.UsuarioClientes", b =>
                 {
                     b.Property<int>("UsuarioId")
@@ -685,6 +704,25 @@ namespace wca.share.infrastructure.Migrations
                     b.HasIndex("ClienteId");
 
                     b.ToTable("UsuarioClientes");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.UsuarioConfiguracoes", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int")
+                        .HasColumnName("usuario_id");
+
+                    b.Property<bool>("NotificarPorChatBot")
+                        .HasColumnType("bit")
+                        .HasColumnName("notificar_por_chatbot");
+
+                    b.Property<bool>("NotificarPorEmail")
+                        .HasColumnType("bit")
+                        .HasColumnName("notificar_por_email");
+
+                    b.HasKey("UsuarioId");
+
+                    b.ToTable("UsuarioConfiguracoes");
                 });
 
             modelBuilder.Entity("ItemMudancaSolicitacaoMudancaBase", b =>
@@ -854,6 +892,25 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("Solicitacao");
                 });
 
+            modelBuilder.Entity("wca.share.domain.Entities.UsuarioCentrodeCustos", b =>
+                {
+                    b.HasOne("wca.share.domain.Entities.CentroCusto", "CentroCusto")
+                        .WithMany("UsuarioCentrodeCustos")
+                        .HasForeignKey("CentroCustoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Usuario", "Usuario")
+                        .WithMany("UsuarioCentrodeCustos")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CentroCusto");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("wca.share.domain.Entities.UsuarioClientes", b =>
                 {
                     b.HasOne("wca.share.domain.Entities.Cliente", "Cliente")
@@ -871,6 +928,22 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("Cliente");
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.UsuarioConfiguracoes", b =>
+                {
+                    b.HasOne("wca.share.domain.Entities.Usuario", "Usuario")
+                        .WithOne("UsuarioConfiguracoes")
+                        .HasForeignKey("wca.share.domain.Entities.UsuarioConfiguracoes", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
+                {
+                    b.Navigation("UsuarioCentrodeCustos");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Cliente", b =>
@@ -891,6 +964,13 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("Historico");
 
                     b.Navigation("MudancaBase");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Usuario", b =>
+                {
+                    b.Navigation("UsuarioCentrodeCustos");
+
+                    b.Navigation("UsuarioConfiguracoes");
                 });
 #pragma warning restore 612, 618
         }

@@ -33,7 +33,7 @@ namespace wca.share.domain.Entities
         public Usuario? Responsavel { get; set; }
 
         [Column("centrocusto_id")]
-        public int? CentroCustoId { get; set; }
+        public int CentroCustoId { get; set; }
         
         public CentroCusto? CentroCusto { get; private set; }
         

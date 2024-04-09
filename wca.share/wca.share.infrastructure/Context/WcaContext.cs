@@ -28,6 +28,8 @@ namespace wca.share.infrastruture.Context
         public DbSet<Filial> Filiais { get; set; }
         public DbSet<Configuracao> Configuracoes { get; set; }
 
+        public DbSet<UsuarioCentrodeCustos> UsuarioCentrodeCustos { get; set; }
+        public DbSet<UsuarioConfiguracoes>  UsuarioConfiguracoes { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UsuarioClientes>().HasKey(pk => new { pk.UsuarioId, pk.ClienteId });
@@ -43,6 +45,8 @@ namespace wca.share.infrastruture.Context
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.MudancaBase);
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.Comunicado);
 
+            modelBuilder.Entity<UsuarioCentrodeCustos>().HasKey(pk => new { pk.UsuarioId, pk.CentroCustoId });
+            modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId });
         }
     }
 }

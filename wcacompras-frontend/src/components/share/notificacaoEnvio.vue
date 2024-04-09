@@ -42,6 +42,8 @@
                 label="Nota"
                 class="text-primary"
                 v-model="evento.nota"
+                :counter="500"
+                
                 :rules="[(v) => !!v || 'Campo obrigatório', v => v.length <= 500 || 'Max 500 caracteres']"
               >
               </v-textarea>
@@ -58,8 +60,8 @@
               <v-btn
                 color="success"
                 :disabled="isRunningEvent"
-                >Enviar</v-btn
-              >
+                @click="sendClick()"
+                >Enviar</v-btn>
               &nbsp;
               <v-btn
                 class="mr-3"
@@ -79,7 +81,8 @@
   
 import { Evento } from '@/helpers/share/classes';
 import { ref } from 'vue';
-  
+import {useShareNotificacaoStore} from '@/store/share/notificacao.store'
+import { handleError } from 'vue';
   // data
   const props =  defineProps({
       usuarioList: { Type: Array, default: function() { return []} },
@@ -87,7 +90,7 @@ import { ref } from 'vue';
       entidadeId: {Type: Number, default: 0 }
 
   });
-  const emit = defineEmits(['closeForm', 'sendClick'])
+  const emit = defineEmits(['closeForm'])
   
   const oForm = ref(null)
   const usuarioNotificar = ref([])
@@ -96,17 +99,30 @@ import { ref } from 'vue';
   
   //functions
   
-  const aprovarReprovar = async (isAproved) => {
-    let valido = true;
-    if (!isAproved) {
-      let { valid } = await oForm.value.validate();
-      valido = valid;
+  const sendClick = async () => {
+    try {
+      isRunningEvent.value = true
+
+      usuarioNotificar.value.forEach(async (id) => {
+        let nota = {
+          "usuarioId": id,
+          "nota": evento.value.nota,
+          "entidade": props.entidade,
+          "entidadeId":props.entidadeId
+        }
+        await useShareNotificacaoStore().enviarNotificacao(nota)
+      })
+      emit("closeForm");
+    } catch (error) {
+      console.error(error)
+      handleError(error);
+    }finally {
+      isRunningEvent.value = false
     }
-    if (valido)
-    {
-        let evento = isAproved? 'aprovarClick': 'reprovarClick';
-        emit(evento, comentario.value) 
-    }
+    
+
+
+    
   }
   
   </script>
