@@ -23,6 +23,7 @@
               :list-funcionarios="funcionarioList"
               :list-centro-custos="centrosCustoList"
               :combo-tipo-show="comboTipoShow"
+              :descricao-show="solicitacao.solicitacaoTipoId != 2"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"

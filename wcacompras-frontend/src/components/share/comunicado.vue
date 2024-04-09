@@ -33,11 +33,11 @@
       <v-col>
         <v-textarea
           variant="outlined"
-          label="Observação"
+          label="Descrição Pedido"
           class="text-primary"
           v-model="dataModel.observacao"
-          :readOnly="isReadOnly"
-          :bg-color="isReadOnly ? '#f2f2f2' : ''"
+          :readonly="!createMode"
+          :bg-color="!createMode ? '#f2f2f2' : ''"
         >
         </v-textarea>
       </v-col>
@@ -62,7 +62,6 @@ defineProps({
     },
   },
   createMode: { type: Boolean, default: true },
-  isReadOnly: { type: Boolean, default: false },
 });
 const listAssuntos = useShareSolicitacaoStore().assuntos;
 </script>
