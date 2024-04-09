@@ -947,7 +947,7 @@ function carregarBotoes() {
   }
 
   if (podeSalvar)
-      formButtons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+      formButtons.value.push({ text: "Enviar para Aprovação", icon: "", event: "salvar-click" });
 
 }
 
