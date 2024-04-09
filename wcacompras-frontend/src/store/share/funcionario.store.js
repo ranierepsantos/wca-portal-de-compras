@@ -32,8 +32,11 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
     async add (data) {
         try 
         {
-            data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
-            data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+            if (data.dddCelular) 
+                data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
+            if (data.numeroCelular)
+                data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+
             let response = await api.post(rotas.Create, data);
             return new Funcionario(response.data);
         } catch (error) {
@@ -42,8 +45,11 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
     },
     async update (data) {
         try {
-            data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
-            data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+            if (data.dddCelular) 
+                data.dddCelular = data.dddCelular.replace("(","").replace(")","").replace("-","")
+            if (data.numeroCelular)
+                data.numeroCelular = data.numeroCelular.replace("(","").replace(")","").replace("-","")
+            
             let response = await api.put(rotas.Update, data);
             return new Funcionario(response.data);
         } catch (error) {
