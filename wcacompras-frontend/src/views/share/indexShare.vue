@@ -164,6 +164,8 @@ const notificacoes = ref ([])
 //VUE - FUNCTIONS
 onMounted(async () => {
   await useShareSolicitacaoStore().listarStatusSolicitacao();
+  await useShareSolicitacaoStore().getListaAssuntos();
+  await useShareSolicitacaoStore().listarMotivosDemissao();
   clearInterval(checkNotificacoes.value)
   startCheckNotificacoes()
 });
