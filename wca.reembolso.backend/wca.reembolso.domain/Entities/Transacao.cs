@@ -21,6 +21,14 @@ namespace wca.reembolso.domain.Entities
         [Column("valor", TypeName = "money")]
         public decimal Valor { get; set; } = decimal.Zero;
 
+        [Column("saldo_anterior", TypeName = "money")]
+        public decimal SaldoAnterior { get; set; } = decimal.Zero;
+
+        [Column("saldo", TypeName = "money")]
+        public decimal Saldo { get; set; } = decimal.Zero;
+
+
+
         [Column("ContaCorrenteUsuarioId")]
         public int ContaCorrenteUsuarioId { get; set; }
         
