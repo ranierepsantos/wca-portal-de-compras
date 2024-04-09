@@ -57,16 +57,21 @@ namespace wca.reembolso.application.Features.Conta.Commands
 
             foreach (var transacao in request.Transacoes)
             {
+                transacao.SaldoAnterior = conta.Saldo;
+                
+                if (transacao.Operador == "+")
+                    conta.Saldo += transacao.Valor;
+                else
+                    conta.Saldo -= transacao.Valor;
+                
+                transacao.Saldo = conta.Saldo;
+
                 if (hasConta)
                 {
                     transacao.ContaCorrenteUsuarioId = conta.UsuarioId;
                     _repository.GetDbSet<Transacao>().Add(transacao);
                 }
-
-                if (transacao.Operador == "+")
-                    conta.Saldo += transacao.Valor;
-                else
-                    conta.Saldo -= transacao.Valor;
+                
             }
 
             if (hasConta)

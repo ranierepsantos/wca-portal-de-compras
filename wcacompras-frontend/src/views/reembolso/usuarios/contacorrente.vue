@@ -21,8 +21,10 @@
               <tr>
                 <th class="text-center text-grey">DATA</th>
                 <th class="text-center text-grey">DESCRIÇÃO</th>
+                <th class="text-center text-grey">SALDO ANTERIOR</th>
                 <th class="text-center text-grey">ENTRADA</th>
                 <th class="text-center text-grey">SAÍDA</th>
+                <th class="text-center text-grey">SALDO</th>
               </tr>
             </thead>
             <tbody>
@@ -30,8 +32,10 @@
                     <tr :class="item.operador == '+' ?'text-success':'text-error'">
                         <td class="text-center">{{ moment(item.dataHora).format("DD/MM/YYYY") }}</td>
                         <td class="text-left">{{ item.descricao }}</td>
+                        <td class="text-right text-black">{{ formatToCurrencyBRL(item.saldoAnterior) }}</td>
                         <td class="text-right">{{ item.operador == "+" ? formatToCurrencyBRL(item.valor): "" }}</td>
                         <td class="text-right">{{ item.operador == "-" ? formatToCurrencyBRL(item.valor): "" }}</td>
+                        <td class="text-right text-black"><b>{{ formatToCurrencyBRL(item.saldo) }}</b></td>
                     </tr>
                 </template>
             </tbody>
