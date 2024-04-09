@@ -46,7 +46,7 @@
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
       </v-col>
-        <v-col cols="2">
+        <v-col cols="2" v-show="solicitacao.solicitacaoTipoId!=2">
         <v-text-field
               variant="outlined"
               label="PIS"
