@@ -3,11 +3,6 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Faturamentos.Common;
 
@@ -32,6 +27,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
             var query = _repository.FaturamentoRepository.ToQuery()
                 .Where(q =>  q.Id == request.Id)
                 .Include(n => n.Cliente)
+                .Include(n => n.CentroCusto)
                 .Include(n => n.FaturamentoHistorico.OrderByDescending(f => f.DataHora))
                 .Include(n => n.FaturamentoItem)
                 .ThenInclude(n => n.Solicitacao);

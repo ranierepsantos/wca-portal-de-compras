@@ -19,6 +19,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
     public record FaturamentoCreateCommand(
         int UsuarioId,
         int ClienteId,
+        int CentroCustoId,
         decimal Valor,
         IList<FaturamentoItemCreate> FaturamentoItem,
         StatusSolicitacao Status, 

@@ -210,7 +210,22 @@ export const useUsuarioStore = defineStore("usuario", {
         async getUsuarioToNotificacaoByCentroDeCusto(idCentroCusto) {
             let response = await reembolsoUsuarioService.getListByCentroCusto(idCentroCusto);
             return response.data;
-        }
+        },
 
+        async getListUsuarioByCentroDeCusto(idCentroCusto) {
+            let response = await userService.toList()
+            let usuarios = response.data;
+            
+            response = await reembolsoUsuarioService.getListByCentroCusto(idCentroCusto);
+
+            let usersCentroCusto = response.data;
+
+
+            let list = usuarios.filter(user => 
+                {return usersCentroCusto.includes(user.value) }
+            )
+
+            return list;
+        },
     },
 });

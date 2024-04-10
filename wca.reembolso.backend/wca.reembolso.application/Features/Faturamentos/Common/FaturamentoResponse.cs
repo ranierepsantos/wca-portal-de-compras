@@ -11,6 +11,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         string ClienteNome,
         int Status,
         int Valor,
+        int? CentroCustoId,
+        string? CentroCustoNome,
         string? NumeroPO,
         string? DocumentoPO,
         IList<FaturamentoHistorico>? FaturamentoHistorico
@@ -25,6 +27,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         string ClienteNome,
         int Status,
         int Valor,
+        int? CentroCustoId,
+        string? CentroCustoNome,
         string? NumeroPO,
         string? DocumentoPO,
         DateTime? DataFinalizacao,

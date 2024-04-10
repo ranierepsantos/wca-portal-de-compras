@@ -39,6 +39,11 @@ namespace wca.reembolso.domain.Entities
         [Column("notaFiscal", TypeName = "varchar(20)")]
         public string? NotaFiscal { get; set; } = null;
 
+        [Column("centrocusto_id")]
+        public int CentroCustoId { get; set; }
+
+        public CentroCusto? CentroCusto { get; set; }
+
         public IList<FaturamentoItem> FaturamentoItem { get; set; } = new List<FaturamentoItem>();
 
         public IList<FaturamentoHistorico> FaturamentoHistorico { get; set; } = new List<FaturamentoHistorico>();

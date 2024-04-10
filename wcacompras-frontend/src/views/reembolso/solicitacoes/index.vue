@@ -86,7 +86,7 @@
           color="primary"
           variant="outlined"
           class="text-capitalize"
-          @click="getItems()"
+          @click="getItems(true)"
         >
           <b>Aplicar Filtros</b>
         </v-btn>
@@ -354,7 +354,7 @@ async function clearFilters() {
     } else {
       await getClientesToList(filter.value.filialId);
     }
-    await getItems();
+    await getItems(true);
   } catch (error) {
     console.error(error)
 
@@ -372,7 +372,7 @@ async function showHistorico(item) {
   openHistorico.value = true;
 }
 
-async function getItems() {
+async function getItems(resetPage =false) {
   try {
     isLoading.value.busy =true
     if ((filter.value.dataIni && !filter.value.dataFim ) || (filter.value.dataFim && !filter.value.dataIni))
@@ -382,6 +382,8 @@ async function getItems() {
     
     filter.value.centroCustoIds = gestorCentrosDeCusto.value.map(x =>  x.id);
     
+    if (resetPage) page.value = 1
+
     let response = await solicitacaoStore.getPaginate(
       page.value,
       pageSize,

@@ -10,7 +10,15 @@ using wca.reembolso.application.Features.Faturamentos.Common;
 namespace wca.reembolso.application.Features.Faturamentos.Queries
 {
 
-    public record FaturamentoPaginateQuery(DateTime? DataIni, DateTime? DataFim, int[]? ClienteIds = null, int Status = 0) : PaginationQuery, IRequest<ErrorOr<Pagination<FaturamentoPaginateResponse>>>;
+    public record FaturamentoPaginateQuery
+    (
+        DateTime? DataIni,
+        DateTime? DataFim,
+        int? Status = 0,
+        int[]? ClienteIds = null,
+        int[]? CentroCustoIds = null
+    ) : PaginationQuery, IRequest<ErrorOr<Pagination<FaturamentoPaginateResponse>>>;
+
     public sealed class FaturamentoToPaginateQueryHandle : IRequestHandler<FaturamentoPaginateQuery, ErrorOr<Pagination<FaturamentoPaginateResponse>>>
     {
         private readonly IRepositoryManager _repository;
@@ -33,14 +41,18 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
 
             var query = _repository.FaturamentoRepository.ToQuery();
             query = query.Include(i => i.Cliente)
+                         .Include(i => i.CentroCusto)
                          .Include(i => i.FaturamentoHistorico.OrderByDescending(f => f.DataHora));
             
 
             if (request.FilialId > 0)
                 query = query.Where(q => q.Cliente.FilialId.Equals(request.FilialId));
 
-            if (request.ClienteIds?.Count() > 0)
+            if (request.ClienteIds?.Length > 0)
                 query = query.Where(q => request.ClienteIds.Contains(q.ClienteId));
+
+            if (request.CentroCustoIds?.Length > 0)
+                query = query.Where(q => request.CentroCustoIds.Contains(q.CentroCustoId));
 
             if (request.Status > 0)
                 query = query.Where(q => q.Status.Equals(request.Status));
