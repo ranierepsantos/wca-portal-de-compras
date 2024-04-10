@@ -73,7 +73,7 @@
                 color="primary"
                 variant="outlined"
                 class="text-capitalize"
-                @click="getItems()"
+                @click="getItems(true)"
                 >
                 <b>Aplicar Filtros</b>
                 </v-btn>
@@ -96,6 +96,7 @@
                     <th class="text-center text-grey">#</th>
                     <th class="text-center text-grey">DATA</th>
                     <th class="text-left text-grey">CLIENTE</th>
+                    <th class="text-left text-grey">CENTRO DE CUSTO</th>
                     <th class="text-center text-grey">VALOR</th>
                     <th class="text-left text-grey">STATUS</th>
                     <th></th>
@@ -105,14 +106,15 @@
                 <tr v-for="item in faturamentos" :key="item.id">
                     <td class="text-center">{{item.id}}</td>
                     <td class="text-center">{{ moment(item.dataCriacao).format("DD/MM/YYYY") }}</td>
-                    <td class="text-left">
-                        {{ item.clienteNome }}
-                    </td>
+                    <td class="text-left">{{ item.clienteNome }}</td>
+                    <td class="text-left">{{ item.centroCustoNome }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
                     <td class="text-left">
                         <v-btn :color="faturamentoStore.getStatus(item.status).color" variant="tonal"
                             density="compact" class="text-center"> {{
                                 faturamentoStore.getStatus(item.status).status
+                                +
+                                (item.status == 2 ? ` ${item.numeroPO}`:"")
                             }}</v-btn>    
                     </td>
                     <td class="text-right">
@@ -135,7 +137,7 @@
                                             color="primary"
                                             @click="editar(item.id)"
                                             size="small"
-                                            :disabled="isBusy"
+                                            :disabled="isLoading.busy"
                                         >Visualizar</v-btn>
                                     </v-list-item>
                                     <v-list-item>
@@ -145,7 +147,7 @@
                                             color="primary"
                                             @click="showHistorico(item)"
                                             size="small"
-                                            :disabled="isBusy"
+                                            :disabled="isLoading.busy"
                                         >Histórico</v-btn>
                                     </v-list-item>
                                 </v-list>
@@ -156,7 +158,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="8">
+                    <td colspan="7">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -186,7 +188,6 @@ import { useUsuarioStore } from "@/store/reembolso/usuario.store";
 const authStore = useAuthStore();
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
-const isBusy = ref(false);
 const totalPages = ref(1);
 const faturamentos = ref([]);
 const clientes = ref([]);
@@ -232,15 +233,19 @@ onMounted(async () =>
 //WATCH'S
 watch(
   () => filter.value.filialId,
-  async () => {
-    
-    let _filiais = [];
-    if (filter.value.filialId != null) _filiais.push(filter.value.filialId);
-    filter.value.clienteId = null;
-    filter.value.usuarioId = null;
-    
-    await getClientesToList(_filiais[0], authStore.user.id);
+  async (newValue, oldValue) => {
+    if (newValue != oldValue)
+    {
+        let _filiais = [];
+        if (filter.value.filialId != null) _filiais.push(filter.value.filialId);
+        filter.value.clienteId = null;
+        filter.value.usuarioId = null;
 
+        if (!authStore.sistema.isMatriz)
+            filter.value.usuarioId = authStore.user.id;
+        
+        await getClientesToList(_filiais[0], filter.value.usuarioId);
+    }
   }
 );
 
@@ -254,6 +259,7 @@ async function clearFilters() {
     filter.value = {
       filialId: null,
       clienteIds: null,
+      centroCustoIds: null,
       status: null,
       dataIni: null,
       dataFim: null,
@@ -262,13 +268,14 @@ async function clearFilters() {
     if (!authStore.sistema.isMatriz) {
       filter.value.filialId = authStore.user.filial;
       filter.value.usuarioId = authStore.user.id;
+      let centrosCusto = await useUsuarioStore().getCentrosdeCusto(authStore.user.id)
+      filter.value.centroCustoIds = centrosCusto.map(x => x.id)
     } 
-    await getClientesToList(filter.value.filialId, filter.value.usuarioId);
+    let _clientes = await useClienteStore().toComboList(filter.value.filialId ?? 0, filter.value.usuarioId);
+    filter.value.clienteIds = _clientes.map(x => x.value);
 
-    filter.value.clienteIds = clientes.value.map(x => x.value);
 
-
-    await getItems();
+    await getItems(true);
   } catch (error) {
     console.error(error)
 
@@ -301,7 +308,7 @@ async function getClientesToList(filialId = 0, usuarioId = 0) {
   }
 }
 
-async function getItems()
+async function getItems(resetPage = false)
 {
     try
     {
@@ -311,7 +318,13 @@ async function getItems()
         else if (moment(filter.value.dataFim) < moment(filter.value.dataIni)) 
         throw new TypeError("A data fim deve ser maior que a data início!")
         
-        let response = await faturamentoStore.getPaginate(page.value, pageSize, filter.value)
+        let filtros = {...filter.value }
+        filtros.filialId = filtros.filialId ?? 0
+        filtros.clienteIds = filtros.clienteId ? [filtros.clienteId]: filtros.clienteIds
+
+        if (resetPage) page.value = 1
+
+        let response = await faturamentoStore.getPaginate(page.value, pageSize, filtros)
         faturamentos.value = response.items;
         totalPages.value = response.totalPages;
     } catch (error)

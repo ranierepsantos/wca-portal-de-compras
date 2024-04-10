@@ -29,8 +29,8 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("Paginar")]
-        public async Task<IActionResult> ToPaginate([FromQuery] FaturamentoPaginateQuery query)
+        [HttpPost("Paginar")]
+        public async Task<IActionResult> ToPaginate([FromBody] FaturamentoPaginateQuery query)
         {
             var result = await _mediator.Send(query);
 
@@ -80,8 +80,8 @@ namespace wca.reembolso.webapi.Controllers
 
         }
 
-        [HttpGet("ExportarParaExcel")]
-        public async Task<IActionResult> Export2Excel([FromQuery] FaturamentoExportToExcelQuery querie)
+        [HttpPost("ExportarParaExcel")]
+        public async Task<IActionResult> Export2Excel([FromBody] FaturamentoExportToExcelQuery querie)
         {
             var result = await _mediator.Send(querie);
 

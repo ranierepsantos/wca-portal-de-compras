@@ -9,14 +9,17 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
     {
         public FaturamentoProfile()
         {
-            CreateMap<Faturamento, FaturamentoResponse>();
+            CreateMap<Faturamento, FaturamentoResponse>()
+                .ForMember(dest => dest.CentroCustoNome, src => src.MapFrom(f => f.CentroCusto.Nome));
+
             CreateMap<FaturamentoItem, FaturamentoItemResponse>();
             CreateMap<FaturamentoResponse, Faturamento>().ForMember(src => src.FaturamentoItem, dest => dest.Ignore());
 
             CreateMap<Solicitacao, Solicitacao2Faturamento>();
             
             CreateMap<Faturamento, FaturamentoPaginateResponse>()
-                .ForMember(src => src.ClienteNome, dest => dest.MapFrom(d => d.Cliente.Nome));
+                .ForMember(src => src.ClienteNome, dest => dest.MapFrom(d => d.Cliente.Nome))
+                .ForMember(dest => dest.CentroCustoNome, src => src.MapFrom(f => f.CentroCusto.Nome)); 
             
             CreateMap<FaturamentoCreateCommand, Faturamento>()
                 .ForMember(src => src.Status, dest =>  dest.Ignore());

@@ -19,6 +19,8 @@ export class Faturamento {
         this.usuarioId = data ? data.usuarioId: null
         this.clienteId = data ? data.clienteId: null
         this.clienteNome = data ? data.clienteNome: null
+        this.centroCustoId = data ? data.centroCustoId: null
+        this.centroCustoNome = data ? data.centroCustoNome: null
         this.status = data? data.status: 1
         this.valor = data ? data.valor: 0.00
         this.numeroPO = data? data.numeroPO: null
@@ -117,11 +119,12 @@ export const useFaturamentoStore = defineStore("faturamento", {
             pageSize: pageSize,
             filialId: filters.filialId,
             clienteIds: filters.clienteIds,
+            centroCustoIds: filters.centroCustoIds,
             dataIni: filters.dataIni,
             dataFim: filters.dataFim,
             status: filters.status
         }
-        let response = await api.get(rotas.Paginar, {params: parametros} );
+        let response = await api.post(rotas.Paginar, parametros );
 
         return response.data;
     },
@@ -148,7 +151,7 @@ export const useFaturamentoStore = defineStore("faturamento", {
         return data
     },
     gerarRelatorio(filters)   {
-        return api.get(rotas.ExportarParaExcel, {params: filters, responseType: 'blob'} );
+        return api.post(rotas.ExportarParaExcel,filters, { responseType: 'blob'} );
     },
   },
 });
