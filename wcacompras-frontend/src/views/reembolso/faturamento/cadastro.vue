@@ -146,7 +146,9 @@
         <v-card-text v-show="false"> </v-card-text>
         <!-- SOLICITAÇÕES DO FATURAMENTO  -->
         <v-card-text>
-          <small class="text-error" v-show="!hasSolicitacoes">Selecione ao menos 1 solicitação</small>
+          <small class="text-error" v-show="!hasSolicitacoes"
+            >Selecione ao menos 1 solicitação</small
+          >
           <v-table class="elevation-2">
             <thead>
               <tr>
@@ -471,19 +473,23 @@ const isLoading = ref({
   form: true,
   busy: false,
 });
-const oForm = ref(null)
-const hasSolicitacoes = ref(true)
+const oForm = ref(null);
+const hasSolicitacoes = ref(true);
 
 //VUE - FUNCTIONS
 onMounted(async () => {
   try {
-    isLoading.value.form = true
+    isLoading.value.form = true;
     solicitacaoStore;
     clientes.value = await clienteStore.ListByUsuario(authStore.user.id);
     usuarios.value = await usuarioStore.toComboList();
 
     if (parseInt(route.query.id) > 0) {
       await getById(route.query.id);
+      
+      let _centros = await clienteStore.ListCentrosDeCusto([faturamento.value.clienteId])
+      listCentroCusto.value = _centros.map(c =>  ({id: c.value, nome: c.text}))
+
       if (
         faturamento.value.status == 1 &&
         authStore.hasPermissao("cliente_faturamento")
@@ -520,9 +526,9 @@ onMounted(async () => {
         event: "salvar-click",
       });
   } catch (error) {
-    handleErrors(error)
-  }finally {
-    isLoading.value.form = false
+    handleErrors(error);
+  } finally {
+    isLoading.value.form = false;
   }
 });
 
@@ -626,7 +632,7 @@ function addRemove(solicitacao) {
       item.faturamentoId = faturamento.value.id;
       item.solicitacao = { ...solicitacao };
       faturamento.value.adicionarAlterarItem(item);
-      hasSolicitacoes.value = true
+      hasSolicitacoes.value = true;
     }
   } else {
     if (index != -1)
@@ -662,7 +668,7 @@ async function getById(faturamentoId) {
 
 async function getSolicitacoes() {
   try {
-    isLoading.value.busy = true
+    isLoading.value.busy = true;
     if (
       (filter.value.dataIni && !filter.value.dataFim) ||
       (filter.value.dataFim && !filter.value.dataIni)
@@ -681,16 +687,16 @@ async function getSolicitacoes() {
     console.error("getSolicitacoes.error:", error);
     handleErrors(error);
   } finally {
-    isLoading.value.busy = false
+    isLoading.value.busy = false;
   }
 }
 
 async function salvar() {
   try {
-    isLoading.value.busy = true
-    const { valid } = await oForm.value.validate()
-    let data = {...faturamento.value};
-    hasSolicitacoes.value = data.faturamentoItem.length > 0
+    isLoading.value.busy = true;
+    const { valid } = await oForm.value.validate();
+    let data = { ...faturamento.value };
+    hasSolicitacoes.value = data.faturamentoItem.length > 0;
 
     if (valid && hasSolicitacoes.value) {
       let status = faturamentoStore.getStatus(1);
@@ -710,13 +716,11 @@ async function salvar() {
       });
       router.push({ name: "reembolsoFaturamento" });
     }
-
-    
   } catch (error) {
     console.log("salvar.error:", error);
     handleErrors(error);
   } finally {
-    isLoading.value.busy = false
+    isLoading.value.busy = false;
   }
 }
 
