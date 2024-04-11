@@ -578,6 +578,8 @@ async function aprovarReprovar(isAprovado, comentario) {
       7 - Aguardando Faturamento
       8 - Faturado
       9 - Cancelado
+      10 - Pré Cadastro
+      11 - Aguardando Depósito (somente adiantamento, quando valor da despesa > valor adiantamento)
     **/
 
     
@@ -617,6 +619,9 @@ async function aprovarReprovar(isAprovado, comentario) {
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
         if (solicitacao.value.tipoSolicitacao == 1)
           solicitacao.value.status = 2; //2 - Aguardando Depósito
+        else (solicitacao.value.tipoSolicitacao == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
+          solicitacao.value.status = 11; //11 - Aguardando Depósito
+
       }
     }
     let reembolsoStatus = solicitacaoStore.getStatus(solicitacao.value.status);
@@ -791,10 +796,17 @@ async function abrirDepositoForm() {
   if (conta) {
     dadosDeposito.value.saldo = conta.saldo
   }
-  dadosDeposito.value.valorDeposito = 
-        solicitacao.value.tipoSolicitacao == 2
-        ? solicitacao.value.valorAdiantamento
-        : solicitacao.value.valorDespesa;
+
+  let valorDeposito = solicitacao.value.tipoSolicitacao == 2
+                      ? solicitacao.value.valorAdiantamento
+                      : solicitacao.value.valorDespesa;
+
+  if (solicitacao.value.status == 11)
+    valorDeposito = calcularTotalDespesa() - solicitacao.value.valorAdiantamento
+
+
+  dadosDeposito.value.valorDeposito = valorDeposito
+        
   openDepositoForm.value = true
 
 }
@@ -824,6 +836,10 @@ async function registrarPagto(dados) {
 
       // se tipo = 1 - reembolso, enviar para 7 - aguardando faturamento, senão, 3 - prestar contas
       let status = solicitacao.value.tipoSolicitacao == 1 ? 7 : 3;
+
+      //Status: 11 - Aguardando Depósito, usado somente quando há diferença entre despesa e valor adiantado
+      if (solicitacao.value.status == 11)
+        status = 7 //Aguardando Faturamento
 
       let novoStatus = solicitacaoStore.getStatus(status);
       
@@ -923,7 +939,7 @@ function carregarBotoes() {
 
   let wcaAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 1 && authStore.hasPermissao("wca_aprovacao")
   let clienteAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 2 && authStore.hasPermissao("cliente_aprovacao")
-  let registraPagamento = solicitacao.value.status == 2 && authStore.hasPermissao("solicitacaoregistrarpagamento")
+  let registraPagamento = (solicitacao.value.status == 2 || solicitacao.value.status == 11) && authStore.hasPermissao("solicitacaoregistrarpagamento")
   
   let podeSalvar = solicitacao.value.id == 0  || solicitacaoCanEdit.value
 
