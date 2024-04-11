@@ -69,6 +69,7 @@ namespace wca.reembolso.infrastruture.Context
                 .WithOne(t => t.Usuario);
 
             modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId });
+            
         }
     }
 }

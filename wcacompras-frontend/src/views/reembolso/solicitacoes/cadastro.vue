@@ -451,7 +451,7 @@ const despesaCanAdd = computed(() => {
      * colaborador != auth.user && status == 5 && hasPermissao('despesa-aprovar'))
      */
     let can = (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || 
-              (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10".includes(solicitacao.value.status)) 
+              (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)) 
     return can
   }
 )
@@ -463,15 +463,15 @@ const despesaCanEdit = computed(() => {
      * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
      * colaborador != auth.user && status == 5 && hasPermissao('despesa-editar'))
      */
-    let can = (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10".includes(solicitacao.value.status)) ||
+    let can = (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)) ||
               (solicitacao.value.status == 5 && authStore.hasPermissao('despesa-editar'))
     return can
   }
 )
 
-const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
+const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10,12".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
 
-const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status)));
+const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10,12".includes(solicitacao.value.status)));
 
 const isColaborador = computed(() => {
   
@@ -580,6 +580,8 @@ async function aprovarReprovar(isAprovado, comentario) {
       7 - Aguardando Faturamento
       8 - Faturado
       9 - Cancelado
+      10 - Pré Cadastro
+      11 - Aguardando Depósito (somente adiantamento, quando valor da despesa > valor adiantamento)
     **/
 
     
@@ -619,6 +621,9 @@ async function aprovarReprovar(isAprovado, comentario) {
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
         if (solicitacao.value.tipoSolicitacao == 1)
           solicitacao.value.status = 2; //2 - Aguardando Depósito
+        else (solicitacao.value.tipoSolicitacao == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
+          solicitacao.value.status = 11; //11 - Aguardando Depósito
+
       }
     }
     let reembolsoStatus = solicitacaoStore.getStatus(solicitacao.value.status);
@@ -721,7 +726,7 @@ async function salvar() {
 
     //checar se o status esta aguardando prestação de contas e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas
-    if (data.tipoSolicitacao == 2 && data.status == 3 && data.despesa.length > 0) {
+    if (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12) && data.despesa.length > 0) {
       let options = {
         title: "Confirmação",
         html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",
@@ -793,10 +798,17 @@ async function abrirDepositoForm() {
   if (conta) {
     dadosDeposito.value.saldo = conta.saldo
   }
-  dadosDeposito.value.valorDeposito = 
-        solicitacao.value.tipoSolicitacao == 2
-        ? solicitacao.value.valorAdiantamento
-        : solicitacao.value.valorDespesa;
+
+  let valorDeposito = solicitacao.value.tipoSolicitacao == 2
+                      ? solicitacao.value.valorAdiantamento
+                      : solicitacao.value.valorDespesa;
+
+  if (solicitacao.value.status == 11)
+    valorDeposito = calcularTotalDespesa() - solicitacao.value.valorAdiantamento
+
+
+  dadosDeposito.value.valorDeposito = valorDeposito
+        
   openDepositoForm.value = true
 
 }
@@ -826,6 +838,10 @@ async function registrarPagto(dados) {
 
       // se tipo = 1 - reembolso, enviar para 7 - aguardando faturamento, senão, 3 - prestar contas
       let status = solicitacao.value.tipoSolicitacao == 1 ? 7 : 3;
+
+      //Status: 11 - Aguardando Depósito, usado somente quando há diferença entre despesa e valor adiantado
+      if (solicitacao.value.status == 11)
+        status = 7 //Aguardando Faturamento
 
       let novoStatus = solicitacaoStore.getStatus(status);
       
@@ -925,7 +941,7 @@ function carregarBotoes() {
 
   let wcaAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 1 && authStore.hasPermissao("wca_aprovacao")
   let clienteAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 2 && authStore.hasPermissao("cliente_aprovacao")
-  let registraPagamento = solicitacao.value.status == 2 && authStore.hasPermissao("solicitacaoregistrarpagamento")
+  let registraPagamento = (solicitacao.value.status == 2 || solicitacao.value.status == 11) && authStore.hasPermissao("solicitacaoregistrarpagamento")
   
   let podeSalvar = solicitacao.value.id == 0  || solicitacaoCanEdit.value
 

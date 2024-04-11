@@ -50,6 +50,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             dado.StatusAnterior = dado.Status;
 
             dado.Status = request.Status.Id;
+            dado.DataStatus = DateTime.Now;
 
             _repository.SolicitacaoRepository.Update(dado);
             

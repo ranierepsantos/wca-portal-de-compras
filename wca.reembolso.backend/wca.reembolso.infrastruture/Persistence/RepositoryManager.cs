@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office.CoverPageProps;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +73,13 @@ namespace wca.reembolso.infrastruture.Persistence
         public DbSet<T> GetDbSet<T>() where T : class
         {
             return _context.Set<T>();
+        }
+
+        public async Task<List<T>> GetFromSQL<T>(string query) where T: class
+        {
+            return await _context.Set<T>().FromSqlRaw(query)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }
