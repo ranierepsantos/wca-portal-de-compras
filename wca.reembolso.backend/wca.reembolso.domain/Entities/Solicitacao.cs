@@ -56,6 +56,9 @@ namespace wca.reembolso.domain.Entities
         [Column("StatusAnteriorId")]
         public int StatusAnterior { get; set; } = 0;
 
+        [Column("data_status", TypeName = "smalldatetime")]
+        public DateTime DataStatus { get; set; } = DateTime.Now;
+
         public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();
     }

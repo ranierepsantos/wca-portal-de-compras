@@ -451,7 +451,7 @@ const despesaCanAdd = computed(() => {
      * colaborador != auth.user && status == 5 && hasPermissao('despesa-aprovar'))
      */
     let can = (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || 
-              (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10".includes(solicitacao.value.status)) 
+              (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)) 
     return can
   }
 )
@@ -463,15 +463,15 @@ const despesaCanEdit = computed(() => {
      * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
      * colaborador != auth.user && status == 5 && hasPermissao('despesa-editar'))
      */
-    let can = (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10".includes(solicitacao.value.status)) ||
+    let can = (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)) ||
               (solicitacao.value.status == 5 && authStore.hasPermissao('despesa-editar'))
     return can
   }
 )
 
-const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
+const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10,12".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
 
-const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10".includes(solicitacao.value.status)));
+const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10,12".includes(solicitacao.value.status)));
 
 const isColaborador = computed(() => {
   
@@ -726,7 +726,7 @@ async function salvar() {
 
     //checar se o status esta aguardando prestação de contas e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas
-    if (data.tipoSolicitacao == 2 && data.status == 3 && data.despesa.length > 0) {
+    if (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12) && data.despesa.length > 0) {
       let options = {
         title: "Confirmação",
         html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",

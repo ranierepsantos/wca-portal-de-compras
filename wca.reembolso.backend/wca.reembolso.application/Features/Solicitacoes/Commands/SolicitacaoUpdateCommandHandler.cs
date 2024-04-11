@@ -109,6 +109,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             if (findResult.Value.Status == 4)
                 dado.Status = findResult.Value.StatusAnterior;
 
+            //registra a data da alteração de status
+            dado.DataStatus = DateTime.Now;
+
             _repository.SolicitacaoRepository.Update(dado);
 
             await _repository.SaveAsync();

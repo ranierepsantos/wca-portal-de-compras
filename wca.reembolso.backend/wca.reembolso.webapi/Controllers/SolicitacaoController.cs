@@ -159,5 +159,16 @@ namespace wca.reembolso.webapi.Controllers
 
         }
 
+        [HttpGet("ChecarVencidos")]
+        public async Task<IActionResult> ChecarVencidos()
+        {
+            var result = await _mediator.Send(new SolicitacaoCheckVencidoCommand());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
     }
 }
