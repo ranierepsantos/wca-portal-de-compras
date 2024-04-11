@@ -28,7 +28,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
         {
             _logger.LogInformation("Status Solicitação - GetAll");
 
-            var query = _repository.StatusSolicitacaoRepository.ToQuery().OrderBy(o => o.Id);
+            var query = _repository.StatusSolicitacaoRepository.ToQuery().OrderBy(o => o.Status);
 
             return await query.ToListAsync(cancellationToken: cancellationToken);
 

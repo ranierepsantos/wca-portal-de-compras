@@ -60,9 +60,9 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
                 var dataFim = request.DataFim.Value.AddHours(23).AddMinutes(59);
                 query = query.Where(c => c.DataSolicitacao >= request.DataIni && c.DataSolicitacao <= dataFim);
             }
-                
 
-            query = query.OrderBy(q => q.Id);
+
+            query = query.OrderByDescending (q => q.Id);
 
             var pagination = Pagination<SolicitacaoToPaginateResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 
