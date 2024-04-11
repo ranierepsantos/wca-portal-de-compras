@@ -16,6 +16,13 @@ namespace wca.reembolso.infrastruture.Migrations
                 table: "Solicitacoes",
                 type: "smalldatetime",
                 nullable: true);
+
+            string sql = "update s set data_status = sh.data_hora from Solicitacoes s " +
+                        "inner join SolicitacaoHistorico sh on sh.solicitacao_id = s.id " +
+                        "where StatusSolicitacaoId =3 and s.tipo_solicitacao =2" +
+                        "  and sh.evento like '%registrou pagamento%'";
+
+            migrationBuilder.Sql(sql);
         }
 
         /// <inheritdoc />
