@@ -15,7 +15,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
             CreateMap<FaturamentoItem, FaturamentoItemResponse>();
             CreateMap<FaturamentoResponse, Faturamento>().ForMember(src => src.FaturamentoItem, dest => dest.Ignore());
 
-            CreateMap<Solicitacao, Solicitacao2Faturamento>();
+            CreateMap<Solicitacao, Solicitacao2Faturamento>()
+                .ForMember(dest => dest.ColaboradorNome, src => src.MapFrom(f => f.Colaborador.Nome));
             
             CreateMap<Faturamento, FaturamentoPaginateResponse>()
                 .ForMember(src => src.ClienteNome, dest => dest.MapFrom(d => d.Cliente.Nome))

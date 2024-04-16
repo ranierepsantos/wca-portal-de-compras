@@ -33,6 +33,16 @@ namespace wca.reembolso.application.Features.Despesas.Command
 
             _rm.DespesaRepository.Delete(despesa);
             await _rm.SaveAsync();
+
+            string sqlCommand = "update s set valor_despesa = dd.valor_despesa from solicitacoes s " +
+                                "inner join " +
+                                "(  select solicitacao_id, sum(valor) valor_despesa " +
+                                "   from despesas group by solicitacao_id "+
+                                ") dd on dd.solicitacao_id = s.id " +
+                               $"where id = {despesa.SolicitacaoId}";
+
+            await _rm.ExecuteCommandAsync(sqlCommand);
+
             return true;
         }
     }

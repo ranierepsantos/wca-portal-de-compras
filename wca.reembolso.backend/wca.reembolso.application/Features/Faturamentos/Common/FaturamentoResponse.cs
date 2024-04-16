@@ -10,7 +10,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         int ClienteId,
         string ClienteNome,
         int Status,
-        int Valor,
+        decimal Valor,
         int? CentroCustoId,
         string? CentroCustoNome,
         string? NumeroPO,
@@ -26,7 +26,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         int ClienteId,
         string ClienteNome,
         int Status,
-        int Valor,
+        decimal Valor,
         int? CentroCustoId,
         string? CentroCustoNome,
         string? NumeroPO,
@@ -48,6 +48,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         int Id,
         DateTime DataSolicitacao,
         int ColaboradorId,
+        string ColaboradorNome,
         int CentroCustoId,
         decimal ValorDespesa
     );

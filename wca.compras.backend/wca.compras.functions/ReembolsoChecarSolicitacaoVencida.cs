@@ -22,8 +22,8 @@ namespace wca.compras.functions
 
             HttpClient client = new();
 
-            //string baseUrl = "https://wca-backend.azurewebsites.net/"; //produ��o
-            string baseUrl = "https://wca-api-reembolso-hml.azurewebsites.net/"; //hml
+            string baseUrl = "https://api-reembolso-wca.azurewebsites.net/api"; //producao
+            //string baseUrl = "https://wca-api-reembolso-hml.azurewebsites.net/"; //hml
             //string baseUrl = "https://localhost:7235/"; //desenvolvimento
 
             client.BaseAddress = new Uri(baseUrl);
