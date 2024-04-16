@@ -225,7 +225,7 @@ namespace wca.compras.services
                 }
 
                 //atualizar/incluir configuracoes do usuario
-                if (usuario.UsuarioConfiguracoes != null)
+                if (usuario.UsuarioConfiguracoes?.Count > 0)
                 {
                     var userConfiguracao = baseData.UsuarioConfiguracoes.FirstOrDefault(q => q.SistemaId == sistemaId);
                     if (userConfiguracao == null)

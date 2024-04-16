@@ -193,7 +193,7 @@
                     }}
                   </td>
                   <td class="text-left">
-                    {{ getNomeUsuario(item.solicitacao.colaboradorId) }}
+                    {{ item.solicitacao.colaboradorNome }}
                   </td>
                   <td class="text-left">
                     {{ getNomeCentroCusto(item.solicitacao.centroCustoId) }}

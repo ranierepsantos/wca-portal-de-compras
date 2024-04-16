@@ -30,7 +30,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
                 .Include(n => n.CentroCusto)
                 .Include(n => n.FaturamentoHistorico.OrderByDescending(f => f.DataHora))
                 .Include(n => n.FaturamentoItem)
-                .ThenInclude(n => n.Solicitacao);
+                .ThenInclude(n => n.Solicitacao)
+                .ThenInclude(n => n.Colaborador);
             
             var dado = await query.AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
