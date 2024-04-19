@@ -16,8 +16,10 @@ namespace wca.share.infrastructure.Integration.GI
         public IntegrationGI(IConfiguration config)
         {
             _config = config;
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(_config["IntegracaoGI:Url"].ToString().TrimEnd('/'));
+            _httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(_config["IntegracaoGI:Url"].ToString().TrimEnd('/'))
+            };
             _client = RestService.For<IGIRefitService>(_httpClient);
             GetToken();
         }

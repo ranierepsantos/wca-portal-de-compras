@@ -2,6 +2,7 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using wca.reembolso.application.Contracts;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
@@ -18,19 +19,21 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         int[]? Notificar
     ):IRequest<ErrorOr<bool>>;
 
-    public sealed class SolicitacaoChangeStatusCommandHandler : IRequestHandler<SolicitacaoChangeStatusCommand, ErrorOr<bool>>
+    internal sealed class SolicitacaoChangeStatusCommandHandler : IRequestHandler<SolicitacaoChangeStatusCommand, ErrorOr<bool>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoChangeStatusCommandHandler> _logger;
         private readonly IMediator _mediator;
+        private readonly IChatBotMessageHandle _chatbot;
 
-        public SolicitacaoChangeStatusCommandHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoChangeStatusCommandHandler> logger, IMediator mediator)
+        public SolicitacaoChangeStatusCommandHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoChangeStatusCommandHandler> logger, IMediator mediator, IChatBotMessageHandle chatbot)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
+            _chatbot = chatbot;
         }
 
         public async Task<ErrorOr<bool>> Handle(SolicitacaoChangeStatusCommand request, CancellationToken cancellationToken)
@@ -69,6 +72,11 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
                 await _mediator.Send(notificacao, cancellationToken);
             }
+
+            findResult = await _mediator.Send(querie, cancellationToken);
+
+            if (!findResult.IsError)
+                await _chatbot.SolicitacaoSendMessageAsync(request.Notificar, findResult.Value, cancellationToken);
 
             // return 
             return true;

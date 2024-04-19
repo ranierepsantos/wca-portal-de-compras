@@ -28,6 +28,7 @@ namespace wca.reembolso.infrastruture.Context
         public DbSet<CentroCusto> CentroCusto { get; set; }
         public DbSet<UsuarioCentrodeCustos> UsuarioCentrodeCustos { get; set; }
         public DbSet<UsuarioConfiguracoes> UsuarioConfiguracoes { get; set; }
+        public DbSet<StatusChatBotMensagem> StatusChatBotMensagem { get; set; }
         //public DbSet<Filial> Filial { get; set; }
         //public DbSet<FilialUsuario> FilialUsuario { get; set; }
 
@@ -69,6 +70,10 @@ namespace wca.reembolso.infrastruture.Context
                 .WithOne(t => t.Usuario);
 
             modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId });
+
+            modelBuilder.Entity<StatusChatBotMensagem>()
+                .HasIndex(f => new { f.StatusSolicitacaoId, f.EnviarPara })
+                .IsUnique(true);
             
         }
     }

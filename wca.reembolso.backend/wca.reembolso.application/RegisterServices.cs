@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using wca.reembolso.application.Common;
+using wca.reembolso.application.Contracts;
 
 namespace wca.reembolso.application
 {
@@ -15,6 +16,7 @@ namespace wca.reembolso.application
             services.AddMediatR(_ => _.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<IChatBotMessageHandle, ChatBotMessageHandle>();
             HandleFile.Configure(configuration);
         }
 

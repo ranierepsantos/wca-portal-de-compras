@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
+using wca.reembolso.application.Contracts;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
@@ -28,19 +29,20 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         int[] Notificar
     ) : IRequest<ErrorOr<SolicitacaoResponse>>;
 
-    public class SolicitacaoUpdateCommandHandler : IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>
+    internal class SolicitacaoUpdateCommandHandler : IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoUpdateCommandHandler> _logger;
-
-        public SolicitacaoUpdateCommandHandler(IMediator mediator, IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoUpdateCommandHandler> logger)
+        private readonly IChatBotMessageHandle _chatbot;
+        public SolicitacaoUpdateCommandHandler(IMediator mediator, IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoUpdateCommandHandler> logger, IChatBotMessageHandle chatbot)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
+            _chatbot = chatbot;
         }
 
         async Task<ErrorOr<SolicitacaoResponse>> IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>.Handle(SolicitacaoUpdateCommand request, CancellationToken cancellationToken)
@@ -133,9 +135,13 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 await _mediator.Send(notificacao, cancellationToken);
             }
 
+            findResult = await _mediator.Send(querie, cancellationToken);
+
+            if (!findResult.IsError)
+                await _chatbot.SolicitacaoSendMessageAsync(request.Notificar, findResult.Value, cancellationToken);
 
             //3. mapear para SolicitacaoResponse
-            return _mapper.Map<SolicitacaoResponse>(dado);
+            return findResult;
         }
     }
 }
