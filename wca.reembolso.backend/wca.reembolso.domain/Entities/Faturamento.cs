@@ -44,6 +44,9 @@ namespace wca.reembolso.domain.Entities
 
         public CentroCusto? CentroCusto { get; set; }
 
+        [Column("data_chatbot_message", TypeName = "smalldatetime")]
+        public DateTime? DataChatBotMessage { get; set; }
+
         public IList<FaturamentoItem> FaturamentoItem { get; set; } = new List<FaturamentoItem>();
 
         public IList<FaturamentoHistorico> FaturamentoHistorico { get; set; } = new List<FaturamentoHistorico>();

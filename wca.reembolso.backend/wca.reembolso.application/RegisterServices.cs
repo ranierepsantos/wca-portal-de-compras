@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using wca.reembolso.application.Common;
-using wca.reembolso.application.Contracts;
+using wca.reembolso.application.Contracts.Integration;
 
 namespace wca.reembolso.application
 {

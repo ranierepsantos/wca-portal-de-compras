@@ -3,6 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Contracts;
+using wca.reembolso.application.Contracts.Integration;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
@@ -16,7 +17,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         int SolicitacaoId,
         string Evento,
         StatusSolicitacao Status,
-        int[]? Notificar
+        int[]? Notificar,
+        DateTime? DataDeposito = null,
+        decimal? ValorDeposito = null
     ):IRequest<ErrorOr<bool>>;
 
     internal sealed class SolicitacaoChangeStatusCommandHandler : IRequestHandler<SolicitacaoChangeStatusCommand, ErrorOr<bool>>
@@ -75,8 +78,13 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             findResult = await _mediator.Send(querie, cancellationToken);
 
-            if (!findResult.IsError)
+            if (!findResult.IsError && request.Notificar?.Length > 0)
                 await _chatbot.SolicitacaoSendMessageAsync(request.Notificar, findResult.Value, cancellationToken);
+
+            if ((request.Status.Id == 3 || request.Status.Id == 7) &&
+                (request.DataDeposito is not null && request.ValorDeposito is not null))
+                await _chatbot.DepositoSendMessageAsync(findResult.Value, request.DataDeposito, request.ValorDeposito, cancellationToken);
+
 
             // return 
             return true;

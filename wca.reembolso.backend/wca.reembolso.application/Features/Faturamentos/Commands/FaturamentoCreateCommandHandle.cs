@@ -3,6 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using wca.reembolso.application.Contracts.Integration;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Faturamentos.Behaviors;
 using wca.reembolso.application.Features.Faturamentos.Common;
@@ -28,18 +29,20 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
     ): IRequest<ErrorOr<FaturamentoResponse>>;
 
 
-    public class FaturamentoCreateCommandHandle : IRequestHandler<FaturamentoCreateCommand, ErrorOr<FaturamentoResponse>>
+    internal class FaturamentoCreateCommandHandle : IRequestHandler<FaturamentoCreateCommand, ErrorOr<FaturamentoResponse>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<FaturamentoCreateCommandHandle> _logger;
         private readonly IMediator _mediator;
-        public FaturamentoCreateCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<FaturamentoCreateCommandHandle> logger, IMediator mediator)
+        private readonly IChatBotMessageHandle _chatbot;
+        public FaturamentoCreateCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<FaturamentoCreateCommandHandle> logger, IMediator mediator, IChatBotMessageHandle chatbot)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
+            _chatbot = chatbot;
         }
 
         public async Task<ErrorOr<FaturamentoResponse>> Handle(FaturamentoCreateCommand request, CancellationToken cancellationToken)
@@ -90,6 +93,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
 
                 await _mediator.Send(notificacao, cancellationToken);
             }
+
+            await _chatbot.FaturamentoSendMessageAsync(request.Notificar, faturamento.Id, cancellationToken);
 
             return _mapper.Map<FaturamentoResponse>(faturamento);
         }

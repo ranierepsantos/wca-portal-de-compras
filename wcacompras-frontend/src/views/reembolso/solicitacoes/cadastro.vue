@@ -855,7 +855,9 @@ async function registrarPagto(dados) {
         solicitacaoId: solicitacao.value.id,
         evento: texto,
         status: novoStatus,
-        notificar: notificarUsuario
+        notificar: notificarUsuario,
+        dataDeposito: dados.dataDeposito,
+        valorDeposito: dados.valorDeposito
       };
 
       await solicitacaoStore.changeStatus(solicitacaoStatus);

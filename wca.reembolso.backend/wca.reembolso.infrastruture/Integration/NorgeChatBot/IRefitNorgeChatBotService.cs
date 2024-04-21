@@ -1,5 +1,5 @@
 ﻿using Refit;
-using wca.reembolso.application.Contracts.NorgeChatBot;
+using wca.reembolso.application.Contracts.Integration.NorgeChatBot;
 
 namespace wca.reembolso.infrastruture.Integration.NorgeChatBot
 {
