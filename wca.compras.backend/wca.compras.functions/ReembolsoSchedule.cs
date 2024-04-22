@@ -22,7 +22,7 @@ namespace wca.compras.functions
 
             HttpClient client = new();
 
-            string baseUrl = "https://api-reembolso-wca.azurewebsites.net/api"; //producao
+            string baseUrl = "https://api-reembolso-wca.azurewebsites.net/"; //producao
             //string baseUrl = "https://wca-api-reembolso-hml.azurewebsites.net/"; //hml
             //string baseUrl = "https://localhost:7235/"; //desenvolvimento
 
@@ -32,21 +32,21 @@ namespace wca.compras.functions
                 new MediaTypeWithQualityHeaderValue("application/json"));
 
 
-            _logger.LogInformation($"{DateTime.Now} Executando schedule diária de solicitações vencidas");
+            _logger.LogInformation($"{DateTime.Now} Executando schedule diï¿½ria de solicitaï¿½ï¿½es vencidas");
             var path = "api/Solicitacao/ChecarVencidos";
 
             HttpResponseMessage response = await client.GetAsync(path);
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"{DateTime.Now} - Checar Solicitações vencidas - executeSchedule success!");
+                _logger.LogInformation($"{DateTime.Now} - Checar Solicitaï¿½ï¿½es vencidas - executeSchedule success!");
             }
             else
             {
-                _logger.LogInformation($"{DateTime.Now} - Checar Solicitações vencidas - executeSchedule problem!");
+                _logger.LogInformation($"{DateTime.Now} - Checar Solicitaï¿½ï¿½es vencidas - executeSchedule problem!");
             }
 
-            _logger.LogInformation($"{DateTime.Now} Executando schedule diário de envio de mensagem via chatbot");
+            _logger.LogInformation($"{DateTime.Now} Executando schedule diï¿½rio de envio de mensagem via chatbot");
 
             path = "api/Faturamento/SendChatBotAfterDays/7";
 
@@ -54,7 +54,7 @@ namespace wca.compras.functions
 
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation($"{DateTime.Now} - Faturamento chatbot 7 dias - executeSchedule success!\");\r\n            }}\r\n            else\r\n            {{\r\n                _logger.LogInformation($\"{{DateTime.Now}} - Checar Solicitações vencidas - executeSchedule problem!\");\r\n            }}\r\n - executeSchedule success!");
+                _logger.LogInformation($"{DateTime.Now} - Faturamento chatbot 7 dias - executeSchedule success!\");\r\n            }}\r\n            else\r\n            {{\r\n                _logger.LogInformation($\"{{DateTime.Now}} - Checar Solicitaï¿½ï¿½es vencidas - executeSchedule problem!\");\r\n            }}\r\n - executeSchedule success!");
             }
             else
             {
