@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Refit;
-using System.Text.RegularExpressions;
 using wca.reembolso.application.Contracts.Integration.WcaCompras;
 
 namespace wca.reembolso.infrastruture.Integration.WcaCompras

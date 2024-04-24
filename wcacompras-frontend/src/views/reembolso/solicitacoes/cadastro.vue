@@ -1087,7 +1087,6 @@ async function retornaUsuariosParaNotificar(status) {
   return list;
 }
 
-
 async function baixarComprovantes() {
   try {
     isDownload.value = true;

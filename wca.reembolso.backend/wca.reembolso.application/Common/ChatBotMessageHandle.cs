@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using wca.reembolso.application.Contracts.Integration;
@@ -17,17 +18,19 @@ namespace wca.reembolso.application.Common
         private readonly IRepositoryManager _repository;
         private readonly IIntegrationNorgeChatBot _norgeBot;
         private readonly IMapper _mapper;
+        private readonly ILogger<ChatBotMessageHandle> _logger;
         private readonly TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
 
         private string faturamentoFirstMessage = @"{saudacao.dia}!\nAqui é o assistente WCA de apoio aos gestores clientes. Há uma relação de despesas aguardando sua análise para faturamento.\nRELAÇÃO DE DESPESAS: {faturamento.codigo}\nVALOR TOTAL: {faturamento.valor}\nCENTRO DE CUSTOS: {faturamento.centrocusto}\nDATA DA PRIMEIRA DESPESA: {faturamento.dataPrimeiraDespesa}\nDATA DA DESPESA MAIS RECENTE: {faturamento.dataUltimaDespesa}\nPara acessar o sistema clique no link: https://app.wcabrasil.com.br";
         private string faturamentoSevenDaysMessage = @"{saudacao.dia}!\nAqui é o assistente WCA de apoio aos gestores clientes. Há faturamentos que aguardam os correspondentes números de ordem de compra ou arquivos equivalentes (P.O.).\nCENTRO DE CUSTOS: {faturamento.centrocusto}\nRELAÇÃO DE DESPESAS: {faturamento.codigo}\nDATA DA PRIMEIRA DESPESA: {faturamento.dataPrimeiraDespesa}\nDATA DA DESPESA MAIS RECENTE: {faturamento.dataUltimaDespesa}\nVALOR A SER FATURADO: {faturamento.valor}\nPara acessar o sistema clique no link: https://app.wcabrasil.com.br";
         private string depositoMessage = "{saudacao.dia}!\nAqui é o assistente WCA de apoio aos colaboradores. O depósito em conta corrente correspondente aos valores da solicitação #{solicitacao.codigo} recebida em {solicitacao.datahora} será feito em {datadeposito}, no valor {valordeposito}.";
 
-        public ChatBotMessageHandle(IRepositoryManager repository, IIntegrationNorgeChatBot norgeBot, IMapper mapper)
+        public ChatBotMessageHandle(IRepositoryManager repository, IIntegrationNorgeChatBot norgeBot, IMapper mapper, ILogger<ChatBotMessageHandle> logger)
         {
             _repository = repository;
             _norgeBot = norgeBot;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task FaturamentoSendMessageAsync(int[] usersId, int faturamentoId, CancellationToken cancellationToken = default)
@@ -58,7 +61,9 @@ namespace wca.reembolso.application.Common
             {
                 foreach (var usuario in usuarios)
                 {
-                    await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
+                   var response =  await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
+                    if (!string.IsNullOrEmpty(response.Error))
+                        _logger.LogError($"norgebot.send.error, number: {"55" + usuario?.Celular.ToString()}, error: {response.Error}");
                 }
             }
 
@@ -94,12 +99,18 @@ namespace wca.reembolso.application.Common
                     string mensagem = Regex.Unescape (SolicitacaoMontaMensagem(message.Mensagem, solicitacao));
 
                     if (message.EnviarPara == (int)EnumNotificaQuem.Usuario && !string.IsNullOrEmpty(solicitacao.ColaboradorCelular))
-                        await _norgeBot.Send("55" + solicitacao.ColaboradorCelular, mensagem);
+                    {
+                        var response = await _norgeBot.Send("55" + solicitacao.ColaboradorCelular, mensagem);
+                        if (!string.IsNullOrEmpty(response.Error))
+                            _logger.LogError($"norgebot.send.error, number: {"55" + solicitacao.ColaboradorCelular}, error: {response.Error}");
+                    }
                     else
                     {
                         foreach(var usuario in usuarios)
                         {
-                            await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
+                            var response = await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
+                            if (!string.IsNullOrEmpty(response.Error))
+                                _logger.LogError($"norgebot.send.error, number: {"55" + usuario?.Celular.ToString()}, error: {response.Error}");
                         }
                     }
                 }

@@ -803,13 +803,7 @@ async function getUsuarioToNotificar(status) {
   let notificar = [];
 
   if (status.notifica == 2) {
-    let notificaList = await usuarioStore.getUsuarioToNotificacaoByCliente(
-      faturamento.value.clienteId,
-      "cliente_faturamento"
-    );
-    notificar = notificaList.map((q) => {
-      return q.value;
-    });
+    notificar = await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(faturamento.value.centroCustoId, "cliente_faturamento")
   } else if (status.notifica == 1) {
     notificar.push(faturamento.value.usuarioId);
   }

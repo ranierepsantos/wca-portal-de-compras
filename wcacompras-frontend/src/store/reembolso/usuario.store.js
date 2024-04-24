@@ -207,9 +207,21 @@ export const useUsuarioStore = defineStore("usuario", {
             return list;
         },
 
-        async getUsuarioToNotificacaoByCentroDeCusto(idCentroCusto) {
-            let response = await reembolsoUsuarioService.getListByCentroCusto(idCentroCusto);
-            return response.data;
+        async getUsuarioToNotificacaoByCentroDeCusto(idCentroCusto, permissao) {
+            try {
+                let response = await userService.toListByPermissao(permissao)
+                let usuarios = response.data;
+                if (usuarios.length > 0) {
+                    response = await reembolsoUsuarioService.getListByCentroCusto(idCentroCusto);
+                    let list = usuarios.filter(user => 
+                        {return response.data.includes(user.value) }
+                    )
+                    return list.map(x =>  x.value);
+                }
+                return [];
+            } catch (error) {
+                throw error;
+            }
         },
 
         async getListUsuarioByCentroDeCusto(idCentroCusto) {
