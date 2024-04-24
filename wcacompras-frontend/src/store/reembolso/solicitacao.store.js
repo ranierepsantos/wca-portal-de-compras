@@ -164,7 +164,7 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
 
     async getByTipoAndUsuario(tipoSolicitacao, colaboradorId, status) {
         
-        let response = await api.ListarPorColaboradorGestor(colaboradorId, 0, status);
+        let response = await api.ListarPorColaboradorGestor(colaboradorId, status);
         let data = response.data.filter(c => c.tipoSolicitacao == tipoSolicitacao)  
 
         return data;

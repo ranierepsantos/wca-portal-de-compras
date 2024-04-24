@@ -535,11 +535,10 @@ onMounted(async () => {
 });
 
 watch(() => solicitacao.value.clienteId, async (newValue,oldValue) => {
-  
   if (newValue != oldValue) {
     let cliente = clientes.value.find(q => q.id == newValue)
     listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
-    if (!isColaborador.value)
+    if (!isColaborador.value && solicitacao.value.id == 0)
       solicitacao.value.centroCustoId = null
 
   }
@@ -740,6 +739,14 @@ async function salvar() {
       if (response.isConfirmed) {
         data.status = 5; //5 - aguardando conferência
       }
+    } else if (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12) && data.despesa.length == 0) {
+      let options = {
+        title: "Informação",
+        html: "Não é possível enviar para aprovação sem cadastro de despesas!",
+        icon: "question",
+      };
+      await swal.fire(options);
+      return
     }
     
     //trocar os id despesa negativos por 0
@@ -983,15 +990,13 @@ async function retornaUsuariosParaNotificar(status) {
   let list = []
   if (status.notifica == 1) // wca
   {
-    let notificaList = await useUsuarioStore().getUsuarioToNotificacaoByCliente(solicitacao.value.clienteId, "wca_aprovacao")
-    list = notificaList.map(q => {return q.value})
+    list = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(solicitacao.value.centroCustoId, "wca_aprovacao"))
   }else if (status.notifica == 2 && solicitacao.value.centroCustoId) //gestores
-    list = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(solicitacao.value.centroCustoId))
+    list = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(solicitacao.value.centroCustoId, "cliente_aprovacao"))
   else if (status.notifica == 3) //colaborador
     list.push(solicitacao.value.colaboradorId)
 
   return list;
 }
-
 
 </script>
