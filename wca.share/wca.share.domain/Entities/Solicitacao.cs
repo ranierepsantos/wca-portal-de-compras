@@ -136,7 +136,6 @@ namespace wca.share.domain.Entities
         [Column("assunto_id")]
         public int AssuntoId { get; set; }
 
-        [JsonIgnore]
         public Assunto? Assunto { get; set; }
 
         [Column("data_alteracao")]

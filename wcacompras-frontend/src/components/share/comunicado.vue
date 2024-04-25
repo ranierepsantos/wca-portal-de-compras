@@ -21,9 +21,7 @@
           combo-item-title="text"
           combo-item-value="value"
           :select-mode="createMode"
-          :text-field-value="
-            getTextFromListByCodigo(listAssuntos, dataModel.assuntoId)
-          "
+          :text-field-value="dataModel.assunto.nome"
           label-text="Assunto"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
