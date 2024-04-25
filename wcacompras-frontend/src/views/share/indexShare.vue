@@ -151,6 +151,12 @@ const menuItems = ref([
     route: "/share/notificacoes",
     permissao: "livre"
   },
+  {
+    title: "Assuntos",
+    value: 10,
+    route: "/share/assuntos",
+    permissao: "assunto"
+  },
 ]);
 
 const authStore = useAuthStore();

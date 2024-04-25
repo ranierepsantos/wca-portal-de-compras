@@ -83,6 +83,7 @@ export class Comunicado {
         this.dataAlteracao = data && data.dataAlteracao? moment(data.dataAlteracao).format("YYYY-MM-DD") : null
         this.assuntoId = data ? data.assuntoId: null
         this.observacao = data? data.observacao: ""
+        this.assunto = data && data.assunto ? data.assunto: {id: null, nome: "", ativo: false}
     }
 }
 
@@ -134,6 +135,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
 
             }else if (data.solicitacaoTipoId == 2)  //Comunicado
             {
+                delete data.comunicado.assunto
                 data.desligamento  = null
                 data.mudancaBase = null 
                 data.ferias = null
@@ -176,6 +178,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 data.comunicado  = null
                 data.mudancaBase = null 
             }else if (data.solicitacaoTipoId == 2) {
+                delete data.comunicado.assunto
                 data.desligamento  = null
                 data.mudancaBase = null 
             }else if (data.solicitacaoTipoId == 4) {

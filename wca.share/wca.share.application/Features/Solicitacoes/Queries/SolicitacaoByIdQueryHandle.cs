@@ -28,7 +28,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 .Include(x => x.Cliente)
                 .Include(x => x.Funcionario)
                 .Include(x => x.CentroCusto)
-                .Include(x => x.Comunicado)
+                .Include(x => x.Comunicado).ThenInclude(x => x.Assunto)
                 .Include(x => x.Desligamento)
                 .Include(x => x.Anexos)
                 .Include(x => x.MudancaBase).ThenInclude(x => x.ItensMudanca)

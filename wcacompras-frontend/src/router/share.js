@@ -162,5 +162,12 @@ export const share = {
         component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/edit'),
         props: route => ({ query: route.query.id })
       },
+      {
+        path: 'assuntos',
+        name: 'shareAssuntos',
+        beforeEnter: protectRoute,
+        meta: {permissao: "assunto", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/assuntos'),
+      },
     ]
 }

@@ -15,5 +15,8 @@ namespace wca.share.domain.Entities
 
         [Column("nome", TypeName = "varchar(200)")]
         public string Nome { get; set; } = string.Empty;
+
+        [Column("ativo")]
+        public bool Ativo { get; set; } = true;
     }
 }
