@@ -618,9 +618,9 @@ async function aprovarReprovar(isAprovado, comentario) {
 
 
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
-        if (solicitacao.value.tipoSolicitacaoId == 1)
+        if (solicitacao.value.tipoSolicitacao == 1)
           solicitacao.value.status = 2; //2 - Aguardando Depósito
-        else (solicitacao.value.tipoSolicitacaoId == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
+        else (solicitacao.value.tipoSolicitacao == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
           solicitacao.value.status = 11; //11 - Aguardando Depósito
 
       }
