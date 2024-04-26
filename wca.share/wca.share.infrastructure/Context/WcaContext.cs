@@ -30,6 +30,10 @@ namespace wca.share.infrastruture.Context
 
         public DbSet<UsuarioCentrodeCustos> UsuarioCentrodeCustos { get; set; }
         public DbSet<UsuarioConfiguracoes>  UsuarioConfiguracoes { get; set; }
+        public DbSet<SolicitacaoFerias> SolicitacaoFerias { get; set; }
+        public DbSet<TipoFerias> TipoFerias { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UsuarioClientes>().HasKey(pk => new { pk.UsuarioId, pk.ClienteId });
@@ -40,6 +44,9 @@ namespace wca.share.infrastruture.Context
             modelBuilder.Entity<SolicitacaoComunicado>().HasOne(o => o.Assunto);
             modelBuilder.Entity<SolicitacaoDesligamento>().HasOne(o => o.Motivo);
             modelBuilder.Entity<SolicitacaoMudancaBase>().HasMany(o => o.ItensMudanca).WithMany();
+            modelBuilder.Entity<SolicitacaoFerias>().HasKey(pk => new { pk.SolicitacaoId });
+            modelBuilder.Entity<SolicitacaoFerias>().HasOne(o => o.TipoFerias);
+
 
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.Desligamento);
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.MudancaBase);
@@ -47,6 +54,8 @@ namespace wca.share.infrastruture.Context
 
             modelBuilder.Entity<UsuarioCentrodeCustos>().HasKey(pk => new { pk.UsuarioId, pk.CentroCustoId });
             modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId });
+
+            modelBuilder.Entity<Funcionario>().HasIndex(ix =>  ix.eSocialMatricula).IsUnique();
         }
     }
 }

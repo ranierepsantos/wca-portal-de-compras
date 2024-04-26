@@ -131,7 +131,7 @@ const menuItems = ref([
     title: "Férias",
     value: 8,
     route: "/share/ferias",
-    permissao: "livre"
+    permissao: "ferias-criar|ferias-executar|ferias-finalizar"
   },
   // {
   //   title: "Filiais",
@@ -172,6 +172,7 @@ onMounted(async () => {
   await useShareSolicitacaoStore().listarStatusSolicitacao();
   await useShareSolicitacaoStore().getListaAssuntos();
   await useShareSolicitacaoStore().listarMotivosDemissao();
+  await useShareSolicitacaoStore().getTipoFerias();
   clearInterval(checkNotificacoes.value)
   startCheckNotificacoes()
 });

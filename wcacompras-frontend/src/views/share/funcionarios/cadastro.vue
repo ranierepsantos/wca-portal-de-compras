@@ -84,7 +84,7 @@
                   <v-col cols="3">
                     <v-text-field
                       label="Número PIS"
-                      v-model="funcionario.numeroPis"
+                      v-model="funcionario.eSocialMatricula"
                       type="number"
                       required
                       variant="outlined"

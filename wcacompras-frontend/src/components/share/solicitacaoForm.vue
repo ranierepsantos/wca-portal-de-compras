@@ -49,9 +49,9 @@
         <v-col cols="2" v-show="solicitacao.solicitacaoTipoId!=2">
         <v-text-field
               variant="outlined"
-              label="PIS"
+              label="eSocial Matrícula"
               class="text-primary"
-              v-model="solicitacao.numeroPis"
+              v-model="solicitacao.eSocialMatricula"
               :readOnly = "true"
               bg-color="#f2f2f2"
               density="compact"

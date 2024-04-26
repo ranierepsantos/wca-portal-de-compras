@@ -169,5 +169,36 @@ export const share = {
         meta: {permissao: "assunto", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/assuntos'),
       },
+      {
+        path: 'ferias',
+        name: 'shareFerias',
+        meta: {permissao: "ferias-criar|ferias-executar|ferias-finalizar", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes'),
+      },
+      {
+        path: 'ferias/criar',
+        name: 'shareFeriasCreate',
+        meta: {permissao: "ferias-criar", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/create'),
+      },
+      {
+        path: 'ferias/editar',
+        name: 'shareFeriasCadastro',
+        meta: {permissao: "ferias-executar|ferias-finalizar", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/edit'),
+        props: route => ({ query: route.query.id })
+      },
     ]
 }

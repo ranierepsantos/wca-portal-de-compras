@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using wca.share.domain.Entities;
+﻿using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Solicitacoes.Common
 {
@@ -23,10 +20,11 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public int? ResponsavelId { get;  set; }
         public int? CentroCustoId { get;  set; }
         public string? CentroCustoNome { get; set; }
-        public string? NumeroPis { get; set; }
+        public string? eSocialMatricula { get; set; }
 
         public SolicitacaoComunicado? Comunicado { get;  set; }
         public SolicitacaoDesligamento? Desligamento { get;  set; }
+        public SolicitacaoFerias? Ferias { get;  set; }
         public SolicitacaoMudancaBase? MudancaBase { get;  set; }
         public List<SolicitacaoArquivo>? Anexos { get;  set; }
         
