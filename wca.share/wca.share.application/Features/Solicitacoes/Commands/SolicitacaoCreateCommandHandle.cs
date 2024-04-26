@@ -25,6 +25,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
         SolicitacaoMudancaBase? MudancaBase,
+        SolicitacaoFerias? Ferias,
         List<SolicitacaoArquivo>? Anexos,
         int[]? NotificarUsuarioIds
     ) :IRequest<ErrorOr<SolicitacaoResponse>>;

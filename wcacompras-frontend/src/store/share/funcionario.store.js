@@ -22,7 +22,7 @@ export class Funcionario {
         this.email = data ? data.email: null
         this.dddCelular = data ? data.dddCelular: null
         this.numeroCelular = data ? data.numeroCelular: null
-        this.numeroPis = data ? data.numeroPis: null
+        this.eSocialMatricula = data ? data.eSocialMatricula: null
     }
 }
 

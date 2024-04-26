@@ -35,7 +35,9 @@
                 :data-model="solicitacao.comunicado"
                 :create-mode="true"
                 />
-              <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" />
+              <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" 
+              :data-model="solicitacao.ferias"
+              :create-mode="true"/>
               <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
 
@@ -107,6 +109,8 @@ onBeforeMount(async () => {
     } else if (route.path.includes("ferias")) {
       solicitacao.value.solicitacaoTipoId = 3;
       permissao.value = 'ferias' 
+      await useShareSolicitacaoStore().getTipoFerias();
+
     } else if (route.path.includes("mudancabase")) {
       solicitacao.value.solicitacaoTipoId = 4;
       permissao.value = 'mudancabase' 
@@ -149,12 +153,32 @@ watch(() => solicitacao.value.funcionarioId, () => {
   if (oFunc) {
     solicitacao.value.centroCustoNome = oFunc.centroCustoNome
     solicitacao.value.centroCustoId = oFunc.centroCustoId
-    solicitacao.value.numeroPis = oFunc.numeroPis
+    solicitacao.value.eSocialMatricula = oFunc.eSocialMatricula
     solicitacao.value.funcionarioDataAdmissao = moment(oFunc.dataAdmissao).format("YYYY-MM-DD");
   }
 });
 
+watch(() => solicitacao.value.ferias.tipoFeriasId, (newvalue) => {
+  
+  let oTipo = useShareSolicitacaoStore().tipoFerias.find(q =>  q.id == newvalue)
+  if (oTipo && solicitacao.value.ferias.dataSaida) {
+    console.debug(moment(solicitacao.value.ferias.dataSaida).add("days", oTipo.quantidadeDias))
+    solicitacao.value.ferias.dataRetorno = moment(solicitacao.value.ferias.dataSaida).add("days",oTipo.quantidadeDias).format("YYYY-MM-DD")
+  }
+});
 
+watch(() => solicitacao.value.ferias.dataSaida, () => {
+  
+  if (solicitacao.value.ferias.tipoFeriasId) 
+  {
+    let oTipo = useShareSolicitacaoStore().tipoFerias.find(q =>  q.id == solicitacao.value.ferias.tipoFeriasId)
+    if (oTipo && solicitacao.value.ferias.dataSaida) {
+      console.debug(moment(solicitacao.value.ferias.dataSaida).add("days", oTipo.quantidadeDias))
+      solicitacao.value.ferias.dataRetorno = moment(solicitacao.value.ferias.dataSaida).add("days",oTipo.quantidadeDias).format("YYYY-MM-DD")
+    }
+  }
+  
+});
 
 //FUNCTIONS
 

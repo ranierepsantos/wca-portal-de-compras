@@ -43,7 +43,9 @@
                 :create-mode="false"
                 :is-read-only="true"
               />
-              <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" />
+              <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3"
+                :data-model="solicitacao.ferias"
+                :create-mode="false" />
               <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />
             </SolicitacaoForm>
             <v-card>
@@ -162,6 +164,7 @@ onBeforeMount(async () => {
 
     } else if (route.path.includes("ferias")) {
       permissao.value = 'ferias' 
+      await useShareSolicitacaoStore().getTipoFerias();
     } else if (route.path.includes("mudancabase")) {
       permissao.value = 'mudancabase' 
     }

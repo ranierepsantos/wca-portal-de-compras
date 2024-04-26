@@ -1,7 +1,6 @@
 ﻿using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using wca.share.application.Contracts.Integration.GI;
 using wca.share.application.Contracts.Persistence;
 using wca.share.domain.Entities;
@@ -33,7 +32,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
                 {
                     Funcionario? _func = await _repository.GetDbSet<Funcionario>()
                     .AsNoTracking()
-                    .Where(q => q.CodigoFuncionario == ofunc.CodigoFuncionario)
+                    .Where(q => q.eSocialMatricula == ofunc.eSocialMatricula)
                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
                     if (_func is null)
@@ -52,7 +51,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
                             if (centroCusto is not null)
                             {
                                 FuncionarioCreateCommand command = new(ofunc.Nome, cliente.Id, centroCusto.Id, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
-                                    ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.Pis?.ToString());
+                                    ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.eSocialMatricula);
 
                                 _ = await _mediator.Send(command, cancellationToken);
                             }
@@ -65,7 +64,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
                     else
                     {
                         FuncionarioUpdateCommand command = new(_func.Id, ofunc.Nome, _func.ClienteId, _func.CentroCustoId, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
-                                                               ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.Pis?.ToString());
+                                                               ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.eSocialMatricula);
                         _ = await _mediator.Send(command, cancellationToken);
                     }
                 }
