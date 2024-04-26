@@ -538,10 +538,11 @@ onMounted(async () => {
 watch(() => solicitacao.value.clienteId, async (newValue,oldValue) => {
   if (newValue != oldValue) {
     let cliente = clientes.value.find(q => q.id == newValue)
-    listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
-    if (!isColaborador.value && solicitacao.value.id == 0)
+    if (cliente) {
+      listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
+    if (!isColaborador.value)
       solicitacao.value.centroCustoId = null
-
+    }
   }
   
 })
@@ -619,11 +620,12 @@ async function aprovarReprovar(isAprovado, comentario) {
 
 
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
-        if (solicitacao.value.tipoSolicitacaoId == 1)
+        if (solicitacao.value.tipoSolicitacao == 1){
           solicitacao.value.status = 2; //2 - Aguardando Depósito
-        else (solicitacao.value.tipoSolicitacaoId == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
+        } else if (solicitacao.value.tipoSolicitacao == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
+        {
           solicitacao.value.status = 11; //11 - Aguardando Depósito
-
+        }
       }
     }
     let reembolsoStatus = solicitacaoStore.getStatus(solicitacao.value.status);
