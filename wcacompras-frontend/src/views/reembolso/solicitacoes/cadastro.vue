@@ -371,6 +371,7 @@
           :data="dadosDeposito" 
           @close-form="openDepositoForm = false"
           @registrar-pagamento = "registrarPagto($event)"
+          :is-running-event="isRunningEvent"
           />
       </v-dialog>
     </v-container>
@@ -618,9 +619,9 @@ async function aprovarReprovar(isAprovado, comentario) {
 
 
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
-        if (solicitacao.value.tipoSolicitacao == 1)
+        if (solicitacao.value.tipoSolicitacaoId == 1)
           solicitacao.value.status = 2; //2 - Aguardando Depósito
-        else (solicitacao.value.tipoSolicitacao == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
+        else (solicitacao.value.tipoSolicitacaoId == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
           solicitacao.value.status = 11; //11 - Aguardando Depósito
 
       }
@@ -822,6 +823,7 @@ async function abrirDepositoForm() {
 
 async function registrarPagto(dados) {
   try {
+    isRunningEvent.value = true
     openDepositoForm.value = false
     let options = {
         title: "Confirmar",
@@ -883,6 +885,8 @@ async function registrarPagto(dados) {
   } catch (error) {
     console.log("solicitacao.cadastro.registrarPagamento.erro", error);
     handleErrors(error);
+  }finally {
+    isRunningEvent.value = false
   }
 }
 
