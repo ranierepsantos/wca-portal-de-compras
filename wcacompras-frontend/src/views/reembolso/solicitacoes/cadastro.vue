@@ -540,8 +540,8 @@ watch(() => solicitacao.value.clienteId, async (newValue,oldValue) => {
     let cliente = clientes.value.find(q => q.id == newValue)
     if (cliente) {
       listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
-    if (!isColaborador.value)
-      solicitacao.value.centroCustoId = null
+      if (!isColaborador.value && solicitacao.value.id == 0)
+        solicitacao.value.centroCustoId = null
     }
   }
   
@@ -739,9 +739,9 @@ async function salvar() {
       };
 
       let response = await swal.fire(options);
-      if (response.isConfirmed) {
+      if (response.isConfirmed) 
         data.status = 5; //5 - aguardando conferência
-      }
+        
     } else if (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12) && data.despesa.length == 0) {
       let options = {
         title: "Informação",
