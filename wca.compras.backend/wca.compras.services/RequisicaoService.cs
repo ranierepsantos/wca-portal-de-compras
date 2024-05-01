@@ -691,12 +691,13 @@ namespace wca.compras.services
                     };
 
                     ws2.Cell($"B{rowPlan2}").SetValue(requisicao.Id);
-                    ws2.Cell($"C{rowPlan2}").SetValue(requisicao.Cliente.Nome);
-                    ws2.Cell($"D{rowPlan2}").SetValue(valorVerba).Style.NumberFormat.Format = numberFormat; 
-                    ws2.Cell($"E{rowPlan2}").SetValue(requisicao.ValorTotal).Style.NumberFormat.Format = numberFormat;
-                    ws2.Cell($"F{rowPlan2}").SetValue(valorVerba - requisicao.ValorTotal).Style.NumberFormat.NumberFormatId = (int)XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
-                    ws2.Cell($"G{rowPlan2}").SetValue(_status);
-                    ws2.Cell($"H{rowPlan2}").SetValue(requisicao.Usuario.Nome);
+                    ws2.Cell($"C{rowPlan2}").SetValue(requisicao.DataCriacao);
+                    ws2.Cell($"D{rowPlan2}").SetValue(requisicao.Cliente.Nome);
+                    ws2.Cell($"E{rowPlan2}").SetValue(valorVerba).Style.NumberFormat.Format = numberFormat; 
+                    ws2.Cell($"F{rowPlan2}").SetValue(requisicao.ValorTotal).Style.NumberFormat.Format = numberFormat;
+                    ws2.Cell($"G{rowPlan2}").SetValue(valorVerba - requisicao.ValorTotal).Style.NumberFormat.NumberFormatId = (int)XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
+                    ws2.Cell($"H{rowPlan2}").SetValue(_status);
+                    ws2.Cell($"I{rowPlan2}").SetValue(requisicao.Usuario.Nome);
 
                     valorVerbaTotal += valorVerba;
                     valorPedidosTotal += requisicao.ValorTotal;
@@ -710,23 +711,24 @@ namespace wca.compras.services
                     foreach (var item in requisicao.RequisicaoItens)
                     {
                         ws.Cell($"B{row}").SetValue(requisicao.Id);
-                        ws.Cell($"C{row}").SetValue(requisicao.Usuario.Nome);
-                        ws.Cell($"D{row}").SetValue(requisicao.Cliente.Nome);
+                        ws.Cell($"C{row}").SetValue(requisicao.DataCriacao);
+                        ws.Cell($"D{row}").SetValue(requisicao.Usuario.Nome);
+                        ws.Cell($"E{row}").SetValue(requisicao.Cliente.Nome);
 
                         string localEntrega = $"{requisicao.Endereco}, {requisicao.Numero} - CEP: {requisicao.Cep} - {requisicao.Cidade} / {requisicao.UF}";
-                        ws.Cell($"E{row}").SetValue(localEntrega);
-                        ws.Cell($"F{row}").SetValue(requisicao.Cliente.CNPJ);
-                        ws.Cell($"G{row}").SetValue(item.Nome);
-                        ws.Cell($"H{row}").SetValue(item.Quantidade);
-                        ws.Cell($"I{row}").SetValue(item.Valor);
-                        ws.Cell($"J{row}").SetValue(item.PercentualIPI);
-                        ws.Cell($"K{row}").SetValue(item.Icms);
-                        decimal valorItemComIpi = Math.Round((item.Valor * (1 + item.PercentualIPI / 100)),2);
-                        ws.Cell($"L{row}").SetValue(valorItemComIpi);
-                        ws.Cell($"M{row}").SetValue(valorItemComIpi * item.Quantidade);
-                        ws.Cell($"N{row}").SetValue(item.TaxaGestao);
-                        ws.Cell($"O{row}").SetValue(item.TaxaGestao * item.Quantidade);
-                        ws.Cell($"P{row}").SetValue(item.ValorTotal);
+                        ws.Cell($"F{row}").SetValue(localEntrega);
+                        ws.Cell($"G{row}").SetValue(requisicao.Cliente.CNPJ);
+                        ws.Cell($"H{row}").SetValue(item.Nome);
+                        ws.Cell($"I{row}").SetValue(item.Quantidade);
+                        ws.Cell($"J{row}").SetValue(item.Valor);
+                        ws.Cell($"K{row}").SetValue(item.PercentualIPI);
+                        ws.Cell($"L{row}").SetValue(item.Icms);
+                        decimal valorItemComIpi = Math.Round(item.Valor * (1 + item.PercentualIPI / 100),2);
+                        ws.Cell($"M{row}").SetValue(valorItemComIpi);
+                        ws.Cell($"N{row}").SetValue(valorItemComIpi * item.Quantidade);
+                        ws.Cell($"O{row}").SetValue(item.TaxaGestao);
+                        ws.Cell($"P{row}").SetValue(item.TaxaGestao * item.Quantidade);
+                        ws.Cell($"Q{row}").SetValue(item.ValorTotal);
                         Periodo periodos = JsonConvert.DeserializeObject<Periodo>(requisicao.PeriodoEntrega);
                         string periodoEntrega = "";
                         periodoEntrega += periodos.Domingo.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Domingo: {(string.Join(", ", periodos.Domingo.periodo)).Trim()}" : "";
@@ -736,29 +738,23 @@ namespace wca.compras.services
                         periodoEntrega += periodos.Quinta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Quinta: {(string.Join(", ", periodos.Quinta.periodo)).Trim()}" : "";
                         periodoEntrega += periodos.Sexta.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sexta: {(string.Join(", ", periodos.Sexta.periodo)).Trim()}" : "";
                         periodoEntrega += periodos.Sabado.selected ? (string.IsNullOrEmpty(periodoEntrega) ? "" : "| ") + $"Sabádo: {(string.Join(", ", periodos.Sabado.periodo)).Trim()}" : "";
-                        ws.Cell($"Q{row}").SetValue(periodoEntrega);
-
-                        //var verbaConfigurada = requisicao.Cliente.ClienteOrcamentoConfiguracao.FirstOrDefault(q => q.TipoFornecimentoId == item.TipoFornecimentoId);
-                        //decimal valor = (decimal)(verbaConfigurada?.ValorPedido);
-                        //ws.Cell($"R{row}").SetValue(valor); //verbas
-
-                        ws.Cell($"R{row}").SetValue(_status); //status
-                        ws.Cell($"S{row}").SetValue(requisicao.Fornecedor?.Nome); //fornecedor
-                        ws.Cell($"T{row}").SetValue(item.TipoFornecimento.Nome); //categoria
-
+                        ws.Cell($"R{row}").SetValue(periodoEntrega);
+                        ws.Cell($"S{row}").SetValue(_status); //status
+                        ws.Cell($"T{row}").SetValue(requisicao.Fornecedor?.Nome); //fornecedor
+                        ws.Cell($"U{row}").SetValue(item.TipoFornecimento.Nome); //categoria
                         row++;
                     }
                 }
 
                 ws2.Cell($"B{rowPlan2}").SetValue("TOTAIS");
-                ws2.Range($"B{rowPlan2}:C{rowPlan2}").Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
-                ws2.Cell($"D{rowPlan2}").SetValue(valorVerbaTotal).Style.NumberFormat.Format = numberFormat;
-                ws2.Cell($"E{rowPlan2}").SetValue(valorPedidosTotal).Style.NumberFormat.Format = numberFormat;
-                ws2.Cell($"F{rowPlan2}").SetValue(valorDiferencaTotal).Style.NumberFormat.NumberFormatId =(int) XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
-                ws2.Cell($"G{rowPlan2}").SetValue("TOTAIS");
+                ws2.Range($"B{rowPlan2}:D{rowPlan2}").Merge().Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+                ws2.Cell($"E{rowPlan2}").SetValue(valorVerbaTotal).Style.NumberFormat.Format = numberFormat;
+                ws2.Cell($"F{rowPlan2}").SetValue(valorPedidosTotal).Style.NumberFormat.Format = numberFormat;
+                ws2.Cell($"G{rowPlan2}").SetValue(valorDiferencaTotal).Style.NumberFormat.NumberFormatId =(int) XLPredefinedFormat.Number.Precision2WithSeparatorAndParensRed;
+                ws2.Cell($"H{rowPlan2}").SetValue("TOTAIS");
 
-                ws2.Range($"B{rowPlan2}:H{rowPlan2}").Style.Fill.BackgroundColor = XLColor.BlueGray;
-                ws2.Range($"B{rowPlan2}:H{rowPlan2}").Style.Font.Bold = true;
+                ws2.Range($"B{rowPlan2}:I{rowPlan2}").Style.Fill.BackgroundColor = XLColor.BlueGray;
+                ws2.Range($"B{rowPlan2}:I{rowPlan2}").Style.Font.Bold = true;
                 
                 Stream spreadsheetStream = new MemoryStream();
                 workbook.SaveAs(spreadsheetStream);
