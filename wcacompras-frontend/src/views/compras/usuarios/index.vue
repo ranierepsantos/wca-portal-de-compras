@@ -46,7 +46,7 @@
       <tfoot>
         <tr>
           <td colspan="4">
-            <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
+            <v-pagination v-model="filter.page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>
       </tfoot>
@@ -60,12 +60,10 @@ import userService from "@/services/user.service";
 import perfilService from "@/services/perfil.service";
 import filialService from "@/services/filial.service";
 import handleErrors from "@/helpers/HandleErrors"
-import { useAuthStore } from "@/store/auth.store";
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 
 //DATA
-const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
@@ -75,20 +73,25 @@ const filiais = ref([]);
 const swal = inject("$swal");
 const filter = ref({
     filial: [],
-    termo: ""
+    termo: "",
+    page: 1
 });
-
+const fromMounted = ref(false)
 
 //VUE METHODS
 onMounted(async () =>
 {
   await getFilialToList();
   await getPerfilToList();
-  await getItems();
+  fromMounted.value = true
+  await getItems(false, true);
+  fromMounted.value = false
 });
 
-watch(page, async () => await getItems());
-watch(() =>filter, () => getItems(), {deep: true});
+//watch(page, async () => await getItems());
+watch(() =>filter.value.page  , () => { if (!fromMounted.value) getItems() });
+watch(() =>filter.value.filial, () => { if (!fromMounted.value) getItems(true) });
+watch(() =>filter.value.termo , () => { if (!fromMounted.value) getItems(true) });
 
 //METHODS
 async function enableDisable(item)
@@ -181,15 +184,32 @@ async function getFilialToList()
   }
 }
 
-async function getItems()
+async function getItems(resetPage = false, fromStoredFilters = false)
 {
   try
   {
     isBusy.value = true;
+    
+    if (fromStoredFilters) 
+    {
+      let storedFilters = JSON.parse(localStorage.getItem("usuarios.filters")) || null
+      if (storedFilters) 
+      {
+        filter.value.page = storedFilters.page
+        filter.value.termo = storedFilters.termo
+        if (!Array.isArray (storedFilters.filial))
+        {
+          filter.value.filial = storedFilters.filial
+        }
+      }
+    }
+    
+    if (resetPage) filter.value.page = 1
     let filtro = {...filter.value}
     if (!filtro.filial || filtro.filial.length ==0 ) filtro.filial = filiais.value.map(f => {return f.value})
 
-    let response = await userService.paginate(pageSize, page.value, filtro)
+    localStorage.setItem("usuarios.filters", JSON.stringify(filtro));
+    let response = await userService.paginate(pageSize, filtro.page, filtro)
     users.value = response.data.items;
     totalPages.value = response.data.totalPages;
   } catch (error)
