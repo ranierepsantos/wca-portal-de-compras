@@ -52,7 +52,7 @@
             <tfoot>
                 <tr>
                     <td colspan="4">
-                        <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
+                        <v-pagination v-model="filter.page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
             </tfoot>
@@ -69,7 +69,6 @@ import router from "@/router";
 import filialService from "@/services/filial.service";
 
 //DATA
-const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
@@ -78,18 +77,23 @@ const filiais = ref ([]);
 const swal = inject("$swal");
 const filter = ref({
     filial: [],
-    termo: ""
+    termo: "",
+    page: 1
 });
-
+const fromMounted = ref(false)
 //VUE METHODS
 onMounted(async () =>
 {
     await getFiliaisByUser();
-    await getItems();
+    fromMounted.value = true
+    await getItems(false, true);
+    fromMounted.value = false
 });
 
-watch(page, () => getItems());
-watch(() =>filter, () => getItems(), {deep: true});
+watch(() => filter.value.page, () => { if (!fromMounted.value) getItems() });
+watch(() => filter.value.filial,  () => { if (!fromMounted.value) getItems(true) });
+watch(() => filter.value.termo,  () => { if (!fromMounted.value)getItems(true) });
+
 
 //METHODS
 async function enableDisable(item)
@@ -154,15 +158,30 @@ async function getFiliaisByUser() {
     }
 }
 
-async function getItems()
+async function getItems(resetPage = false, fromStoredFilters = false) 
 {
     try
     {
         isBusy.value = true;
-        let filtro = {...filter.value}
-        if (!filtro.filial || filtro.filial.length ==0 ) filtro.filial = filiais.value.map(f => {return f.value})
-
-        let response = await fornecedorService.paginate(pageSize, page.value, filtro);
+        if (fromStoredFilters) {
+        let storedFilters = JSON.parse(localStorage.getItem("fornecedores.filters")) || null;
+        if (storedFilters) {
+            filter.value.page = storedFilters.page;
+            filter.value.termo = storedFilters.termo;
+            if (!Array.isArray(storedFilters.filial)) {
+            filter.value.filial = storedFilters.filial;
+            }
+        }
+        }
+        if (resetPage) filter.value.page = 1
+        let filtro = { ...filter.value };
+        if (!filtro.filial || filtro.filial.length == 0)
+        filtro.filial = filiais.value.map((f) => {
+            return f.value;
+        });
+        
+        localStorage.setItem("fornecedores.filters", JSON.stringify(filtro));
+        let response = await fornecedorService.paginate(pageSize, filtro.page, filtro);
         fornecedores.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)

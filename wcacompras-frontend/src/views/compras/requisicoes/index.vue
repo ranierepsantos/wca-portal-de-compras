@@ -45,7 +45,7 @@
                 density="compact"></v-text-field>
             </v-col>
             <v-col class="text-right">
-                <v-btn color="primary" variant="outlined" class="text-capitalize" @click="applyFilters()" title="Aplicar Filtros">
+                <v-btn color="primary" variant="outlined" class="text-capitalize" @click="applyFilters(true)" title="Aplicar Filtros">
                     <!-- <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon> -->
                     <b>Aplicar</b>
                 </v-btn>
@@ -100,7 +100,7 @@
             <tfoot>
                 <tr>
                     <td colspan="8">
-                        <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
+                        <v-pagination v-model="filter.page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
             </tfoot>
@@ -124,7 +124,7 @@ import filialService from "@/services/filial.service";
 
 //DATA
 const authStore = useAuthStore();
-const page = ref(1);
+// const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
 const isBusy = ref(false);
 const totalPages = ref(1);
@@ -142,7 +142,8 @@ const filter = ref({
     usuarioId: null,
     status: null,
     dataInicio: null,
-    dataFim: null
+    dataFim: null,
+    page: 1
 });
 
 //VUE METHODS
@@ -166,7 +167,7 @@ onMounted(async () =>
     await getItems();
 });
 
-watch(page, () => getItems());
+watch(() => filter.value.page, () => applyFilters());
 watch(()=>filter.value.filial, async () => {
     let _filiais = []
     if (filter.value.filial!=null)_filiais.push(filter.value.filial)
@@ -182,13 +183,17 @@ watch(()=>filter.value.filial, async () => {
 //watch(filter.value, () => getItems());
 
 //METHODS
-function applyFilters() 
+function applyFilters(resetPage = false) 
 {
+    if (resetPage) 
+        filter.value.page = 1;
+
     localStorage.setItem("requisicao.index.filters", JSON.stringify(filter.value))
     getItems()   
 }
 function clearFilters()
 {
+
     filter.value.filial = null
     filter.value.clienteId = null
     filter.value.fornecedorId = null
@@ -196,6 +201,7 @@ function clearFilters()
     filter.value.status = null
     filter.value.dataInicio = null
     filter.value.dataFim = null
+    filter.value.page = 1
     localStorage.removeItem("requisicao.index.filters")
     getItems();
 }
@@ -342,7 +348,7 @@ async function getItems()
 
         
 
-        response = await requisicaoService.paginate(pageSize, page.value, filtro);
+        response = await requisicaoService.paginate(pageSize, filtro.page, filtro);
         requisicoes.value = response.data.items;
         totalPages.value = response.data.totalPages;
     } catch (error)
