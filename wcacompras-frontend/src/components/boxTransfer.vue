@@ -2,10 +2,16 @@
   <v-row>
     <v-col cols="6">
       <v-card elevation="3" :subtitle="listOrigemTitulo">
+        <v-card-title>
+          <v-text-field label="Pesquisar" v-model="boxOrigemTermo" type="text" required variant="outlined" color="primary"
+                   density="compact">
+          </v-text-field>
+        </v-card-title>
+        
         <v-card-text>
           <v-list density="compact" select-strategy="multiple" color="primary">
             <v-list-item
-              v-for="item in listOrigem"
+              v-for="item in getFilteredList(listOrigem, boxOrigemTermo)"
               :key="item.text"
               @click="item.selected = !item.selected"
               :active="item.selected"
@@ -47,10 +53,15 @@
     </v-col>
     <v-col cols="5">
       <v-card elevation="3" :subtitle="listDestinoTitulo">
+        <v-card-title>
+          <v-text-field label="Pesquisar" v-model="boxDestinoTermo" type="text" required variant="outlined" color="primary"
+                   density="compact">
+          </v-text-field>
+        </v-card-title>
         <v-card-text>
           <v-list density="compact" select-strategy="multiple" color="primary">
             <v-list-item
-              v-for="item in listDestino"
+              v-for="item in getFilteredList(listDestino, boxDestinoTermo)"
               :key="item.value"
               :active="item.selected"
               @click="item.selected = !item.selected"
@@ -67,6 +78,7 @@
 <script setup>
 
 import { compararValor } from "@/helpers/functions";
+import { ref } from "vue";
 const props = defineProps({
   listOrigemTitulo: "",
   listOrigem: {
@@ -78,7 +90,8 @@ const props = defineProps({
     
   },
 });
-
+const boxOrigemTermo = ref("")
+const boxDestinoTermo = ref("")
 //FUNCTIONS
 
 function adicionar() {
@@ -130,6 +143,18 @@ function removerTodos() {
 function ordernarLista(lista, campo) {
   lista.sort(compararValor(campo));
 }
+
+function getFilteredList (lista, termo)
+{
+  let listReturn = lista
+
+  if (termo && termo.trim() != "")
+    listReturn = lista.filter(q => q.text.toLowerCase().includes(termo.toLowerCase()))
+
+  return listReturn
+}
+
+
 </script>
 
 <style scoped>
