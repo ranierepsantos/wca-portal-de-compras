@@ -14,7 +14,7 @@ namespace wca.share.application.Features.Clientes.Common
             CreateMap<ClienteUpdateCommand, Cliente>();
             CreateMap<Cliente, ListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src =>  (src.CodigoCliente == null ? "": src.CodigoCliente.ToString() + " - ")  + src.Nome));
 
             CreateMap<Contracts.Integration.GI.Models.ClienteResponse, ClienteCreateCommand>()
                 .ForMember(dest => dest.Nome , opt => opt.MapFrom(src => src.RazaoSocial))

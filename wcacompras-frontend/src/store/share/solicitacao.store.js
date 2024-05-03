@@ -15,7 +15,8 @@ const rotas = {
     ListarPorColaboradorGestor: "Solicitacao/ListarPorColaboradorGestor",
     ListarStatusSolicitacao: "Solicitacao/ListarStatusSolicitacao",
     ListarMotivoDemissao: "Solicitacao/ListarMotivoDemissao",
-    ListarAssuntos: "Solicitacao/ListarAssuntos"
+    ListarAssuntos: "Solicitacao/ListarAssuntos",
+    ListarTipoFerias: "Solicitacao/ListarTipoFerias",
 }
 
 export class Solicitacao {
@@ -26,7 +27,7 @@ export class Solicitacao {
         this.clienteNome = data ? data.clienteNome: null
         this.funcionarioId = data ? data.funcionarioId: null
         this.funcionarioNome = data ? data.funcionarioNome: null
-        this.numeroPis = data ? data.numeroPis: null
+        this.eSocialMatricula  = data ? data.eSocialMatricula: null
         this.funcionarioDataAdmissao = data && data.funcionarioDataAdmissao ?  moment(data.funcionarioDataAdmissao).format("YYYY-MM-DD"): null
         this.dataSolicitacao = data ?  moment(data.dataSolicitacao).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
         this.descricao = data? data.descricao: null
@@ -36,6 +37,7 @@ export class Solicitacao {
         this.centroCustoNome = data ? data.centroCustoNome: null
         this.comunicado = data && data.comunicado ? new Comunicado(data.comunicado) : new Comunicado()
         this.desligamento = data ? new Desligamento(data.desligamento) : new Desligamento()
+        this.ferias = data ? new Ferias(data.ferias) : new Ferias()
         this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
         this.anexos = data && data.anexos ? data.anexos: []
         this.historico = data && data.historico ? data.historico: []
@@ -83,8 +85,21 @@ export class Comunicado {
         this.dataAlteracao = data && data.dataAlteracao? moment(data.dataAlteracao).format("YYYY-MM-DD") : null
         this.assuntoId = data ? data.assuntoId: null
         this.observacao = data? data.observacao: ""
+        this.assunto = data && data.assunto ? data.assunto: {id: null, nome: "", ativo: false}
     }
 }
+
+export class Ferias {
+    constructor(data = null) {
+        this.solicitacaoId = data ? data.solicitacaoId : 0
+        this.dataSaida = data && data.dataSaida? moment(data.dataSaida).format("YYYY-MM-DD") : null
+        this.dataRetorno = data && data.dataRetorno? moment(data.dataRetorno).format("YYYY-MM-DD") : null
+        this.tipoFeriasId = data ? data.tipoFeriasId : null
+        this.tipoFerias = data && data.tipoFerias ? data.tipoFerias: {id: null, descricao: "", quantidadeDias: 0}
+    }
+}
+
+
 
 export class MudancaBase {
     
@@ -114,7 +129,8 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
     ],
     statusSolicitacao: JSON.parse(localStorage.getItem("share-status-solicitacao")) || [],
     motivosDemissao: JSON.parse(localStorage.getItem("share-motivo-demissao")) || [],
-    assuntos: JSON.parse(localStorage.getItem("share-assuntos")) || []
+    assuntos: JSON.parse(localStorage.getItem("share-assuntos")) || [],
+    tipoFerias: JSON.parse(localStorage.getItem("share-tipoFerias")) || [],
   }),
   actions: {
     async add (data) {
@@ -134,11 +150,13 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
 
             }else if (data.solicitacaoTipoId == 2)  //Comunicado
             {
+                delete data.comunicado.assunto
                 data.desligamento  = null
                 data.mudancaBase = null 
                 data.ferias = null
             }else if (data.solicitacaoTipoId == 3) //Férias
             {
+                delete data.ferias.tipoFerias
                 data.comunicado  = null
                 data.desligamento  = null
                 data.mudancaBase = null 
@@ -176,6 +194,13 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 data.comunicado  = null
                 data.mudancaBase = null 
             }else if (data.solicitacaoTipoId == 2) {
+                delete data.comunicado.assunto
+                data.desligamento  = null
+                data.mudancaBase = null 
+            }else if (data.solicitacaoTipoId == 3) //Férias
+            {
+                delete data.ferias.tipoFerias
+                data.comunicado  = null
                 data.desligamento  = null
                 data.mudancaBase = null 
             }else if (data.solicitacaoTipoId == 4) {
@@ -280,6 +305,19 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
         let data = this.statusSolicitacao.find(q => q.id == statusId)
         return data
     },
-
+    async getTipoFerias() {
+        try {
+            if (this.tipoFerias.length == 0)
+            {
+                let response = await api.get(rotas.ListarTipoFerias);
+            
+                this.tipoFerias = response.data 
+                localStorage.setItem('share-tipoFerias',JSON.stringify(this.tipoFerias))
+            }
+            return this.tipoFerias;
+        } catch (error) {
+            throw error
+        }  
+    },
   }
 })

@@ -142,5 +142,9 @@ namespace wca.share.application.Contracts.Integration.GI.Models
 
         [JsonPropertyName("pis")]
         public double? Pis { get; set; }
+
+        [JsonPropertyName("eSocialMatricula")]
+        public string eSocialMatricula { get; set; }
+
     }
 }

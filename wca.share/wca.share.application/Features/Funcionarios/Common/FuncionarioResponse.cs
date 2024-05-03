@@ -17,7 +17,7 @@
         string? UF = null,
         int? DDDCelular = null,
         int? NumeroCelular = null,
-        string? NumeroPis = null
+        string? eSocialMatricula = null
     );
     public sealed class FuncionarioToPaginateResponse
     {
@@ -37,6 +37,6 @@
         public int CentroCustoId { get; set; }
         public string CentroCustoNome { get; set; } = string.Empty;
         public DateTime DataAdmissao { get; set; }
-        public string? NumeroPis { get; set; } = null;
+        public string? eSocialMatricula { get; set; } = null;
     }
 }

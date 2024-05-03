@@ -51,6 +51,7 @@ namespace wca.share.domain.Entities
         public SolicitacaoComunicado? Comunicado { get; set; }
         public SolicitacaoDesligamento? Desligamento { get; set; }
         public SolicitacaoMudancaBase? MudancaBase { get; set; }
+        public SolicitacaoFerias? Ferias { get; set; }
         public List<SolicitacaoArquivo> Anexos { get; set; } = new();
         public List<SolicitacaoHistorico> Historico { get; set; }
     }
@@ -136,7 +137,6 @@ namespace wca.share.domain.Entities
         [Column("assunto_id")]
         public int AssuntoId { get; set; }
 
-        [JsonIgnore]
         public Assunto? Assunto { get; set; }
 
         [Column("data_alteracao")]
@@ -166,6 +166,41 @@ namespace wca.share.domain.Entities
 
         [Column("caminho_arquivo", TypeName = "varchar(500)")]
         public string CaminhoArquivo { get; set; } = string.Empty; 
+
+    }
+
+    [Table("TiposFerias")]
+    public sealed class TipoFerias
+    {
+        [Column("id")]
+        public int Id { get; set; }
+
+        [Column("descricao", TypeName = "varchar(100)")]
+        public string Descricao { get; set; } = string.Empty;
+        
+        [Column("quantidade_dias")]
+        public int QuantidadeDias { get; set; }
+    }
+
+    public sealed class SolicitacaoFerias
+    {
+        [Column("solicitacao_id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int SolicitacaoId { get; set; }
+
+        [JsonIgnore]
+        public Solicitacao? Solicitacao { get; set; }
+
+        [Column("data_saida")]
+        public DateTime DataSaida { get; set; }
+
+        [Column("data_retorno")]
+        public DateTime DataRetorno { get; set; }
+
+        [Column("tipoferias_id")]
+        public int TipoFeriasId { get; set; }
+
+        public TipoFerias? TipoFerias { get; set; }
 
     }
 }

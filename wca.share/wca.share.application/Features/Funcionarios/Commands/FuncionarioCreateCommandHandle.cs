@@ -21,7 +21,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
         string? Email = null,
         int? DDDCelular = null,
         int? NumeroCelular = null,
-        string? NumeroPis = null
+        string? eSocialMatricula = null
     ) : IRequest<ErrorOr<FuncionarioResponse>>;
     internal class FuncionarioCreateCommandHandle : IRequestHandler<FuncionarioCreateCommand, ErrorOr<FuncionarioResponse>>
     {

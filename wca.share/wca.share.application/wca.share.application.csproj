@@ -24,4 +24,8 @@
     <ProjectReference Include="..\wca.share.domain\wca.share.domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Assuntos\Behaviors\" />
+  </ItemGroup>
+
 </Project>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240425115645_CreateTable_SolicitacaoFerias_TipoFerias")]
+    partial class CreateTable_SolicitacaoFerias_TipoFerias
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -268,19 +271,15 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("numero_celular");
 
-                    b.Property<string>("eSocialMatricula")
-                        .HasColumnType("varchar(30)")
-                        .HasColumnName("esocial_matricula");
+                    b.Property<string>("NumeroPis")
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("numero_pis");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CentroCustoId");
 
                     b.HasIndex("ClienteId");
-
-                    b.HasIndex("eSocialMatricula")
-                        .IsUnique()
-                        .HasFilter("[esocial_matricula] IS NOT NULL");
 
                     b.ToTable("Funcionarios");
                 });

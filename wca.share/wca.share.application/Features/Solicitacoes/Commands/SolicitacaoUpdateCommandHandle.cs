@@ -28,6 +28,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
         SolicitacaoMudancaBase? MudancaBase,
+        SolicitacaoFerias? Ferias,
         List<SolicitacaoArquivo>? Anexos,
         StatusSolicitacao? Status,
         int[]? NotificarUsuarioIds
@@ -66,6 +67,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             Solicitacao? dado = await _repository.SolicitacaoRepository.ToQuery().AsNoTracking()
                                 .Include(x => x.Comunicado)
                                 .Include(x => x.Desligamento)
+                                .Include(x => x.Ferias)
                                 .Include(x => x.Anexos)
                                 .Include(x => x.MudancaBase).ThenInclude(x => x.ItensMudanca)
                                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken: cancellationToken);
@@ -130,7 +132,8 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                 _repository.GetDbSet<SolicitacaoComunicado>().Entry(dado.Comunicado).State = EntityState.Modified;
             else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Desligamento)
                 _repository.GetDbSet<SolicitacaoDesligamento>().Entry(dado.Desligamento).State = EntityState.Modified;
-
+            else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Ferias)
+                _repository.GetDbSet<SolicitacaoFerias>().Entry(dado.Ferias).State = EntityState.Modified;
 
             _repository.GetDbSet<Solicitacao>().Entry(dado).State = EntityState.Modified;
 
