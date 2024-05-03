@@ -41,7 +41,7 @@ namespace wca.share.domain.Entities
         [Column("numero_celular")]
         public int? NumeroCelular { get;set; }
 
-        [Column("e-social-matricula", TypeName = "varchar(30)")]
+        [Column("esocial_matricula", TypeName = "varchar(30)")]
         public string? eSocialMatricula { get; set; } = string.Empty;
     }
 }
