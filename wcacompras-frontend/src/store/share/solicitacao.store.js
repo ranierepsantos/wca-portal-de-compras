@@ -94,6 +94,7 @@ export class Ferias {
         this.solicitacaoId = data ? data.solicitacaoId : 0
         this.dataSaida = data && data.dataSaida? moment(data.dataSaida).format("YYYY-MM-DD") : null
         this.dataRetorno = data && data.dataRetorno? moment(data.dataRetorno).format("YYYY-MM-DD") : null
+        this.tipoFeriasId = data ? data.tipoFeriasId : null
         this.tipoFerias = data && data.tipoFerias ? data.tipoFerias: {id: null, descricao: "", quantidadeDias: 0}
     }
 }
@@ -155,10 +156,10 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 data.ferias = null
             }else if (data.solicitacaoTipoId == 3) //Férias
             {
+                delete data.ferias.tipoFerias
                 data.comunicado  = null
                 data.desligamento  = null
                 data.mudancaBase = null 
-                delete data.ferias.tipoFerias
             }else if (data.solicitacaoTipoId == 4) //Mudança de Base
             {
                 data.comunicado  = null
@@ -198,10 +199,10 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 data.mudancaBase = null 
             }else if (data.solicitacaoTipoId == 3) //Férias
             {
+                delete data.ferias.tipoFerias
                 data.comunicado  = null
                 data.desligamento  = null
                 data.mudancaBase = null 
-                delete data.ferias.tipoFerias
             }else if (data.solicitacaoTipoId == 4) {
                 data.comunicado  = null
                 data.desligamento = null 
