@@ -83,9 +83,8 @@
                 <v-row>
                   <v-col cols="3">
                     <v-text-field
-                      label="Número PIS"
+                      label="eSocial Matrícula"
                       v-model="funcionario.eSocialMatricula"
-                      type="number"
                       required
                       variant="outlined"
                       color="primary"
