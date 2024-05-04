@@ -57,7 +57,7 @@
                   v-model="solicitacao.tipoSolicitacao"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
                   :readonly="solicitacao.id > 0"
-                  :bg-color="solicitacao.id > 0? '#f2f2f2':''"
+                  :bg-color="solicitacao.id > 0 ? '#f2f2f2' : ''"
                 ></v-select>
               </v-col>
               <v-col v-show="solicitacao.id > 0">
@@ -100,11 +100,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col
-                v-show="
-                  solicitacao.id > 0 
-                "
-              >
+              <v-col v-show="solicitacao.id > 0">
                 <v-text-field
                   label="Cargo"
                   type="text"
@@ -127,7 +123,6 @@
                   color="primary"
                   v-model="solicitacao.centroCustoId"
                   :rules="[(v) => !!v || 'Campo obrigatório']"
-                  
                 ></v-select>
               </v-col>
               <v-col v-show="solicitacao.id == 0 && isColaborador">
@@ -139,7 +134,7 @@
                   density="compact"
                   v-model="solicitacao.centroCustoNome"
                   :readonly="true"
-                  bg-color = "#f2f2f2"
+                  bg-color="#f2f2f2"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -153,7 +148,7 @@
                   density="compact"
                   v-model="solicitacao.objetivo"
                   :readonly="isReadonly"
-                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
+                  :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -165,7 +160,7 @@
                   density="compact"
                   v-model="solicitacao.periodoInicial"
                   :readonly="isReadonly"
-                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
+                  :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field>
               </v-col>
               <v-col>
@@ -177,7 +172,7 @@
                   density="compact"
                   v-model="solicitacao.periodoFinal"
                   :readonly="isReadonly"
-                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
+                  :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field>
               </v-col>
               <v-col v-show="solicitacao.tipoSolicitacao == 2">
@@ -188,7 +183,7 @@
                   :number-decimal="2"
                   prefix="R$"
                   :readonly="isReadonly"
-                  :bg-color = 'isReadonly ? "#f2f2f2":"" '
+                  :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field-money>
               </v-col>
             </v-row>
@@ -196,14 +191,29 @@
         </v-card-text>
       </v-card>
 
-      <v-card
-        style="margin-top: 20px"
-        v-show="showSecaoDespesa"
-      >
+      <v-card style="margin-top: 20px" v-show="showSecaoDespesa">
         <v-card-title>
           <v-breadcrumbs>
             <div class="text-h6 text-primary">Detalhamento de Despesas</div>
             <v-spacer></v-spacer>
+            <v-progress-circular
+              color="primary"
+              indeterminate
+              v-show="isDownload"
+            ></v-progress-circular>
+            &nbsp;
+            <v-btn
+              color="primary"
+              variant="outlined"
+              class="text-capitalize"
+              @click="baixarComprovantes()"
+              v-show="solicitacao.despesa.length > 0"
+              :disabled="isDownload"
+              title="Baixar Comprovantes"
+            >
+            <v-icon icon="mdi-download"/>
+              <b> Comprovantes</b>
+            </v-btn>
             <v-btn
               color="primary"
               variant="outlined"
@@ -229,7 +239,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in solicitacao.despesa.sort(compararValor('dataEvento', 'asc'))" :key="index">
+              <tr
+                v-for="(item, index) in solicitacao.despesa.sort(
+                  compararValor('dataEvento', 'asc')
+                )"
+                :key="index"
+              >
                 <td class="text-center">
                   {{ moment(item.dataEvento).format("DD/MM/YYYY") }}
                 </td>
@@ -239,9 +254,7 @@
                 <td class="text-center" colspan="2">
                   {{
                     getDespesaTipo(item.tipoDespesaId).tipo == 1
-                      ? item.razaoSocial +
-                        " : " +
-                        item.numeroFiscal
+                      ? item.razaoSocial + " : " + item.numeroFiscal
                       : item.origem + " > " + item.destino
                   }}
                 </td>
@@ -249,13 +262,24 @@
                   {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
                 </td>
                 <td v-if="!item.aprovada">
-                  <v-icon icon="mdi-eye-off-outline" variant="plain"
-                            color="gray" title="à conferir"></v-icon>
+                  <v-icon
+                    icon="mdi-eye-off-outline"
+                    variant="plain"
+                    color="gray"
+                    title="à conferir"
+                  ></v-icon>
                 </td>
                 <td v-else>
-                  <v-icon :icon="item.aprovada == 1 ? 'mdi-eye-check-outline' : 'mdi-eye-remove-outline'" variant="plain"
-                            :color="item.aprovada == 1 ? 'success' : 'error'"
-                            :title="item.aprovada == 1 ? 'conferido' : 'reprovado'"></v-icon>
+                  <v-icon
+                    :icon="
+                      item.aprovada == 1
+                        ? 'mdi-eye-check-outline'
+                        : 'mdi-eye-remove-outline'
+                    "
+                    variant="plain"
+                    :color="item.aprovada == 1 ? 'success' : 'error'"
+                    :title="item.aprovada == 1 ? 'conferido' : 'reprovado'"
+                  ></v-icon>
                 </td>
                 <td class="text-right">
                   <v-btn
@@ -265,7 +289,7 @@
                     color="primary"
                     @click="editarDespesa(item)"
                     title="Visualizar"
-                    v-show ="despesaCanView && !despesaCanEdit"
+                    v-show="despesaCanView && !despesaCanEdit"
                   ></v-btn>
                   <v-btn
                     icon="mdi-lead-pencil"
@@ -275,7 +299,7 @@
                     @click="editarDespesa(item)"
                     title="Editar"
                     :disabled="isBusy"
-                    v-show ="!despesaCanView || despesaCanEdit"
+                    v-show="!despesaCanView || despesaCanEdit"
                   ></v-btn>
                   <v-btn
                     icon="mdi-delete"
@@ -283,7 +307,11 @@
                     color="error"
                     @click="removerDespesa(item)"
                     :disabled="isBusy"
-                    v-show="!despesaCanView || (despesaCanEdit && authStore.user.id == solicitacao.colaboradorId)"
+                    v-show="
+                      !despesaCanView ||
+                      (despesaCanEdit &&
+                        authStore.user.id == solicitacao.colaboradorId)
+                    "
                   >
                   </v-btn>
                 </td>
@@ -326,7 +354,6 @@
       <v-dialog
         v-model="openDespesaForm"
         min-width="1024"
-        
         :absolute="false"
         persistent
       >
@@ -342,7 +369,11 @@
           "
           @save-click="salvarDespesa($event)"
           :read-only="!(despesaCanEdit && !(despesa.aprovada == 1))"
-          :can-aprove="solicitacao.status == 5 && despesa.aprovada !== 1 && authStore.hasPermissao('wca_aprovacao')"
+          :can-aprove="
+            solicitacao.status == 5 &&
+            despesa.aprovada !== 1 &&
+            authStore.hasPermissao('wca_aprovacao')
+          "
         ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
@@ -367,12 +398,12 @@
         :absolute="false"
         persistent
       >
-        <registrar-pagamento-form 
-          :data="dadosDeposito" 
+        <registrar-pagamento-form
+          :data="dadosDeposito"
           @close-form="openDepositoForm = false"
-          @registrar-pagamento = "registrarPagto($event)"
+          @registrar-pagamento="registrarPagto($event)"
           :is-running-event="isRunningEvent"
-          />
+        />
       </v-dialog>
     </v-container>
   </div>
@@ -388,9 +419,13 @@ import DespesaForm from "@/components/reembolso/despesaForm.vue";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
 import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
-import { formatToCurrencyBRL } from "@/helpers/functions";
+import { formatToCurrencyBRL, realizarDownload } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
-import { IDPERFILCOLABORADOR, Usuario, useUsuarioStore } from "@/store/reembolso/usuario.store";
+import {
+  IDPERFILCOLABORADOR,
+  Usuario,
+  useUsuarioStore,
+} from "@/store/reembolso/usuario.store";
 import {
   Despesa,
   Solicitacao,
@@ -406,7 +441,6 @@ import historico from "@/components/reembolso/historico.vue";
 import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
 import { watch } from "vue";
 
-
 const authStore = useAuthStore();
 const clienteStore = useClienteStore();
 const despesaTipoStore = useDespesaTipoStore();
@@ -417,6 +451,7 @@ const openDespesaForm = ref(false);
 const openDepositoForm = ref(false);
 const openAprovacaoForm = ref(false);
 const isRunningEvent = ref(false);
+const isDownload = ref(false);
 const isBusy = ref(false);
 const clientes = ref([]);
 const swal = inject("$swal");
@@ -426,62 +461,73 @@ const despesaTipos = ref([]);
 
 const formButtons = ref([]);
 const usuario = ref(new Usuario());
-const listCentroCusto = ref([])
-const dadosDeposito = ref(
-  {
-        saldo: 0,
-        dataDeposito: moment().format("YYYY-MM-DD"),
-        valorDeposito: 0,
-  }
-)
+const listCentroCusto = ref([]);
+const dadosDeposito = ref({
+  saldo: 0,
+  dataDeposito: moment().format("YYYY-MM-DD"),
+  valorDeposito: 0,
+});
 //COMPUTED
-const isReadonly = computed(() =>{
-
-  return (solicitacao.value.id > 0 && solicitacao.value.status != 4 && solicitacao.value.status != 10)
-      || (solicitacao.value.colaboradorId != authStore.user.id)
-})
-const showSecaoDespesa = computed(()=> {
-  return solicitacao.value.tipoSolicitacao == 1 ||
-        (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
-})
+const isReadonly = computed(() => {
+  return (
+    (solicitacao.value.id > 0 &&
+      solicitacao.value.status != 4 &&
+      solicitacao.value.status != 10) ||
+    solicitacao.value.colaboradorId != authStore.user.id
+  );
+});
+const showSecaoDespesa = computed(() => {
+  return (
+    solicitacao.value.tipoSolicitacao == 1 ||
+    (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
+  );
+});
 const despesaCanAdd = computed(() => {
-    
-    /**
-     * pode adicionar despesa quando:
-     * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
-     * colaborador != auth.user && status == 5 && hasPermissao('despesa-aprovar'))
-     */
-    let can = (solicitacao.value.colaboradorId == authStore.user.id && solicitacao.value.id == 0) || 
-              (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)) 
-    return can
-  }
-)
-
-const despesaCanEdit = computed(() => {
-    
-    /**
-     * pode adicionar despesa quando:
-     * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
-     * colaborador != auth.user && status == 5 && hasPermissao('despesa-editar'))
-     */
-    let can = (solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)) ||
-              (solicitacao.value.status == 5 && authStore.hasPermissao('despesa-editar'))
-    return can
-  }
-)
-
-const solicitacaoCanEdit = computed(() => solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10,12".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao"));
-
-const despesaCanView = computed(() => solicitacao.value.colaboradorId != authStore.user.id || !(solicitacao.value.colaboradorId == authStore.user.id && "1,3,4,10,12".includes(solicitacao.value.status)));
-
-const isColaborador = computed(() => {
-  
-    return (
-      authStore.sistema.perfil.id == IDPERFILCOLABORADOR
-    );
-  
+  /**
+   * pode adicionar despesa quando:
+   * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
+   * colaborador != auth.user && status == 5 && hasPermissao('despesa-aprovar'))
+   */
+  let can =
+    (solicitacao.value.colaboradorId == authStore.user.id &&
+      solicitacao.value.id == 0) ||
+    (solicitacao.value.colaboradorId == authStore.user.id &&
+      "3,4,10,12".includes(solicitacao.value.status));
+  return can;
 });
 
+const despesaCanEdit = computed(() => {
+  /**
+   * pode adicionar despesa quando:
+   * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
+   * colaborador != auth.user && status == 5 && hasPermissao('despesa-editar'))
+   */
+  let can =
+    (solicitacao.value.colaboradorId == authStore.user.id &&
+      "3,4,10,12".includes(solicitacao.value.status)) ||
+    (solicitacao.value.status == 5 && authStore.hasPermissao("despesa-editar"));
+  return can;
+});
+
+const solicitacaoCanEdit = computed(
+  () =>
+    solicitacao.value.colaboradorId == authStore.user.id &&
+    "1,3,4,10,12".includes(solicitacao.value.status) &&
+    authStore.hasPermissao("solicitacao")
+);
+
+const despesaCanView = computed(
+  () =>
+    solicitacao.value.colaboradorId != authStore.user.id ||
+    !(
+      solicitacao.value.colaboradorId == authStore.user.id &&
+      "1,3,4,10,12".includes(solicitacao.value.status)
+    )
+);
+
+const isColaborador = computed(() => {
+  return authStore.sistema.perfil.id == IDPERFILCOLABORADOR;
+});
 
 //VUE FUNCTIONS
 onMounted(async () => {
@@ -514,19 +560,22 @@ onMounted(async () => {
         return;
       }
       solicitacao.value.colaboradorId = usuario.value.id;
-      solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
+      solicitacao.value.colaboradorCargo =
+        usuario.value.usuarioReembolsoComplemento.cargo;
       if (clientes.value.length > 0) {
-        let centroCusto = clientes.value[0].centroCusto.find(q => q.centroCustoId == usuario.value.usuarioReembolsoComplemento.centroCustoId)
-        solicitacao.value.centroCustoId = centroCusto ? centroCusto.id: null
-        solicitacao.value.centroCustoNome = centroCusto? centroCusto.nome: ""
+        let centroCusto = clientes.value[0].centroCusto.find(
+          (q) =>
+            q.centroCustoId ==
+            usuario.value.usuarioReembolsoComplemento.centroCustoId
+        );
+        solicitacao.value.centroCustoId = centroCusto ? centroCusto.id : null;
+        solicitacao.value.centroCustoNome = centroCusto ? centroCusto.nome : "";
       }
-      
-      if (clientes.value.length ==1)
-        solicitacao.value.clienteId = clientes.value[0].id
 
+      if (clientes.value.length == 1)
+        solicitacao.value.clienteId = clientes.value[0].id;
     }
-    carregarBotoes()
-      
+    carregarBotoes();
   } catch (error) {
     console.log("onMounted.error:", error);
     handleErrors(error);
@@ -535,36 +584,42 @@ onMounted(async () => {
   }
 });
 
-watch(() => solicitacao.value.clienteId, async (newValue,oldValue) => {
-  if (newValue != oldValue) {
-    let cliente = clientes.value.find(q => q.id == newValue)
-    if (cliente) {
-      listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
-      if (!isColaborador.value && solicitacao.value.id == 0)
-        solicitacao.value.centroCustoId = null
+watch(
+  () => solicitacao.value.clienteId,
+  async (newValue, oldValue) => {
+    if (newValue != oldValue) {
+      let cliente = clientes.value.find((q) => q.id == newValue);
+      if (cliente) {
+        listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(
+          authStore.user.id,
+          cliente.id
+        );
+        if (!isColaborador.value && solicitacao.value.id == 0)
+          solicitacao.value.centroCustoId = null;
+      }
     }
   }
-  
-})
-
+);
 
 //FUNCTIONS
 
 function aprovarReprovarOpen() {
-    let semConferencia = solicitacao.value.despesa.filter(q => q.aprovada==null || q.aprovada==0)
-    if (semConferencia.length > 0 && solicitacao.value.status == 5) {
-      swal.fire({
-        toast: true,
-        icon: "warning",
-        index: "top-end",
-        title: "Atenção!",
-        text: "Há despesas sem conferência!",
-        showConfirmButton: false,
-        timer: 4000,
-      });
-      return 
-    }
-    openAprovacaoForm.value = true
+  let semConferencia = solicitacao.value.despesa.filter(
+    (q) => q.aprovada == null || q.aprovada == 0
+  );
+  if (semConferencia.length > 0 && solicitacao.value.status == 5) {
+    swal.fire({
+      toast: true,
+      icon: "warning",
+      index: "top-end",
+      title: "Atenção!",
+      text: "Há despesas sem conferência!",
+      showConfirmButton: false,
+      timer: 4000,
+    });
+    return;
+  }
+  openAprovacaoForm.value = true;
 }
 
 async function aprovarReprovar(isAprovado, comentario) {
@@ -585,7 +640,6 @@ async function aprovarReprovar(isAprovado, comentario) {
       11 - Aguardando Depósito (somente adiantamento, quando valor da despesa > valor adiantamento)
     **/
 
-    
     if (!isAprovado) solicitacao.value.status = 4; //rejeitado
     else {
       //tipoSolicitacao: Adiantamento, Status: Solicitado
@@ -595,7 +649,7 @@ async function aprovarReprovar(isAprovado, comentario) {
       )
         solicitacao.value.status = 2; //2 - Aguardando Depósito
       //Status: 5 - Aguardando conferência
-      else if (solicitacao.value.status == 5){
+      else if (solicitacao.value.status == 5) {
         solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
         //21.03.2024 - Luciano solicitou para adicionar débito quando cliente aprovar
         // let transacao = new Transacao(
@@ -604,7 +658,6 @@ async function aprovarReprovar(isAprovado, comentario) {
         //   solicitacao.value.valorDespesa
         // );
         // contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
-
       }
       //Status: 6 - Aguardando Aprovação Cliente
       else if (solicitacao.value.status == 6) {
@@ -618,12 +671,13 @@ async function aprovarReprovar(isAprovado, comentario) {
         );
         contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
 
-
         // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
-        if (solicitacao.value.tipoSolicitacao == 1){
+        if (solicitacao.value.tipoSolicitacao == 1) {
           solicitacao.value.status = 2; //2 - Aguardando Depósito
-        } else if (solicitacao.value.tipoSolicitacao == 2 && (solicitacao.value.valorAdiantamento - calcularTotalDespesa()) < 0)
-        {
+        } else if (
+          solicitacao.value.tipoSolicitacao == 2 &&
+          solicitacao.value.valorAdiantamento - calcularTotalDespesa() < 0
+        ) {
           solicitacao.value.status = 11; //11 - Aguardando Depósito
         }
       }
@@ -634,14 +688,14 @@ async function aprovarReprovar(isAprovado, comentario) {
     }</b> por ${authStore.user.nome}, status alterado para <b>${
       reembolsoStatus.status
     }</b>. <br/> Comentário: ${comentario}`;
-    
-    let notificarUsuario = await retornaUsuariosParaNotificar(reembolsoStatus)
-    
+
+    let notificarUsuario = await retornaUsuariosParaNotificar(reembolsoStatus);
+
     let solicitacaoStatus = {
       solicitacaoId: solicitacao.value.id,
       evento: texto,
       status: reembolsoStatus,
-      notificar: notificarUsuario
+      notificar: notificarUsuario,
     };
 
     await solicitacaoStore.changeStatus(solicitacaoStatus);
@@ -712,23 +766,27 @@ function limparDadosDespesa() {
 async function salvar() {
   try {
     let data = { ...solicitacao.value };
-    
+
     // verificar se o limite foi excedido
     if (hasValorLimiteExcedido(data)) {
       let options = {
         title: "Atenção",
         html: "O valor limite definido para o cliente foi atingido! <br/> Esta solicitação será abortada",
         icon: "warning",
-        showCancelButton: false
+        showCancelButton: false,
       };
 
       await swal.fire(options);
-      return
+      return;
     }
 
     //checar se o status esta aguardando prestação de contas e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas
-    if (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12) && data.despesa.length > 0) {
+    if (
+      data.tipoSolicitacao == 2 &&
+      (data.status == 3 || data.status == 12) &&
+      data.despesa.length > 0
+    ) {
       let options = {
         title: "Confirmação",
         html: "Finalizou o cadastro de despesa? <br/> Ao confirmar não poderá realizar alterações!",
@@ -739,51 +797,49 @@ async function salvar() {
       };
 
       let response = await swal.fire(options);
-      if (response.isConfirmed) 
-        data.status = 5; //5 - aguardando conferência
-        
-    } else if (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12) && data.despesa.length == 0) {
+      if (response.isConfirmed) data.status = 5; //5 - aguardando conferência
+    } else if (
+      data.tipoSolicitacao == 2 &&
+      (data.status == 3 || data.status == 12) &&
+      data.despesa.length == 0
+    ) {
       let options = {
         title: "Informação",
         html: "Não é possível enviar para aprovação sem cadastro de despesas!",
         icon: "question",
       };
       await swal.fire(options);
-      return
+      return;
     }
-    
+
     //trocar os id despesa negativos por 0
-    data.despesa.forEach(d => {
-      if (d.id < 0) d.id = 0
+    data.despesa.forEach((d) => {
+      if (d.id < 0) d.id = 0;
     });
-    
+
     // verificar se haverá notificação
-    let statusAtual = 0 
+    let statusAtual = 0;
 
     if (data.status == 4) {
-      statusAtual = data.statusAnterior
-    }else {
-      if (data.id == 0 || data.status == 10) //status 10 - pré cadastro
-      {
-        if (data.tipoSolicitacao == 2 ) 
-          data.status = 1; //1 - solicitado
-        else 
-          data.status = 5; //5 - aguardando conferência
+      statusAtual = data.statusAnterior;
+    } else {
+      if (data.id == 0 || data.status == 10) {
+        //status 10 - pré cadastro
+        if (data.tipoSolicitacao == 2) data.status = 1; //1 - solicitado
+        else data.status = 5; //5 - aguardando conferência
       }
-      statusAtual = data.status
+      statusAtual = data.status;
     }
 
-    let status = solicitacaoStore.getStatus(statusAtual) 
+    let status = solicitacaoStore.getStatus(statusAtual);
     let notificar = await retornaUsuariosParaNotificar(status);
-    
-    data.notificar = notificar;
 
+    data.notificar = notificar;
 
     if (data.id == 0) {
       await solicitacaoStore.add(data);
-    } else
-      await solicitacaoStore.update(data);
-    
+    } else await solicitacaoStore.update(data);
+
     swal.fire({
       toast: true,
       icon: "success",
@@ -802,43 +858,45 @@ async function salvar() {
 }
 
 async function abrirDepositoForm() {
-  
-  dadosDeposito.value.saldo = 0
-  let conta = await useContaStore().getByUsuarioId(solicitacao.value.colaboradorId)
+  dadosDeposito.value.saldo = 0;
+  let conta = await useContaStore().getByUsuarioId(
+    solicitacao.value.colaboradorId
+  );
   if (conta) {
-    dadosDeposito.value.saldo = conta.saldo
+    dadosDeposito.value.saldo = conta.saldo;
   }
 
-  let valorDeposito = solicitacao.value.tipoSolicitacao == 2
-                      ? solicitacao.value.valorAdiantamento
-                      : solicitacao.value.valorDespesa;
+  let valorDeposito =
+    solicitacao.value.tipoSolicitacao == 2
+      ? solicitacao.value.valorAdiantamento
+      : solicitacao.value.valorDespesa;
 
   if (solicitacao.value.status == 11)
-    valorDeposito = calcularTotalDespesa() - solicitacao.value.valorAdiantamento
+    valorDeposito =
+      calcularTotalDespesa() - solicitacao.value.valorAdiantamento;
 
+  dadosDeposito.value.valorDeposito = valorDeposito;
 
-  dadosDeposito.value.valorDeposito = valorDeposito
-        
-  openDepositoForm.value = true
-
+  openDepositoForm.value = true;
 }
 
 async function registrarPagto(dados) {
   try {
-    isRunningEvent.value = true
-    openDepositoForm.value = false
+    isRunningEvent.value = true;
+    openDepositoForm.value = false;
     let options = {
-        title: "Confirmar",
-        text: `Confirmar depósito na data ${moment(dados.dataDeposito).format("DD/MM/YYYY")}, no valor: ${formatToCurrencyBRL(dados.valorDeposito)}?`,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sim",
-        cancelButtonText: "Não",
-    }
+      title: "Confirmar",
+      text: `Confirmar depósito na data ${moment(dados.dataDeposito).format(
+        "DD/MM/YYYY"
+      )}, no valor: ${formatToCurrencyBRL(dados.valorDeposito)}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    };
 
     let response = await swal.fire(options);
     if (response.isConfirmed) {
-      
       let transacao = new Transacao(
         `Crédito - solicitação ${solicitacao.value.id}`,
         "+",
@@ -851,15 +909,16 @@ async function registrarPagto(dados) {
       let status = solicitacao.value.tipoSolicitacao == 1 ? 7 : 3;
 
       //Status: 11 - Aguardando Depósito, usado somente quando há diferença entre despesa e valor adiantado
-      if (solicitacao.value.status == 11)
-        status = 7 //Aguardando Faturamento
+      if (solicitacao.value.status == 11) status = 7; //Aguardando Faturamento
 
       let novoStatus = solicitacaoStore.getStatus(status);
-      
+
       let texto = `${authStore.user.nome} registrou pagamento ao colaborador.
-                  <br/> Depositado em: ${moment(dados.dataDeposito).format("DD/MM/YYYY")}
+                  <br/> Depositado em: ${moment(dados.dataDeposito).format(
+                    "DD/MM/YYYY"
+                  )}
                   <br/> Valor: ${formatToCurrencyBRL(dados.valorDeposito)}.`;
-      
+
       let notificarUsuario = await retornaUsuariosParaNotificar(novoStatus);
 
       let solicitacaoStatus = {
@@ -868,7 +927,7 @@ async function registrarPagto(dados) {
         status: novoStatus,
         notificar: notificarUsuario,
         dataDeposito: dados.dataDeposito,
-        valorDeposito: dados.valorDeposito
+        valorDeposito: dados.valorDeposito,
       };
 
       await solicitacaoStore.changeStatus(solicitacaoStatus);
@@ -887,46 +946,53 @@ async function registrarPagto(dados) {
   } catch (error) {
     console.log("solicitacao.cadastro.registrarPagamento.erro", error);
     handleErrors(error);
-  }finally {
-    isRunningEvent.value = false
+  } finally {
+    isRunningEvent.value = false;
   }
 }
 
 async function salvarDespesa() {
   try {
-    let tipoDespesa = despesaTipos.value.find(q =>  q.id == despesa.value.tipoDespesaId)
-    let hasDespesa = tipoDespesa.tipo == 1 ? await solicitacaoStore.checarSeDespesaExiste(despesa.value): false;
+    let tipoDespesa = despesaTipos.value.find(
+      (q) => q.id == despesa.value.tipoDespesaId
+    );
+    let hasDespesa =
+      tipoDespesa.tipo == 1
+        ? await solicitacaoStore.checarSeDespesaExiste(despesa.value)
+        : false;
     if (hasDespesa) {
       limparDadosDespesa();
       openDespesaForm.value = false;
       swal.fire({
-          icon: "warning",
-          index: "top-end",
-          title: "Atenção!",
-          text: "Já existe despesa cadastrada com esta nota e cnpj!",
-          showConfirmButton: true
-        });
-        return 
+        icon: "warning",
+        index: "top-end",
+        title: "Atenção!",
+        text: "Já existe despesa cadastrada com esta nota e cnpj!",
+        showConfirmButton: true,
+      });
+      return;
     }
-    if (solicitacao.value.id == 0){
-      solicitacao.value.status = 10 // pré cadastro
-      solicitacao.value.despesa.push({...despesa.value})
-      solicitacao.value.notificar = []
-      let response = await solicitacaoStore.add(solicitacao.value)
-      console.log(response)
-      solicitacao.value = new Solicitacao(response.data)
-    }else {
-      despesa.value.solicitacaoId = solicitacao.value.id  
-      despesa.value = despesa.value.id <= 0 ? (await solicitacaoStore.criarDespesa(despesa.value)): (await solicitacaoStore.atualizarDespesa(despesa.value))
+    if (solicitacao.value.id == 0) {
+      solicitacao.value.status = 10; // pré cadastro
+      solicitacao.value.despesa.push({ ...despesa.value });
+      solicitacao.value.notificar = [];
+      let response = await solicitacaoStore.add(solicitacao.value);
+      console.log(response);
+      solicitacao.value = new Solicitacao(response.data);
+    } else {
+      despesa.value.solicitacaoId = solicitacao.value.id;
+      despesa.value =
+        despesa.value.id <= 0
+          ? await solicitacaoStore.criarDespesa(despesa.value)
+          : await solicitacaoStore.atualizarDespesa(despesa.value);
       solicitacao.value.salvarDespesa(despesa.value);
     }
     limparDadosDespesa();
     openDespesaForm.value = false;
   } catch (error) {
-    console.error("salvarDespesa.error", error)
-    handleErrors(error)
+    console.error("salvarDespesa.error", error);
+    handleErrors(error);
   }
-    
 }
 
 async function removerDespesa(item) {
@@ -941,27 +1007,36 @@ async function removerDespesa(item) {
   try {
     let response = await swal.fire(options);
     if (response.isConfirmed) {
-      await solicitacaoStore.excluirDespesa(item)
+      await solicitacaoStore.excluirDespesa(item);
       solicitacao.value.removerDespesa(item);
-    }  
+    }
   } catch (error) {
-    console.error("removerDespesa.error", error)
-    handleErrors(error)
+    console.error("removerDespesa.error", error);
+    handleErrors(error);
   }
-  
 }
 function carregarBotoes() {
-
   let statusSolicitacao = solicitacaoStore.getStatus(solicitacao.value.status);
 
-  let wcaAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 1 && authStore.hasPermissao("wca_aprovacao")
-  let clienteAprova = statusSolicitacao.autorizar == true && statusSolicitacao.notifica == 2 && authStore.hasPermissao("cliente_aprovacao")
-  let registraPagamento = (solicitacao.value.status == 2 || solicitacao.value.status == 11) && authStore.hasPermissao("solicitacaoregistrarpagamento")
-  
-  let podeSalvar = solicitacao.value.id == 0  || solicitacaoCanEdit.value
+  let wcaAprova =
+    statusSolicitacao.autorizar == true &&
+    statusSolicitacao.notifica == 1 &&
+    authStore.hasPermissao("wca_aprovacao");
+  let clienteAprova =
+    statusSolicitacao.autorizar == true &&
+    statusSolicitacao.notifica == 2 &&
+    authStore.hasPermissao("cliente_aprovacao");
+  let registraPagamento =
+    (solicitacao.value.status == 2 || solicitacao.value.status == 11) &&
+    authStore.hasPermissao("solicitacaoregistrarpagamento");
 
+  let podeSalvar = solicitacao.value.id == 0 || solicitacaoCanEdit.value;
 
-  if ((wcaAprova || clienteAprova) && solicitacao.value.id > 0 && solicitacao.value.status != 10) {
+  if (
+    (wcaAprova || clienteAprova) &&
+    solicitacao.value.id > 0 &&
+    solicitacao.value.status != 10
+  ) {
     formButtons.value.push({
       text: "Aprovar / Reprovar",
       icon: "",
@@ -978,31 +1053,72 @@ function carregarBotoes() {
   }
 
   if (podeSalvar)
-      formButtons.value.push({ text: "Enviar para Aprovação", icon: "", event: "salvar-click" });
-
+    formButtons.value.push({
+      text: "Enviar para Aprovação",
+      icon: "",
+      event: "salvar-click",
+    });
 }
 
 function hasValorLimiteExcedido(data) {
   //1. pegar informações do cliente
-  let _cliente = clientes.value.find(q => q.id == data.clienteId)
+  let _cliente = clientes.value.find((q) => q.id == data.clienteId);
   if (_cliente && _cliente.valorLimite > 0) {
-    let valorSolicitacao = data.tipoSolicitacaoId == 1? data.valorDespesa: data.valorAdiantamento
-    return (parseFloat(valorSolicitacao) + parseFloat(_cliente.valorUtilizadoMes)) > parseFloat(_cliente.valorLimite);
+    let valorSolicitacao =
+      data.tipoSolicitacaoId == 1 ? data.valorDespesa : data.valorAdiantamento;
+    return (
+      parseFloat(valorSolicitacao) + parseFloat(_cliente.valorUtilizadoMes) >
+      parseFloat(_cliente.valorLimite)
+    );
   }
-  return true
+  return true;
 }
 
 async function retornaUsuariosParaNotificar(status) {
-  let list = []
-  if (status.notifica == 1) // wca
-  {
-    list = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(solicitacao.value.centroCustoId, "wca_aprovacao"))
-  }else if (status.notifica == 2 && solicitacao.value.centroCustoId) //gestores
-    list = (await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(solicitacao.value.centroCustoId, "cliente_aprovacao"))
-  else if (status.notifica == 3) //colaborador
-    list.push(solicitacao.value.colaboradorId)
+  let list = [];
+  if (status.notifica == 1) {
+    // wca
+    list = await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(
+      solicitacao.value.centroCustoId,
+      "wca_aprovacao"
+    );
+  } else if (status.notifica == 2 && solicitacao.value.centroCustoId)
+    //gestores
+    list = await useUsuarioStore().getUsuarioToNotificacaoByCentroDeCusto(
+      solicitacao.value.centroCustoId,
+      "cliente_aprovacao"
+    );
+  else if (status.notifica == 3)
+    //colaborador
+    list.push(solicitacao.value.colaboradorId);
 
   return list;
 }
 
+async function baixarComprovantes() {
+  try {
+    isDownload.value = true;
+    if (solicitacao.value.id > 0) {
+      let response = await solicitacaoStore.getDespesasToZipFile(
+        solicitacao.value.id
+      );
+      console.log("baixar->", response);
+
+      if (response.status == 200) {
+        let nomeArquivo = `comprovantes_solicitacao_${solicitacao.value.id}.zip`;
+        await new Promise((r) => setTimeout(r, 2000));
+        realizarDownload(
+          response,
+          nomeArquivo,
+          response.headers.getContentType()
+        );
+      }
+    }
+  } catch (error) {
+    console.log("baixarComprovantes.error:", error.response);
+    handleErrors(error);
+  } finally {
+    isDownload.value = false;
+  }
+}
 </script>

@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 using wca.reembolso.application.Features.Despesas.Command;
 using wca.reembolso.application.Features.Despesas.Queries;
+using wca.reembolso.application.Features.Faturamentos.Queries;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
@@ -170,5 +172,15 @@ namespace wca.reembolso.webapi.Controllers
 
         }
 
+        [HttpGet("{Id}/DespesasToZip")]
+        public async Task<IActionResult> DespesasToZip([FromRoute] SolicitacaoDespesasToZipFileQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return new FileStreamResult(result.Value, "application/zip") { FileDownloadName = $"despesas_solicitacao_{query.Id}.zip" };
+
+        }
     }
 }
