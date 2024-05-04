@@ -40,7 +40,8 @@
                 >
                   {{
                     faturamentoStore.getStatus(faturamento.status).status +
-                    (faturamento.status == 2 ? ` ${faturamento.numeroPO}` : "")
+                    (faturamento.status == 2 ? ` ${faturamento.numeroPO}` : "") +
+                    (faturamento.status == 3 ? ` - NF: ${faturamento.notaFiscal}` : "")
                   }}</v-btn
                 >
               </v-col>
@@ -60,6 +61,19 @@
                   :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                 />
               </v-col>
+              <v-col cols="3">
+                <v-text-field
+                  label="Número DS"
+                  type="text"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  v-model="faturamento.numeroDS"
+                  :readonly="faturamento.id > 0"
+                  :bg-color="faturamento.id > 0 ?'#f2f2f2':''"
+                ></v-text-field>
+              </v-col>
+              
             </v-row>
           </v-form>
         </v-card-text>

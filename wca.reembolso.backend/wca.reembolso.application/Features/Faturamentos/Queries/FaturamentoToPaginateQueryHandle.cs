@@ -64,7 +64,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
             }
                 
 
-            query = query.OrderBy(q => q.Id);
+            query = query.OrderByDescending(q => q.DataCriacao);
 
 
             var pagination = Pagination<FaturamentoPaginateResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);

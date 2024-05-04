@@ -15,6 +15,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         string? CentroCustoNome,
         string? NumeroPO,
         string? DocumentoPO,
+        string? NotaFiscal,
+        string? NumeroDS,
         IList<FaturamentoHistorico>? FaturamentoHistorico
     );
 
@@ -33,6 +35,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         string? DocumentoPO,
         DateTime? DataFinalizacao,
         string? NotaFiscal,
+        string? NumeroDS,
         IList<FaturamentoItemResponse>? FaturamentoItem,
         IList<FaturamentoHistorico>? FaturamentoHistorico
     );
