@@ -22,6 +22,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
         int ClienteId,
         int CentroCustoId,
         decimal Valor,
+        string? NumeroDS,
         IList<FaturamentoItemCreate> FaturamentoItem,
         StatusSolicitacao Status, 
         int[] Notificar

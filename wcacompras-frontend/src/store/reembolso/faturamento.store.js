@@ -23,11 +23,12 @@ export class Faturamento {
         this.centroCustoNome = data ? data.centroCustoNome: null
         this.status = data? data.status: 1
         this.valor = data ? data.valor: 0.00
-        this.numeroPO = data? data.numeroPO: null
+        this.numeroPO = data? data.numeroPO: ''
         this.documentoPO = data? data.documentoPO: null
         this.faturamentoItem = data? data.faturamentoItem: []
         this.dataFinalizacao = data? data.dataFinalizacao: null
-        this.notaFiscal = data? data.notaFiscal: null
+        this.notaFiscal = data? data.notaFiscal: ''
+        this.numeroDS = data? data.numeroDS: ''
         this.faturamentoHistorico = data? data.faturamentoHistorico: []
     }
 

@@ -114,7 +114,9 @@
                             density="compact" class="text-center"> {{
                                 faturamentoStore.getStatus(item.status).status
                                 +
-                                (item.status == 2 ? ` ${item.numeroPO}`:"")
+                                (item.status == 1 ? ` ${item.numeroDS ?? ''}`:"") +
+                                (item.status == 2 ? ` ${item.numeroPO ?? ''}`:"") +
+                                (item.status == 3 ? ` ${item.notaFiscal?? ''}`:"")
                             }}</v-btn>    
                     </td>
                     <td class="text-right">

@@ -47,6 +47,9 @@ namespace wca.reembolso.domain.Entities
         [Column("data_chatbot_message", TypeName = "smalldatetime")]
         public DateTime? DataChatBotMessage { get; set; }
 
+        [Column("numero_ds", TypeName = "varchar(20)")]
+        public string? NumeroDS { get; set; } = null;
+
         public IList<FaturamentoItem> FaturamentoItem { get; set; } = new List<FaturamentoItem>();
 
         public IList<FaturamentoHistorico> FaturamentoHistorico { get; set; } = new List<FaturamentoHistorico>();
