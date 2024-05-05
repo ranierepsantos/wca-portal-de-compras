@@ -1115,8 +1115,7 @@ async function baixarComprovantes() {
       }
     }
   } catch (error) {
-    console.log("baixarComprovantes.error:", error.response);
-    handleErrors(error);
+    handleErrors(error, error.response.status == 404 ? "Não há comprovantes anexos!": null);
   } finally {
     isDownload.value = false;
   }

@@ -64,7 +64,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
 
                     return memoryStream;
                 }
-                return Error.Failure(description: "Não havia arquivos para download!");
+                return Error.NotFound(description: "Não havia arquivos para download!");
 
             }
             catch (Exception ex)
