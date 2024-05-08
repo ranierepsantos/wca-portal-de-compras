@@ -96,7 +96,7 @@ namespace wca.compras.webapi.Controllers
         [HttpGet("GetVersion")]
         public async Task<ActionResult> GetVersion()
         {
-                return Ok("wca-compras, ver.: 1.4.2");
+                return Ok("wca-compras, ver.: 1.4.10");
         }
 
     }
