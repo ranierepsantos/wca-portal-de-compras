@@ -200,7 +200,11 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     async excluirDespesa(despesa) {
         let response = await api.despesaDelete(despesa.id)
         return response.data
-    }
+    },
+    async getDespesasToZipFile(solicitacaoId) {
+        let response = await api.despesasToZipFile(solicitacaoId)
+        return response
+    },
 
   },
 });

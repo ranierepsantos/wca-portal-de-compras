@@ -13,7 +13,8 @@ const rotas = {
     ExportarParaExcel: "Solicitacao/ExportarParaExcel",
     DespesaCreate: "Solicitacao/Despesa",
     DespesaUpdate: "Solicitacao/Despesa",
-    DespesaDelete: "Solicitacao/Despesa/{Id}"
+    DespesaDelete: "Solicitacao/Despesa/{Id}",
+    DespesasToZip: "Solicitacao/{Id}/DespesasToZip"
 }
 
 export default {
@@ -88,6 +89,8 @@ export default {
     },
     despesaDelete(despesaId) {
         return api.delete(rotas.DespesaDelete.replace("{Id}", despesaId))
+    },
+    despesasToZipFile(solicitacaoId) {
+        return api.get(rotas.DespesasToZip.replace("{Id}", solicitacaoId), {responseType: 'arraybuffer'})
     }
-    
 }
