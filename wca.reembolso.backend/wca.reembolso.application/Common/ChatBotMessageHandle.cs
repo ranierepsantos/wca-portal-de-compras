@@ -199,9 +199,12 @@ namespace wca.reembolso.application.Common
 
         private static decimal GetSolicitacaoValor(SolicitacaoResponse solicitacao)
         {
-            return solicitacao.TipoSolicitacao == (int)EnumTipoSolicitacao.Adiantamento ? 
-                                   solicitacao.ValorAdiantamento : 
-                                   solicitacao.ValorDespesa;
+            var valor = solicitacao.ValorDespesa;
+
+            if (solicitacao.Status == 1)
+                valor = solicitacao.ValorAdiantamento;
+
+            return valor;
 
         }
 
