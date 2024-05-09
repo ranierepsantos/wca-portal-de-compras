@@ -102,7 +102,13 @@ export class Ferias {
 
 
 export class MudancaBase {
-    
+    constructor(data = null) {
+        this.solicitacaoId = data ? data.solicitacaoId : 0
+        this.clienteDestinoId = data ? data.clienteDestinoId : 0
+        this.clienteDestinoNome = data ? data.clienteDestinoNome : null
+        this.dataAlteracao = data && data.dataAlteracao? moment(data.dataAlteracao).format("YYYY-MM-DD") : null
+        this.itensMudanca = data && data.itensMudanca ? data.itensMudanca: []
+    }
 }
 
 
