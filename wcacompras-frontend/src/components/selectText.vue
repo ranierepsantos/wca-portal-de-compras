@@ -12,6 +12,7 @@
       @update:model-value="val => $emit('update:modelValue',val)"
       :rules="fieldRules"
       v-if="selectMode"
+      :disabled="disabled"
     ></v-autocomplete>
     <v-text-field
       :label="labelText"
@@ -42,7 +43,9 @@ defineProps({
     fieldRules: {
         type: Array,
         default: function() { return []; }
-    }
+    },
+    disabled: { type: Boolean, default: false }
+
 })
 
 

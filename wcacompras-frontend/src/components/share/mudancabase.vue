@@ -9,30 +9,58 @@
           color="primary"
           density="compact"
           :rules="[(v) => !!v || 'Campo obrigatório']"
-          :readonly="true"
           v-model="dataModel.dataAlteracao"
-          bg-color="#f2f2f2"
+          :readonly="!createMode || isReadOnly"
+          :bg-color="!createMode || isReadOnly ? '#f2f2f2' : ''"
         ></v-text-field>
       </v-col>
       <v-col>
         <select-text
           v-model="dataModel.clienteDestinoId"
-          :combo-items="[]"
+          :combo-items="listClientes"
           :select-mode="dataModel.solicitacaoId == 0"
           :text-field-value="dataModel.clienteDestinoNome"
           label-text="Cliente Destino"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+          :disabled="!clienteSelected"
         ></select-text>
       </v-col>
     </v-row>
     <v-row>
-        <v-col>
+      <v-col >
+            <v-textarea
+              variant="outlined"
+              label="Descricão da Mudança"
+              class="text-primary"
+              :readOnly = "isReadOnly"
+              :bg-color="isReadOnly ? '#f2f2f2' : ''"
+              v-model="dataModel.observacao"
+            >
+            </v-textarea>
+        </v-col>
+    </v-row>
+    <v-row>
+        <v-col >
             <box-transfer 
               :list-origem="listItensMudanca" 
               :list-destino="dataModel.itensMudanca"
               list-origem-titulo = "Selecione os Itens de Mudança"
               list-destino-titulo = "Itens de Mudança"
+              :show-search-text="false"
+              v-show="!isReadOnly"
             />
+            <v-textarea
+              variant="outlined"
+              label="Items de Mudança"
+              class="text-primary"
+              :readOnly = "isReadOnly"
+              :bg-color="isReadOnly ? '#f2f2f2' : ''"
+              :model-value="getItensMudancaDescricao()"
+              v-show="isReadOnly"
+              rows="2"
+            >
+            
+            </v-textarea>
         </v-col>
     </v-row>
   </div>
@@ -41,13 +69,11 @@
 <script setup>
 import {
   MudancaBase,
-  useShareSolicitacaoStore,
 } from "@/store/share/solicitacao.store";
 import boxTransfer from "@/components/boxTransfer.vue";
 import selectText from "../selectText.vue";
-import { getTextFromListByCodigo } from "@/helpers/share/data";
 
-defineProps({
+const props = defineProps({
   dataModel: {
     type: Object,
     default: function () {
@@ -57,6 +83,27 @@ defineProps({
   dataAdmissao: { type: String, default: "" },
   createMode: { type: Boolean, default: true },
   isReadOnly: { type: Boolean, default: false },
+  listClientes: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
+  clienteSelected: { type: Boolean, default: false },
+  listItensMudanca: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  }
 });
-const listItensMudanca = [];
+
+function getItensMudancaDescricao () {
+  let text = "";
+  props.dataModel.itensMudanca.forEach(item => {
+    text += item.text + "; "
+  });
+  return text.trimEnd();
+
+}
 </script>

@@ -107,5 +107,16 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
 
         }
+
+        [HttpGet("ListarItensMudanca")]
+        public async Task<IActionResult> ListarItensMudanca()
+        {
+            var result = await _mediator.Send(new ItemMudancaListQuery());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
     }
 }

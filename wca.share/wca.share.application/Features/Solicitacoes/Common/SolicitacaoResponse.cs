@@ -1,4 +1,8 @@
-﻿using wca.share.domain.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
+using System.Text.Json.Serialization;
+using wca.share.application.Common;
+using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Solicitacoes.Common
 {
@@ -25,7 +29,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public SolicitacaoComunicado? Comunicado { get;  set; }
         public SolicitacaoDesligamento? Desligamento { get;  set; }
         public SolicitacaoFerias? Ferias { get;  set; }
-        public SolicitacaoMudancaBase? MudancaBase { get;  set; }
+        public SolicitacaoMudancaBaseResponse? MudancaBase { get;  set; }
         public List<SolicitacaoArquivo>? Anexos { get;  set; }
         
         public List<SolicitacaoHistorico> Historico { get; set; }
@@ -57,5 +61,21 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public string Color { get; set; }
 
     }
+
+    public sealed class SolicitacaoMudancaBaseResponse
+    {
+        public int SolicitacaoId { get; init; }
+        
+        public DateTime? DataAlteracao { get; init; }
+        
+        public string? Observacao { get; init; }
+
+        public int? ClienteDestinoId { get; init; }
+
+        public string? ClienteDestinoNome { get; init; }
+
+        public List<ListItem>? ItensMudanca { get; init; } = new List<ListItem>();
+    }
+
 
 }

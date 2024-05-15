@@ -30,8 +30,11 @@ namespace wca.share.application.Features.Clientes.Commands
             var clientes = await _gi.ClienteGetAllAsync();
             var centroDeCustos = await _gi.CentroCustoGetAllAsync();
 
+            //int[] filter = { 11, 22, 68, 70, 73, 93, 96 };
+            //clientes = clientes.Where(q => filter.Contains(q.CodigoCliente)).ToList();
 
             Console.WriteLine("Clientes.total: " + clientes.Count() );
+            Console.WriteLine("CentrosDeCusto.total: " + centroDeCustos.Count() );
 
             foreach(var oCli in  clientes)
             {
@@ -67,7 +70,7 @@ namespace wca.share.application.Features.Clientes.Commands
                     _ = await _mediator.Send(clienteUpdateCommand, cancellationToken);
                 }else
                 {
-                    ClienteCreateCommand clienteCommand = new ClienteCreateCommand(oCli.CodigoCliente, oCli.RazaoSocial, oCli.Cgc, oCli.Ie, oCli.Endereco,
+                    ClienteCreateCommand clienteCommand = new (oCli.CodigoCliente, oCli.RazaoSocial, oCli.Cgc, oCli.Ie, oCli.Endereco,
                                                                "", oCli.Cep, oCli.Cidade, oCli.UF, 0, oCli.ClienteAtivo, centros);
                     _ = await _mediator.Send(clienteCommand, cancellationToken);
                 }

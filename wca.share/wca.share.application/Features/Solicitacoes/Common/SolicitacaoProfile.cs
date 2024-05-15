@@ -39,6 +39,16 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome))
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id));
 
+            CreateMap<ItemMudanca, ListItem>()
+                .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Descricao))
+                .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
+                .ReverseMap();
+
+            CreateMap<SolicitacaoMudancaBase, SolicitacaoMudancaBaseResponse>()
+                .ForMember(dest => dest.ClienteDestinoNome, opt => opt.MapFrom(src => src.ClienteDestino.Nome))
+                .ReverseMap();
+                
+
         }
         /*
          int? Id,

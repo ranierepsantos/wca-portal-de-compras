@@ -26,7 +26,12 @@ namespace wca.share.application.Features.Funcionarios.Commands
             Console.WriteLine("Funcionarios.FromGI.início: " + DateTime.Now.ToString());
             var funcionarios = await _gi.FuncionarioGetAllAsync();
 
-            foreach(var ofunc in funcionarios)
+            //int[]? filter = { 11, 22, 68, 70, 73, 93, 96 };
+
+            //funcionarios = funcionarios.Where(q => filter.Contains(q.CodigoCliente)).ToList(); ;
+            Console.WriteLine("Funcionários.total: " + funcionarios.Count());
+
+            foreach (var ofunc in funcionarios)
             {
                 try
                 {

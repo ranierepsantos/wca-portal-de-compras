@@ -47,14 +47,14 @@ export const share = {
         path: 'funcionarios',
         name: 'shareFuncionarios',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "funcionario", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/funcionarios'),
       },
       {
         path: 'funcionario',
         name: 'shareFuncionarioCadastro',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "funcionario", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/funcionarios/cadastro'),
       },
       {
@@ -202,7 +202,7 @@ export const share = {
       },
       {
         path: 'mudancabase',
-        name: 'shareMudancaBase',
+        name: 'shareMudancabase',
         meta: {permissao: "livre", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting

@@ -88,7 +88,7 @@ onMounted(async () =>
 });
 
 watch(page, async () => await getItems());
-watch(filter, async () => await getItems());
+watch(filter, async () => await getItems(true));
 
 //METHODS
 async function enableDisable(item)
@@ -189,11 +189,12 @@ function getFilialName(filialId)
   return filial ==undefined ? "" : filial.text;
 }
 
-async function getItems()
+async function getItems(resetPage = false)
 {
   try
   {
     isBusy.value = true;
+    if (resetPage) page.value = 1
     let filtro = {
       termo: filter.value,
       filial: isMatriz.value ? []: [authStore.user.filial]

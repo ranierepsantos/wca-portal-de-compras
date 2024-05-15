@@ -89,7 +89,7 @@ onMounted(async () =>
 });
 
 watch(page, () => getItems());
-watch(() => filter.value.termo, () => getItems());
+watch(() => filter.value.termo, () => getItems(true));
 
 //METHODS
 function editar(id)
@@ -97,11 +97,13 @@ function editar(id)
     router.push({ name: "shareFuncionarioCadastro", query: { id: id } })
 }
 
-async function getItems()
+async function getItems(resetPage = false)
 {
     try
     {
         isBusy.value = true;
+        if (resetPage) page.value = 1;
+        
         let response = await funcionarioStore.getPaginate(page.value, pageSize, filter.value)
         
         funcionarios.value = response.items;

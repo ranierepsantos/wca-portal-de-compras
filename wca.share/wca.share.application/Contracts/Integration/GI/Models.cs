@@ -96,10 +96,10 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         public string? Nome { get; set; }
 
         [JsonPropertyName("codigoCliente")]
-        public int? CodigoCliente { get; set; }
+        public int CodigoCliente { get; set; }
 
         [JsonPropertyName("codigoCentroCusto")]
-        public int? CodigoCentroCusto { get; set; }
+        public int CodigoCentroCusto { get; set; }
 
         [JsonPropertyName("dataAdmissao")]
         public DateTime? DataAdmissao { get; set; }
