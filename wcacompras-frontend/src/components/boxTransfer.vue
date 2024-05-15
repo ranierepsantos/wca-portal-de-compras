@@ -4,7 +4,7 @@
       <v-card elevation="3" :subtitle="listOrigemTitulo">
         <v-card-title>
           <v-text-field label="Pesquisar" v-model="boxOrigemTermo" type="text" required variant="outlined" color="primary"
-                   density="compact">
+                   density="compact" v-show="showSearchText">
           </v-text-field>
         </v-card-title>
         
@@ -52,10 +52,10 @@
       ></v-icon>
     </v-col>
     <v-col cols="5">
-      <v-card elevation="3" :subtitle="listDestinoTitulo">
+      <v-card elevation="3" :subtitle="listDestinoTitulo" readonly>
         <v-card-title>
           <v-text-field label="Pesquisar" v-model="boxDestinoTermo" type="text" required variant="outlined" color="primary"
-                   density="compact">
+                   density="compact" v-show="showSearchText">
           </v-text-field>
         </v-card-title>
         <v-card-text>
@@ -89,6 +89,10 @@ const props = defineProps({
     type: Object
     
   },
+  showSearchText: {
+    type:Boolean,
+    default: true
+  }
 });
 const boxOrigemTermo = ref("")
 const boxDestinoTermo = ref("")

@@ -23,7 +23,7 @@
               :list-funcionarios="funcionarioList"
               :list-centro-custos="centrosCustoList"
               :combo-tipo-show="comboTipoShow"
-              :descricao-show="solicitacao.solicitacaoTipoId != 2"
+              :descricao-show="![2,4].includes(solicitacao.solicitacaoTipoId)"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
@@ -38,7 +38,12 @@
               <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" 
               :data-model="solicitacao.ferias"
               :create-mode="true"/>
-              <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />
+              <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" 
+              :data-model="solicitacao.mudancaBase" 
+              :list-clientes="getClienteDestinoList()"
+              :list-itens-mudanca="listItensMudanca"
+              :cliente-selected="solicitacao.clienteId && solicitacao.clienteId > 0"
+              :create-mode="true"/>
             </SolicitacaoForm>
 
             <table-file-upload 
@@ -89,6 +94,7 @@ const mForm = ref(null);
 const swal = inject("$swal");
 const permissao = ref("")
 const tableUploadItems = ref([{text: "Outros"}])
+const listItensMudanca = ref([])
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -112,8 +118,10 @@ onBeforeMount(async () => {
       await useShareSolicitacaoStore().getTipoFerias();
 
     } else if (route.path.includes("mudancabase")) {
+      console.info("mudança-de-base")
       solicitacao.value.solicitacaoTipoId = 4;
       permissao.value = 'mudancabase' 
+      listItensMudanca.value = await useShareSolicitacaoStore().getListaItensMudanca();
     }
 
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
@@ -135,10 +143,14 @@ watch(
       funcionarioList.value = [];
       centrosCustoList.value = [];
       if (clienteId) {
+        if (permissao.value = 'mudancabase')
+          solicitacao.value.mudancaBase.clienteDestinoId = null;
+
         funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId, useAuthStore().user.id)
 
         //Trazer centros de custo
         centrosCustoList.value = await useShareUsuarioStore().getCentrosdeCusto(useAuthStore().user.id, clienteId)       
+        
       }  
     } catch (error) {
       console.log('watch.clienteId', error)
@@ -223,5 +235,10 @@ async function salvar() {
   }finally {
     isBusy.value.save = false;
   }
+}
+function getClienteDestinoList()
+{
+    let lista = clienteList.value.filter(q => q.value != solicitacao.value.clienteId) ?? []
+    return lista;
 }
 </script>

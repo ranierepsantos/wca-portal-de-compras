@@ -24,7 +24,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
-        SolicitacaoMudancaBase? MudancaBase,
+        SolicitacaoMudancaBaseResponse? MudancaBase,
         SolicitacaoFerias? Ferias,
         List<SolicitacaoArquivo>? Anexos,
         int[]? NotificarUsuarioIds
@@ -76,6 +76,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
 
             if (dado.SolicitacaoTipoId == (int) EnumTipoSolicitacao.MudancaBase)
             {
+                dado.MudancaBase.ClienteDestino = null;
                 List<int> itensMudancaIds = dado.MudancaBase.ItensMudanca
                                             .Select(x => x.Id)
                                             .ToList();

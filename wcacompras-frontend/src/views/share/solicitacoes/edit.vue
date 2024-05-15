@@ -46,7 +46,14 @@
               <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3"
                 :data-model="solicitacao.ferias"
                 :create-mode="false" />
-              <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" />
+              <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" 
+              :data-model="solicitacao.mudancaBase" 
+              :list-clientes="[]"
+              :list-itens-mudanca="listItensMudanca"
+              :cliente-selected="solicitacao.clienteId && solicitacao.clienteId > 0"
+              :create-mode="false"
+              :is-read-only="true"
+              />
             </SolicitacaoForm>
             <v-card>
             <v-card-text>
@@ -147,6 +154,7 @@ const openNotificacao = ref(false)
 const openAprovacaoForm = ref(false)
 const permissao = ref("")
 const isRunningEvent = ref(false)
+const listItensMudanca = ref([])
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -167,6 +175,7 @@ onBeforeMount(async () => {
       await useShareSolicitacaoStore().getTipoFerias();
     } else if (route.path.includes("mudancabase")) {
       permissao.value = 'mudancabase' 
+      listItensMudanca.value = await useShareSolicitacaoStore().getListaItensMudanca();
     }
     
     await getById(route.query.id);
@@ -181,6 +190,7 @@ onBeforeMount(async () => {
     } else if (solicitacao.value.solicitacaoTipoId == 2) {
     } else if (solicitacao.value.solicitacaoTipoId == 3) {
     } else if (solicitacao.value.solicitacaoTipoId == 4) {
+      ItensMudancaListRemove()
     }
     
   } catch (error) {
@@ -311,6 +321,8 @@ async function getById(id) {
     if (data.solicitacaoTipoId == 1 && data.statusSolicitacaoId !== 3) {
       let dias = moment(data.desligamento.dataDemissao).diff(data.funcionarioDataAdmissao, "days");
       data.desligamento.statusExameDemissional = dias <= 90 ? 3 : data.desligamento.statusExameDemissional
+    }else if (data.solicitacaoTipoId == 4 ) {
+      ItensMudancaListRemove()
     }
 
     solicitacao.value = data;
@@ -398,4 +410,15 @@ async function FinalizarSolicitacao() {
   }
 
 }
+function ItensMudancaListRemove(removerTodos = false) {
+  if (removerTodos == true) listItensMudanca.value.splice(0, listItensMudanca.value.length);
+  else {
+
+    solicitacao.value.mudancaBase.itensMudanca.forEach((item) => {
+      let index = listItensMudanca.value.findIndex((c) => c.value == item.value);
+      if (index > -1) listItensMudanca.value.splice(index, 1);
+    });
+  }
+}
+
 </script>

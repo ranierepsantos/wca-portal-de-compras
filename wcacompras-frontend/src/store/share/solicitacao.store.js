@@ -17,6 +17,7 @@ const rotas = {
     ListarMotivoDemissao: "Solicitacao/ListarMotivoDemissao",
     ListarAssuntos: "Solicitacao/ListarAssuntos",
     ListarTipoFerias: "Solicitacao/ListarTipoFerias",
+    ListarItensMudanca: "Solicitacao/ListarItensMudanca",
 }
 
 export class Solicitacao {
@@ -38,7 +39,7 @@ export class Solicitacao {
         this.comunicado = data && data.comunicado ? new Comunicado(data.comunicado) : new Comunicado()
         this.desligamento = data ? new Desligamento(data.desligamento) : new Desligamento()
         this.ferias = data ? new Ferias(data.ferias) : new Ferias()
-        this.mudancaBase = data && data.mudancaBase ? data.mudancaBase : null
+        this.mudancaBase = data && data.mudancaBase ? new MudancaBase(data.mudancaBase) : new MudancaBase()
         this.anexos = data && data.anexos ? data.anexos: []
         this.historico = data && data.historico ? data.historico: []
         this.status = {
@@ -104,8 +105,9 @@ export class Ferias {
 export class MudancaBase {
     constructor(data = null) {
         this.solicitacaoId = data ? data.solicitacaoId : 0
-        this.clienteDestinoId = data ? data.clienteDestinoId : 0
+        this.clienteDestinoId = data ? data.clienteDestinoId : null
         this.clienteDestinoNome = data ? data.clienteDestinoNome : null
+        this.observacao = data ? data.observacao : null
         this.dataAlteracao = data && data.dataAlteracao? moment(data.dataAlteracao).format("YYYY-MM-DD") : null
         this.itensMudanca = data && data.itensMudanca ? data.itensMudanca: []
     }
@@ -137,6 +139,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
     motivosDemissao: JSON.parse(localStorage.getItem("share-motivo-demissao")) || [],
     assuntos: JSON.parse(localStorage.getItem("share-assuntos")) || [],
     tipoFerias: JSON.parse(localStorage.getItem("share-tipoFerias")) || [],
+    itensMudanca: JSON.parse(localStorage.getItem("share-itens-mudanca")) || [],
   }),
   actions: {
     async add (data) {
@@ -198,11 +201,13 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             
             if (data.solicitacaoTipoId == 1) {
                 data.comunicado  = null
-                data.mudancaBase = null 
+                data.mudancaBase = null
+                data.ferias = null 
             }else if (data.solicitacaoTipoId == 2) {
                 delete data.comunicado.assunto
                 data.desligamento  = null
                 data.mudancaBase = null 
+                data.ferias = null
             }else if (data.solicitacaoTipoId == 3) //Férias
             {
                 delete data.ferias.tipoFerias
@@ -212,6 +217,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             }else if (data.solicitacaoTipoId == 4) {
                 data.comunicado  = null
                 data.desligamento = null 
+                data.ferias = null
             }
             await api.put(rotas.Update, data);
         } catch (error) {
@@ -278,14 +284,9 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
 
     async getListaAssuntos() {
         try {
-            if (this.assuntos.length == 0)
-            {
                 let response = await api.get(rotas.ListarAssuntos);
-            
-                this.assuntos = response.data 
-                localStorage.setItem('share-assuntos',JSON.stringify(this.assuntos))
-            }
-            return this.assuntos;
+                this.assuntos = response.data;
+                return this.assuntos;
         } catch (error) {
             throw error
         }  
@@ -321,6 +322,23 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 localStorage.setItem('share-tipoFerias',JSON.stringify(this.tipoFerias))
             }
             return this.tipoFerias;
+        } catch (error) {
+            throw error
+        }  
+    },
+    async getListaItensMudanca() {
+        try {
+            console.log("items mudança: ",this.itensMudanca.length)
+            if (this.itensMudanca.length == 0)
+            {
+
+                let response = await api.get(rotas.ListarItensMudanca);
+                console.log("items mudança.response: ", response)
+                this.itensMudanca = response.data 
+            
+                localStorage.setItem('share-itens-mudanca',JSON.stringify(this.itensMudanca))
+            }
+            return this.itensMudanca;
         } catch (error) {
             throw error
         }  

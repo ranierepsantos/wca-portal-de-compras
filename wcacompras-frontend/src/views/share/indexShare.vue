@@ -173,6 +173,8 @@ onMounted(async () => {
   await useShareSolicitacaoStore().getListaAssuntos();
   await useShareSolicitacaoStore().listarMotivosDemissao();
   await useShareSolicitacaoStore().getTipoFerias();
+  await useShareSolicitacaoStore().getListaItensMudanca();
+
   clearInterval(checkNotificacoes.value)
   startCheckNotificacoes()
 });
