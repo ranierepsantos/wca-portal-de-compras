@@ -16,6 +16,8 @@ namespace wca.share.infrastructure.Migrations
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
+
+            migrationBuilder.Sql("update itensmudanca set ativo = 1");
         }
 
         /// <inheritdoc />

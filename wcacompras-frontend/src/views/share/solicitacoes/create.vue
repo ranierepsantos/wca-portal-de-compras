@@ -146,7 +146,9 @@ watch(
         if (permissao.value = 'mudancabase')
           solicitacao.value.mudancaBase.clienteDestinoId = null;
 
-        funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId, useAuthStore().user.id)
+          solicitacao.value.funcionarioId = null
+
+          funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId, useAuthStore().user.id)
 
         //Trazer centros de custo
         centrosCustoList.value = await useShareUsuarioStore().getCentrosdeCusto(useAuthStore().user.id, clienteId)       
@@ -162,6 +164,10 @@ watch(
 watch(() => solicitacao.value.funcionarioId, () => {
   
   let oFunc = funcionarioList.value.find(q => q.value == solicitacao.value.funcionarioId)
+    solicitacao.value.centroCustoNome = null
+    solicitacao.value.centroCustoId = null
+    solicitacao.value.eSocialMatricula =null
+    solicitacao.value.funcionarioDataAdmissao =null
   if (oFunc) {
     solicitacao.value.centroCustoNome = oFunc.centroCustoNome
     solicitacao.value.centroCustoId = oFunc.centroCustoId

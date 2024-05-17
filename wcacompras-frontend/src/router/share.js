@@ -203,7 +203,7 @@ export const share = {
       {
         path: 'mudancabase',
         name: 'shareMudancabase',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "mudancabase-criar|mudancabase-executar|mudancabase-finalizar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -213,7 +213,7 @@ export const share = {
       {
         path: 'mudancabase/criar',
         name: 'shareMudancaBaseCreate',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "mudancabase-criar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -223,7 +223,7 @@ export const share = {
       {
         path: 'mudancabase/editar',
         name: 'shareMudancaBaseCadastro',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "mudancabase-executar|mudancabase-finalizar", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
