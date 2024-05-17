@@ -107,7 +107,7 @@ const menuItems = ref([
     title: "Mudança de base",
     value: 4,
     route: "/share/mudancabase",
-    permissao: "livre"
+    permissao: "mudancabase-criar|mudancabase-executar|mudancabase-finalizar"
   },
   {
     title: "Comunicados",

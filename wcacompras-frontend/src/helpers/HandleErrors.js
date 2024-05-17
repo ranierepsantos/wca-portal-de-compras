@@ -2,7 +2,6 @@ import { useAuthStore } from "@/store/auth.store";
 import router from "@/router"
 const handleErrors = (error, customMessage = null) =>
 {
-debugger
     let authStore = useAuthStore();
     let swal = require("sweetalert2")
     let message = ""
