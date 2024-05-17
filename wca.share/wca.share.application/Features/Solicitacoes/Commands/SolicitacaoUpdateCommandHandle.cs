@@ -3,11 +3,9 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Runtime.CompilerServices;
 using wca.share.application.Common;
 using wca.share.application.Contracts;
 using wca.share.application.Contracts.Persistence;
-using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
 using wca.share.application.Features.Solicitacoes.Behaviors;
 using wca.share.application.Features.Solicitacoes.Common;
@@ -27,7 +25,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
-        SolicitacaoMudancaBase? MudancaBase,
+        SolicitacaoMudancaBaseResponse? MudancaBase,
         SolicitacaoFerias? Ferias,
         List<SolicitacaoArquivo>? Anexos,
         StatusSolicitacao? Status,
@@ -117,7 +115,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                     await _repository.ExecuteCommandAsync($"delete from itemmudancaSolicitacaoMudancabase where SolicitacaoMudancaBaseSolicitacaoId ={request.Id}");
 
                     List<int> itensMudancaId = request.MudancaBase.ItensMudanca
-                    .Select(x => x.Id)
+                    .Select(x => x.Value)
                     .ToList();
                     List<ItemMudanca> items = _repository.ItemMudancaRepository.ToQuery().Where(c => itensMudancaId.Contains(c.Id)).ToList();
                     if (items.Any())
