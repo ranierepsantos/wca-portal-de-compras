@@ -140,7 +140,7 @@ const menuItems = ref([
   //   permissao: "Filial"
   // },
   {
-    title: "Funcionáros",
+    title: "Funcionários",
     value: 10,
     route: "/share/funcionarios",
     permissao: "funcionario"
