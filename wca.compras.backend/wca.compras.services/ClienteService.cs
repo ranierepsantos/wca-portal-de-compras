@@ -298,8 +298,7 @@ namespace wca.compras.services
                             codigo1 = (int)(key.Length == 1 ? char.Parse(key.Substring(0, 1)) : char.Parse(key.Substring(1, 1)));
 
                             string chave = key;
-                            Console.WriteLine("chave:" + chave);
-
+                            
                             ClienteOrcamentoConfiguracao configuracao = new ClienteOrcamentoConfiguracao();
 
                             configuracao.TipoFornecimentoId = tipos.Where(q => q.Nome.ToUpper() == categorias[chave].ToString().ToUpper()).First().Id;
