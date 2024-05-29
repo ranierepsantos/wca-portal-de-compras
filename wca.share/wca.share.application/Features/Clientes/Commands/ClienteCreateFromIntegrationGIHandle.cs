@@ -59,18 +59,18 @@ namespace wca.share.application.Features.Clientes.Commands
                     if (cliente != null)
                     {
                         //checar da lista de centros de custo, o que já esta na base e o que não esta, o que não está incluir
-                        //var centrosAdicionar = centros.Where(c => !cliente.CentroCusto.Where(x => x.Codigo == c.Codigo).Any()).ToList();
+                        var centrosAdicionar = centros.Where(c => !cliente.CentroCusto.Where(x => x.Codigo == c.Codigo).Any()).ToList();
 
-                        //if (centrosAdicionar != null)
-                        //{
-                        //    foreach (var item in centrosAdicionar)
-                        //    {
-                        //        cliente.CentroCusto.Add(item);
-                        //    }
-                        //}
+                        if (centrosAdicionar != null)
+                        {
+                            foreach (var item in centrosAdicionar)
+                            {
+                                cliente.CentroCusto.Add(item);
+                            }
+                        }
 
-                        //ClienteUpdateCommand clienteUpdateCommand = new ClienteUpdateCommand(cliente.Id, oCli.CodigoCliente, cliente.FilialId, oCli.RazaoSocial, oCli.Cgc, oCli.Ie, oCli.Endereco, cliente.Numero, oCli.Cep, oCli.Cidade, oCli.UF, oCli.ClienteAtivo, cliente.CentroCusto);
-                        //_ = await _mediator.Send(clienteUpdateCommand, cancellationToken);
+                        ClienteUpdateCommand clienteUpdateCommand = new ClienteUpdateCommand(cliente.Id, oCli.CodigoCliente, cliente.FilialId, oCli.RazaoSocial, oCli.Cgc, oCli.Ie, oCli.Endereco, cliente.Numero, oCli.Cep, oCli.Cidade, oCli.UF, oCli.ClienteAtivo, cliente.CentroCusto);
+                        _ = await _mediator.Send(clienteUpdateCommand, cancellationToken);
                     }
                     else
                     {
