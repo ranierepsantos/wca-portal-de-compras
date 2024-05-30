@@ -90,5 +90,15 @@ namespace wca.reembolso.webapi.Controllers
             return new FileStreamResult(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"relatorio_solicitacoes.xlsx" };
 
         }
+
+        [HttpGet("SendChatBotAfterDays/{days}")]
+        public async Task<IActionResult> SendChatBotAfterSevenDays(int days)
+        {
+            var result = await _mediator.Send(new FaturamentoSendChatBotAfterDaysCommand(days));
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
     }
 }

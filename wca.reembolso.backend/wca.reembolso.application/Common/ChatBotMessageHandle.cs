@@ -1,12 +1,11 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http.Internal;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using wca.reembolso.application.Contracts;
-using wca.reembolso.application.Contracts.NorgeChatBot;
+using wca.reembolso.application.Contracts.Integration;
+using wca.reembolso.application.Contracts.Integration.NorgeChatBot;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.application.Features.Solicitacaos.Queries;
+using wca.reembolso.application.Features.Faturamentos.Common;
 using wca.reembolso.application.Features.Solicitacoes.Common;
 using wca.reembolso.domain.Common.Enum;
 using wca.reembolso.domain.Entities;
@@ -17,24 +16,64 @@ namespace wca.reembolso.application.Common
     {
         private readonly IRepositoryManager _repository;
         private readonly IIntegrationNorgeChatBot _norgeBot;
-        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
         private readonly TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
 
-        private string faturamentoFirstMessage = @"{saudacao.dia}!\nAqui é o assistente WCA de apoio aos gestores clientes. Há uma relação de despesas aguardando sua análise para faturamento.\nRELAÇÃO DE DESPESAS: {faturamento.codigo}\nVALOR TOTAL: {faturamento.valor}\nCENTRO DE CUSTOS: {faturamento.centrocusto}\nDATA DA PRIMEIRA DESPESA: {faturamento.dataPrimeiraDespesa}\nDATA DA DESPESA MAIS RECENTE: {faturamento.dataUltimaDespesa}";
-        private string faturamentoSevenDaysMessage = @"{saudacao.dia}!\nAqui é o assistente WCA de apoio aos gestores clientes. Há faturamentos que aguardam os correspondentes números de ordem de compra ou arquivos equivalentes (P.O.).\nCENTRO DE CUSTOS: {faturamento.centrocusto}\nRELAÇÃO DE DESPESAS: {faturamento.codigo}\nDATA DA PRIMEIRA DESPESA: {faturamento.dataPrimeiraDespesa}\nDATA DA DESPESA MAIS RECENTE: {faturamento.dataUltimaDespesa}\nVALOR A SER FATURADO: {faturamento.valor}";
+        private string faturamentoFirstMessage = @"{saudacao.dia}!\nAqui é o assistente WCA de apoio aos gestores clientes. Há uma relação de despesas aguardando sua análise para faturamento.\nRELAÇÃO DE DESPESAS: {faturamento.codigo}\nVALOR TOTAL: {faturamento.valor}\nCENTRO DE CUSTOS: {faturamento.centrocusto}\nDATA DA PRIMEIRA DESPESA: {faturamento.dataPrimeiraDespesa}\nDATA DA DESPESA MAIS RECENTE: {faturamento.dataUltimaDespesa}\nPara acessar o sistema clique no link: https://app.wcabrasil.com.br";
+        private string faturamentoSevenDaysMessage = @"{saudacao.dia}!\nAqui é o assistente WCA de apoio aos gestores clientes. Há faturamentos que aguardam os correspondentes números de ordem de compra ou arquivos equivalentes (P.O.).\nCENTRO DE CUSTOS: {faturamento.centrocusto}\nRELAÇÃO DE DESPESAS: {faturamento.codigo}\nDATA DA PRIMEIRA DESPESA: {faturamento.dataPrimeiraDespesa}\nDATA DA DESPESA MAIS RECENTE: {faturamento.dataUltimaDespesa}\nVALOR A SER FATURADO: {faturamento.valor}\nPara acessar o sistema clique no link: https://app.wcabrasil.com.br";
+        private string depositoMessage = "{saudacao.dia}!\nAqui é o assistente WCA de apoio aos colaboradores. O depósito em conta corrente correspondente aos valores da solicitação #{solicitacao.codigo} recebida em {solicitacao.datahora} será feito em {datadeposito}, no valor {valordeposito}.";
 
-
-        public ChatBotMessageHandle(IRepositoryManager repository, IIntegrationNorgeChatBot norgeBot, IMediator mediator)
+        public ChatBotMessageHandle(IRepositoryManager repository, IIntegrationNorgeChatBot norgeBot, IMapper mapper)
         {
             _repository = repository;
             _norgeBot = norgeBot;
-            _mediator = mediator;
+            _mapper = mapper;
         }
 
-        public Task FaturamentoSendMessageAsync(int[] usersId, Faturamento faturamento, bool firstSend = false, CancellationToken cancellationToken = default)
+        public async Task FaturamentoSendMessageAsync(int[] usersId, int faturamentoId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var query = _repository.FaturamentoRepository.ToQuery()
+                        .Where(q => q.Id == faturamentoId)
+                        .Include(n => n.Cliente)
+                        .Include(n => n.CentroCusto)
+                        .Include(n => n.FaturamentoItem)
+                        .ThenInclude(n => n.Solicitacao);
+
+            var dado = await query.AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            await FaturamentoSendMessageAsync(usersId, _mapper.Map<FaturamentoChatBot>(dado),true, cancellationToken);
         }
+        public async Task FaturamentoSendMessageAsync(int[] usersId, FaturamentoChatBot faturamento, bool firstSend = false, CancellationToken cancellationToken = default)
+        {
+            List<Usuario>? usuarios = await _repository.GetDbSet<Usuario>()
+                                           .Where(q => (q.Celular != null && q.Celular != "") && usersId.Contains(q.Id))
+                                           .ToListAsync(cancellationToken: cancellationToken);
+            
+            
+            string mensagem = firstSend ? faturamentoFirstMessage : faturamentoSevenDaysMessage;
+
+            mensagem = Regex.Unescape(FaturamentoMontaMensagem(mensagem, faturamento));
+            
+            if (usuarios?.Count > 0) 
+            {
+                foreach (var usuario in usuarios)
+                {
+                    await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
+                }
+            }
+
+            await _repository.ExecuteCommandAsync($"update faturamento set data_chatbot_message = getdate() where id ={faturamento.Id}");
+        }
+
+
+        public async Task DepositoSendMessageAsync(SolicitacaoResponse solicitacao, DateTime? datadeposito, decimal? valordeposito, CancellationToken cancellationToken) 
+        { 
+            string mensagem = Regex.Unescape(SolicitacaoMontaMensagem(depositoMessage, solicitacao));
+            mensagem = mensagem.Replace("{datadeposito}", datadeposito?.ToString("dd/MM/yyyy"));
+            mensagem = mensagem.Replace("{valordeposito}", string.Format(new CultureInfo("pt-BR", true), "{0:c2}", valordeposito));
+            await _norgeBot.Send("55" + solicitacao.ColaboradorCelular, mensagem);
+        }
+
 
         public async Task SolicitacaoSendMessageAsync(int[] usersId, SolicitacaoResponse solicitacao, CancellationToken cancellationToken = default)
         {
@@ -68,45 +107,25 @@ namespace wca.reembolso.application.Common
             }
         }
 
-        private string FaturamentoMontaMensagem(string mensagem, SolicitacaoResponse solicitacao)
+        private string FaturamentoMontaMensagem(string mensagem, FaturamentoChatBot faturamento)
         {
 
             /*
-            {saudacao.dia} 
-            {colaborador.nome}
-            {solicitacao.valor}
-            {solitacao.datahora}
-            {conta.saldo}
-            {func.valordeposito}
-            {solicitacao.tipo}
-            {link}
-            {solicitacao.centrocusto}
-            {func.dataUltimaSolicitacao}
+            {saudacao.dia}
+            {faturamento.centrocusto}
+            {faturamento.codigo}
+            {faturamento.dataPrimeiraDespesa}
+            {faturamento.dataUltimaDespesa}
+            {faturamento.valor}
             */
-            decimal contaSaldo = 0M;
-            decimal solicitacaoValor = GetSolicitacaoValor(solicitacao);
-            decimal valorDeposito = 0M;
-            DateTime? dataUltimaSolicitacao = null;
-            if (mensagem.IndexOf("{conta.saldo}") > -1 || mensagem.IndexOf("{func.valordeposito}") > -1)
-                contaSaldo = GetContaSaldo(solicitacao.ColaboradorId);
-
-            if (mensagem.IndexOf("{func.valordeposito}") > -1)
-                valorDeposito = solicitacao.ValorDespesa - contaSaldo;
-
-            if (mensagem.IndexOf("{func.dataUltimaSolicitacao}") > -1)
-                dataUltimaSolicitacao = GetDataUltimaSolicitacao(solicitacao.ColaboradorId, solicitacao.Id);
-
 
             mensagem = mensagem.Replace("{saudacao.dia}", GetSaudacaoDia());
-            mensagem = mensagem.Replace("{colaborador.nome}", solicitacao.ColaboradorNome);
-            mensagem = mensagem.Replace("{solicitacao.centrocusto}", solicitacao.CentroCustoNome);
-            mensagem = mensagem.Replace("{solicitacao.datahora}", solicitacao.DataSolicitacao.ToString("dd/MM/yyyy"));
-            mensagem = mensagem.Replace("{solicitacao.valor}", string.Format(new CultureInfo("pt-BR", true), "{0:c2}", solicitacaoValor));
-            mensagem = mensagem.Replace("{conta.saldo}", string.Format(new CultureInfo("pt-BR", true), "{0:c2}", contaSaldo));
-            mensagem = mensagem.Replace("{func.valordeposito}", string.Format(new CultureInfo("pt-BR", true), "{0:c2}", valorDeposito < 0 ? 0 : valorDeposito));
-            mensagem = mensagem.Replace("{func.dataUltimaSolicitacao}", dataUltimaSolicitacao?.ToString("dd/MM/yyyy") ?? "Não há");
-            mensagem = mensagem.Replace("{solicitacao.tipo}", solicitacao.TipoSolicitacao == 1 ? "reembolso" : "adiantamento");
-
+            mensagem = mensagem.Replace("{faturamento.codigo}", faturamento.Id.ToString());
+            mensagem = mensagem.Replace("{faturamento.centrocusto}", faturamento.CentroCustoNome);
+            mensagem = mensagem.Replace("{faturamento.valor}", string.Format(new CultureInfo("pt-BR", true), "{0:c2}", faturamento.Valor));
+            mensagem = mensagem.Replace("{faturamento.dataPrimeiraDespesa}", faturamento.DataMenorDespesa.ToString("dd/MM/yyyy"));
+            mensagem = mensagem.Replace("{faturamento.dataUltimaDespesa}", faturamento.DataMaiorDespesa.ToString("dd/MM/yyyy"));
+            
             return mensagem;
         }
 
@@ -135,13 +154,14 @@ namespace wca.reembolso.application.Common
                 contaSaldo = GetContaSaldo(solicitacao.ColaboradorId);
             
             if (mensagem.IndexOf("{func.valordeposito}") > -1)
-                valorDeposito = solicitacao.ValorDespesa - contaSaldo;
+                valorDeposito = (solicitacao.Status == 1? solicitacao.ValorAdiantamento: solicitacao.ValorDespesa) - contaSaldo;
 
             if (mensagem.IndexOf("{func.dataUltimaSolicitacao}") > -1)
                 dataUltimaSolicitacao = GetDataUltimaSolicitacao(solicitacao.ColaboradorId, solicitacao.Id);
 
 
             mensagem = mensagem.Replace("{saudacao.dia}", GetSaudacaoDia());
+            mensagem = mensagem.Replace("{solicitacao.codigo}", solicitacao.Id.ToString());
             mensagem = mensagem.Replace("{colaborador.nome}", solicitacao.ColaboradorNome);
             mensagem = mensagem.Replace("{solicitacao.centrocusto}", solicitacao.CentroCustoNome);
             mensagem = mensagem.Replace("{solicitacao.datahora}", solicitacao.DataSolicitacao.ToString("dd/MM/yyyy"));

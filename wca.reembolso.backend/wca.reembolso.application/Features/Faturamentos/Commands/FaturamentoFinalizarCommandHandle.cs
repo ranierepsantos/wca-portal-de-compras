@@ -15,7 +15,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
         string NomeUsuario
     ) : IRequest<ErrorOr<bool>>;
 
-    public sealed class FaturamentoFinalizarCommandHandle : IRequestHandler<FaturamentoFinalizarCommand, ErrorOr<bool>>
+    internal sealed class FaturamentoFinalizarCommandHandle : IRequestHandler<FaturamentoFinalizarCommand, ErrorOr<bool>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;

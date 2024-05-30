@@ -52,4 +52,18 @@ namespace wca.reembolso.application.Features.Faturamentos.Common
         int CentroCustoId,
         decimal ValorDespesa
     );
+
+
+    public sealed class FaturamentoChatBot
+    {
+        public int Id { get; init; }
+        public DateTime DataCriacao { get; init; }
+        public string ClienteNome { get; init; }
+        public int Status { get; init; }
+        public decimal Valor { get; init; }
+        public string CentroCustoNome { get; init; }
+        public DateTime DataMenorDespesa { get; init; }
+        public DateTime DataMaiorDespesa { get; init; }
+    }
+
 }

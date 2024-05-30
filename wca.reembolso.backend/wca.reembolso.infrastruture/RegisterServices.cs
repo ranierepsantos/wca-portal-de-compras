@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using wca.reembolso.application.Contracts.NorgeChatBot;
+using wca.reembolso.application.Contracts.Integration.NorgeChatBot;
+using wca.reembolso.application.Contracts.Integration.WcaCompras;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.infrastruture.Context;
 using wca.reembolso.infrastruture.Integration.NorgeChatBot;
+using wca.reembolso.infrastruture.Integration.WcaCompras;
 using wca.reembolso.infrastruture.Persistence;
 
 namespace wca.reembolso.infrastruture
@@ -51,6 +53,7 @@ namespace wca.reembolso.infrastruture
 
             services.AddScoped<IRepositoryManager, RepositoryManager>();
             services.AddScoped<IIntegrationNorgeChatBot, IntegrationNorgeChatBot>();
+            services.AddScoped<IIntegrationWcaCompras, IntegrationWcaCompras>();
             
 
         }

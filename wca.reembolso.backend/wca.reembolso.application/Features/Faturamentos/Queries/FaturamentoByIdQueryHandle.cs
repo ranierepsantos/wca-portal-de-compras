@@ -3,6 +3,7 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Faturamentos.Common;
 
@@ -40,6 +41,8 @@ namespace wca.reembolso.application.Features.Faturamentos.Queries
                 _logger.LogError($"Faturamento não localizado!");
                 return Error.NotFound(description: $"Faturamento não localizado!");
             }
+
+            _logger.LogInformation($"FaturamentoChatBot\n {JsonSerializer.Serialize(_mapper.Map<FaturamentoChatBot>(dado))}");
 
             return _mapper.Map<FaturamentoResponse>(dado);
         }

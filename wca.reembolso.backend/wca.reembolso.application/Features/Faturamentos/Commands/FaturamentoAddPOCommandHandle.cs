@@ -18,7 +18,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
         string? DocumentoPO
     ) : IRequest<ErrorOr<bool>>;
 
-    public sealed class FaturamentoAddPOCommandHandle : IRequestHandler<FaturamentoAddPOCommand, ErrorOr<bool>>
+    internal sealed class FaturamentoAddPOCommandHandle : IRequestHandler<FaturamentoAddPOCommand, ErrorOr<bool>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;

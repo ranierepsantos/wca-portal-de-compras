@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
-using wca.reembolso.application.Contracts;
+using wca.reembolso.application.Contracts.Integration;
 using wca.reembolso.application.Contracts.Persistence;
 using wca.reembolso.application.Features.Notificacoes.Commands;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;

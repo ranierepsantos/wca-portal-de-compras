@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace wca.reembolso.application.Contracts.NorgeChatBot
+namespace wca.reembolso.application.Contracts.Integration.NorgeChatBot
 {
     public sealed class Message
     {
@@ -9,8 +9,8 @@ namespace wca.reembolso.application.Contracts.NorgeChatBot
 
         public Message(string number, string body)
         {
-            this.Number = number;
-            this.Body = body;
+            Number = number;
+            Body = body;
         }
     }
 

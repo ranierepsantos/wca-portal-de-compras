@@ -1,4 +1,4 @@
-﻿namespace wca.reembolso.application.Contracts.NorgeChatBot
+﻿namespace wca.reembolso.application.Contracts.Integration.NorgeChatBot
 {
     public interface IIntegrationNorgeChatBot
     {

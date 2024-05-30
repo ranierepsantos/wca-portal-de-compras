@@ -2,7 +2,7 @@
 using Refit;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using wca.reembolso.application.Contracts.NorgeChatBot;
+using wca.reembolso.application.Contracts.Integration.NorgeChatBot;
 
 namespace wca.reembolso.infrastruture.Integration.NorgeChatBot
 {

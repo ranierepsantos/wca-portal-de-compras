@@ -11,8 +11,8 @@ using wca.reembolso.application.Common;
 using wca.reembolso.application.Features.Notificacoes.Commands;
 using Microsoft.EntityFrameworkCore;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
-using wca.reembolso.application.Contracts.NorgeChatBot;
 using wca.reembolso.application.Contracts;
+using wca.reembolso.application.Contracts.Integration;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Commands
 {
