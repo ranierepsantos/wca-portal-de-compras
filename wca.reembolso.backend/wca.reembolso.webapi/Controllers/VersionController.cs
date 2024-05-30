@@ -7,7 +7,7 @@ namespace wca.reembolso.webapi.Controllers
         [HttpGet("GetVersion")]
         public IActionResult GetVersion()
         {
-            return Ok("1.4.10");
+            return Ok("1.4.11");
         }
     }
 }
