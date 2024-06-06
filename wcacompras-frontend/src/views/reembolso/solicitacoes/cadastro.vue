@@ -544,8 +544,8 @@ onMounted(async () => {
       let adiantamento = await solicitacaoStore.getByTipoAndUsuario(
         2,
         authStore.user.id,
-        [1, 2, 3, 4, 5]
-      );
+        [1, 2, 4, 5]
+      ); //removido o status 3- rejeitado da verifição pedido por Luciano em 05/06/2024
       if (adiantamento.length > 0) {
         swal.fire({
           toast: true,
