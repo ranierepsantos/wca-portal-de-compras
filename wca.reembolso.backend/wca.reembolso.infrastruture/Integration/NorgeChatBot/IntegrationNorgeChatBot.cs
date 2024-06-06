@@ -31,15 +31,27 @@ namespace wca.reembolso.infrastruture.Integration.NorgeChatBot
         public async Task<Response> Send(string number, string message)
         {
             //trazer somente números
-            if (_client is not null){
-                number = String.Join("", System.Text.RegularExpressions.Regex.Split(number, @"[^\d]"));
-            
-                Message _msg = new(number, message);
-                return await _client.SendMessage(_msg);
+            try
+            {
+                if (_client is not null)
+                {
+                    number = String.Join("", System.Text.RegularExpressions.Regex.Split(number, @"[^\d]"));
+
+                    Message _msg = new(number, message);
+                    var response = await _client.SendMessage(_msg);
+                    return response;
+                }
+                return new Response()
+                {
+                    Error = "Chatbot não configurado"
+                };
             }
-            return new Response(){
-                Error = "Chatbot não configurado"
-            };
+            catch (ApiException aex)
+            {
+                var response = await aex.GetContentAsAsync<Response>();
+                return response;
+            }
+            
         }
     }
 }
