@@ -44,7 +44,8 @@ namespace wca.compras.services
             {
                 var authUser = await _rm.UsuarioRepository.SelectByCondition(u => u.Email == login.Email && u.Ativo == true)
                                         .FirstOrDefaultAsync();
-                if (authUser == null || !BC.Verify(login.Password, authUser.Password))
+                
+                if (authUser == null || string.IsNullOrEmpty(authUser.Password) || !BC.Verify(login.Password, authUser.Password))
                 {
                     return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, "", null);
                 }

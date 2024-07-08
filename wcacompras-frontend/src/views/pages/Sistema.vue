@@ -20,18 +20,18 @@
               {{sistema.descricao}}
             </v-btn>
           </v-col>
-
-          <!-- <v-col cols="auto">
-            <v-btn :height="buttonHeight" min-width="164" @click="router.push({name: 'reembolso'})">
+          <v-col cols="auto">
+            <v-btn :height="buttonHeight" min-width="164" @click="logout()">
               <v-icon
-                icon="mdi-account-cash-outline"
+                icon="mdi-export"
                 size="x-large"
                 color="purple-darken-2"
                 style="margin-right: 5px"
               ></v-icon>
-              Reembolso
+              Sair
             </v-btn>
-          </v-col> -->
+          </v-col>
+          
         </v-row>
       </v-col>
     </v-col>
@@ -58,7 +58,10 @@ onBeforeMount (() => {
 }) 
 
 //FUNCTIONS
-
+function logout() {
+  authStore.finishSession();
+  router.push({ name: "login" });
+}
 </script>
 
 <style scoped>

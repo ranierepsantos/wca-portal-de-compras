@@ -15,6 +15,9 @@ namespace wca.compras.domain.Dtos
         string UF,
         bool Ativo,
         int FilialId,
+        decimal ValorFrete,
+        decimal ValorCompraMinimoSemFrete,
+        decimal TaxaGestaoMinimaPercentual,
         IList<FornecedorContatoDto> FornecedorContatos
     );
 
@@ -33,6 +36,9 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
+        decimal ValorFrete,
+        decimal ValorCompraMinimoSemFrete,
+        decimal TaxaGestaoMinimaPercentual,
         IList<FornecedorContatoDto> FornecedorContatos
     );
 
@@ -53,6 +59,9 @@ namespace wca.compras.domain.Dtos
         bool Ativo,
         [Required(ErrorMessage = "O campo é obrigatório!")]
         int FilialId,
+        decimal ValorFrete,
+        decimal ValorCompraMinimoSemFrete,
+        decimal TaxaGestaoMinimaPercentual,
         IList<FornecedorContatoDto> FornecedorContatos
     );
 

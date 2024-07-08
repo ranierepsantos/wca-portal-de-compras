@@ -7,30 +7,30 @@
           Valor Máximo Pedido
         </span>
         <v-progress-linear
-                  :color="
-                    (parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao) *  100 > 100
-                      ? 'red'
-                      : (parseFloat(valorTotalPedido) /
-                          cliente.valorLimiteRequisicao) *
-                          100 >
-                        60
-                      ? 'warning'
-                      : 'success'
-                  "
-                  :model-value="valorTotalPedido"
-                  :max="cliente.valorLimiteRequisicao"
-                  :height="7"
-                  title="Valor Máximo Pedido"
-                >
-                </v-progress-linear>
-                <span style="font-size: 11px" class="text-grey">
-                  {{ formatToCurrencyBRL(valorTotalPedido) }} /
-                  {{
-                    formatToCurrencyBRL(
-                      cliente.valorLimiteRequisicao.toFixed(2)
-                    )
-                  }}
-                </span>
+          :color="
+            (parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao) *  100 > 100
+              ? 'red'
+              : (parseFloat(valorTotalPedido) /
+                  cliente.valorLimiteRequisicao) *
+                  100 >
+                60
+              ? 'warning'
+              : 'success'
+          "
+          :model-value="valorTotalPedido"
+          :max="cliente.valorLimiteRequisicao"
+          :height="7"
+          title="Valor Máximo Pedido"
+        >
+        </v-progress-linear>
+        <span style="font-size: 11px" class="text-grey">
+          {{ formatToCurrencyBRL(valorTotalPedido) }} /
+          {{
+            formatToCurrencyBRL(
+              cliente.valorLimiteRequisicao.toFixed(2)
+            )
+          }}
+        </span>
       </v-col>
       <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
         <span style="font-size: 11px" class="text-grey text-left">{{
@@ -56,9 +56,38 @@
           }}</span
         >
       </v-col>
-      <v-col cols="2">
-        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxas</span><br/>
-        <span style="font-size: 14px" class="text-center">{{formatToCurrencyBRL(valorTotalPedidoSemTaxa)}}</span>
+      <v-col>
+        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete</span><br/>
+        <v-progress-linear
+          :color="TaxaGestaoMenosFreteColor"
+          :model-value="valorTotalPedidoSemTaxa"
+          :max="fornecedor.valorCompraMinimoSemFrete"
+          :height="7"
+          title="Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete"
+        ></v-progress-linear>
+        <span style="font-size: 11px" class="text-grey">
+          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }} /
+          {{ formatToCurrencyBRL(fornecedor.valorCompraMinimoSemFrete) }} /
+          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa < fornecedor.valorCompraMinimoSemFrete ? fornecedor.valorFrete: 0) }}
+        </span>
+      </v-col>
+    </v-row>
+  </v-app-bar>
+  <v-app-bar :height="orcamento!=null ? 45: 0">
+    <v-row>  
+      <v-col>
+        <v-table >
+          <tbody>
+              <tr>
+                <td>Total Pedido: {{ formatToCurrencyBRL(valorTotalPedido) }}</td>
+                <td>Total S/Taxas: {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }}</td>
+                <td>Tx. Gestão :{{ formatToCurrencyBRL(requisicao.taxaGestao) }}</td>
+                <td>Frete: {{ formatToCurrencyBRL(requisicao.valorFrete) }}</td>
+                <td>Tx. Gestão - Frete: <span :class="'text-' + TaxaGestaoMenosFreteColor">{{ formatToCurrencyBRL(TaxaGestaoMenosFrete) }}</span></td>
+                <td>Tx. Gestão Miníma: {{ formatToCurrencyBRL(TaxaGestaoMinima) }}</td>
+              </tr>
+          </tbody>
+    </v-table>
       </v-col>
     </v-row>
   </v-app-bar>
@@ -484,6 +513,7 @@ const requisicao = ref({
   fornecedorId: null,
   valorTotal: 0,
   taxaGestao: 0,
+  valorFrete: 0,
   destino: 0,
   UsuarioId: null,
   NomeUsuario: null,
@@ -509,6 +539,13 @@ const requisicao = ref({
 const clientes = ref([]);
 const filterFilial = ref(null);
 const fornecedores = ref([]);
+const fornecedor = ref({
+  text: "",
+  value: 0,
+  valorCompraMinimoSemFrete: 0,
+  valorFrete : 0,
+  taxaGestaoMinimaPercentual: 0
+})
 const destinos = ref([
   { value: 0, text: "Outros" },
   { value: 1, text: "Diretoria" },
@@ -543,6 +580,7 @@ watch(() => filterFilial.value, async (novoValor) => {
   clientes.value = []
   requisicao.value.clienteId = null
   requisicao.value.fornecedorId = null
+  clearFornecedor()
     
   await getClienteListByUser(novoValor ? [novoValor]: [])
   
@@ -554,7 +592,12 @@ watch(
   async (fornecedorId) => {
     requisicao.value.requisicaoItens = [];
     produtos.value = []
-    if (fornecedorId)  await getProdutosToList(fornecedorId);
+    clearFornecedor()
+    if (fornecedorId)  
+    {
+      fornecedor.value = fornecedores.value.find(p => p.value == fornecedorId);
+      await getProdutosToList(fornecedorId);
+    }
   }
 );
 
@@ -575,6 +618,7 @@ watch(
     requisicao.value.uf = ""
     requisicao.value.filialId = null
     orcamento.value = null
+    clearFornecedor()
     if (cliente.value.id) {
         await getFornecedorToList([cliente.value.filialId])
         
@@ -622,6 +666,31 @@ const localEntrega = computed(() => {
   return localEntrega;
 });
 
+const PedidoValorFrete = computed(() =>  {
+  return valorTotalPedidoSemTaxa.value < fornecedor.value.valorCompraMinimoSemFrete ? fornecedor.value.valorFrete: 0
+})
+
+const TaxaGestaoMinima = computed(() =>  {
+  let _taxaGestaoMinima = 0;
+  _taxaGestaoMinima = requisicao.value.taxaGestao * (fornecedor.value.taxaGestaoMinimaPercentual /100)
+  return parseFloat(_taxaGestaoMinima.toFixed(2))
+})
+
+const TaxaGestaoMenosFrete = computed(() =>  {
+  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
+  return parseFloat(_valortaxaGestaoFinal.toFixed(2))
+})
+
+const TaxaGestaoMenosFreteColor = computed(() =>  {
+  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
+  if (_valortaxaGestaoFinal < 0) 
+    return 'red'
+  else if (_valortaxaGestaoFinal < TaxaGestaoMinima.value)
+    return 'orange'
+  else 
+    return 'green'
+})
+
 const valorTotalPedido = computed(() => {
   if (requisicao.value.requisicaoItens.length == 0) return 0;
 
@@ -631,17 +700,28 @@ const valorTotalPedido = computed(() => {
   let valorIcms = 0;
 
   produtos.forEach((produto) => {
-    valorTotal +=
-      produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
-    valorTaxaGestao += produto.quantidade * produto.taxaGestao;
-    valorIcms +=
-      produto.quantidade *
-      parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
+    let produtoValor = produto.quantidade * parseFloat(retornarValorTotalProduto(produto))
+    let produtoTaxaGestao = produto.quantidade * parseFloat(produto.taxaGestao);
+    let produtoIcms = produto.quantidade * parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
+    valorTotal += produtoValor - produtoTaxaGestao
+    valorTaxaGestao += produtoTaxaGestao
+    valorIcms += produtoIcms;
+
+    console.debug("totais:", {
+      'produtovalor': produtoValor,
+      'produtoTaxaGestao': produtoTaxaGestao,
+      'produtoIcms': produtoIcms,
+      'valorTotal': valorTotal
+    })
+
   });
-  valorTotal = valorTotal.toFixed(2);
+  valorTotal = parseFloat(valorTotal.toFixed(2))
+             + parseFloat(PedidoValorFrete.value.toFixed(2))
+             + parseFloat(valorTaxaGestao.toFixed(2));
   requisicao.value.valorIcms = parseFloat(valorIcms.toFixed(2));
   requisicao.value.valorTotal = parseFloat(valorTotal);
   requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2));
+  requisicao.value.valorFrete = parseFloat(PedidoValorFrete.value.toFixed(2));
 
   return requisicao.value.valorTotal.toFixed(2);
 });
@@ -654,7 +734,7 @@ const valorTotalPedidoSemTaxa = computed(() => {
   
   produtos.forEach((produto) => {
     valorTotal +=
-      produto.quantidade * parseFloat(produto.valor);
+      produto.quantidade * parseFloat(produto.valor.toFixed(2));
   });
   valorTotal = valorTotal.toFixed(2);
   
@@ -664,6 +744,15 @@ const valorTotalPedidoSemTaxa = computed(() => {
 
 
 //METHODS
+function clearFornecedor () {
+ fornecedor.value = {
+    text: "",
+    value: 0,
+    valorCompraMinimoSemFrete: 0,
+    valorFrete : 0,
+    taxaGestaoMinimaPercentual: 0
+  }
+}
 
 function adicionarProdutoRequisicao(item) {
   let index = requisicao.value.requisicaoItens.findIndex(
@@ -847,6 +936,16 @@ async function salvar() {
     let { valid } = await formCadastro.value.validate();
     hasProduto.value = requisicao.value.requisicaoItens.length > 0;
 
+    //validar se taxa de gestão é maior q 0, isto é impeditivo
+    if (TaxaGestaoMenosFrete.value < 0) {
+      valid = false;
+      swal.fire({
+            icon: "error",
+            title: "Atenção",
+            text: "Pedido com taxa de gestão negativa, favor revisar o pedido!",
+          })
+    }
+
     if (valid && hasProduto.value) {
       let data = { ...requisicao.value };
       //remover o campo id da requisicaoItens
@@ -867,18 +966,20 @@ async function salvar() {
       // verificar se ultrassou o limite estabelecido para o cliente
       if (
         cliente.value.naoUltrapassarLimitePorRequisicao &&
-        parseFloat(cliente.value.valorLimiteRequisicao) <
-          parseFloat(valorTotalPedido.value)
+        parseFloat(cliente.value.valorLimiteRequisicao) < parseFloat(valorTotalPedido.value)
       ) {
         data.requerAutorizacaoWCA = true;
       }
 
+      if (TaxaGestaoMenosFreteColor.value == 'orange')
+        data.requerAutorizacaoWCA = true; 
+      
       if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
         if (!authStore.hasPermissao("aprova_requisicao")) {
           let result = await swal.fire({
             icon: "warning",
             title: "Atenção",
-            text: "O pedido excedeu limites configurados, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
+            text: "O pedido não atendeu todos os requisitos, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
             confirmButtonText: "Estou ciente",
             focusConfirm: false,
             cancelButtonText: "Cancelar",

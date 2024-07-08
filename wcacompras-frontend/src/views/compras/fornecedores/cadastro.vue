@@ -74,6 +74,30 @@
                                 </v-text-field>
                             </v-col>
                         </v-row>
+                        <!--VALOR MINIMO PEDIDO / FRETE / TAXA GESTÃO MINIMA -->
+                        <v-row>
+                            <v-col>
+                                <h3 class="text-left text-grey">Configurações de Frete</h3>
+                            </v-col>
+                        </v-row>
+                        <br/>
+                        <v-row>
+                            <v-col>
+                                <v-text-field-money label-text="Valor Minímo Pedido" v-model="fornecedor.valorCompraMinimoSemFrete" color="primary"
+                                    :number-decimal="2" prefix="R$"></v-text-field-money>
+                            </v-col>
+
+                            <v-col>
+                                <v-text-field-money label-text="Valor Frete" v-model="fornecedor.valorFrete"
+                                    color="primary" :number-decimal="2" prefix="R$"></v-text-field-money>
+                            </v-col>
+                            <v-col>
+                                <v-text-field-money label-text="Taxa Gestão Miníma (%)" v-model="fornecedor.taxaGestaoMinimaPercentual"
+                                    color="primary" :number-decimal="2" sufix="%"
+                                    :rules="[(v) => parseFloat(v) < 100 || 'O percentual deve ser no máximo 99.99%']"
+                                    ></v-text-field-money>
+                            </v-col>
+                        </v-row>
                         <!-- CONTATOS -->
                         <v-row>
                             <v-col>
@@ -197,6 +221,7 @@ import handleErrors from "@/helpers/HandleErrors"
 import fornecedorService from '@/services/fornecedor.service';
 import filialService from "@/services/filial.service";
 import { mask } from "maska"
+import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 
 // VARIABLES
 const authStore = useAuthStore()
@@ -219,6 +244,9 @@ const fornecedor = ref({
     uf: "",
     ativo: true,
     filialId: null,
+    valorCompraMinimoSemFrete: 0,
+    valorFrete: 0,
+    taxaGestaoMinimaPercentual: 0,
     fornecedorContatos: []
 });
 const fornecedorContato = ref({

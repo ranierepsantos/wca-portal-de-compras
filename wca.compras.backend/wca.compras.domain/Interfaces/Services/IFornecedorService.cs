@@ -10,7 +10,7 @@ namespace wca.compras.domain.Interfaces.Services
         public Task<bool> Remove(int id);
         public Task<FornecedorDto> GetById(int id);
         public Pagination<FornecedorDto> Paginate(int[]? filialId, int page = 1, int pageSize = 10, string termo = "");
-        public Task<IList<ListItem>> GetToList(int[] filialId);
+        public Task<IList<ListItemFornecedor>> GetToList(int[] filialId);
         public Task<ProdutoDto> CreateProduto(CreateProdutoDto createProdutoDto);
         public Task<ProdutoDto> GetProdutoById(int fornecedorId, int id);
         public Task<ProdutoDto> UpdateProduto(UpdateProdutoDto updateProdutoDto);

@@ -102,7 +102,7 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<IList<ListItem>> GetToList(int[] filialId)
+        public async Task<IList<ListItemFornecedor>> GetToList(int[] filialId)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace wca.compras.services
 
                 var itens = await query.OrderBy(p => p.Nome).ToListAsync(); ;
 
-                return _mapper.Map<IList<ListItem>>(itens);
+                return _mapper.Map<IList<ListItemFornecedor>>(itens);
             }
             catch (Exception ex)
             {

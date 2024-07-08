@@ -203,6 +203,8 @@ namespace wca.compras.services
                 decimal requisicaoValorTotal = 0;
                 decimal requisicaoTaxaGestao = 0;
                 decimal requisicaoValorIcms = 0;
+                decimal requisicaoValorFrete = 0;
+                decimal requisicaoTaxaGestaoCobrada = 0;
 
                 // montar a lista de produtos
                 List<RequisicaoItemDto> produtos = new List<RequisicaoItemDto>();
@@ -239,7 +241,7 @@ namespace wca.compras.services
                 {
                     try
                     {
-                        var pedido = new CreateRequisicaoDto(item.FilialId, item.ClienteId, item.FornecedorId, requisicaoValorTotal, requisicaoTaxaGestao, item.Destino,
+                        var pedido = new CreateRequisicaoDto(item.FilialId, item.ClienteId, item.FornecedorId, requisicaoValorTotal, requisicaoTaxaGestao,requisicaoValorFrete, item.Destino,
                                                              item.Endereco,item.Numero,item.Cep,item.Cidade, item.UF, item.UsuarioId, item.Usuario.Nome, produtos, false, false, requisicaoValorIcms ,item.PeriodoEntrega);
 
                         var requisicao = await requisicaoService.Create(pedido, item.UrlOrigin);
