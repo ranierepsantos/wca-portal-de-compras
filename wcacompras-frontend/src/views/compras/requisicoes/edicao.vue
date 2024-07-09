@@ -491,9 +491,9 @@
                     <td class="text-right">ICMS:</td>
                     <td class="text-right">{{ formatToCurrencyBRL(requisicao.valorIcms) }}</td>
                     -->
-              <td colspan="8" class="text-right">TOTAL PEDIDO:</td>
+              <td colspan="8" class="text-right">TOTAL ITENS:</td>
               <td class="text-right">
-                {{ formatToCurrencyBRL(valorTotalPedido) }}
+                {{ formatToCurrencyBRL(valorTotalPedido - PedidoValorFrete) }}
               </td>
               <td></td>
             </tr>
@@ -848,14 +848,6 @@ const valorTotalPedido = computed(() => {
     valorTotal += produtoValor - produtoTaxaGestao
     valorTaxaGestao += produtoTaxaGestao
     valorIcms += produtoIcms;
-
-    console.debug("totais:", {
-      'produtovalor': produtoValor,
-      'produtoTaxaGestao': produtoTaxaGestao,
-      'produtoIcms': produtoIcms,
-      'valorTotal': valorTotal
-    })
-
   });
   valorTotal = parseFloat(valorTotal.toFixed(2))
              + parseFloat(PedidoValorFrete.value.toFixed(2))
