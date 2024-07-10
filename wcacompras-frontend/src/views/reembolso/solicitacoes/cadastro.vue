@@ -14,51 +14,30 @@
       :height="5"
       v-if="isBusy"
     ></v-progress-linear>
-    <v-container class="justify-center" v-else>
+    <v-container ref="content" id = "pdfArea" class="justify-center" v-else>
       <v-card>
         <v-card-text>
           <v-form>
             <v-row>
               <v-col cols="6">
-                <v-select
-                  label="Cliente"
-                  :items="clientes"
-                  density="compact"
-                  item-title="nome"
-                  item-value="id"
-                  variant="outlined"
-                  color="primary"
+                <select-text
                   v-model="solicitacao.clienteId"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  v-if="solicitacao.id == 0"
-                ></v-select>
-                <v-text-field
-                  label="Cliente"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  v-model="solicitacao.cliente.nome"
-                  :readonly="true"
-                  bg-color="#f2f2f2"
-                  v-else
-                ></v-text-field>
+                  :combo-items="clientes"
+                  combo-item-value="id"
+                  combo-item-title="nome"
+                  :select-mode="solicitacao.id == 0"
+                  :text-field-value="solicitacao.cliente.nome"
+                  label-text="Cliente"
+                ></select-text>
               </v-col>
               <v-col>
-                <v-select
-                  label="Tipo Solicitação"
-                  :items="solicitacaoStore.tipoSolicitacao"
-                  density="compact"
-                  item-title="text"
-                  item-value="value"
-                  variant="outlined"
-                  color="primary"
+                <select-text
                   v-model="solicitacao.tipoSolicitacao"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  :readonly="solicitacao.id > 0"
-                  :bg-color="solicitacao.id > 0 ? '#f2f2f2' : ''"
-                ></v-select>
+                  :combo-items="solicitacaoStore.tipoSolicitacao"
+                  :select-mode="solicitacao.id == 0"
+                  :text-field-value="solicitacao.id == 0 ? '' : solicitacaoStore.tipoSolicitacao.find(p => p.value == solicitacao.tipoSolicitacao ).text"
+                  label-text="Tipo Solicitação"
+                ></select-text>
               </v-col>
               <v-col v-show="solicitacao.id > 0">
                 <v-btn
@@ -412,8 +391,8 @@
 <script setup>
 import breadCrumbs from "@/components/breadcrumbs.vue";
 import registrarPagamentoForm from "@/components/reembolso/registrarPagamentoForm.vue";
-
-import { ref, inject, onMounted } from "vue";
+import selectText from "@/components/selectText.vue";
+import { ref, inject, onMounted, watch } from "vue";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import DespesaForm from "@/components/reembolso/despesaForm.vue";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
@@ -439,7 +418,6 @@ import { computed } from "vue";
 import { compararValor } from "@/helpers/functions";
 import historico from "@/components/reembolso/historico.vue";
 import { Transacao, useContaStore } from "@/store/reembolso/conta.store";
-import { watch } from "vue";
 
 const authStore = useAuthStore();
 const clienteStore = useClienteStore();
@@ -458,6 +436,7 @@ const swal = inject("$swal");
 const solicitacao = ref(new Solicitacao());
 const despesa = ref(new Despesa());
 const despesaTipos = ref([]);
+const content = ref(null);
 
 const formButtons = ref([]);
 const usuario = ref(new Usuario());
@@ -1098,23 +1077,28 @@ async function retornaUsuariosParaNotificar(status) {
 async function baixarComprovantes() {
   try {
     isDownload.value = true;
-    if (solicitacao.value.id > 0) {
-      let response = await solicitacaoStore.getDespesasToZipFile(
-        solicitacao.value.id
-      );
-      console.log("baixar->", response);
+    const routeData = router.resolve({name: 'reembolsoSolicitacaoPdf', query: {id: solicitacao.value.id}});
+    window.open(routeData.href, '_blank');
 
-      if (response.status == 200) {
-        let nomeArquivo = `comprovantes_solicitacao_${solicitacao.value.id}.zip`;
-        await new Promise((r) => setTimeout(r, 2000));
-        realizarDownload(
-          response,
-          nomeArquivo,
-          response.headers.getContentType()
-        );
-      }
-    }
+
+    // if (solicitacao.value.id > 0) {
+    //   let response = await solicitacaoStore.getDespesasToZipFile(
+    //     solicitacao.value.id
+    //   );
+    //   console.log("baixar->", response);
+
+    //   if (response.status == 200) {
+    //     let nomeArquivo = `comprovantes_solicitacao_${solicitacao.value.id}.zip`;
+    //     await new Promise((r) => setTimeout(r, 2000));
+    //     realizarDownload(
+    //       response,
+    //       nomeArquivo,
+    //       response.headers.getContentType()
+    //     );
+    //   }
+    // }
   } catch (error) {
+    console.error(error);
     handleErrors(error, error.response.status == 404 ? "Não há comprovantes anexos!": null);
   } finally {
     isDownload.value = false;
