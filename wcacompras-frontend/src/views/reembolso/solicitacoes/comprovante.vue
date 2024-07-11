@@ -28,7 +28,7 @@
       :height="5"
       v-if="isBusy"
     ></v-progress-linear>
-    <v-container id = "pdfArea" class="justify-center" ref="mytest" v-else>
+    <v-container id = "pdfArea" class="justify-center" style="max-width: 1024px;" ref="mytest" v-else>
       
           <v-form>
             <v-row>
@@ -199,7 +199,7 @@ import { ref, onMounted} from "vue";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
-import { formatToCurrencyBRL } from "@/helpers/functions";
+import { base64ToArrayBuffer, formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import {
   Usuario,
@@ -309,18 +309,15 @@ async function baixarComprovantes() {
         widthProporcao = 1.8
         heightProporcao = 3.3
       }
-        
+      let arrCanvas = null;
 	    await html2canvas(mytest.value.$el, {
         width: width * widthProporcao,
         height: height * heightProporcao
       }).then((canvas) => {
         const img = canvas.toDataURL("image/png");
-        //arrCanvas = base64ToArrayBuffer(img)
-        doc.addImage(img, "PNG",40, 10, width, height);
-        //doc.save("jspdf_html2canvas.pdf");
-        
+        doc.addImage(img, "PNG",20, 10, width, height);
       })
-      //doc.save("jspdf_html2canvas.pdf");
+      //doc.save("jspdf_html2canvas_" +  new Date().toLocaleDateString() + ".pdf");
       arrCapa = doc.output('arraybuffer');
 
       let pdfDoc = await PDFDocument.create();
