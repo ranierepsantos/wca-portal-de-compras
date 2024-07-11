@@ -199,7 +199,7 @@ import { ref, onMounted} from "vue";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
-import { formatToCurrencyBRL, realizarDownload, base64ToArrayBuffer } from "@/helpers/functions";
+import { formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import {
   Usuario,
@@ -212,7 +212,6 @@ import {
 import moment from "moment";
 import { useRoute } from "vue-router";
 import { useDespesaTipoStore } from "@/store/reembolso/despesaTipo.store";
-import { computed } from "vue";
 import { compararValor } from "@/helpers/functions";
 import jsPDF from "jspdf";
 import html2canvas from 'html2canvas';
