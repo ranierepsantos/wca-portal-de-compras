@@ -32,6 +32,14 @@ namespace wca.share.infrastruture.Context
         public DbSet<UsuarioConfiguracoes>  UsuarioConfiguracoes { get; set; }
         public DbSet<SolicitacaoFerias> SolicitacaoFerias { get; set; }
         public DbSet<TipoFerias> TipoFerias { get; set; }
+        public DbSet<DocumentoComplementar> DocumentoComplementares { get; set; }
+        public DbSet<Escala> Escalas { get; set; }
+        public DbSet<Funcao> Funcoes { get; set; }
+        public DbSet<Gestor> Gestores { get; set; }
+        public DbSet<Horario> Horarios { get; set; }
+        public DbSet<TipoContrato> TiposContrato { get; set; }
+
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
