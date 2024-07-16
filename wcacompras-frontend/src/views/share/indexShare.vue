@@ -157,6 +157,37 @@ const menuItems = ref([
     route: "/share/assuntos",
     permissao: "assunto"
   },
+  {
+    title: "Docs. Complementares",
+    value: 11,
+    route: "/share/documentoscomplementares",
+    permissao: "livre"
+  },
+  {
+    title: "Escalas",
+    value: 12,
+    route: "/share/escalas",
+    permissao: "livre"
+  },
+  {
+    title: "Gestores",
+    value: 13,
+    route: "/share/gestores",
+    permissao: "livre"
+  },
+  {
+    title: "Horários",
+    value: 14,
+    route: "/share/horarios",
+    permissao: "livre"
+  },
+  {
+    title: "Tipos de Contrato",
+    value: 15,
+    route: "/share/tiposcontrato",
+    permissao: "livre"
+  },
+  
 ]);
 
 const authStore = useAuthStore();

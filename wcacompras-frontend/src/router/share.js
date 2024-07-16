@@ -231,5 +231,47 @@ export const share = {
         component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/edit'),
         props: route => ({ query: route.query.id })
       },
+      {
+        path: 'documentoscomplementares',
+        name: 'shareDocumentosComplementares',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
+        path: 'escalas',
+        name: 'shareEscalas',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
+        path: 'funcoes',
+        name: 'shareFuncoes',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
+        path: 'gestores',
+        name: 'shareGestores',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
+        path: 'horarios',
+        name: 'shareHorarios',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
+        path: 'tiposcontrato',
+        name: 'shareTiposContrato',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
     ]
 }
