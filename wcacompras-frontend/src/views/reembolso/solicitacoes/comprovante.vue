@@ -29,123 +29,130 @@
       v-if="isBusy"
     ></v-progress-linear>
     <v-container id = "pdfArea" class="justify-center" style="max-width: 1024px;" ref="mytest" v-else>
-      
-          <v-form>
-            <v-row>
-              <v-col>
-                <h3>SOLICITAÇÃO # {{ solicitacao.id }}</h3>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-text-field
-                  label="Cliente"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.cliente.nome"
-                  :readonly="true"
-                ></v-text-field>
-                
-              </v-col>
-              <v-col cols="4">
-                <select-text
+          <div id="solicitacao">
+            <v-form>
+              <v-row>
+                <v-col>
+                  <h3>SOLICITAÇÃO # {{ solicitacao.id }}</h3>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Cliente"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.cliente.nome"
+                    :readonly="true"
+                  ></v-text-field>
                   
-                  v-model="solicitacao.tipoSolicitacao"
-                  :combo-items="solicitacaoStore.tipoSolicitacao"
-                  :select-mode="false"
-                  :text-field-value="solicitacao.id == 0 ? '' : solicitacaoStore.tipoSolicitacao.find(p => p.value == solicitacao.tipoSolicitacao ).text"
-                  label-text="Tipo Solicitação"
-                ></select-text>
-              </v-col>
-            </v-row>
+                </v-col>
+                <v-col cols="4">
+                  <select-text
+                    
+                    v-model="solicitacao.tipoSolicitacao"
+                    :combo-items="solicitacaoStore.tipoSolicitacao"
+                    :select-mode="false"
+                    :text-field-value="solicitacao.id == 0 ? '' : solicitacaoStore.tipoSolicitacao.find(p => p.value == solicitacao.tipoSolicitacao ).text"
+                    label-text="Tipo Solicitação"
+                  ></select-text>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Centro de Custo"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.centroCustoNome"
+                    :readonly="true"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Colaborador"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    :rules="[(v) => !!v || 'Campo obrigatório']"
+                    v-model="solicitacao.colaboradorNome"
+                    :readonly="true"
+                  ></v-text-field>
+                </v-col>
+                <v-col>
+                  <v-text-field
+                    label="Cargo"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.colaboradorCargo"
+                    :readonly="true"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="6">
+                  <v-text-field
+                    label="Objetivo Solicitação"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.objetivo"
+                    :readonly="true"
+                  ></v-text-field>
+                </v-col>
+                <v-col>
+                  <v-text-field
+                    label="Período Inicial"
+                    type="date"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.periodoInicial"
+                    :readonly="true"
+                  ></v-text-field>
+                </v-col>
+                <v-col>
+                  <v-text-field
+                    label="Período Final"
+                    type="date"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.periodoFinal"
+                    :readonly="true"
+                    
+                  ></v-text-field>
+                </v-col>
+                <v-col v-show="solicitacao.tipoSolicitacao == 2">
+                  <v-text-field-money
+                    label-text="Valor Solicitação"
+                    v-model="solicitacao.valorAdiantamento"
+                    color="primary"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="true"
+                  ></v-text-field-money>
+                </v-col>
+              </v-row>
+            </v-form>
+          </div>
+          <div id="despesas">
             <v-row>
-              <v-col>
-                <v-text-field
-                  label="Centro de Custo"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.centroCustoNome"
-                  :readonly="true"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-text-field
-                  label="Colaborador"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  v-model="solicitacao.colaboradorNome"
-                  :readonly="true"
-                ></v-text-field>
-              </v-col>
-              <v-col>
-                <v-text-field
-                  label="Cargo"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.colaboradorCargo"
-                  :readonly="true"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <v-text-field
-                  label="Objetivo Solicitação"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.objetivo"
-                  :readonly="true"
-                ></v-text-field>
-              </v-col>
-              <v-col>
-                <v-text-field
-                  label="Período Inicial"
-                  type="date"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.periodoInicial"
-                  :readonly="true"
-                ></v-text-field>
-              </v-col>
-              <v-col>
-                <v-text-field
-                  label="Período Final"
-                  type="date"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.periodoFinal"
-                  :readonly="true"
-                  
-                ></v-text-field>
-              </v-col>
-              <v-col v-show="solicitacao.tipoSolicitacao == 2">
-                <v-text-field-money
-                  label-text="Valor Solicitação"
-                  v-model="solicitacao.valorAdiantamento"
-                  color="primary"
-                  :number-decimal="2"
-                  prefix="R$"
-                  :readonly="true"
-                ></v-text-field-money>
-              </v-col>
-            </v-row>
-          </v-form>
-          <v-table>
+                <v-col>
+                  <h3>DESPESAS DA SOLICITAÇÃO</h3>
+                </v-col>
+              </v-row>
+            <v-table>
             <thead>
               <tr>
                 <th class="text-center text-grey">DATA</th>
@@ -188,7 +195,20 @@
                 </td>
               </tr>
             </tfoot>
-          </v-table>
+            </v-table>
+          </div>
+          <div id="historico">
+            <!-- HISTORICO DA SOLICITAÇÃO -->
+            <historico
+              :eventos="
+                solicitacao.solicitacaoHistorico.sort(
+                  compararValor('dataEvento', 'desc')
+                )
+              "
+              style="margin-top: 15px"
+              v-show="solicitacao.id != 0"
+            />
+          </div>
     </v-container>
   </div>
 </template>
@@ -216,6 +236,8 @@ import { compararValor } from "@/helpers/functions";
 import jsPDF from "jspdf";
 import html2canvas from 'html2canvas';
 import { PDFDocument } from "pdf-lib";
+import historico from "@/components/reembolso/historico.vue";
+
 
 
 const authStore = useAuthStore();
@@ -293,11 +315,12 @@ async function baixarComprovantes() {
         format: 'a4',
         hotfixes: ['px_scaling'],
       });
+    
       let arrCapa = null;
       let width = doc.internal.pageSize.getWidth();
       let height = doc.internal.pageSize.getHeight();
 		//1.8,1.6
-      let widthProporcao = 1.8
+      let widthProporcao = 1.6
       let heightProporcao = 1.6
 
       if (solicitacao.value.despesa.length > 25 && solicitacao.value.despesa.length< 50){
@@ -310,13 +333,39 @@ async function baixarComprovantes() {
         heightProporcao = 3.3
       }
       let arrCanvas = null;
-	    await html2canvas(mytest.value.$el, {
-        width: width * widthProporcao,
-        height: height * heightProporcao
-      }).then((canvas) => {
-        const img = canvas.toDataURL("image/png");
-        doc.addImage(img, "PNG",20, 10, width, height);
+      
+	    await html2canvas(document.getElementById("solicitacao")).then((canvas) => {
+        let img = canvas.toDataURL("image/png");
+        const imgProps= doc.getImageProperties(img);
+        const pdfWidth = width * 0.85;
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        // doc.addPage();
+        doc.addImage(img, "PNG",35, 50, pdfWidth, pdfHeight);
+        // doc.addImage(img, "PNG",20, 10, width, height);
       })
+
+      await html2canvas(document.getElementById("despesas"))
+      .then((canvas) => {
+        let img = canvas.toDataURL("image/png");
+        const imgProps= doc.getImageProperties(img);
+        const pdfWidth = width * 0.85;
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        doc.addPage();
+        doc.addImage(img, "PNG",35, 50, pdfWidth, pdfHeight);
+      })
+
+      await html2canvas(document.getElementById("historico")).then((canvas) => {
+        let img = canvas.toDataURL("image/png");
+        const imgProps= doc.getImageProperties(img);
+        const pdfWidth = width * 0.85;
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        doc.addPage();
+        doc.addImage(img, "PNG",35, 50, pdfWidth, pdfHeight);
+      })
+
       //doc.save("jspdf_html2canvas_" +  new Date().toLocaleDateString() + ".pdf");
       arrCapa = doc.output('arraybuffer');
 
