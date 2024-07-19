@@ -98,6 +98,9 @@
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">CENTRO DE CUSTO</th>
                     <th class="text-center text-grey">VALOR</th>
+                    <th class="text-center text-grey">NUM. DS</th>
+                    <th class="text-center text-grey">NUM. PO</th>
+                    <th class="text-center text-grey">NOTA FISCAL</th>
                     <th class="text-left text-grey">STATUS</th>
                     <th></th>
                 </tr>
@@ -109,16 +112,9 @@
                     <td class="text-left">{{ item.clienteNome }}</td>
                     <td class="text-left">{{ item.centroCustoNome }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
-                    <td class="text-left">
-                        <v-btn :color="faturamentoStore.getStatus(item.status).color" variant="tonal"
-                            density="compact" class="text-center"> {{
-                                faturamentoStore.getStatus(item.status).status
-                                +
-                                (item.status == 1 ? ` ${item.numeroDS ?? ''}`:"") +
-                                (item.status == 2 ? ` ${item.numeroPO ?? ''}`:"") +
-                                (item.status == 3 ? ` ${item.notaFiscal?? ''}`:"")
-                            }}</v-btn>    
-                    </td>
+                    <td class="text-left">{{ item.numeroDS }}</td>
+                    <td class="text-left">{{ item.numeroPO }}</td>
+                    <td class="text-left">{{ item.notaFiscal }}</td>
                     <td class="text-right">
                         <div class="text-center">
                             <v-menu open-on-hover>
@@ -160,7 +156,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="7">
+                    <td colspan="9">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
