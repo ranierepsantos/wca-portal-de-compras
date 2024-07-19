@@ -27,7 +27,7 @@ namespace wca.reembolso.domain.Entities
         [Column("valor", TypeName = "money")]
         public decimal Valor { get; set; }
 
-        [Column("numero_po", TypeName ="varchar(20)")]
+        [Column("numero_po", TypeName ="varchar(500)")]
         public string? NumeroPO { get; set; }
 
         [Column("documento_po", TypeName = "varchar(500)")]
@@ -36,7 +36,7 @@ namespace wca.reembolso.domain.Entities
         [Column("data_finalizacao", TypeName = "smalldatetime")]
         public DateTime? DataFinalizacao { get; set; } = null;
 
-        [Column("notaFiscal", TypeName = "varchar(20)")]
+        [Column("notaFiscal", TypeName = "varchar(500)")]
         public string? NotaFiscal { get; set; } = null;
 
         [Column("centrocusto_id")]
@@ -47,7 +47,7 @@ namespace wca.reembolso.domain.Entities
         [Column("data_chatbot_message", TypeName = "smalldatetime")]
         public DateTime? DataChatBotMessage { get; set; }
 
-        [Column("numero_ds", TypeName = "varchar(20)")]
+        [Column("numero_ds", TypeName = "varchar(500)")]
         public string? NumeroDS { get; set; } = null;
 
         public IList<FaturamentoItem> FaturamentoItem { get; set; } = new List<FaturamentoItem>();
