@@ -98,10 +98,11 @@
                     <th class="text-left text-grey">CLIENTE</th>
                     <th class="text-left text-grey">CENTRO DE CUSTO</th>
                     <th class="text-center text-grey">VALOR</th>
+                    <th class="text-left text-grey">STATUS</th>
                     <th class="text-center text-grey">NUM. DS</th>
                     <th class="text-center text-grey">NUM. PO</th>
                     <th class="text-center text-grey">NOTA FISCAL</th>
-                    <th class="text-left text-grey">STATUS</th>
+                    
                     <th></th>
                 </tr>
             </thead>
@@ -112,9 +113,16 @@
                     <td class="text-left">{{ item.clienteNome }}</td>
                     <td class="text-left">{{ item.centroCustoNome }}</td>
                     <td class="text-right">{{ formatToCurrencyBRL(item.valor) }}</td>
+                    <td class="text-left">
+                        <v-btn :color="faturamentoStore.getStatus(item.status).color" variant="tonal"
+                            density="compact" class="text-center"> {{
+                                faturamentoStore.getStatus(item.status).status
+                            }}</v-btn>    
+                    </td>
                     <td class="text-left">{{ item.numeroDS }}</td>
                     <td class="text-left">{{ item.numeroPO }}</td>
                     <td class="text-left">{{ item.notaFiscal }}</td>
+
                     <td class="text-right">
                         <div class="text-center">
                             <v-menu open-on-hover>

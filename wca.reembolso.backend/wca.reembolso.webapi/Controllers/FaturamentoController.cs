@@ -100,5 +100,16 @@ namespace wca.reembolso.webapi.Controllers
 
             return Ok(result.Value);
         }
+
+        [HttpPut("AlterarNumeroDS")]
+        public async Task<IActionResult> AlterarNumeroDS([FromBody] FaturamentoChangeNumeroDsCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
     }
 }

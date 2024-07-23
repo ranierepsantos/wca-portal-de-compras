@@ -8,7 +8,8 @@ const rotas = {
     GetById: "Faturamento?Id={Id}",
     AddPO: "Faturamento/AdicionarPO",
     Finalizar: "Faturamento/Finalizar",
-    ExportarParaExcel: "Faturamento/ExportarParaExcel"
+    ExportarParaExcel: "Faturamento/ExportarParaExcel",
+    AlterarNumeroDS:"Faturamento/AlterarNumeroDS"
 }
 
 
@@ -130,14 +131,12 @@ export const useFaturamentoStore = defineStore("faturamento", {
         return response.data;
     },
 
-    update (data) {
-        let index = this.repository.findIndex(q => q.id == data.id)
-        if (index == -1) {
-            return false;
-        }
-        this.repository[index] = {...data};
-        localStorage.setItem("reembolso-faturamento", JSON.stringify(this.repository))
-        return true;
+    async changeNumeroDS (data) {
+        try {
+            await api.put(rotas.AlterarNumeroDS, data);
+        } catch (error) {
+            throw error
+        }  
     },
 
     toComboList() {

@@ -8,6 +8,7 @@
       @salvar-click="salvar()"
       @view-po-click="visualizarPO()"
       @finalizar-click="finalizarDialog = true"
+      @salvar-ds-click="changeNumeroDS()"
     />
     <v-progress-linear
       color="primary"
@@ -539,6 +540,16 @@ onMounted(async () => {
         icon: "",
         event: "salvar-click",
       });
+    else if (faturamento.value.id > 0 &&  (authStore.hasPermissao("faturamento") && faturamento.value.status < 2))
+      formButtons.value.push({
+        text: "Salvar",
+        icon: "",
+        event: "salvar-ds-click",
+      });
+
+
+
+
   } catch (error) {
     handleErrors(error);
   } finally {
@@ -608,7 +619,7 @@ async function enviarPO() {
     data.status = status;
 
     await faturamentoStore.addPO(data);
-
+    //openAprovacaoForm.value = false;
     swal.fire({
       toast: true,
       icon: "success",
@@ -758,11 +769,11 @@ function getNomeCentroCusto(id) {
   return "";
 }
 
-function getNomeUsuario(id) {
-  let colaborador = usuarios.value.find((q) => q.value == id);
-  if (colaborador) return colaborador.text;
-  return "";
-}
+// function getNomeUsuario(id) {
+//   let colaborador = usuarios.value.find((q) => q.value == id);
+//   if (colaborador) return colaborador.text;
+//   return "";
+// }
 
 function visualizarSolicitacao(id) {
   let rota = router.resolve({
@@ -823,4 +834,38 @@ async function getUsuarioToNotificar(status) {
   }
   return notificar;
 }
+
+async function changeNumeroDS() {
+
+  try {
+    isLoading.value.busy = true;
+
+    let numeroDS = faturamento.value.numeroDS && faturamento.value.numeroDS.trim() != ''? faturamento.value.numeroDS : "não informado"
+    let texto = `Numero DS alterado para: ${numeroDS}, por ${authStore.user.nome}`
+    let sendData = {
+      id: faturamento.value.id,
+      numeroDS: faturamento.value.numeroDS,
+      evento: texto
+    }
+    await faturamentoStore.changeNumeroDS(sendData);
+    swal.fire({
+      toast: true,
+      icon: "success",
+      position: "top-end",
+      title: "Sucesso!",
+      text: "Alteração realizada com sucesso!",
+      showConfirmButton: false,
+      timer: 2000,
+    });
+    router.push({ name: "reembolsoFaturamento" });
+
+  } catch (error) {
+    console.error("changeNumeroDS.error:", error);
+    handleErrors(error); 
+  } finally {
+    isLoading.value.busy = false;
+  }
+  
+}
+
 </script>
