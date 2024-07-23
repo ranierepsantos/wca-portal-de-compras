@@ -69,8 +69,8 @@
                   color="primary"
                   density="compact"
                   v-model="faturamento.numeroDS"
-                  :readonly="faturamento.id > 0"
-                  :bg-color="faturamento.id > 0 ?'#f2f2f2':''"
+                  :readonly="faturamento.status > 1"
+                  :bg-color="faturamento.status > 1 ?'#f2f2f2':''"
                 ></v-text-field>
               </v-col>
               
