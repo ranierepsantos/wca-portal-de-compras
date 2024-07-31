@@ -2,7 +2,7 @@
 
 namespace wca.share.domain.Entities
 {
-    public class DocumentoComplementar
+    public sealed class TipoFaturamento
     {
         [Column("id")]
         public int Id { get; set; }
@@ -12,6 +12,5 @@ namespace wca.share.domain.Entities
 
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
-
     }
 }
