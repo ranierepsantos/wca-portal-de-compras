@@ -32,14 +32,18 @@ namespace wca.share.infrastruture.Context
         public DbSet<UsuarioConfiguracoes>  UsuarioConfiguracoes { get; set; }
         public DbSet<SolicitacaoFerias> SolicitacaoFerias { get; set; }
         public DbSet<TipoFerias> TipoFerias { get; set; }
-        public DbSet<DocumentoComplementar> DocumentoComplementares { get; set; }
+        public DbSet<DocumentoComplementar> DocumentoComplementar { get; set; }
         public DbSet<Escala> Escalas { get; set; }
         public DbSet<Funcao> Funcoes { get; set; }
         public DbSet<Gestor> Gestores { get; set; }
         public DbSet<Horario> Horarios { get; set; }
         public DbSet<TipoContrato> TiposContrato { get; set; }
-
-
+        internal DbSet<Vaga> Vagas { get; set; }
+        internal DbSet<MotivoContratacao> MotivoContratacao { get; set; }
+        internal DbSet<Escolaridade> Escolaridade { get; set; }
+        internal DbSet<Sexo> Sexo { get; set; }
+        internal DbSet<StatusVaga> StatusVaga { get; set; }
+        internal DbSet<TipoFaturamento> TipoFaturamento { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -64,6 +68,11 @@ namespace wca.share.infrastruture.Context
             modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId });
 
             modelBuilder.Entity<Funcionario>().HasIndex(ix =>  ix.eSocialMatricula).IsUnique();
+
+            modelBuilder.Entity<Vaga>()
+                .HasMany<DocumentoComplementar>(o => o.DocumentoComplementares).WithMany();
+
+
         }
     }
 }

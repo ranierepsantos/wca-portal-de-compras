@@ -22,6 +22,21 @@ namespace wca.share.infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("DocumentoComplementarVaga", b =>
+                {
+                    b.Property<int>("DocumentoComplementaresId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VagaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DocumentoComplementaresId", "VagaId");
+
+                    b.HasIndex("VagaId");
+
+                    b.ToTable("DocumentoComplementarVaga");
+                });
+
             modelBuilder.Entity("ItemMudancaSolicitacaoMudancaBase", b =>
                 {
                     b.Property<int>("ItensMudancaId")
@@ -221,7 +236,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DocumentoComplementares");
+                    b.ToTable("DocumentoComplementar");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Escala", b =>
@@ -245,6 +260,29 @@ namespace wca.share.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Escalas");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Escolaridade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Escolaridade");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Filial", b =>
@@ -422,6 +460,29 @@ namespace wca.share.infrastructure.Migrations
                     b.ToTable("ItensMudanca");
                 });
 
+            modelBuilder.Entity("wca.share.domain.Entities.MotivoContratacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MotivoContratacao");
+                });
+
             modelBuilder.Entity("wca.share.domain.Entities.MotivoDemissao", b =>
                 {
                     b.Property<int>("Id")
@@ -479,6 +540,29 @@ namespace wca.share.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notificacoes");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Sexo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sexo");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Solicitacao", b =>
@@ -795,6 +879,52 @@ namespace wca.share.infrastructure.Migrations
                     b.ToTable("StatusSolicitacao");
                 });
 
+            modelBuilder.Entity("wca.share.domain.Entities.StatusVaga", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Autorizar")
+                        .HasColumnType("bit")
+                        .HasColumnName("autorizar");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("color");
+
+                    b.Property<int>("Notifica")
+                        .HasColumnType("int")
+                        .HasColumnName("notifica");
+
+                    b.Property<int?>("ProximoStatusId")
+                        .HasColumnType("int")
+                        .HasColumnName("proximo_status_id")
+                        .HasComment("Utilizado quando campo autorizar = 1, após aprovação mudará para o status indicado aqui");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StatusIntermediario")
+                        .IsRequired()
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("status_intermediario");
+
+                    b.Property<string>("TemplateNotificacao")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("template_notificacao");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatusVaga");
+                });
+
             modelBuilder.Entity("wca.share.domain.Entities.TipoContrato", b =>
                 {
                     b.Property<int>("Id")
@@ -816,6 +946,29 @@ namespace wca.share.infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TiposContrato");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.TipoFaturamento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TipoFaturamento");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.TipoFerias", b =>
@@ -921,6 +1074,221 @@ namespace wca.share.infrastructure.Migrations
                     b.HasKey("UsuarioId");
 
                     b.ToTable("UsuarioConfiguracoes");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Vaga", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Anotacoes")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("anotacoes");
+
+                    b.Property<string>("Caracteristica")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("caracteristica");
+
+                    b.Property<string>("CategoriaCNH")
+                        .HasColumnType("varchar(1)")
+                        .HasColumnName("cnh_categoria");
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("int")
+                        .HasColumnName("cliente_id");
+
+                    b.Property<DateTime>("DataInicioPrevista")
+                        .HasColumnType("smalldatetime")
+                        .HasColumnName("data_inicio_prevista");
+
+                    b.Property<DateTime>("DataSolicitacao")
+                        .HasColumnType("smalldatetime")
+                        .HasColumnName("data_solicitacao");
+
+                    b.Property<string>("DescricaoAtividades")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("descricao_atividade");
+
+                    b.Property<int?>("DiasValeTransporte")
+                        .HasColumnType("int")
+                        .HasColumnName("dias_transporte");
+
+                    b.Property<string>("EnderecoCliente")
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("endereco_cliente");
+
+                    b.Property<int>("EscalaId")
+                        .HasColumnType("int")
+                        .HasColumnName("escala_id");
+
+                    b.Property<int>("EscolaridadeId")
+                        .HasColumnType("int")
+                        .HasColumnName("escolaridade_id");
+
+                    b.Property<string>("ExperienciaProfissinal")
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("experiencia_profissional");
+
+                    b.Property<int>("FuncaoId")
+                        .HasColumnType("int")
+                        .HasColumnName("funcao_id");
+
+                    b.Property<int>("GestorId")
+                        .HasColumnType("int")
+                        .HasColumnName("gestor_id");
+
+                    b.Property<int>("HorarioId")
+                        .HasColumnType("int")
+                        .HasColumnName("horario_id");
+
+                    b.Property<string>("HorarioIntegracao")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("horario_integracao");
+
+                    b.Property<int>("IdadeMaxima")
+                        .HasColumnType("int")
+                        .HasColumnName("idade_maxima");
+
+                    b.Property<int>("IdadeMinima")
+                        .HasColumnType("int")
+                        .HasColumnName("idade_minima");
+
+                    b.Property<string>("Indicacao")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("indicacao");
+
+                    b.Property<string>("IntegracaoDiasSemana")
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("integracao_dias_semana");
+
+                    b.Property<string>("JustificativaContratacao")
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("justificativa_contratacao");
+
+                    b.Property<string>("LocalResidencia")
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("local_residencia");
+
+                    b.Property<int>("MotivoContratacaoId")
+                        .HasColumnType("int")
+                        .HasColumnName("motivocontratacao_id");
+
+                    b.Property<string>("OutrosBeneficios")
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("outros_beneficios");
+
+                    b.Property<decimal>("PercentualInsalubridade")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("percentual_insalubridade");
+
+                    b.Property<decimal>("PercentualPericulosidade")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("percentual_periculosidade");
+
+                    b.Property<bool>("PermiteFumante")
+                        .HasColumnType("bit")
+                        .HasColumnName("permite_fumante");
+
+                    b.Property<int>("QuantidadeVagas")
+                        .HasColumnType("int")
+                        .HasColumnName("quantidade_vagas");
+
+                    b.Property<string>("Refeicao")
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("refeicao");
+
+                    b.Property<decimal?>("SalarioBase")
+                        .HasColumnType("money")
+                        .HasColumnName("salario_base");
+
+                    b.Property<int>("SexoId")
+                        .HasColumnType("int")
+                        .HasColumnName("sexo_id");
+
+                    b.Property<int>("StatusVagaId")
+                        .HasColumnType("int")
+                        .HasColumnName("status_vaga_id");
+
+                    b.Property<bool>("TemCNH")
+                        .HasColumnType("bit")
+                        .HasColumnName("tem_cnh");
+
+                    b.Property<bool>("TemCopiaAdmissaoCliente")
+                        .HasColumnType("bit")
+                        .HasColumnName("tem_copia_admissao_cliente");
+
+                    b.Property<bool>("TemInsalubridade")
+                        .HasColumnType("bit")
+                        .HasColumnName("tem_insalubridade");
+
+                    b.Property<bool>("TemIntegracaoCliente")
+                        .HasColumnType("bit")
+                        .HasColumnName("tem_integracao_cliente");
+
+                    b.Property<bool>("TemPericulosidade")
+                        .HasColumnType("bit")
+                        .HasColumnName("tem_periculosidade");
+
+                    b.Property<bool>("TemValeTransporte")
+                        .HasColumnType("bit")
+                        .HasColumnName("tem_vale_transporte");
+
+                    b.Property<int>("TipoContratoId")
+                        .HasColumnType("int")
+                        .HasColumnName("tipocontrato_id");
+
+                    b.Property<int>("TipoFaturamentoId")
+                        .HasColumnType("int")
+                        .HasColumnName("tipofaturamento_id");
+
+                    b.Property<decimal?>("ValorValeTransporte")
+                        .HasColumnType("money")
+                        .HasColumnName("valor_vale_transporte");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("EscalaId");
+
+                    b.HasIndex("EscolaridadeId");
+
+                    b.HasIndex("FuncaoId");
+
+                    b.HasIndex("GestorId");
+
+                    b.HasIndex("HorarioId");
+
+                    b.HasIndex("MotivoContratacaoId");
+
+                    b.HasIndex("SexoId");
+
+                    b.HasIndex("StatusVagaId");
+
+                    b.HasIndex("TipoContratoId");
+
+                    b.HasIndex("TipoFaturamentoId");
+
+                    b.ToTable("Vagas");
+                });
+
+            modelBuilder.Entity("DocumentoComplementarVaga", b =>
+                {
+                    b.HasOne("wca.share.domain.Entities.DocumentoComplementar", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentoComplementaresId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Vaga", null)
+                        .WithMany()
+                        .HasForeignKey("VagaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ItemMudancaSolicitacaoMudancaBase", b =>
@@ -1158,6 +1526,97 @@ namespace wca.share.infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Vaga", b =>
+                {
+                    b.HasOne("wca.share.domain.Entities.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Escala", "Escala")
+                        .WithMany()
+                        .HasForeignKey("EscalaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Escolaridade", "Escolaridade")
+                        .WithMany()
+                        .HasForeignKey("EscolaridadeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Funcao", "Funcao")
+                        .WithMany()
+                        .HasForeignKey("FuncaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Gestor", "Gestor")
+                        .WithMany()
+                        .HasForeignKey("GestorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Horario", "Horario")
+                        .WithMany()
+                        .HasForeignKey("HorarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.MotivoContratacao", "MotivoContratacao")
+                        .WithMany()
+                        .HasForeignKey("MotivoContratacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.Sexo", "Sexo")
+                        .WithMany()
+                        .HasForeignKey("SexoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.StatusVaga", "StatusVaga")
+                        .WithMany()
+                        .HasForeignKey("StatusVagaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.TipoContrato", "TipoContrato")
+                        .WithMany()
+                        .HasForeignKey("TipoContratoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("wca.share.domain.Entities.TipoFaturamento", "TipoFaturamento")
+                        .WithMany()
+                        .HasForeignKey("TipoFaturamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Escala");
+
+                    b.Navigation("Escolaridade");
+
+                    b.Navigation("Funcao");
+
+                    b.Navigation("Gestor");
+
+                    b.Navigation("Horario");
+
+                    b.Navigation("MotivoContratacao");
+
+                    b.Navigation("Sexo");
+
+                    b.Navigation("StatusVaga");
+
+                    b.Navigation("TipoContrato");
+
+                    b.Navigation("TipoFaturamento");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>

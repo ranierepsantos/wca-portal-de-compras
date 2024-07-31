@@ -129,6 +129,14 @@ import { useRoute } from "vue-router";
       pageInfo.value.title = "Tipos de Contrato";
       pageInfo.value.singleTitle = "Tipo de Contrato";
       pageInfo.value.entidade = "TipoContrato";
+    } else if (route.path.includes("tiposfaturamento")) {
+      pageInfo.value.title = "Tipos de Faturamento";
+      pageInfo.value.singleTitle = "Tipo de Faturamento";
+      pageInfo.value.entidade = "TipoFaturamento";
+    } else if (route.path.includes("escolaridades")) {
+      pageInfo.value.title = "Escolaridades";
+      pageInfo.value.singleTitle = "Escolaridade";
+      pageInfo.value.entidade = "Escolaridade";
     }
   console.debug('PageInfo', pageInfo.value)
     

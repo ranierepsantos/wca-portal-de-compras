@@ -273,5 +273,19 @@ export const share = {
         meta: {permissao: "livre", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
+      {
+        path: 'tiposfaturamento',
+        name: 'shareTiposFaturamento',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
+        path: 'escolaridades',
+        name: 'shareEscolaridades',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
     ]
 }
