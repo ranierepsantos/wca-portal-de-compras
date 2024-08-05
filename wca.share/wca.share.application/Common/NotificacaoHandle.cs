@@ -4,7 +4,6 @@ using wca.share.application.Contracts;
 using wca.share.application.Contracts.Integration.Email;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Notificacoes.Commands;
-using wca.share.application.Features.Solicitacoes.Common;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Common
@@ -23,6 +22,7 @@ namespace wca.share.application.Common
                 (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
                 (int)EnumTipoSolicitacao.Ferias => "Férias",
                 (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
+                (int)EnumTipoSolicitacao.Vaga => "Vaga",
             };
         }
 
@@ -34,6 +34,7 @@ namespace wca.share.application.Common
                 (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
                 (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
                 (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
+                (int)EnumTipoSolicitacao.Vaga => EnumTipoSolicitacao.Vaga.ToString(),
             };
         }
 
@@ -62,6 +63,32 @@ namespace wca.share.application.Common
                 if (user.UsuarioConfiguracoes?.NotificarPorEmail ?? false)
                 {
                     string assunto = GetEntidadeTipoSolicitacao(solicitacao.SolicitacaoTipoId) + $" - código: {solicitacao.Id}";
+
+                    string body = $"Olá {user.Nome}, <br/> <br/>";
+                    body += mensagem;
+
+                    _emailService.SendNotificacao(new string[] { user.Email }, assunto, body);
+                }
+            }
+        }
+
+        public async Task VagaEnviarNotificacaoAsync(int[] usersId, string template, Vaga vaga, CancellationToken cancellationToken = default)
+        {
+            List<Usuario> users = await _repository.GetDbSet<Usuario>()
+                                  .Include("UsuarioConfiguracoes")
+                                  .Where(q => usersId.Contains(q.Id)).ToListAsync(cancellationToken: cancellationToken);
+
+            foreach (Usuario user in users)
+            {
+                string mensagem = template.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao((int) EnumTipoSolicitacao.Vaga )).Replace("{id}", vaga.Id.ToString());
+
+                var notificacao = new NotificacaoCreateCommand(user.Id, mensagem, GetEntidadeTipoSolicitacao((int)EnumTipoSolicitacao.Vaga), vaga.Id);
+
+                await _mediator.Send(notificacao, cancellationToken);
+
+                if (user.UsuarioConfiguracoes?.NotificarPorEmail ?? false)
+                {
+                    string assunto = GetEntidadeTipoSolicitacao((int)EnumTipoSolicitacao.Vaga) + $" - código: {vaga.Id}";
 
                     string body = $"Olá {user.Nome}, <br/> <br/>";
                     body += mensagem;

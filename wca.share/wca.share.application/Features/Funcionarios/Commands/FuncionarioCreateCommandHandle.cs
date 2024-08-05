@@ -38,7 +38,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
 
         public async Task<ErrorOr<FuncionarioResponse>> Handle(FuncionarioCreateCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
+            //_logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
 
             //1. validar dados
             FuncionarioCreateCommandBehavior validator = new();

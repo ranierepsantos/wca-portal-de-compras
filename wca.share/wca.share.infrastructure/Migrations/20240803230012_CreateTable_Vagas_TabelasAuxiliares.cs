@@ -183,6 +183,7 @@ namespace wca.share.infrastructure.Migrations
                     funcao_id = table.Column<int>(type: "int", nullable: false),
                     escala_id = table.Column<int>(type: "int", nullable: false),
                     horario_id = table.Column<int>(type: "int", nullable: false),
+                    responsavel_id = table.Column<int>(type: "int", nullable: true),
                     data_solicitacao = table.Column<DateTime>(type: "smalldatetime", nullable: false),
                     status_vaga_id = table.Column<int>(type: "int", nullable: false),
                     quantidade_vagas = table.Column<int>(type: "int", nullable: false),
@@ -287,6 +288,11 @@ namespace wca.share.infrastructure.Migrations
                         principalTable: "TiposContrato",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Vagas_Usuarios_responsavel_id",
+                        column: x => x.responsavel_id,
+                        principalTable: "Usuarios",
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
@@ -313,10 +319,36 @@ namespace wca.share.infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "VagaHistorico",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    vaga_id = table.Column<int>(type: "int", nullable: false),
+                    data_hora = table.Column<DateTime>(type: "smalldatetime", nullable: false),
+                    evento = table.Column<string>(type: "varchar(500)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VagaHistorico", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_VagaHistorico_Vagas_vaga_id",
+                        column: x => x.vaga_id,
+                        principalTable: "Vagas",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_DocumentoComplementarVaga_VagaId",
                 table: "DocumentoComplementarVaga",
                 column: "VagaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VagaHistorico_vaga_id",
+                table: "VagaHistorico",
+                column: "vaga_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vagas_cliente_id",
@@ -354,6 +386,11 @@ namespace wca.share.infrastructure.Migrations
                 column: "motivocontratacao_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Vagas_responsavel_id",
+                table: "Vagas",
+                column: "responsavel_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Vagas_sexo_id",
                 table: "Vagas",
                 column: "sexo_id");
@@ -379,6 +416,9 @@ namespace wca.share.infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "DocumentoComplementarVaga");
+
+            migrationBuilder.DropTable(
+                name: "VagaHistorico");
 
             migrationBuilder.DropTable(
                 name: "DocumentoComplementar");

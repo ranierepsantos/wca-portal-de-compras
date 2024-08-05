@@ -34,17 +34,16 @@ namespace wca.share.infrastruture.Context
         public DbSet<TipoFerias> TipoFerias { get; set; }
         public DbSet<DocumentoComplementar> DocumentoComplementar { get; set; }
         public DbSet<Escala> Escalas { get; set; }
+        internal DbSet<Escolaridade> Escolaridade { get; set; }
         public DbSet<Funcao> Funcoes { get; set; }
         public DbSet<Gestor> Gestores { get; set; }
         public DbSet<Horario> Horarios { get; set; }
-        public DbSet<TipoContrato> TiposContrato { get; set; }
-        internal DbSet<Vaga> Vagas { get; set; }
         internal DbSet<MotivoContratacao> MotivoContratacao { get; set; }
-        internal DbSet<Escolaridade> Escolaridade { get; set; }
         internal DbSet<Sexo> Sexo { get; set; }
-        internal DbSet<StatusVaga> StatusVaga { get; set; }
+        public DbSet<TipoContrato> TiposContrato { get; set; }
         internal DbSet<TipoFaturamento> TipoFaturamento { get; set; }
-
+        internal DbSet<Vaga> Vagas { get; set; }
+        internal DbSet<VagaHistorico> VagaHistoricos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

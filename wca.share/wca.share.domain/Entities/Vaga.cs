@@ -30,11 +30,14 @@ namespace wca.share.domain.Entities
         [Column("horario_id")]
         public int HorarioId { get; set; }
 
+        [Column("responsavel_id")]
+        public int? ResponsavelId { get; set; }
+
         [Column("data_solicitacao", TypeName = "smalldatetime")]
         public DateTime DataSolicitacao { get; set; } = DateTime.Now;
 
-        [Column("status_vaga_id")]
-        public int StatusVagaId { get; set; } = 1;
+        [Column("status_solicitacao_id")]
+        public int StatusSolicitacaoId { get; set; } = 1;
 
         [Column("quantidade_vagas")]
         public int QuantidadeVagas { get; set; } = 1;
@@ -132,7 +135,8 @@ namespace wca.share.domain.Entities
         [Column("integracao_dias_semana", TypeName = "varchar(30)")]
         public string? IntegracaoDiasSemana { get; set; }
 
-        public virtual ICollection<DocumentoComplementar>? DocumentoComplementares { get; set; } = new List<DocumentoComplementar>();    
+        public virtual List<DocumentoComplementar>? DocumentoComplementares { get; set; } = new List<DocumentoComplementar>();
+        public virtual List<VagaHistorico>? VagaHistorico { get; set; } = new List<VagaHistorico>();
 
         [JsonIgnore]
         public Cliente? Cliente { get; set; }
@@ -165,6 +169,9 @@ namespace wca.share.domain.Entities
         public TipoFaturamento? TipoFaturamento { get; set; }
 
         [JsonIgnore]
-        public StatusVaga? StatusVaga { get; set; }
+        public StatusSolicitacao? StatusSolicitacao { get; set; }
+
+        [JsonIgnore]
+        public Usuario? Responsavel { get; set; }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using wca.share.application.Common;
 using wca.share.application.Features.Solicitacoes.Commands;
 using wca.share.domain.Entities;
 using ListItem = wca.share.application.Common.ListItem;

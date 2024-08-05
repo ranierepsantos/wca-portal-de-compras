@@ -246,6 +246,13 @@ export const share = {
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
+        path: 'escolaridades',
+        name: 'shareEscolaridades',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+      },
+      {
         path: 'funcoes',
         name: 'shareFuncoes',
         beforeEnter: protectRoute,
@@ -281,11 +288,18 @@ export const share = {
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
-        path: 'escolaridades',
-        name: 'shareEscolaridades',
+        path: 'vagas',
+        name: 'shareVagas',
         beforeEnter: protectRoute,
         meta: {permissao: "livre", sistema: 3},
-        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas'),
+      },
+      {
+        path: 'vagas/criar',
+        name: 'shareVagaCreate',
+        beforeEnter: protectRoute,
+        meta: {permissao: "livre", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas/create'),
       },
     ]
 }

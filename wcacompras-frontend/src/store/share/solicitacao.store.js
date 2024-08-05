@@ -328,12 +328,10 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
     },
     async getListaItensMudanca() {
         try {
-            console.log("items mudança: ",this.itensMudanca.length)
             if (this.itensMudanca.length == 0)
             {
 
                 let response = await api.get(rotas.ListarItensMudanca);
-                console.log("items mudança.response: ", response)
                 this.itensMudanca = response.data 
             
                 localStorage.setItem('share-itens-mudanca',JSON.stringify(this.itensMudanca))

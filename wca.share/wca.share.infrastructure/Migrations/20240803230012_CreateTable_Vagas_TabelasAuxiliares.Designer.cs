@@ -12,7 +12,7 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    [Migration("20240731014927_CreateTable_Vagas_TabelasAuxiliares")]
+    [Migration("20240803230012_CreateTable_Vagas_TabelasAuxiliares")]
     partial class CreateTable_Vagas_TabelasAuxiliares
     {
         /// <inheritdoc />
@@ -1204,6 +1204,10 @@ namespace wca.share.infrastructure.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("refeicao");
 
+                    b.Property<int?>("ResponsavelId")
+                        .HasColumnType("int")
+                        .HasColumnName("responsavel_id");
+
                     b.Property<decimal?>("SalarioBase")
                         .HasColumnType("money")
                         .HasColumnName("salario_base");
@@ -1268,6 +1272,8 @@ namespace wca.share.infrastructure.Migrations
 
                     b.HasIndex("MotivoContratacaoId");
 
+                    b.HasIndex("ResponsavelId");
+
                     b.HasIndex("SexoId");
 
                     b.HasIndex("StatusVagaId");
@@ -1277,6 +1283,35 @@ namespace wca.share.infrastructure.Migrations
                     b.HasIndex("TipoFaturamentoId");
 
                     b.ToTable("Vagas");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.VagaHistorico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataHora")
+                        .HasColumnType("smalldatetime")
+                        .HasColumnName("data_hora");
+
+                    b.Property<string>("Evento")
+                        .IsRequired()
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("evento");
+
+                    b.Property<int>("VagaId")
+                        .HasColumnType("int")
+                        .HasColumnName("vaga_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VagaId");
+
+                    b.ToTable("VagaHistorico");
                 });
 
             modelBuilder.Entity("DocumentoComplementarVaga", b =>
@@ -1575,6 +1610,10 @@ namespace wca.share.infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("wca.share.domain.Entities.Usuario", "Responsavel")
+                        .WithMany()
+                        .HasForeignKey("ResponsavelId");
+
                     b.HasOne("wca.share.domain.Entities.Sexo", "Sexo")
                         .WithMany()
                         .HasForeignKey("SexoId")
@@ -1613,6 +1652,8 @@ namespace wca.share.infrastructure.Migrations
 
                     b.Navigation("MotivoContratacao");
 
+                    b.Navigation("Responsavel");
+
                     b.Navigation("Sexo");
 
                     b.Navigation("StatusVaga");
@@ -1620,6 +1661,15 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("TipoContrato");
 
                     b.Navigation("TipoFaturamento");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.VagaHistorico", b =>
+                {
+                    b.HasOne("wca.share.domain.Entities.Vaga", null)
+                        .WithMany("VagaHistorico")
+                        .HasForeignKey("VagaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
@@ -1654,6 +1704,11 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("UsuarioCentrodeCustos");
 
                     b.Navigation("UsuarioConfiguracoes");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.Vaga", b =>
+                {
+                    b.Navigation("VagaHistorico");
                 });
 #pragma warning restore 612, 618
         }
