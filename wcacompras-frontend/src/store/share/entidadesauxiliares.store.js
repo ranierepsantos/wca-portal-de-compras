@@ -60,7 +60,7 @@ export const useShareEntidadeAuxiliarStore = defineStore("shareEntidadeAuxiliar"
     },
     async getToComboList(entidade) {
       try {
-        let response = await api.get(rotas.ToComboList.replace('{Entidade}', entidade), { params: { id: id } });
+        let response = await api.get(rotas.ToComboList.replace('{Entidade}', entidade));
         return response.data;
       } catch (error) {
         throw error;

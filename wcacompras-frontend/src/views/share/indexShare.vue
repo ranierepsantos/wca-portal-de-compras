@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" app color="#4A148C"
+    <v-navigation-drawer v-model="drawer" app color="#4A148C" 
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px;">
       <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
@@ -167,6 +167,18 @@ const menuItems = ref([
     title: "Escalas",
     value: 12,
     route: "/share/escalas",
+    permissao: "livre"
+  },
+  {
+    title: "Escolaridade",
+    value: 12,
+    route: "/share/escolaridades",
+    permissao: "livre"
+  },
+  {
+    title: "Funções",
+    value: 16,
+    route: "/share/funcoes",
     permissao: "livre"
   },
   {

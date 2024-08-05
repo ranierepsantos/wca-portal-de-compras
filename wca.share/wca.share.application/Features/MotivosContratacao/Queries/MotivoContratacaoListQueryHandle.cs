@@ -11,7 +11,7 @@ namespace wca.share.application.Features.MotivosContratacao.Queries
 {
     public record MotivoContratacaoListQuery() : IRequest<ErrorOr<IList<ListItem>>>;
 
-    internal class MotivoContratacaoListQueryHandle : IRequestHandler<MotivoContratacaoListQuery, ErrorOr<IList<ListItem>>>
+    public class MotivoContratacaoListQueryHandle : IRequestHandler<MotivoContratacaoListQuery, ErrorOr<IList<ListItem>>>
     {
         private readonly IRepositoryManager _repository;
         private readonly ILogger<MotivoContratacaoListQueryHandle> _logger;

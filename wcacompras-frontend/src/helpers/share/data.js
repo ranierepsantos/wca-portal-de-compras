@@ -22,6 +22,8 @@ export function getPageTitle(solicitacaoTipoId) {
       return "Férias";
     case 4:
       return "Mudança de Base";
+    case 5:
+        return "Vagas";
     default:
       return "Solicitação";
   }

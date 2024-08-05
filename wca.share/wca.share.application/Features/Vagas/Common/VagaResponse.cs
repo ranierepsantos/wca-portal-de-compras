@@ -1,8 +1,10 @@
-﻿using wca.share.domain.Entities;
+﻿using wca.share.application.Common;
+using wca.share.application.Features.Solicitacoes.Common;
+using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Vagas.Common
 {
-    internal class VagaResponse
+    public sealed class VagaResponse
     {
         public int Id { get; set; }
         public int ClienteId { get; set; }
@@ -20,8 +22,8 @@ namespace wca.share.application.Features.Vagas.Common
         public int HorarioId { get; set; }
         public string? HorarioNome { get; set; }
         public DateTime DataSolicitacao { get; set; }
-        public int StatusVagaId { get; set; }
-        public string? StatusVagaNome { get; set; }
+        public int StatusSolicitacaoId { get; set; }
+        public string? StatusSolicitacaoNome { get; set; }
         public int QuantidadeVagas { get; set; }
         public int SexoId { get; set; }
         public string? SexoNome { get; set; }
@@ -57,7 +59,35 @@ namespace wca.share.application.Features.Vagas.Common
         public bool TemIntegracaoCliente { get; set; } = false;
         public string? HorarioIntegracao { get; set; }
         public string? IntegracaoDiasSemana { get; set; }
-        public virtual ICollection<DocumentoComplementar>? DocumentoComplementares { get; set; }
+        public List<ListItem>? DocumentoComplementares { get; set; }
+        public List<VagaHistorico>? VagaHistorico { get; set; }
 
     }
+
+    public sealed class VagaToPaginateResponse
+    {
+        public int Id { get; set; }
+        public int FilialId { get; set; }
+        public int Status { get; set; }
+        public DateTime DataSolicitacao { get; set; }
+        public string ClienteNome { get; set; }
+        public string? ResponsavelNome { get; set; }
+        public string? FuncaoNome { get; set; }
+
+        public StatusSolicitacaoResponse StatusSolicitacao { get; set; }
+        public List<VagaHistorico> VagaHistorico { get; set; }
+    }
+
+    public sealed class StatusSolicitacaoResponse
+    {
+        public int Id { get; set; }
+
+        public string Status { get; set; }
+
+        public string StatusIntermediario { get; set; }
+
+        public string Color { get; set; }
+
+    }
+
 }
