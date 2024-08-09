@@ -21,8 +21,9 @@
                     <select-text
                         v-model="vaga.clienteId"
                         :combo-items="listCliente"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Cliente"
+                        :text-field-value ="vaga.clienteNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -32,8 +33,9 @@
                     <select-text
                         v-model="vaga.tipoContratoId"
                         :combo-items="listTipoContrato"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Tipo Contrato"
+                        :text-field-value ="vaga.tipoContratoNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -41,8 +43,9 @@
                     <select-text
                         v-model="vaga.tipoFaturamentoId"
                         :combo-items="listTipoFaturamento"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Tipo Faturamento"
+                        :text-field-value ="vaga.tipoFaturamentoNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -65,8 +68,9 @@
                     <select-text
                         v-model="vaga.gestorId"
                         :combo-items="listGestor"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Gestor"
+                        :text-field-value ="vaga.gestorNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -74,8 +78,9 @@
                     <select-text
                         v-model="vaga.funcaoId"
                         :combo-items="listFuncao"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Função"
+                        :text-field-value ="vaga.funcaoNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -97,8 +102,9 @@
                   <select-text
                         v-model="vaga.sexoId"
                         :combo-items="listSexo"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Sexo"
+                        :text-field-value ="vaga.sexoNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -145,8 +151,9 @@
                   <select-text
                         v-model="vaga.motivoContratacaoId"
                         :combo-items="listMotivoContratacao"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Motivo Contratação"
+                        :text-field-value ="vaga.motivoContratacaoNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -154,16 +161,18 @@
                   <select-text
                         v-model="vaga.permiteFumante"
                         :combo-items="[{value: 0, text: 'Não'}, {value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Permite Fumante"
+                        :text-field-value ="vaga.permiteFumante ==1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 <v-col>
                   <select-text
                         v-model="vaga.escolaridadeId"
                         :combo-items="listEscolaridade"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Escolaridade"
+                        :text-field-value ="vaga.escolaridadeNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -223,24 +232,27 @@
                   <select-text
                         v-model="vaga.temCNH"
                         :combo-items="[{value: 0, text: 'Não'},{value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Tem CNH"
+                        :text-field-value ="vaga.temCNH == 1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 <v-col>
                   <select-text
                         v-model="vaga.categoriaCNH"
                         :combo-items="[{value: 'A', text: 'A'},{value: 'B', text: 'B'},{value: 'C', text: 'C'},{value: 'D', text: 'D'}, ]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Categoria CNH"
+                        :text-field-value ="vaga.categoriaCNH"
                     ></select-text>
                 </v-col>
                 <v-col>
                   <select-text
                         v-model="vaga.temValeTransporte"
                         :combo-items="[{value: 0, text: 'Não'},{value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Vale Transporte"
+                        :text-field-value ="vaga.temValeTransporte == 1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 <v-col>
@@ -303,8 +315,9 @@
                   <select-text
                         v-model="vaga.temInsalubridade"
                         :combo-items="[{value: 0, text: 'Não'},{value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Insalubridade"
+                        :text-field-value ="vaga.temInsalubridade == 1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 <v-col>
@@ -320,8 +333,9 @@
                   <select-text
                         v-model="vaga.temPericulosidade"
                         :combo-items="[{value: 0, text: 'Não'},{value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Periculosidade"
+                        :text-field-value ="vaga.temPericulosidade == 1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 <v-col>
@@ -339,8 +353,9 @@
                   <select-text
                         v-model="vaga.escalaId"
                         :combo-items="listEscala"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Escala"
+                        :text-field-value ="vaga.escalaNome"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     ></select-text>
                 </v-col>
@@ -348,9 +363,10 @@
                   <select-text
                         v-model="vaga.horarioId"
                         :combo-items="listHorario"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Horário"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :text-field-value ="vaga.horarioNome"
                     ></select-text>
                 </v-col>
               </v-row>
@@ -369,16 +385,18 @@
                   <select-text
                         v-model="vaga.temCopiaAdmissaoCliente"
                         :combo-items="[{value: 0, text: 'Não'},{value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Cópia Admissao Cliente"
+                        :text-field-value ="vaga.temCopiaAdmissaoCliente == 1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 <v-col>
                   <select-text
                         v-model="vaga.temIntegracaoCliente"
                         :combo-items="[{value: 0, text: 'Não'},{value: 1, text: 'Sim'}]"
-                        :select-mode="true"
+                        :select-mode="false"
                         label-text="Integração Cliente"
+                        :text-field-value ="vaga.temIntegracaoCliente == 1 ? 'Sim': 'Não'"
                     ></select-text>
                 </v-col>
                 
@@ -403,6 +421,7 @@
                     variant="outlined"
                     density="compact"
                     v-model="vaga.integracaoDiasSemana"
+                    :readOnly="true"
                   ></v-select>
                 </v-col>
               </v-row>
@@ -414,6 +433,7 @@
                     list-origem-titulo="Documentos Complementares"
                     list-destino-titulo="Documentos Complementares"
                     :show-search-text="false"
+                    :is-read-only = "true"
                   />
                 </v-col>
               </v-row>
@@ -432,29 +452,35 @@
             </v-form>
           </v-card-text>
         </v-card>
+        <historico :eventos="vaga.vagaHistorico" />
       </v-container>
     </div>
   </template>
   
   <script setup>
-  import Breadcrumbs from "@/components/breadcrumbs.vue";
   import { onBeforeMount, ref,inject } from "vue";
   import handleErrors from "@/helpers/HandleErrors";
   import router from "@/router";
   import moment from "moment";
+  import { useRoute } from "vue-router";
+  //Components
   import selectText from "@/components/selectText.vue"
   import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
   import boxTransfer from "@/components/boxTransfer.vue";
+  import historico from "@/components/reembolso/historico.vue";
+  import Breadcrumbs from "@/components/breadcrumbs.vue";
   //Stores
   import { useAuthStore } from "@/store/auth.store";
   import {Vaga, useShareVagaStore} from "@/store/share/vaga.store";
   import {useShareEntidadeAuxiliarStore} from "@/store/share/entidadesauxiliares.store"
   import { useShareClienteStore } from "@/store/share/cliente.store";
+  import { useShareUsuarioStore } from "@/store/share/usuario.store";
 
   const isLoading = ref({
     form: true,
     save: false,
   });
+  const route = useRoute();
   const mForm = ref(null);
   const swal = inject("$swal");
   const vaga = ref(new Vaga())
@@ -471,10 +497,15 @@
   const listSexo = ref([]);
   const listTipoContrato = ref([]);
   const listTipoFaturamento = ref([]);
-
+  const listResponsavel = ref([]);
   //VUE FUNCTIONS
   onBeforeMount(async () => {
     try {
+      
+      if (isNaN(route.query.id))
+        throw new Error("Parâmentro incorreto!");
+        
+
       listCliente.value = await useShareClienteStore().toComboList(0, useAuthStore().user.id);
       listDocumentoComplementar.value = await entidadeStore.getToComboList("DocumentoComplementar");
       listEscala.value = await entidadeStore.getToComboList("Escala");
@@ -486,6 +517,13 @@
       listTipoContrato.value = await entidadeStore.getToComboList("TipoContrato");
       listTipoFaturamento.value = await entidadeStore.getToComboList("TipoFaturamento");
       listSexo.value = [{value: 3, text: "Indiferente"},{value: 2, text: "Feminino"},{value: 1, text: "Masculino"}]
+
+      vaga.value = await vagaStore.getById(route.query.id)
+      documentoComplementarListRemove()
+
+      listResponsavel.value = await useShareUsuarioStore()
+                                    .getListByCliente(vaga.value.clienteId);
+
     } catch (error) {
       console.debug("create.beforeMount.error", error);
       handleErrors(error);
@@ -504,8 +542,16 @@
   
       if (valid) {
         let data = {...vaga.value}
-        data.usuarioCriador = useAuthStore().user.nome;
-        await vagaStore.add(data);
+        data.UsuarioAtualizador = useAuthStore().user.nome;
+        if (data.responsavelId && data.responsavelId > 0) {
+            let status = vagaStore().statusSolicitacao.find(
+                (x) => x.status.toLowerCase() == "em andamento"
+            );
+            if (status && data.statusSolicitacaoId != status.id)
+                data.statusSolicitacaoId = status.id;
+        }
+
+        await vagaStore.update(data);
 
         await swal.fire({
           toast: true,
@@ -527,5 +573,16 @@
       isLoading.value.save = false;
     }
   }
-  </script>
+
+  function documentoComplementarListRemove(removerTodos = false) {
+  if (removerTodos == true) listDocumentoComplementar.value.splice(0, listDocumentoComplementar.value.length);
+  else {
+    vaga.value.documentoComplementares.forEach((cc) => {
+      let index = listDocumentoComplementar.value.findIndex((c) => c.value == cc.value);
+      if (index > -1) listDocumentoComplementar.value.splice(index, 1);
+    });
+  }
+}
+
+</script>
   

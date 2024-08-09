@@ -10,7 +10,10 @@ namespace wca.share.application.Features.Vagas.Common
         {
             CreateMap<VagaCreateCommand, Vaga>()
                 .ForMember(dest => dest.DocumentoComplementares , opt => opt.Ignore());
-            CreateMap<VagaUpdateCommand, Vaga>();
+            
+            CreateMap<VagaUpdateCommand, Vaga>()
+                .ForMember(dest => dest.DocumentoComplementares, opt => opt.Ignore());
+
             CreateMap<Vaga, VagaResponse>()
                 .ForSourceMember(src => src.StatusSolicitacao, opt => opt.DoNotValidate())
                 .ForMember(dest => dest.ClienteNome, opt => opt.MapFrom(src => src.Cliente.Nome))

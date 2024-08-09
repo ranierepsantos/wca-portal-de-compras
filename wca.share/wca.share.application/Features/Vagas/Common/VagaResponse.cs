@@ -54,7 +54,7 @@ namespace wca.share.application.Features.Vagas.Common
         public decimal PercentualInsalubridade { get; set; }
         public bool TemPericulosidade { get; set; } = false;
         public decimal PercentualPericulosidade { get; set; }
-        public DateTime DataInicioPrevista { get; set; } = DateTime.Now;
+        public DateTime DataInicioPrevista { get; set; }
         public bool TemCopiaAdmissaoCliente { get; set; } = false;
         public bool TemIntegracaoCliente { get; set; } = false;
         public string? HorarioIntegracao { get; set; }

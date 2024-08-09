@@ -301,5 +301,16 @@ export const share = {
         meta: {permissao: "livre", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas/create'),
       },
+      {
+        path: 'vagas/editar',
+        name: 'shareVagaCadastro',
+        meta: {permissao: "livre", sistema: 3},
+        beforeEnter: protectRoute,
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas/edit'),
+        props: route => ({ query: route.query.id })
+      },
     ]
 }

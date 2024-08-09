@@ -32,7 +32,7 @@ export class Vaga {
         this.escalaNome = data.escalaNome || null;
         this.horarioId = data.horarioId || null;
         this.horarioNome = data.horarioNome || null;
-        this.dataSolicitacao = data.dataSolicitacao || moment().format("YYYY-MM-DD");
+        this.dataSolicitacao = data.dataSolicitacao ? moment(data.dataSolicitacao).format("YYYY-MM-DD") : moment().format("YYYY-MM-DD");
         this.statusSolicitacaoId = data.statusSolicitacaoId || null;
         this.statusSolicitacaoNome = data.statusSolicitacaoNome || null;
         this.quantidadeVagas = data.quantidadeVagas || null;
@@ -65,7 +65,7 @@ export class Vaga {
         this.percentualInsalubridade = data.percentualInsalubridade || 0.0;
         this.temPericulosidade = data.temPericulosidade || 0;
         this.percentualPericulosidade = data.percentualPericulosidade || 0.0;
-        this.dataInicioPrevista = data.dataInicioPrevista || null;
+        this.dataInicioPrevista = data.dataInicioPrevista ? moment(data.dataInicioPrevista).format("YYYY-MM-DD"): null;
         this.temCopiaAdmissaoCliente = data.temCopiaAdmissaoCliente || 0;
         this.temIntegracaoCliente = data.temIntegracaoCliente || 0;
         this.horarioIntegracao = data.horarioIntegracao || null;
@@ -97,7 +97,8 @@ export const useShareVagaStore = defineStore("shareVaga", {
                 //traz o status inicial da solicitação
                 let notificacaopermissao = 'vaga-executar'
                 data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
-                data.integracaoDiasSemana = data.integracaoDiasSemana.join(',')
+                if (data.integracaoDiasSemana)
+                    data.integracaoDiasSemana = data.integracaoDiasSemana.join(',')
                 //verifica se requer aprovação
                 if (checarAprovacao){
                     let configuracao = (await configuracaoService.getByChave('vaga.requer.aprovacao')).data;
@@ -131,6 +132,25 @@ export const useShareVagaStore = defineStore("shareVaga", {
         },
         async update (data) {
             try {
+                let notificacaopermissao = 'vaga-executar'
+                data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
+                if (data.integracaoDiasSemana)
+                    data.integracaoDiasSemana = data.integracaoDiasSemana.join(',')
+                data.permiteFumante = data.permiteFumante == 1 ? true : false; 
+                data.temCNH = data.temCNH == 1 ? true : false; 
+                data.temCopiaAdmissaoCliente = data.temCopiaAdmissaoCliente == 1 ? true : false; 
+                data.temInsalubridade = data.temInsalubridade == 1 ? true : false; 
+                data.temIntegracaoCliente = data.temIntegracaoCliente == 1 ? true : false; 
+                data.temPericulosidade = data.temPericulosidade == 1 ? true : false; 
+                data.temValeTransporte = data.temValeTransporte == 1 ? true : false; 
+
+                //retorna a lista de usuários que serão notificados
+                data.notificarUsuarioIds = []
+                if (data.status.notifica == 1)
+                {
+                    let notificaList = await useShareUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, notificacaopermissao)
+                    data.notificarUsuarioIds = notificaList.map(q => {return q.value})
+                }
                 await api.put(rotas.Update, data);
             } catch (error) {
                 throw error
@@ -140,14 +160,16 @@ export const useShareVagaStore = defineStore("shareVaga", {
             try {
                 let response = await api.get(rotas.GetById, {params: {id: id}});
                 let vaga = new Vaga(response.data)
-                vaga.integracaoDiasSemana = vaga.integracaoDiasSemana.split(',');
-                vaga.permiteFumante = data.permiteFumante ? 1 : 0; 
-                vaga.temCNH = data.temCNH ? 1 : 0; 
-                vaga.temCopiaAdmissaoCliente = data.temCopiaAdmissaoCliente ? 1 : 0;
-                vaga.temInsalubridade = data.temInsalubridade ? 1 : 0;
-                vaga.temIntegracaoCliente = data.temIntegracaoCliente ? 1 : 0;
-                vaga.temPericulosidade = data.temPericulosidade ? 1 : 0; 
-                vaga.temValeTransporte = data.temValeTransporte ? 1 : 0; 
+                if (vaga.integracaoDiasSemana)
+                    vaga.integracaoDiasSemana = vaga.integracaoDiasSemana.split(',');
+                
+                vaga.permiteFumante = vaga.permiteFumante ? 1 : 0; 
+                vaga.temCNH = vaga.temCNH ? 1 : 0; 
+                vaga.temCopiaAdmissaoCliente = vaga.temCopiaAdmissaoCliente ? 1 : 0;
+                vaga.temInsalubridade = vaga.temInsalubridade ? 1 : 0;
+                vaga.temIntegracaoCliente = vaga.temIntegracaoCliente ? 1 : 0;
+                vaga.temPericulosidade = vaga.temPericulosidade ? 1 : 0; 
+                vaga.temValeTransporte = vaga.temValeTransporte ? 1 : 0; 
 
                 return vaga
             } catch (error) {
