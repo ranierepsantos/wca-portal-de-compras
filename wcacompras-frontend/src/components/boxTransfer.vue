@@ -9,7 +9,7 @@
         </v-card-title>
         
         <v-card-text>
-          <v-list density="compact" select-strategy="multiple" color="primary">
+          <v-list density="compact" select-strategy="multiple" color="primary" :bg-color="isReadOnly? '#f2f2f2':''">
             <v-list-item
               v-for="item in getFilteredList(listOrigem, boxOrigemTermo)"
               :key="item.text"
@@ -51,7 +51,7 @@
         @click="remover()"
       ></v-icon>
     </v-col>
-    <v-col cols="5">
+    <v-col cols="5" >
       <v-card elevation="3" :subtitle="listDestinoTitulo" readonly>
         <v-card-title>
           <v-text-field label="Pesquisar" v-model="boxDestinoTermo" type="text" required variant="outlined" color="primary"
@@ -59,12 +59,13 @@
           </v-text-field>
         </v-card-title>
         <v-card-text>
-          <v-list density="compact" select-strategy="multiple" color="primary">
+          <v-list density="compact" select-strategy="multiple" color="primary" :bg-color="isReadOnly? '#f2f2f2':''">
             <v-list-item
               v-for="item in getFilteredList(listDestino, boxDestinoTermo)"
               :key="item.value"
               :active="item.selected"
               @click="item.selected = !item.selected"
+              
             >
               <v-list-item-title>{{ item.text }}</v-list-item-title>
             </v-list-item>
@@ -92,6 +93,10 @@ const props = defineProps({
   showSearchText: {
     type:Boolean,
     default: true
+  },
+  isReadOnly: {
+    type: Boolean,
+    default: false
   }
 });
 const boxOrigemTermo = ref("")
@@ -110,6 +115,7 @@ function adicionar() {
 }
 
 function removerItemOrigem(removerTodos = false) {
+  if (props.isReadOnly) return
   if (removerTodos == true) props.listOrigem.splice(0, props.listOrigem.length);
   else {
     props.listDestino.forEach((element) => {
@@ -120,12 +126,14 @@ function removerItemOrigem(removerTodos = false) {
 }
 
 function adicionarTodos() {
+  if (props.isReadOnly) return
   props.listDestino.push(...props.listOrigem);
   props.listOrigem.splice(0, props.listOrigem.length);
   ordernarLista(props.listDestino, "text");
 }
 
 function remover() {
+  if (props.isReadOnly) return
   let list = props.listDestino.slice();
   list.forEach((element) => {
     if (element.selected != undefined && element.selected == true) {
@@ -139,8 +147,10 @@ function remover() {
 }
 
 function removerTodos() {
-    props.listOrigem.push(...props.listDestino);
-    props.listDestino.splice(0, props.listDestino.length);
+  if (props.isReadOnly) return
+    
+  props.listOrigem.push(...props.listDestino);
+  props.listDestino.splice(0, props.listDestino.length);
   ordernarLista(props.listOrigem, "text");
 }
 

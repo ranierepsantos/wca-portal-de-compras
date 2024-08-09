@@ -42,7 +42,7 @@ namespace wca.share.application.Features.Vagas.Commands
         bool TemCNH,
         string? CategoriaCNH,
         bool TemValeTransporte,
-        string? ValorValeTransporte, 
+        decimal? ValorValeTransporte, 
         int? DiasValeTransporte,
         string? Refeicao, 
         string? OutrosBeneficios,
@@ -54,7 +54,9 @@ namespace wca.share.application.Features.Vagas.Commands
         DateTime? DataInicioPrevista ,
         bool TemCopiaAdmissaoCliente,
         bool TemIntegracaoCliente,
-        List<ListItem>? DocumentoComplementar,
+        string? HorarioIntegracao,
+        string? IntegracaoDiasSemana,
+        List<ListItem>? DocumentoComplementares,
         StatusSolicitacao? Status,
         int[]? NotificarUsuarioIds,
         string? UsuarioAtualizador
@@ -104,7 +106,7 @@ namespace wca.share.application.Features.Vagas.Commands
                 
                 data.DocumentoComplementares = new List<DocumentoComplementar>();
                 
-                List<int>? docsId = request.DocumentoComplementar?.Select(f => f.Value).ToList();
+                List<int>? docsId = request.DocumentoComplementares?.Select(f => f.Value).ToList();
                 if (docsId is not null && docsId.Any())
                 {
                     List<DocumentoComplementar> items = _repository.GetDbSet<DocumentoComplementar>()
