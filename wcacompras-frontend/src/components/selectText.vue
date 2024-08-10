@@ -13,7 +13,32 @@
       :rules="fieldRules"
       v-if="selectMode"
       :disabled="disabled"
-    ></v-autocomplete>
+      
+    >
+      <template v-slot:append v-if="buttonShow">
+      <v-icon
+        :icon="buttonIcon"
+        color="success"
+        size="small"
+        @click="$emit('buttonClick')"
+        :title="buttonTitle"
+        
+      ></v-icon>      
+    </template>
+
+    <template v-slot:append-inner>
+      <v-fade-transition leave-absolute>
+        <v-progress-circular
+          v-show="buttonLoading"
+          color="primary"
+          size="24"
+          :width="2"
+          indeterminate
+        ></v-progress-circular>
+      </v-fade-transition>
+    </template>
+    
+  </v-autocomplete>
     <v-text-field
       :label="labelText"
       type="text"
@@ -44,9 +69,17 @@ defineProps({
         type: Array,
         default: function() { return []; }
     },
-    disabled: { type: Boolean, default: false }
-
+    disabled: { type: Boolean, default: false },
+    buttonTitle: {type: String, default: 'Adicionar'},
+    buttonShow: {type: Boolean, default: false},
+    buttonIcon: {type: String, default: 'mdi-plus'},
+    buttonLoading: {type: Boolean, default: false}
 })
+//const emit = defineEmits(['buttonClick'])
 
+// function sendCommand() {
+//   console.log('buttonClick')
+//   emit('buttonClick')
+// }
 
 </script>

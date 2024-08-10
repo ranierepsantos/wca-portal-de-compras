@@ -31,19 +31,25 @@
                 <v-col>
                     <select-text
                         v-model="vaga.tipoContratoId"
-                        :combo-items="listTipoContrato"
+                        :combo-items="listEntidade['tipocontrato']"
                         :select-mode="true"
                         label-text="Tipo Contrato"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        button-title="Adicionar Tipo de Contrato"
+                        @button-click="abrirCadastroAuxiliar('TipoContrato')"
                     ></select-text>
                 </v-col>
                 <v-col>
                     <select-text
                         v-model="vaga.tipoFaturamentoId"
-                        :combo-items="listTipoFaturamento"
+                        :combo-items="listEntidade['tipofaturamento']"
                         :select-mode="true"
                         label-text="Tipo Faturamento"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        button-title="Adicionar Tipo de Faturamento"
+                        @button-click="abrirCadastroAuxiliar('TipoFaturamento')"
                     ></select-text>
                 </v-col>
               </v-row>
@@ -64,19 +70,25 @@
                 <v-col>
                     <select-text
                         v-model="vaga.gestorId"
-                        :combo-items="listGestor"
+                        :combo-items="listEntidade['gestor']"
                         :select-mode="true"
                         label-text="Gestor"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        button-title="Adicionar Gestor"
+                        @button-click="abrirCadastroAuxiliar('Gestor')"
                     ></select-text>
                 </v-col>
                 <v-col>
                     <select-text
                         v-model="vaga.funcaoId"
-                        :combo-items="listFuncao"
+                        :combo-items="listEntidade['funcao']"
                         :select-mode="true"
                         label-text="Função"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        button-title="Adicionar Função"
+                        @button-click="abrirCadastroAuxiliar('Funcao')"
                     ></select-text>
                 </v-col>
               </v-row>
@@ -161,10 +173,13 @@
                 <v-col>
                   <select-text
                         v-model="vaga.escolaridadeId"
-                        :combo-items="listEscolaridade"
+                        :combo-items="listEntidade['escolaridade']"
                         :select-mode="true"
                         label-text="Escolaridade"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        button-title="Adicionar Escolaridade"
+                        @button-click="abrirCadastroAuxiliar('Escolaridade')"
                     ></select-text>
                 </v-col>
               </v-row>
@@ -338,20 +353,28 @@
                 <v-col cols="4">
                   <select-text
                         v-model="vaga.escalaId"
-                        :combo-items="listEscala"
+                        :combo-items="listEntidade['escala']"
                         :select-mode="true"
                         label-text="Escala"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        button-title="Adicionar Escala"
+                        @button-click="abrirCadastroAuxiliar('Escala')"
                     ></select-text>
                 </v-col>
                 <v-col>
-                  <select-text
+                    <select-text
                         v-model="vaga.horarioId"
-                        :combo-items="listHorario"
+                        :combo-items="listEntidade['horario']"
                         :select-mode="true"
                         label-text="Horário"
                         :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                        :button-show="true"
+                        :button-loading="false"
+                        button-title="Adicionar Horário"
+                        @button-click="abrirCadastroAuxiliar('Horario')"
                     ></select-text>
+                    
                 </v-col>
               </v-row>
               <v-row>
@@ -409,11 +432,14 @@
               <v-row>
                 <v-col>
                   <box-transfer
-                    :list-origem="listDocumentoComplementar"
+                    :list-origem="listEntidade['documentocomplementar']"
                     :list-destino="vaga.documentoComplementares"
                     list-origem-titulo="Documentos Complementares"
                     list-destino-titulo="Documentos Complementares"
                     :show-search-text="false"
+                    :plus-button-show="true"
+                    plus-button-title="Adicionar Novo Documento Complementar"
+                    @plus-click="abrirCadastroAuxiliar('DocumentoComplementar')"
                   />
                 </v-col>
               </v-row>
@@ -433,6 +459,40 @@
           </v-card-text>
         </v-card>
       </v-container>
+      <v-dialog v-model="dialog" max-width="700" :absolute="false">
+        <v-card>
+          <v-card-title class="text-primary text-h5">
+            {{ dialogTitle }}
+          </v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="salvarEntidade()" ref="entidadeForm">
+              <v-row>
+                <v-col>
+                  <v-text-field label="Nome" v-model="entidade.nome" type="text" required variant="outlined" color="primary"
+                    :rules="[(v) => !!v || 'Nome é obrigatório']" density="compact"></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col class="text-right">
+                  <v-btn variant="outlined" color="primary" @click="fecharDialog()" :disabled="isSavingEntity">Cancelar</v-btn>
+                  <v-btn color="primary" type="submit" class="ml-3" :disabled="isSavingEntity">Salvar</v-btn>
+                  <v-fade-transition leave-absolute>
+                    <v-progress-circular
+                      v-show="isSavingEntity"
+                      color="primary"
+                      size="24"
+                      :width="2"
+                      indeterminate
+                      class="ml-3"
+                    ></v-progress-circular>
+                  </v-fade-transition>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-text>
+          <v-card-actions> </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
   </template>
   
@@ -448,8 +508,9 @@
   //Stores
   import { useAuthStore } from "@/store/auth.store";
   import {Vaga, useShareVagaStore} from "@/store/share/vaga.store";
-  import {useShareEntidadeAuxiliarStore} from "@/store/share/entidadesauxiliares.store"
+  import {EntidadeAuxiliar, useShareEntidadeAuxiliarStore} from "@/store/share/entidadesauxiliares.store"
   import { useShareClienteStore } from "@/store/share/cliente.store";
+  
 
   const isLoading = ref({
     form: true,
@@ -461,30 +522,49 @@
   const vagaStore = useShareVagaStore()
   const entidadeStore = useShareEntidadeAuxiliarStore();
   const listCliente = ref([]);
-  const listDocumentoComplementar = ref([]);
-  const listEscala = ref([]);
-  const listEscolaridade = ref([]);
-  const listFuncao = ref([]);
-  const listGestor = ref([]);
-  const listHorario = ref([]);
   const listMotivoContratacao = ref([]);
   const listSexo = ref([]);
-  const listTipoContrato = ref([]);
-  const listTipoFaturamento = ref([]);
+  const dialog = ref(false)
+  const dialogTitle = ref("")
+  const entidadeForm = ref(null)
+  const entidade = ref(new EntidadeAuxiliar());
+  const entidadeTipo = ref(null)
+  const entidadeTipos = ref([
+    {title: "Documento Complementar", type: "DocumentoComplementar"},
+    {title: "Escala", type: "Escala"},
+    {title: "Escolaridade", type: "Escolaridade"},
+    {title: "Função", type: "Funcao"},
+    {title: "Gestor", type: "Gestor"},
+    {title: "Horário", type: "Horario"},
+    {title: "Tipo de Contrato", type: "TipoContrato"},
+    {title: "Tipo de Faturamento", type: "TipoFaturamento"},
+  ])
+  const listEntidade = ref({
+    documentocomplementar: [],
+    escala : [],
+    escolaridade : [],
+    funcao : [],
+    gestor : [],
+    horario: [],
+    tipocontrato: [],
+    tipofaturamento: []
+  })
+  const isSavingEntity = ref(false)
+
 
   //VUE FUNCTIONS
   onBeforeMount(async () => {
     try {
       listCliente.value = await useShareClienteStore().toComboList(0, useAuthStore().user.id);
-      listDocumentoComplementar.value = await entidadeStore.getToComboList("DocumentoComplementar");
-      listEscala.value = await entidadeStore.getToComboList("Escala");
-      listEscolaridade.value = await entidadeStore.getToComboList("Escolaridade");
-      listFuncao.value = await entidadeStore.getToComboList("Funcao");
-      listGestor.value = await entidadeStore.getToComboList("Gestor");
-      listHorario.value = await entidadeStore.getToComboList("Horario");
+      listEntidade.value["documentocomplementar"] = await entidadeStore.getToComboList("DocumentoComplementar");
+      listEntidade.value["escala"] = await entidadeStore.getToComboList("Escala");
+      listEntidade.value["escolaridade"] = await entidadeStore.getToComboList("Escolaridade");
+      listEntidade.value["funcao"] = await entidadeStore.getToComboList("Funcao");
+      listEntidade.value["gestor"] = await entidadeStore.getToComboList("Gestor");
+      listEntidade.value["horario"] = await entidadeStore.getToComboList("Horario");
       listMotivoContratacao.value = await entidadeStore.getToComboList("MotivoContratacao");
-      listTipoContrato.value = await entidadeStore.getToComboList("TipoContrato");
-      listTipoFaturamento.value = await entidadeStore.getToComboList("TipoFaturamento");
+      listEntidade.value["tipocontrato"] = await entidadeStore.getToComboList("TipoContrato");
+      listEntidade.value["tipofaturamento"] = await entidadeStore.getToComboList("TipoFaturamento");
       listSexo.value = [{value: 3, text: "Indiferente"},{value: 2, text: "Feminino"},{value: 1, text: "Masculino"}]
     } catch (error) {
       console.debug("create.beforeMount.error", error);
@@ -496,6 +576,23 @@
   
   
   //FUNCTIONS
+  function abrirCadastroAuxiliar(_entidade) {
+    
+    entidadeTipo.value = entidadeTipos.value.find(q =>  q.type == _entidade);
+
+    entidade.value = new EntidadeAuxiliar();
+    dialogTitle.value = `Novo(a) ${entidadeTipo.value.title}`;
+    dialog.value  = true
+  }
+  
+  function fecharDialog()
+  {
+    dialog.value = false;
+    entidadeForm.value.reset()
+    entidade.value = new EntidadeAuxiliar();
+    entidadeTipo.value = null;
+  }
+
   async function salvar() {
     try {
       isLoading.value.save = true;
@@ -525,6 +622,47 @@
       handleErrors(error);
     }finally {
       isLoading.value.save = false;
+    }
+  }
+
+  async function salvarEntidade()
+  {
+    try
+    {
+      let { valid } = await entidadeForm.value.validate();
+      if (valid)
+      {
+        isSavingEntity.value = true
+        let data = entidade.value;
+        let response = null
+        if (data.id == 0)
+        {
+          response = await useShareEntidadeAuxiliarStore().add(entidadeTipo.value.type, data);
+        } else
+        {
+          response = await useShareEntidadeAuxiliarStore().update(entidadeTipo.value.type, data);
+        }
+        
+        listEntidade.value[entidadeTipo.value.type.toLowerCase()] = await entidadeStore.getToComboList(entidadeTipo.value.type);
+
+        fecharDialog();
+        
+        swal.fire({
+          toast: true,
+          icon: "success",
+          position: "top-end",
+          title: "Sucesso!",
+          text: "Dados salvos com sucesso!",
+          showConfirmButton: false,
+          timer: 2000,
+        })
+      }
+    } catch (error)
+    {
+      console.error("salvarEntidade.error:", error);
+      handleErrors(error)
+    }finally {
+      isSavingEntity.value = false
     }
   }
   </script>
