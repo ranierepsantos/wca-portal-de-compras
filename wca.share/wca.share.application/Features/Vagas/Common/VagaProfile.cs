@@ -21,6 +21,7 @@ namespace wca.share.application.Features.Vagas.Common
                 .ForMember(dest => dest.EscolaridadeNome, opt => opt.MapFrom(src => src.Escolaridade.Nome))
                 .ForMember(dest => dest.FuncaoNome, opt => opt.MapFrom(src => src.Funcao.Nome))
                 .ForMember(dest => dest.GestorNome, opt => opt.MapFrom(src => src.Gestor.Nome))
+                .ForMember(dest => dest.ResponsavelNome, opt => opt.MapFrom(src => src.Responsavel.Nome))
                 .ForMember(dest => dest.HorarioNome, opt => opt.MapFrom(src => src.Horario.Nome))
                 .ForMember(dest => dest.MotivoContratacaoNome, opt => opt.MapFrom(src => src.MotivoContratacao.Nome))
                 .ForMember(dest => dest.SexoNome, opt => opt.MapFrom(src => src.Sexo.Nome))

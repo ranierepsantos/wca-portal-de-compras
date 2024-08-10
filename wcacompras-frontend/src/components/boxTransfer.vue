@@ -25,30 +25,44 @@
     <v-col cols="1">
       <v-icon
         icon="mdi-chevron-double-right"
-        color="success"
+        color="primary"
         size="x-large"
         @click="adicionarTodos()"
+        title="Adicionar todos items na lista"
       ></v-icon
       ><br />
       <v-icon
         icon="mdi-chevron-right"
-        color="success"
+        color="primary"
         size="x-large"
         @click="adicionar()"
+        title="Adicionar item na lista"
       ></v-icon
       ><br />
       <v-icon
         icon="mdi-chevron-double-left"
-        color="success"
+        color="primary"
         size="x-large"
         @click="removerTodos()"
-      ></v-icon
-      ><br />
+        title="Remover todos os item da lista"
+      ></v-icon>
+      <br />
       <v-icon
         icon="mdi-chevron-left"
-        color="success"
+        color="primary"
         size="x-large"
         @click="remover()"
+        title="Remover item da lista"
+      ></v-icon>
+      <br />
+      <br />
+      <v-icon
+        icon="mdi-plus"
+        color="success"
+        size="x-large"
+        @click="$emit('plusClick')"
+        v-show="plusButtonShow"
+        :title="plusButtonTitle"
       ></v-icon>
     </v-col>
     <v-col cols="5" >
@@ -97,7 +111,16 @@ const props = defineProps({
   isReadOnly: {
     type: Boolean,
     default: false
+  }, 
+  plusButtonShow: {
+    type: Boolean,
+    default: false
+  },
+  plusButtonTitle: {
+    type: String,
+    default: 'Adicionar'
   }
+
 });
 const boxOrigemTermo = ref("")
 const boxDestinoTermo = ref("")

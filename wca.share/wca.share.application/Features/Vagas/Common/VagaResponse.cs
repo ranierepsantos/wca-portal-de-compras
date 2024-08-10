@@ -1,5 +1,4 @@
 ﻿using wca.share.application.Common;
-using wca.share.application.Features.Solicitacoes.Common;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Vagas.Common
@@ -22,6 +21,8 @@ namespace wca.share.application.Features.Vagas.Common
         public int HorarioId { get; set; }
         public string? HorarioNome { get; set; }
         public DateTime DataSolicitacao { get; set; }
+        public int ResponsavelId { get; set; }
+        public string? ResponsavelNome { get; set; }
         public int StatusSolicitacaoId { get; set; }
         public string? StatusSolicitacaoNome { get; set; }
         public int QuantidadeVagas { get; set; }

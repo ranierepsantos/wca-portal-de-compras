@@ -1,7 +1,7 @@
 <template>
   <div>
     <bread-crumbs
-      :show-button="authStore.hasPermissao('livre')"
+      :show-button="authStore.hasPermissao('vaga-criar')"
       :title="getPageTitle(pageTipo.id)"
       @novoClick="toPage()"
     />
@@ -213,7 +213,6 @@ import router from "@/router";
 import moment from "moment";
 import { useShareVagaStore } from "@/store/share/vaga.store";
 import historico from "@/components/reembolso/historico.vue";
-import { realizarDownload } from "@/helpers/functions";
 import filialService from "@/services/filial.service";
 import { useAuthStore } from "@/store/auth.store";
 import { onBeforeMount } from "vue";
@@ -222,6 +221,7 @@ import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import { getPageTitle } from "@/helpers/share/data";
 import { useRoute } from "vue-router";
 import { compararValor } from "@/helpers/functions";
+
 //DATA
 const route = useRoute();
 const authStore = useAuthStore();

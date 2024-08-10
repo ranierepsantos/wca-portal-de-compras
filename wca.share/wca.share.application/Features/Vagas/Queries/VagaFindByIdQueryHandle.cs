@@ -44,6 +44,7 @@ namespace wca.share.application.Features.Vagas.Queries
                                 .Include(q => q.StatusSolicitacao)
                                 .Include(q => q.TipoContrato)
                                 .Include(q => q.TipoFaturamento)
+                                .Include(q => q.Responsavel)
                                 .Include(q => q.VagaHistorico.OrderByDescending(f => f.DataHora))
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 if (data == null)

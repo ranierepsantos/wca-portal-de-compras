@@ -50,6 +50,8 @@ export class Vaga {
         this.permiteFumante = data.permiteFumante || 0;
         this.escolaridadeId = data.escolaridadeId || null;
         this.escolaridadeNome = data.escolaridadeNome || null;
+        this.responsavelId = data.responsavelId || null;
+        this.responsavelNome = data.responsavelNome || null;
         this.localResidencia = data.localResidencia || null;
         this.experienciaProfissinal = data.experienciaProfissinal || null;
         this.descricaoAtividades = data.descricaoAtividades || null;
@@ -93,12 +95,13 @@ export const useShareVagaStore = defineStore("shareVaga", {
     actions: {
         async add (data) {
             try {
-                let checarAprovacao = true;
+                let checarAprovacao = false;
                 //traz o status inicial da solicitação
                 let notificacaopermissao = 'vaga-executar'
                 data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
                 if (data.integracaoDiasSemana)
                     data.integracaoDiasSemana = data.integracaoDiasSemana.join(',')
+                
                 //verifica se requer aprovação
                 if (checarAprovacao){
                     let configuracao = (await configuracaoService.getByChave('vaga.requer.aprovacao')).data;
@@ -130,28 +133,9 @@ export const useShareVagaStore = defineStore("shareVaga", {
                 throw error
             }
         },
-        async update (data) {
+        async changeStatus (data) {
             try {
-                let notificacaopermissao = 'vaga-executar'
-                data.status = this.statusSolicitacao.find(x => x.statusIntermediario.toLowerCase() == 'pendente');
-                if (data.integracaoDiasSemana)
-                    data.integracaoDiasSemana = data.integracaoDiasSemana.join(',')
-                data.permiteFumante = data.permiteFumante == 1 ? true : false; 
-                data.temCNH = data.temCNH == 1 ? true : false; 
-                data.temCopiaAdmissaoCliente = data.temCopiaAdmissaoCliente == 1 ? true : false; 
-                data.temInsalubridade = data.temInsalubridade == 1 ? true : false; 
-                data.temIntegracaoCliente = data.temIntegracaoCliente == 1 ? true : false; 
-                data.temPericulosidade = data.temPericulosidade == 1 ? true : false; 
-                data.temValeTransporte = data.temValeTransporte == 1 ? true : false; 
-
-                //retorna a lista de usuários que serão notificados
-                data.notificarUsuarioIds = []
-                if (data.status.notifica == 1)
-                {
-                    let notificaList = await useShareUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, notificacaopermissao)
-                    data.notificarUsuarioIds = notificaList.map(q => {return q.value})
-                }
-                await api.put(rotas.Update, data);
+                await api.put(rotas.AlterarStatus, data);
             } catch (error) {
                 throw error
             }
@@ -207,5 +191,33 @@ export const useShareVagaStore = defineStore("shareVaga", {
                 throw error
             }  
         },
+        async update (data, sendNotificacao = false) {
+            try {
+                let notificacaopermissao = 'vaga-executar'
+                
+                if (data.integracaoDiasSemana)
+                    data.integracaoDiasSemana = data.integracaoDiasSemana.join(',')
+                
+                data.permiteFumante = data.permiteFumante == 1 ? true : false; 
+                data.temCNH = data.temCNH == 1 ? true : false; 
+                data.temCopiaAdmissaoCliente = data.temCopiaAdmissaoCliente == 1 ? true : false; 
+                data.temInsalubridade = data.temInsalubridade == 1 ? true : false; 
+                data.temIntegracaoCliente = data.temIntegracaoCliente == 1 ? true : false; 
+                data.temPericulosidade = data.temPericulosidade == 1 ? true : false; 
+                data.temValeTransporte = data.temValeTransporte == 1 ? true : false; 
+
+                //retorna a lista de usuários que serão notificados
+                data.notificarUsuarioIds = []
+                if (data.status.notifica == 1 && sendNotificacao)
+                {
+                    let notificaList = await useShareUsuarioStore().getUsuarioToNotificacaoByCliente(data.clienteId, notificacaopermissao)
+                    data.notificarUsuarioIds = notificaList.map(q => {return q.value})
+                }
+                await api.put(rotas.Update, data);
+            } catch (error) {
+                throw error
+            }
+        },
+        
     }
 });

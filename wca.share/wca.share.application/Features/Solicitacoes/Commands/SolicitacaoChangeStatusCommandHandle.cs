@@ -5,9 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using wca.share.application.Contracts;
 using wca.share.application.Contracts.Persistence;
-using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
-using wca.share.application.Features.Solicitacoes.Common;
 using wca.share.application.Features.Solicitacoes.Queries;
 using wca.share.domain.Entities;
 

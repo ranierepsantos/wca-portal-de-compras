@@ -138,8 +138,6 @@ import { useRoute } from "vue-router";
       pageInfo.value.singleTitle = "Escolaridade";
       pageInfo.value.entidade = "Escolaridade";
     }
-  console.debug('PageInfo', pageInfo.value)
-    
   } catch (error) {
   } finally {
     isBusy.value = true;

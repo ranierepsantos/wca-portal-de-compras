@@ -3,8 +3,11 @@
       <Breadcrumbs
         title="Vagas"
         :show-button="false"
-        :buttons="[{ text: 'Salvar', icon: '', event: 'salvar-click', disabled: isLoading.save }]"
+        :buttons="getButtons()"      
         @salvar-click="salvar()"
+        @aprovar-click ="openAprovacaoForm=true"
+        @nofiticar-click="openNotificacao=true"
+        @finalizar-click="FinalizarSolicitacao()"
       />
       <v-progress-linear
         color="primary"
@@ -16,6 +19,17 @@
         <v-card class="mx-auto">
           <v-card-text>
             <v-form ref="mForm" lazy-validation>
+              <v-row>
+                <v-col  class="text-right">
+                  <v-btn
+                    :color="vaga.status.color"
+                    variant="tonal"
+                    class="text-center"
+                  >
+                    {{ vaga.status.statusIntermediario }}
+                  </v-btn>
+                </v-col>
+              </v-row>
               <v-row>
                 <v-col>
                     <select-text
@@ -52,6 +66,17 @@
               </v-row>
               <v-row>
                 <v-col>
+                  <select-text
+                      v-model="vaga.responsavelId"
+                      :combo-items="listResponsavel"
+                      :select-mode="vaga.statusSolicitacaoId != 3"
+                      label-text="Responsável"
+                      :text-field-value ="vaga.responsavelNome"
+                  ></select-text>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
                   <v-textarea
                     variant="outlined"
                     label="Endereço Cliente"
@@ -59,6 +84,8 @@
                     v-model="vaga.enderecoCliente"
                     rows="2"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-textarea>
                 </v-col>
@@ -95,6 +122,8 @@
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     type="number"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -117,6 +146,8 @@
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     type="number"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -129,6 +160,8 @@
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     type="number"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -142,6 +175,8 @@
                     v-model="vaga.indicacao"
                     rows="2"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-textarea>
                 </v-col>
@@ -186,6 +221,8 @@
                     v-model="vaga.justificativaContratacao"
                     rows="2"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-textarea>
                 </v-col>
@@ -199,6 +236,8 @@
                     v-model="vaga.localResidencia"
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -210,6 +249,8 @@
                     v-model="vaga.experienciaProfissinal"
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -223,6 +264,8 @@
                     v-model="vaga.descricaoAtividades"
                     rows="2"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-textarea>
                 </v-col>
@@ -262,6 +305,8 @@
                     color="primary"
                     :number-decimal="2"
                     prefix="R$"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   ></v-text-field-money>
                 </v-col>
                 <v-col>
@@ -273,6 +318,8 @@
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                     type="number"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -286,6 +333,8 @@
                     v-model="vaga.refeicao"
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -297,6 +346,8 @@
                     v-model="vaga.outrosBeneficios"
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
@@ -309,6 +360,8 @@
                     color="primary"
                     :number-decimal="2"
                     prefix="R$"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   ></v-text-field-money>
                 </v-col>
                 <v-col>
@@ -327,6 +380,8 @@
                     color="primary"
                     :number-decimal="2"
                     sufix="%"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   ></v-text-field-money>
                 </v-col>
                 <v-col>
@@ -345,6 +400,8 @@
                     color="primary"
                     :number-decimal="2"
                     sufix="%"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   ></v-text-field-money>
                 </v-col>
               </v-row>
@@ -379,6 +436,8 @@
                     variant="outlined"
                     class="text-primary"
                     density="compact"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   ></v-text-field>
                 </v-col>
                 <v-col>
@@ -410,19 +469,19 @@
                     v-model="vaga.horarioIntegracao"
                     density="compact"
                     :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+                    :readOnly="true"
+                    :bg-color="readOnly? '#f2f2f2':''"
                   >
                   </v-text-field>
                 </v-col>
                 <v-col>
-                  <v-select
-                    label="Dias da Semana"
-                    :items="['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sabádo']"
-                    multiple
-                    variant="outlined"
-                    density="compact"
-                    v-model="vaga.integracaoDiasSemana"
-                    :readOnly="true"
-                  ></v-select>
+                  <select-text
+                        v-model="vaga.integracaoDiasSemanas"
+                        :combo-items="listDiasSemana"
+                        :select-mode="false"
+                        label-text="Dias da Semana"
+                        :text-field-value ="integracaoDiasSemanaText"
+                    ></select-text>
                 </v-col>
               </v-row>
               <v-row>
@@ -445,23 +504,52 @@
                     class="text-primary"
                     v-model="vaga.anotacoes"
                     rows="2"
-                    :field-rules="[(v) => !!v || 'Campo é obrigatório']"
                   ></v-textarea>
                 </v-col>
               </v-row>
             </v-form>
           </v-card-text>
         </v-card>
+        <br/>
         <historico :eventos="vaga.vagaHistorico" />
       </v-container>
+      <!---->
+      <v-dialog
+        v-model="openNotificacao"
+        max-width="800"
+        :absolute="false"
+        persistent
+      >
+        <NotificacaoEnvio 
+          :usuario-list="listResponsavel" 
+          @closeForm="openNotificacao=false"
+          entidade="Vaga"
+          :entidade-id="vaga.id"
+        />
+      </v-dialog>
+      <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
+      <v-dialog
+        v-model="openAprovacaoForm"
+        max-width="700"
+        :absolute="false"
+        persistent
+      >
+          <aprovar-rejeitar-form
+            title="Vaga - Aprovar / Reprovar"
+            @aprovar-click="aprovarReprovar(true, $event)"
+            @reprovar-click="aprovarReprovar(false, $event)"
+            @close-form="openAprovacaoForm = false"
+            :is-running-event="isRunningEvent"
+            reprovar-title="Reprovar"
+          />
+      </v-dialog>
     </div>
-  </template>
+</template>
   
-  <script setup>
-  import { onBeforeMount, ref,inject } from "vue";
+<script setup>
+  import {computed, onBeforeMount, ref, inject, watch } from "vue";
   import handleErrors from "@/helpers/HandleErrors";
   import router from "@/router";
-  import moment from "moment";
   import { useRoute } from "vue-router";
   //Components
   import selectText from "@/components/selectText.vue"
@@ -469,13 +557,16 @@
   import boxTransfer from "@/components/boxTransfer.vue";
   import historico from "@/components/reembolso/historico.vue";
   import Breadcrumbs from "@/components/breadcrumbs.vue";
+  import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
+  import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
   //Stores
   import { useAuthStore } from "@/store/auth.store";
   import {Vaga, useShareVagaStore} from "@/store/share/vaga.store";
   import {useShareEntidadeAuxiliarStore} from "@/store/share/entidadesauxiliares.store"
   import { useShareClienteStore } from "@/store/share/cliente.store";
   import { useShareUsuarioStore } from "@/store/share/usuario.store";
-
+import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
+  //Data
   const isLoading = ref({
     form: true,
     save: false,
@@ -498,6 +589,17 @@
   const listTipoContrato = ref([]);
   const listTipoFaturamento = ref([]);
   const listResponsavel = ref([]);
+  const openNotificacao = ref(false)
+  const openAprovacaoForm = ref(false)
+  const isRunningEvent = ref(false)
+  const listDiasSemana = [
+    {value: 'Segunda', text: 'Segunda'},
+    {value: 'Terça', text: 'Terça'},
+    {value: 'Quarta', text: 'Quarta'},
+    {value: 'Quinta', text: 'Quinta'},
+    {value: 'Sexta', text: 'Sexta'},
+    {value: 'Sabádo', text: 'Sabádo'},
+  ]
   //VUE FUNCTIONS
   onBeforeMount(async () => {
     try {
@@ -517,13 +619,11 @@
       listTipoContrato.value = await entidadeStore.getToComboList("TipoContrato");
       listTipoFaturamento.value = await entidadeStore.getToComboList("TipoFaturamento");
       listSexo.value = [{value: 3, text: "Indiferente"},{value: 2, text: "Feminino"},{value: 1, text: "Masculino"}]
-
       vaga.value = await vagaStore.getById(route.query.id)
+      vaga.value.status = useShareSolicitacaoStore().getStatus(vaga.value.statusSolicitacaoId);
       documentoComplementarListRemove()
 
-      listResponsavel.value = await useShareUsuarioStore()
-                                    .getListByCliente(vaga.value.clienteId);
-
+      
     } catch (error) {
       console.debug("create.beforeMount.error", error);
       handleErrors(error);
@@ -532,8 +632,160 @@
     }
   });
   
-  
+  //COMPUTED
+  const readOnly = computed(() => {
+    return true
+    //return vaga.value.status.status.toLowerCase() == 'concluído' || vaga.value.status.autorizar
+  })
+
+  const integracaoDiasSemanaText = computed(() => {
+    if (vaga.value.integracaoDiasSemana)
+      return vaga.value.integracaoDiasSemana.join(', ')
+    else 
+      return ''
+  })
+
+  //WATCH
+  watch(
+  () => vaga.value.clienteId,
+  async (clienteId) => {
+    try {
+      if (clienteId) {
+        listResponsavel.value = await useShareUsuarioStore()
+                                      .getListByCliente(clienteId);
+      }
+    } catch (error) {
+      handleErrors(error);
+    }
+  }
+);
+
+
   //FUNCTIONS
+  async function alterarStatus(dado, status, evento, notificarPermissao) {
+    let notificarUsuario = []
+      if (status.notifica == 1) //verificar se precisa notificar
+        notificarUsuario = await useShareSolicitacaoStore().retornaUsuariosParaNotificar(status, dado.clienteId, notificarPermissao)
+      
+      let solicitacaoStatus = {
+        vagaId: dado.id,
+        evento: evento,
+        status: status,
+        notificar: notificarUsuario
+      };
+      
+      await vagaStore.changeStatus(solicitacaoStatus);
+  }
+
+  async function aprovarReprovar(isAprovado, comentario) {
+    isRunningEvent.value = true;
+    try
+    {
+      let status = null;
+      let texto  = null;
+      let permissaoNotificar = 'vaga'
+      if (!isAprovado) {
+        vaga.value.statusSolicitacaoId = 5; //reprovado
+        permissaoNotificar += '-criar'
+      }
+      else 
+      {
+        //checar através do status atual, qual é o proximo status
+        if (vaga.value.status && vaga.value.status.proximoStatusId)
+          vaga.value.statusSolicitacaoId = vaga.value.status.proximoStatusId
+
+        permissaoNotificar += '-executar'
+      }
+      status = useShareSolicitacaoStore().getStatus(vaga.value.statusSolicitacaoId);
+      
+      texto = `Solicitação  <b>${ isAprovado ? "APROVADA" : "REPROVADA"}</b> por ${useAuthStore().user.nome}!`
+      if (isAprovado)
+        texto += `<br/>Status alterado para <b>${status.statusIntermediario}</b>.`
+
+      if (comentario && comentario.trim() != ""){
+        texto += `<br/>Comentário: ${comentario}`
+      }
+      
+      await alterarStatus(vaga.value, status, texto, permissaoNotificar);
+      
+      openAprovacaoForm.value = false;
+
+      let mensagem = (isAprovado ? "Aprovação" : "Reprovação") + " realizada com sucesso!";
+      
+      swal.fire({
+        toast: true,
+        icon: "success",
+        index: "top-end",
+        title: "Sucesso!",
+        html: mensagem,
+        showConfirmButton: false,
+        timer: 4000,
+      });
+
+      router.push({ name: "shareVagas"});
+    } catch (error) {
+      console.error("aprovarReprovar.error:", error);
+      handleErrors(error);
+    } finally {
+      isRunningEvent.value = false;
+    }
+  }
+
+  function documentoComplementarListRemove(removerTodos = false) {
+    if (removerTodos == true) listDocumentoComplementar.value.splice(0, listDocumentoComplementar.value.length);
+    else {
+      vaga.value.documentoComplementares.forEach((cc) => {
+        let index = listDocumentoComplementar.value.findIndex((c) => c.value == cc.value);
+        if (index > -1) listDocumentoComplementar.value.splice(index, 1);
+      });
+    }
+  }
+
+  async function FinalizarSolicitacao() {
+    let options = {
+      title: "Confirmação",
+      html: "Confirma a finalização da vaga?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    };
+
+    let response = await swal.fire(options);
+    if (response.isConfirmed) {
+      let texto = `Solicitação  <b>FINALIZADA</b> por ${useAuthStore().user.nome}!`
+      let status = useShareSolicitacaoStore().getStatus(3)
+      await alterarStatus(vaga.value, status, texto, "")
+
+      await swal.fire({
+          toast: true,
+          icon: "success",
+          index: "top-end",
+          title: "Sucesso!",
+          text: "Solicitação finalizada com sucesso!",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      router.push({ name: "shareVagas" });
+    }
+
+  }
+
+  function getButtons() {
+    if (vaga.value.status.status.toLowerCase() == 'concluído')
+        return []
+    else if (useAuthStore().hasPermissao('vaga-executar') || useAuthStore().hasPermissao('vaga-finalizar')) 
+    {
+        let buttons = [{ text: 'Notificar', icon: '', event: 'nofiticar-click'}]
+        //let buttons = []
+        if (useAuthStore().hasPermissao('vaga-finalizar')){
+          buttons.push({ text: 'Finalizar', icon: '', event: 'finalizar-click'})
+        }
+        buttons.push({ text: 'Salvar', icon: '', event: 'salvar-click' })
+        return buttons;
+    }
+  }
+
   async function salvar() {
     try {
       isLoading.value.save = true;
@@ -542,27 +794,35 @@
   
       if (valid) {
         let data = {...vaga.value}
+        let enviarNotificacao = false
         data.UsuarioAtualizador = useAuthStore().user.nome;
         if (data.responsavelId && data.responsavelId > 0) {
-            let status = vagaStore().statusSolicitacao.find(
+            let status = vagaStore.statusSolicitacao.find(
                 (x) => x.status.toLowerCase() == "em andamento"
             );
-            if (status && data.statusSolicitacaoId != status.id)
-                data.statusSolicitacaoId = status.id;
-        }
 
-        await vagaStore.update(data);
+            if (status && data.statusSolicitacaoId != status.id) 
+            {
+              console.log('update.status', status)
+              data.statusSolicitacaoId = status.id;
+              data.status = {...status};
+              enviarNotificacao = true
+            }
+                
+        }
+        console.log('update.data', data)
+
+        await vagaStore.update(data, enviarNotificacao);
 
         await swal.fire({
           toast: true,
           icon: "success",
           index: "top-end",
           title: "Sucesso!",
-          text: "Solicitação criada com sucesso!",
+          text: "Solicitação atualizada com sucesso!",
           showConfirmButton: false,
           timer: 2000,
         });
-
         router.push({ name: "shareVagas"});
         
       }
@@ -574,15 +834,6 @@
     }
   }
 
-  function documentoComplementarListRemove(removerTodos = false) {
-  if (removerTodos == true) listDocumentoComplementar.value.splice(0, listDocumentoComplementar.value.length);
-  else {
-    vaga.value.documentoComplementares.forEach((cc) => {
-      let index = listDocumentoComplementar.value.findIndex((c) => c.value == cc.value);
-      if (index > -1) listDocumentoComplementar.value.splice(index, 1);
-    });
-  }
-}
 
 </script>
   

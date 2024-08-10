@@ -65,16 +65,16 @@ namespace wca.share.webapi.Controllers
 
         }
 
-        //[HttpPut("AlterarStatus")]
-        //public async Task<IActionResult> AlterarStatus([FromBody] VagaChangeStatusCommand command)
-        //{
-        //    var result = await _mediator.Send(command);
+        [HttpPut("AlterarStatus")]
+        public async Task<IActionResult> AlterarStatus([FromBody] VagaChangeStatusCommand command)
+        {
+            var result = await _mediator.Send(command);
 
-        //    if (result.IsError) { return Problem(result.Errors); }
+            if (result.IsError) { return Problem(result.Errors); }
 
-        //    return Ok(result.Value);
+            return Ok(result.Value);
 
-        //}
+        }
 
     }
 }

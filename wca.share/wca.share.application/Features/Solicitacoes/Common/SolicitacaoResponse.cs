@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
-using System.Text.Json.Serialization;
-using wca.share.application.Common;
+﻿using wca.share.application.Common;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Solicitacoes.Common

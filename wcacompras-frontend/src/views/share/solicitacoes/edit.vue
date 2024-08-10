@@ -88,15 +88,14 @@
         :entidade="permissao.charAt(0).toUpperCase() + permissao.slice(1)"
         :entidade-id="solicitacao.id"
       />
-                    
     </v-dialog>
     <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
     <v-dialog
-        v-model="openAprovacaoForm"
-        max-width="700"
-        :absolute="false"
-        persistent
-      >
+      v-model="openAprovacaoForm"
+      max-width="700"
+      :absolute="false"
+      persistent
+    >
         <aprovar-rejeitar-form
           :title="getPageTitle(solicitacao.solicitacaoTipoId) + ' - Aprovar / Reprovar'"
           @aprovar-click="aprovarReprovar(true, $event)"
@@ -105,7 +104,7 @@
           :is-running-event="isRunningEvent"
           reprovar-title="Reprovar"
         />
-      </v-dialog>
+    </v-dialog>
   </div>
 </template>
 
@@ -134,8 +133,8 @@ import router from "@/router";
 import { inject } from "vue";
 import Historico from "@/components/reembolso/historico.vue";
 import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
-import moment from "moment";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
+import moment from "moment";
 import { computed } from "vue";
 
 
@@ -152,8 +151,9 @@ const mForm = ref(null);
 const swal = inject("$swal");
 const openNotificacao = ref(false)
 const openAprovacaoForm = ref(false)
-const permissao = ref("")
 const isRunningEvent = ref(false)
+const permissao = ref("")
+
 const listItensMudanca = ref([])
 //VUE FUNCTIONS
 onBeforeMount(async () => {
