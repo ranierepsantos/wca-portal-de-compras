@@ -1,60 +1,93 @@
 <template>
   <div>
     <v-app-bar elevation="1" :height="orcamento!=null ? 84: 0" >
-    <v-row style="margin: 1px 0 1px 0;">
-      <v-col v-show="requisicao.cliente.naoUltrapassarLimitePorRequisicao">
-        <span style="font-size: 11px" class="text-grey text-left">
-          Valor Máximo Pedido
-        </span>
+      <v-row style="margin: 1px 0 1px 0;">
+        <v-col v-show="requisicao.cliente.naoUltrapassarLimitePorRequisicao">
+          <span style="font-size: 11px" class="text-grey text-left">
+            Valor Máximo Pedido
+          </span>
+          <v-progress-linear
+                    :color="
+                      (parseFloat(valorTotalPedido) / requisicao.cliente.valorLimiteRequisicao) *  100 > 100
+                        ? 'red'
+                        : (parseFloat(valorTotalPedido) /
+                        requisicao.cliente.valorLimiteRequisicao) *
+                            100 >
+                          60
+                        ? 'warning'
+                        : 'success'
+                    "
+                    :model-value="valorTotalPedido"
+                    :max="requisicao.cliente.valorLimiteRequisicao"
+                    :height="7"
+                    title="Valor Máximo Pedido"
+                  >
+                  </v-progress-linear>
+                  <span style="font-size: 11px" class="text-grey">
+                    {{ formatToCurrencyBRL(valorTotalPedido) }} /
+                    {{
+                      formatToCurrencyBRL(
+                        requisicao.cliente.valorLimiteRequisicao.toFixed(2)
+                      )
+                    }}
+                  </span>
+        </v-col>
+        <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
+          <span style="font-size: 11px" class="text-grey text-left">{{
+            config.nome
+          }}</span>
+          <v-progress-linear
+            :color="
+              config.percentual > 100
+                ? 'red'
+                : config.percentual > 60
+                ? 'warning'
+                : 'success'
+            "
+            :model-value="config.valorTotal"
+            :max="config.valorPedido * (1 + config.tolerancia / 100)+1"
+            :height="7"
+            :title="config.nome"
+          ></v-progress-linear>
+          <span style="font-size: 11px" class="text-grey"
+            >{{ formatToCurrencyBRL(config.valorTotal) }} /
+            {{
+              formatToCurrencyBRL(config.valorPedido * (1 + config.tolerancia / 100))
+            }}</span
+          >
+        </v-col>
+        <v-col>
+        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete</span><br/>
         <v-progress-linear
-                  :color="
-                    (parseFloat(valorTotalPedido) / requisicao.cliente.valorLimiteRequisicao) *  100 > 100
-                      ? 'red'
-                      : (parseFloat(valorTotalPedido) /
-                      requisicao.cliente.valorLimiteRequisicao) *
-                          100 >
-                        60
-                      ? 'warning'
-                      : 'success'
-                  "
-                  :model-value="valorTotalPedido"
-                  :max="requisicao.cliente.valorLimiteRequisicao"
-                  :height="7"
-                  title="Valor Máximo Pedido"
-                >
-                </v-progress-linear>
-                <span style="font-size: 11px" class="text-grey">
-                  {{ formatToCurrencyBRL(valorTotalPedido) }} /
-                  {{
-                    formatToCurrencyBRL(
-                      requisicao.cliente.valorLimiteRequisicao.toFixed(2)
-                    )
-                  }}
-                </span>
-      </v-col>
-      <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
-        <span style="font-size: 11px" class="text-grey text-left">{{
-          config.nome
-        }}</span>
-        <v-progress-linear
-          :color="
-            config.percentual > 100
-              ? 'red'
-              : config.percentual > 60
-              ? 'warning'
-              : 'success'
-          "
-          :model-value="config.valorTotal"
-          :max="config.valorPedido * (1 + config.tolerancia / 100)+1"
+          :color="TaxaGestaoMenosFreteColor"
+          :model-value="valorTotalPedidoSemTaxa"
+          :max="requisicao.fornecedor.valorCompraMinimoSemFrete"
           :height="7"
-          :title="config.nome"
+          title="Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete"
         ></v-progress-linear>
-        <span style="font-size: 11px" class="text-grey"
-          >{{ formatToCurrencyBRL(config.valorTotal) }} /
-          {{
-            formatToCurrencyBRL(config.valorPedido * (1 + config.tolerancia / 100))
-          }}</span
-        >
+        <span style="font-size: 11px" class="text-grey">
+          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }} /
+          {{ formatToCurrencyBRL(requisicao.fornecedor.valorCompraMinimoSemFrete) }} /
+          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa < requisicao.fornecedor.valorCompraMinimoSemFrete ? requisicao.fornecedor.valorFrete: 0) }}
+        </span>
+      </v-col>
+      </v-row>
+    </v-app-bar>
+    <v-app-bar :height="orcamento!=null ? 45: 0">
+    <v-row>  
+      <v-col>
+        <v-table >
+          <tbody>
+              <tr>
+                <td>Total Pedido: {{ formatToCurrencyBRL(valorTotalPedido) }}</td>
+                <td>Total S/Taxas: {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }}</td>
+                <td>Tx. Gestão :{{ formatToCurrencyBRL(requisicao.taxaGestao) }}</td>
+                <td>Frete: {{ formatToCurrencyBRL(requisicao.valorFrete) }}</td>
+                <td>Tx. Gestão - Frete: <span :class="'text-' + TaxaGestaoMenosFreteColor">{{ formatToCurrencyBRL(TaxaGestaoMenosFrete) }}</span></td>
+                <td>Tx. Gestão Miníma: {{ formatToCurrencyBRL(TaxaGestaoMinima) }}</td>
+              </tr>
+          </tbody>
+    </v-table>
       </v-col>
     </v-row>
   </v-app-bar>
@@ -681,9 +714,13 @@ const requisicao = ref({
   fornecedor: {
     text: "",
     value: "",
+    valorCompraMinimoSemFrete: 0,
+    valorFrete: 0
   },
   valorTotal: 0,
   taxaGestao: 0,
+  valorFrete: 0,
+  taxaGestaoCobrada: 0,
   status: null,
   destino: 0,
   usuarioId: null,
@@ -805,17 +842,28 @@ const valorTotalPedido = computed(() => {
   let valorIcms = 0;
 
   produtos.forEach((produto) => {
-    valorTotal +=
-      produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
-    valorTaxaGestao += produto.quantidade * produto.taxaGestao;
-    valorIcms +=
-      produto.quantidade *
-      parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
+    let produtoValor = produto.quantidade * parseFloat(retornarValorTotalProduto(produto))
+    let produtoTaxaGestao = produto.quantidade * parseFloat(produto.taxaGestao);
+    let produtoIcms = produto.quantidade * parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
+    valorTotal += produtoValor - produtoTaxaGestao
+    valorTaxaGestao += produtoTaxaGestao
+    valorIcms += produtoIcms;
+
+    console.debug("totais:", {
+      'produtovalor': produtoValor,
+      'produtoTaxaGestao': produtoTaxaGestao,
+      'produtoIcms': produtoIcms,
+      'valorTotal': valorTotal
+    })
+
   });
-  valorTotal = valorTotal.toFixed(2);
+  valorTotal = parseFloat(valorTotal.toFixed(2))
+             + parseFloat(PedidoValorFrete.value.toFixed(2))
+             + parseFloat(valorTaxaGestao.toFixed(2));
   requisicao.value.valorIcms = parseFloat(valorIcms.toFixed(2));
   requisicao.value.valorTotal = parseFloat(valorTotal);
   requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2));
+  requisicao.value.valorFrete = parseFloat(PedidoValorFrete.value.toFixed(2));
 
   return requisicao.value.valorTotal.toFixed(2);
 });
@@ -854,6 +902,46 @@ const hasChanged = computed(() => {
     .replaceAll(".00", "");
 
   return itensOriginals != itens;
+});
+
+const PedidoValorFrete = computed(() =>  {
+  return valorTotalPedidoSemTaxa.value < requisicao.value.fornecedor.valorCompraMinimoSemFrete ? requisicao.value.fornecedor.valorFrete: 0
+})
+
+const TaxaGestaoMinima = computed(() =>  {
+  let _taxaGestaoMinima = 0;
+  _taxaGestaoMinima = requisicao.value.taxaGestao * (requisicao.value.fornecedor.taxaGestaoMinimaPercentual /100)
+  return parseFloat(_taxaGestaoMinima.toFixed(2))
+})
+
+const TaxaGestaoMenosFrete = computed(() =>  {
+  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
+  return parseFloat(_valortaxaGestaoFinal.toFixed(2))
+})
+
+const TaxaGestaoMenosFreteColor = computed(() =>  {
+  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
+  if (_valortaxaGestaoFinal < 0) 
+    return 'red'
+  else if (_valortaxaGestaoFinal < TaxaGestaoMinima.value)
+    return 'orange'
+  else 
+    return 'green'
+})
+
+const valorTotalPedidoSemTaxa = computed(() => {
+  if (requisicao.value.requisicaoItens.length == 0) return 0;
+
+  let produtos = requisicao.value.requisicaoItens;
+  let valorTotal = 0;
+  
+  produtos.forEach((produto) => {
+    valorTotal +=
+      produto.quantidade * parseFloat(produto.valor.toFixed(2));
+  });
+  valorTotal = valorTotal.toFixed(2);
+  
+  return valorTotal
 });
 
 //METHODS
@@ -1038,7 +1126,6 @@ async function getRequisicaoData(id) {
     isBusy.value = true;
     let response = await requisicaoService.getById(id);
     let data = response.data;
-    console.debug("requisição: ", data);
     data.requisicaoHistorico.sort(compararValor("dataHora", "desc"));
     if (data.periodoEntrega == null || data.periodoEntrega.trim() == "") {
       data.periodoEntrega = requisicao.value.periodoEntrega;
@@ -1113,26 +1200,44 @@ async function salvar(forceUpdate = false) {
   try {
     isBusy.value = true;
     let data = {}
+    let saveData = false;
     if (forceUpdate) {
       //neste caso não deve ter alteração de dados, segue o original somente envia o status para retornar para aprovação
       data = checarSeRequerAprovacao({ ...requisicaoOriginal.value })
       data.status = -3 //retornar para aprovação
-    }else {
+      saveData = true;
+    } else {
       let { valid } = await formCadastro.value.validate();
       hasProduto.value = requisicao.value.requisicaoItens.length > 0;
+
+      //validar se taxa de gestão é maior q 0, isto é impeditivo
+      if (TaxaGestaoMenosFrete.value < 0) {
+        valid = false;
+        swal.fire({
+              icon: "error",
+              title: "Atenção",
+              text: "Pedido com taxa de gestão negativa, favor revisar o pedido!",
+            })
+        saveData = false;
+      }
 
       if (valid && hasProduto.value) {
         
         data = checarSeRequerAprovacao({ ...requisicao.value })
 
+        if (TaxaGestaoMenosFreteColor.value == 'orange')
+          data.requerAutorizacaoWCA = true; 
+      
         if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
           if (!authStore.hasPermissao("aprova_requisicao")) {
             let result = await swal.fire({
               icon: "warning",
               title: "Atenção",
-              text: "O pedido excedeu limites configurados, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
+              text: "O pedido não atendeu todos os requisitos, o administrador e/ou cliente deve aprovar para dar continuidade a solicitação!",
               confirmButtonText: "Estou ciente",
               focusConfirm: false,
+              cancelButtonText: "Cancelar",
+              showCancelButton: true,
             });
             if (!result.isConfirmed) {
               return;
@@ -1148,19 +1253,22 @@ async function salvar(forceUpdate = false) {
         }
       }
     }
+    if (saveData)
+    {
+      await requisicaoService.update(data);
 
-    await requisicaoService.update(data);
+      swal.fire({
+        toast: true,
+        icon: "success",
+        index: "top-end",
+        title: "Sucesso!",
+        text: "Dados salvos com sucesso!",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      router.push({ name: "requisicoes" });
 
-    swal.fire({
-      toast: true,
-      icon: "success",
-      index: "top-end",
-      title: "Sucesso!",
-      text: "Dados salvos com sucesso!",
-      showConfirmButton: false,
-      timer: 2000,
-    });
-    router.push({ name: "requisicoes" });
+    }
     
   } catch (error) {
     console.log("salvar.error:", error);

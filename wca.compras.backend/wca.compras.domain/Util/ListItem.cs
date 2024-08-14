@@ -13,5 +13,12 @@ namespace wca.compras.domain.Util
 
         public int? FilialId { get; set; }
     }
-    
+
+    public class ListItemFornecedor: ListItem
+    {
+        public decimal ValorFrete { get; set; }
+        public decimal ValorCompraMinimoSemFrete { get; set; }
+        public decimal TaxaGestaoMinimaPercentual { get; set; }
+    }
+
 }

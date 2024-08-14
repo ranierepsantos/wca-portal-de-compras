@@ -51,6 +51,15 @@ namespace wca.compras.domain.Entities
         [Column("filial_id")]
         public int FilialId { get; set; }
 
+        [Column("valor_frete", TypeName = "money")]
+        public decimal ValorFrete {  get; set; } = decimal.Zero;
+
+        [Column("valor_compra_minimo_sem_frete", TypeName = "money")]
+        public decimal ValorCompraMinimoSemFrete { get; set; } = decimal.Zero;
+
+        [Column("taxa_gestao_minima_percentual", TypeName = "decimal(4,2)")]
+        public decimal TaxaGestaoMinimaPercentual { get; set; } = decimal.Zero;
+
         public IList<Produto> Produtos { get; set; } = new List<Produto>();
 
         public IList<FornecedorContato> FornecedorContatos { get; set; } = new List<FornecedorContato>();

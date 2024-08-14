@@ -580,7 +580,7 @@ namespace wca.compras.services
 
             // Criar o pedido
             CreateRequisicaoDto novoPedido = new((int)requisicao.FilialId, (int)requisicao.ClienteId,
-                (int)requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.Destino,
+                (int)requisicao.FornecedorId, requisicao.ValorTotal, requisicao.TaxaGestao, requisicao.ValorFrete, requisicao.Destino,
                 requisicao.Endereco, requisicao.Numero, requisicao.Cep, requisicao.Cidade, requisicao.UF, usuarioId,
                 usuarioNome, itens, false, false, requisicao.ValorIcms, requisicao.PeriodoEntrega
             );
@@ -1092,7 +1092,7 @@ namespace wca.compras.services
             {
                 string consulta = "select r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
                             + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                            + "r.usuario_id, r.valor_icms, r.valor_total "
+                            + "r.usuario_id, r.valor_icms, r.valor_total, r.valor_frete "
                             + "from Requisicoes r "
                             + "inner join clientes c on c.id = r.cliente_id "
                             + "inner join ClienteUsuario cu on cu.ClienteId = c.id "
@@ -1101,7 +1101,7 @@ namespace wca.compras.services
                             + $"where cu.UsuarioId ={logedUserId}"
                             + "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
                             + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                            + "r.usuario_id, r.valor_icms, r.valor_total";
+                            + "r.usuario_id, r.valor_icms, r.valor_total, r.valor_frete ";
                 query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
             }
 

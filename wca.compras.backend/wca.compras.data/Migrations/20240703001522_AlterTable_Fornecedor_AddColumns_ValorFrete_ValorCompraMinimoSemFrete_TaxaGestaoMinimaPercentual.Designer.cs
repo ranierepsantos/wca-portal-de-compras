@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.compras.data.DataAccess;
 
@@ -11,9 +12,10 @@ using wca.compras.data.DataAccess;
 namespace wca.compras.data.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240703001522_AlterTable_Fornecedor_AddColumns_ValorFrete_ValorCompraMinimoSemFrete_TaxaGestaoMinimaPercentual")]
+    partial class AlterTable_Fornecedor_AddColumns_ValorFrete_ValorCompraMinimoSemFrete_TaxaGestaoMinimaPercentual
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -914,10 +916,6 @@ namespace wca.compras.data.Migrations
                     b.Property<int?>("UsuarioId")
                         .HasColumnType("int")
                         .HasColumnName("usuario_id");
-
-                    b.Property<decimal>("ValorFrete")
-                        .HasColumnType("money")
-                        .HasColumnName("valor_frete");
 
                     b.Property<decimal>("ValorIcms")
                         .HasColumnType("money")

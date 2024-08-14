@@ -20,6 +20,9 @@ namespace wca.compras.domain.Entities
         [Column("taxa_gestao", TypeName = "money")]
         public decimal TaxaGestao { get; set; } = 0;
 
+        [Column("valor_frete", TypeName = "money")]
+        public decimal ValorFrete { get; set; } = 0;
+
         [Column("status", TypeName = "tinyint")]
         public int Status { get; set; } = 0;
 
