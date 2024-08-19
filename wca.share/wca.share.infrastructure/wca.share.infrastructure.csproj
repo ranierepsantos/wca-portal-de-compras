@@ -21,4 +21,8 @@
     <ProjectReference Include="..\wca.share.domain\wca.share.domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Extensions\" />
+  </ItemGroup>
+
 </Project>

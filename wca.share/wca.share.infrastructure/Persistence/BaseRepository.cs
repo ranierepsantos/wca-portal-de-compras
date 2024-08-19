@@ -27,6 +27,11 @@ namespace wca.share.infrastruture.Persistence
            return _context.Set<T>().AsNoTracking();
         }
 
+        public IQueryable<T> FromQuery(string query)
+        {
+            return _context.Set<T>().FromSqlRaw(query).AsNoTracking();
+        }
+
         public async Task<int> ExecuteCommandAsync(string command)
         {
             int result = await _context.Database.ExecuteSqlRawAsync(command);

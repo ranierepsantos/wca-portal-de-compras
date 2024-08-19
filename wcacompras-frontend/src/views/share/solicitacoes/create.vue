@@ -20,30 +20,51 @@
               :solicitacao="solicitacao"
               :list-clientes="clienteList"
               :descricao-label="getObservacaoLabelDescricao(solicitacao.solicitacaoTipoId)"
-              :list-funcionarios="funcionarioList"
-              :list-centro-custos="centrosCustoList"
               :combo-tipo-show="comboTipoShow"
               :descricao-show="![2,4].includes(solicitacao.solicitacaoTipoId)"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
                 :create-mode="true"
-                :data-admissao="solicitacao.funcionarioDataAdmissao"
                 v-if="solicitacao.solicitacaoTipoId == 1"
+                :list-funcionarios="funcionarioList"
+                :list-centro-custos="centrosCustoList"
               />
               <Comunicado v-else-if="solicitacao.solicitacaoTipoId == 2" 
                 :data-model="solicitacao.comunicado"
                 :create-mode="true"
-                />
+                :list-funcionarios="funcionarioList"
+                :list-centro-custos="centrosCustoList"
+              />
               <Ferias v-else-if="solicitacao.solicitacaoTipoId == 3" 
-              :data-model="solicitacao.ferias"
-              :create-mode="true"/>
+                :data-model="solicitacao.ferias"
+                :create-mode="true"
+                :list-funcionarios="funcionarioList"
+                :list-centro-custos="centrosCustoList"
+              />
               <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" 
               :data-model="solicitacao.mudancaBase" 
+              :list-funcionarios="funcionarioList"
+              :list-centro-custos="centrosCustoList"
               :list-clientes="getClienteDestinoList()"
               :list-itens-mudanca="listItensMudanca"
               :cliente-selected="solicitacao.clienteId && solicitacao.clienteId > 0"
               :create-mode="true"/>
+              <vaga v-else-if="solicitacao.solicitacaoTipoId == 5"
+                :list-documento-complementar="listEntidade['documentocomplementar']"
+                :list-escala="listEntidade['escala']"
+                :list-escolaridade="listEntidade['escolaridade']"
+                :list-funcao="listEntidade['funcao']"
+                :list-gestor="listEntidade['gestor']"
+                :list-horario="listEntidade['horario']"
+                :list-motivo-contratacao="listEntidade['motivocontratacao']"
+                :list-sexo="listEntidade['sexo']"
+                :list-tipo-contrato="listEntidade['tipocontrato']"
+                :list-tipo-faturamento="listEntidade['tipofaturamento']"
+                :is-read-only="false"
+                :data-model="solicitacao.vaga"
+                @select-button-click="abrirCadastroAuxiliar($event)"
+              />
             </SolicitacaoForm>
 
             <table-file-upload 
@@ -55,6 +76,40 @@
         </v-card-text>
       </v-card>
     </v-container>
+    <v-dialog v-model="dialog" max-width="700" :absolute="false">
+        <v-card>
+          <v-card-title class="text-primary text-h5">
+            {{ dialogTitle }}
+          </v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="salvarEntidade()" ref="entidadeForm">
+              <v-row>
+                <v-col>
+                  <v-text-field label="Nome" v-model="entidade.nome" type="text" required variant="outlined" color="primary"
+                    :rules="[(v) => !!v || 'Nome é obrigatório']" density="compact"></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col class="text-right">
+                  <v-btn variant="outlined" color="primary" @click="fecharDialog()" :disabled="isSavingEntity">Cancelar</v-btn>
+                  <v-btn color="primary" type="submit" class="ml-3" :disabled="isSavingEntity">Salvar</v-btn>
+                  <v-fade-transition leave-absolute>
+                    <v-progress-circular
+                      v-show="isSavingEntity"
+                      color="primary"
+                      size="24"
+                      :width="2"
+                      indeterminate
+                      class="ml-3"
+                    ></v-progress-circular>
+                  </v-fade-transition>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-text>
+          <v-card-actions> </v-card-actions>
+        </v-card>
+      </v-dialog>
   </div>
 </template>
 
@@ -79,7 +134,8 @@ import router from "@/router";
 import {useShareFuncionarioStore} from "@/store/share/funcionario.store"
 import moment from "moment";
 import { useShareUsuarioStore } from "@/store/share/usuario.store";
-
+import { EntidadeAuxiliar, useShareEntidadeAuxiliarStore } from "@/store/share/entidadesauxiliares.store";
+import vaga from "@/components/share/vaga.vue";
 const isBusy = ref({
   form: true,
   save: false,
@@ -95,6 +151,38 @@ const swal = inject("$swal");
 const permissao = ref("")
 const tableUploadItems = ref([{text: "Outros"}])
 const listItensMudanca = ref([])
+const dialog = ref(false)
+const dialogTitle = ref("")
+const entidadeForm = ref(null)
+
+const entidadeStore = useShareEntidadeAuxiliarStore();
+const entidade = ref(new EntidadeAuxiliar());
+const entidadeTipo = ref(null)
+const entidadeTipos = ref([
+  {title: "Documento Complementar", type: "DocumentoComplementar"},
+  {title: "Escala", type: "Escala"},
+  {title: "Escolaridade", type: "Escolaridade"},
+  {title: "Função", type: "Funcao"},
+  {title: "Gestor", type: "Gestor"},
+  {title: "Horário", type: "Horario"},
+  {title: "Motivo Contratação", type: "MotivoContratacao"},
+  {title: "Tipo de Contrato", type: "TipoContrato"},
+  {title: "Tipo de Faturamento", type: "TipoFaturamento"},
+])
+const listEntidade = ref({
+  documentocomplementar: [],
+  escala : [],
+  escolaridade : [],
+  funcao : [],
+  gestor : [],
+  horario: [],
+  motivocontratacao: [],
+  sexo: [],
+  tipocontrato: [],
+  tipofaturamento: [],
+})
+const isSavingEntity = ref(false)
+
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -122,6 +210,19 @@ onBeforeMount(async () => {
       solicitacao.value.solicitacaoTipoId = 4;
       permissao.value = 'mudancabase' 
       listItensMudanca.value = await useShareSolicitacaoStore().getListaItensMudanca();
+    } else if (route.path.includes("vaga")) {
+      listEntidade.value["documentocomplementar"] = await entidadeStore.getToComboList("DocumentoComplementar");
+      listEntidade.value["escala"] = await entidadeStore.getToComboList("Escala");
+      listEntidade.value["escolaridade"] = await entidadeStore.getToComboList("Escolaridade");
+      listEntidade.value["funcao"] = await entidadeStore.getToComboList("Funcao");
+      listEntidade.value["gestor"] = await entidadeStore.getToComboList("Gestor");
+      listEntidade.value["horario"] = await entidadeStore.getToComboList("Horario");
+      listEntidade.value["motivocontratacao"]= await entidadeStore.getToComboList("MotivoContratacao");
+      listEntidade.value["tipocontrato"] = await entidadeStore.getToComboList("TipoContrato");
+      listEntidade.value["tipofaturamento"] = await entidadeStore.getToComboList("TipoFaturamento");
+      listEntidade.value["sexo"] = [{value: 3, text: "Indiferente"},{value: 2, text: "Feminino"},{value: 1, text: "Masculino"}]
+      solicitacao.value.solicitacaoTipoId = 5;
+      permissao.value = 'vaga' 
     }
 
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
@@ -143,7 +244,7 @@ watch(
       funcionarioList.value = [];
       centrosCustoList.value = [];
       if (clienteId) {
-        if (permissao.value = 'mudancabase')
+        if (permissao.value == 'mudancabase')
           solicitacao.value.mudancaBase.clienteDestinoId = null;
 
           solicitacao.value.funcionarioId = null
@@ -161,26 +262,10 @@ watch(
   }
 );
 
-watch(() => solicitacao.value.funcionarioId, () => {
-  
-  let oFunc = funcionarioList.value.find(q => q.value == solicitacao.value.funcionarioId)
-    solicitacao.value.centroCustoNome = null
-    solicitacao.value.centroCustoId = null
-    solicitacao.value.eSocialMatricula =null
-    solicitacao.value.funcionarioDataAdmissao =null
-  if (oFunc) {
-    solicitacao.value.centroCustoNome = oFunc.centroCustoNome
-    solicitacao.value.centroCustoId = oFunc.centroCustoId
-    solicitacao.value.eSocialMatricula = oFunc.eSocialMatricula
-    solicitacao.value.funcionarioDataAdmissao = moment(oFunc.dataAdmissao).format("YYYY-MM-DD");
-  }
-});
-
 watch(() => solicitacao.value.ferias.tipoFeriasId, (newvalue) => {
   
   let oTipo = useShareSolicitacaoStore().tipoFerias.find(q =>  q.id == newvalue)
   if (oTipo && solicitacao.value.ferias.dataSaida) {
-    console.debug(moment(solicitacao.value.ferias.dataSaida).add("days", oTipo.quantidadeDias))
     solicitacao.value.ferias.dataRetorno = moment(solicitacao.value.ferias.dataSaida).add("days",oTipo.quantidadeDias).format("YYYY-MM-DD")
   }
 });
@@ -191,7 +276,6 @@ watch(() => solicitacao.value.ferias.dataSaida, () => {
   {
     let oTipo = useShareSolicitacaoStore().tipoFerias.find(q =>  q.id == solicitacao.value.ferias.tipoFeriasId)
     if (oTipo && solicitacao.value.ferias.dataSaida) {
-      console.debug(moment(solicitacao.value.ferias.dataSaida).add("days", oTipo.quantidadeDias))
       solicitacao.value.ferias.dataRetorno = moment(solicitacao.value.ferias.dataSaida).add("days",oTipo.quantidadeDias).format("YYYY-MM-DD")
     }
   }
@@ -232,7 +316,7 @@ async function salvar() {
         showConfirmButton: false,
         timer: 2000,
       });
-
+      console.debug("router.push", { name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) })
       router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
     }
   } catch (error) {
@@ -247,4 +331,62 @@ function getClienteDestinoList()
     let lista = clienteList.value.filter(q => q.value != solicitacao.value.clienteId) ?? []
     return lista;
 }
+
+function abrirCadastroAuxiliar(_entidade) {
+    console.log(_entidade)
+    entidadeTipo.value = entidadeTipos.value.find(q =>  q.type == _entidade);
+
+    entidade.value = new EntidadeAuxiliar();
+    dialogTitle.value = `Novo(a) ${entidadeTipo.value.title}`;
+    dialog.value  = true
+  }
+  
+  function fecharDialog()
+  {
+    dialog.value = false;
+    entidadeForm.value.reset()
+    entidade.value = new EntidadeAuxiliar();
+    entidadeTipo.value = null;
+  }
+
+  async function salvarEntidade()
+  {
+    try
+    {
+      let { valid } = await entidadeForm.value.validate();
+      if (valid)
+      {
+        isSavingEntity.value = true
+        let data = entidade.value;
+        let response = null
+        if (data.id == 0)
+        {
+          response = await useShareEntidadeAuxiliarStore().add(entidadeTipo.value.type, data);
+        } else
+        {
+          response = await useShareEntidadeAuxiliarStore().update(entidadeTipo.value.type, data);
+        }
+        
+        listEntidade.value[entidadeTipo.value.type.toLowerCase()] = await entidadeStore.getToComboList(entidadeTipo.value.type);
+
+        fecharDialog();
+        
+        swal.fire({
+          toast: true,
+          icon: "success",
+          position: "top-end",
+          title: "Sucesso!",
+          text: "Dados salvos com sucesso!",
+          showConfirmButton: false,
+          timer: 2000,
+        })
+      }
+    } catch (error)
+    {
+      console.error("salvarEntidade.error:", error);
+      handleErrors(error)
+    }finally {
+      isSavingEntity.value = false
+    }
+  }
 </script>

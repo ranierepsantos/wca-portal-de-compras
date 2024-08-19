@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20240815164324_AlterTable_Solicitacao_CreateTable_SolicitacaoVagas_AlterChildTable_Solicitacoes")]
+    partial class AlterTable_Solicitacao_CreateTable_SolicitacaoVagas_AlterChildTable_Solicitacoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -592,7 +595,7 @@ namespace wca.share.infrastructure.Migrations
 
                     b.Property<int>("SolicitacaoTipoId")
                         .HasColumnType("int")
-                        .HasColumnName("solicitacaotipo_id");
+                        .HasColumnName("soliticacaotipo_id");
 
                     b.Property<int>("StatusSolicitacaoId")
                         .HasColumnType("int")
@@ -1247,6 +1250,38 @@ namespace wca.share.infrastructure.Migrations
                     b.ToTable("UsuarioConfiguracoes");
                 });
 
+            modelBuilder.Entity("wca.share.domain.Entities.VagaHistorico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataHora")
+                        .HasColumnType("smalldatetime")
+                        .HasColumnName("data_hora");
+
+                    b.Property<string>("Evento")
+                        .IsRequired()
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("evento");
+
+                    b.Property<int?>("SolicitacaoVagaSolicitacaoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VagaId")
+                        .HasColumnType("int")
+                        .HasColumnName("vaga_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SolicitacaoVagaSolicitacaoId");
+
+                    b.ToTable("VagaHistorico");
+                });
+
             modelBuilder.Entity("DocumentoComplementarSolicitacaoVaga", b =>
                 {
                     b.HasOne("wca.share.domain.Entities.DocumentoComplementar", null)
@@ -1630,6 +1665,13 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("wca.share.domain.Entities.VagaHistorico", b =>
+                {
+                    b.HasOne("wca.share.domain.Entities.SolicitacaoVaga", null)
+                        .WithMany("VagaHistorico")
+                        .HasForeignKey("SolicitacaoVagaSolicitacaoId");
+                });
+
             modelBuilder.Entity("wca.share.domain.Entities.CentroCusto", b =>
                 {
                     b.Navigation("UsuarioCentrodeCustos");
@@ -1657,6 +1699,11 @@ namespace wca.share.infrastructure.Migrations
                     b.Navigation("MudancaBase");
 
                     b.Navigation("Vaga");
+                });
+
+            modelBuilder.Entity("wca.share.domain.Entities.SolicitacaoVaga", b =>
+                {
+                    b.Navigation("VagaHistorico");
                 });
 
             modelBuilder.Entity("wca.share.domain.Entities.Usuario", b =>

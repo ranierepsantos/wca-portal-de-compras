@@ -289,17 +289,18 @@ export const share = {
       },
       {
         path: 'vagas',
-        name: 'shareVagas',
+        name: 'shareVaga',
         beforeEnter: protectRoute,
         meta: {permissao: "livre", sistema: 3},
-        component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas'),
+        //component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas'),
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes'),
       },
       {
         path: 'vagas/criar',
         name: 'shareVagaCreate',
         beforeEnter: protectRoute,
         meta: {permissao: "livre", sistema: 3},
-        component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas/create'),
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/create'),
       },
       {
         path: 'vagas/editar',
@@ -309,7 +310,7 @@ export const share = {
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "share" */ '../views/share/vagas/edit'),
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/edit'),
         props: route => ({ query: route.query.id })
       },
     ]

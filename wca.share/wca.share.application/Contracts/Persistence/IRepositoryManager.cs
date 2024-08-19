@@ -18,5 +18,7 @@ namespace wca.share.application.Contracts.Persistence
         Task SaveAsync();
         Task<int> ExecuteCommandAsync(string command);
         DbSet<T> GetDbSet<T>() where T : class;
+
+        IQueryable<T> FromQuery<T>(string query) where T : class;
     }
 }

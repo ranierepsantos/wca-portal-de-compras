@@ -127,6 +127,7 @@ const boxDestinoTermo = ref("")
 //FUNCTIONS
 
 function adicionar() {
+  if (props.isReadOnly) return
   let list = props.listOrigem.slice();
   list.forEach((element) => {
     if (element.selected != undefined && element.selected == true) {
