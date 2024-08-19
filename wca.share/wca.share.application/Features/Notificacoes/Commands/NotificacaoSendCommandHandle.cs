@@ -33,37 +33,20 @@ namespace wca.share.application.Features.Notificacoes.Commands
         {
             try
             {
-                if (request.Entidade.ToLower().Equals("vaga", StringComparison.OrdinalIgnoreCase))
+                
+                Solicitacao? solicitacao = await _repository.SolicitacaoRepository
+                                                            .ToQuery()
+                                                            .Where(q => q.Id.Equals(request.EntidadeId))
+                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                if (solicitacao == null)
                 {
-
-                    Vaga? vaga = await _repository.GetDbSet<Vaga>()
-                                                  .AsNoTracking()
-                                                  .FirstOrDefaultAsync(q => q.Id.Equals(request.EntidadeId));
-                    if (vaga == null)
-                    {
-                        _logger.LogError($"{request.Entidade} #{request.EntidadeId} não localizada!");
-                        return Error.NotFound(description: $"Não localizamos a {request.Entidade} #{request.EntidadeId}!");
-                    }
-                    else
-                        await _notificacaoHandle.VagaEnviarNotificacaoAsync(new int[] { request.UsuarioId }, request.Nota, vaga, cancellationToken);
-
+                    _logger.LogError($"Solicitacao #{request.EntidadeId} não localizada!");
+                    return Error.NotFound(description: $"Não localizamos a solicitação #{request.EntidadeId}!");
                 }
                 else
-                {
-                    Solicitacao? solicitacao = await _repository.SolicitacaoRepository
-                                                             .ToQuery()
-                                                             .Where(q => q.Id.Equals(request.EntidadeId))
-                                                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                    if (solicitacao == null)
-                    {
-                        _logger.LogError($"Solicitacao #{request.EntidadeId} não localizada!");
-                        return Error.NotFound(description: $"Não localizamos a solicitação #{request.EntidadeId}!");
-                    }
-                    else
-                        await _notificacaoHandle.SolicitacaoEnviarNotificacaoAsync(new int[] { request.UsuarioId }, request.Nota, solicitacao, cancellationToken);
+                    await _notificacaoHandle.SolicitacaoEnviarNotificacaoAsync(new int[] { request.UsuarioId }, request.Nota, solicitacao, cancellationToken);
 
-                }
-
+            
                 return true;
             }
             catch (Exception ex)

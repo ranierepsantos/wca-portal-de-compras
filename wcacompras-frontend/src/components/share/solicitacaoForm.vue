@@ -2,16 +2,14 @@
   <div>
     <v-row>
       <v-col v-show="solicitacao.id > 0" class="text-right">
-      <v-btn
-        :color="solicitacao.status.color"
-        variant="tonal"
-        class="text-center"
-      >
-        {{
-          solicitacao.status.statusIntermediario
-        }}</v-btn
-      >
-    </v-col>
+        <v-btn
+          :color="solicitacao.status.color"
+          variant="tonal"
+          class="text-center"
+        >
+          {{ solicitacao.status.statusIntermediario }}</v-btn
+        >
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="4" v-show="comboTipoShow">
@@ -19,7 +17,12 @@
           v-model="solicitacao.solicitacaoTipoId"
           :combo-items="TipoSolicitacao"
           :select-mode="solicitacao.id == 0"
-          :text-field-value="getTextFromListByCodigo(TipoSolicitacao, solicitacao.solicitacaoTipoId)"
+          :text-field-value="
+            getTextFromListByCodigo(
+              TipoSolicitacao,
+              solicitacao.solicitacaoTipoId
+            )
+          "
           label-text="Tipo Solicitação"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
@@ -38,47 +41,12 @@
     <v-row>
       <v-col>
         <select-text
-          v-model="solicitacao.funcionarioId"
-          :combo-items="listFuncionarios"
-          :select-mode="solicitacao.id == 0"
-          :text-field-value="solicitacao.funcionarioNome"
-          label-text="Funcionário"
-          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
-        ></select-text>
-      </v-col>
-        <v-col cols="2">
-        <v-text-field
-              variant="outlined"
-              label="eSocial Matrícula"
-              class="text-primary"
-              v-model="solicitacao.eSocialMatricula"
-              :readOnly = "true"
-              bg-color="#f2f2f2"
-              density="compact"
-            >
-          </v-text-field>
-      </v-col>
-      
-    </v-row>
-    <v-row>
-      <v-col>
-        <select-text
-          v-model="solicitacao.centroCustoId"
-          :combo-items="listCentroCustos"
-          :select-mode="false"
-          :text-field-value="solicitacao.centroCustoNome"
-          label-text="Centro de Custo"
-          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
-        ></select-text>
-      </v-col>
-      </v-row>
-      <v-row>
-      <v-col>
-        <select-text
           v-model="solicitacao.responsavelId"
           :combo-items="listResponsavel"
           :select-mode="solicitacao.id != 0 && !isReadOnly"
-          :text-field-value="getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)"
+          :text-field-value="
+            getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)
+          "
           label-text="Responsável"
           v-show="solicitacao.id != 0"
         ></select-text>
@@ -86,19 +54,19 @@
     </v-row>
     <slot></slot>
     <v-row>
-          <v-col>
-            <v-textarea
-              variant="outlined"
-              :label="descricaoLabel"
-              class="text-primary"
-              v-model="solicitacao.descricao"
-              :readOnly = "isReadOnly"
-              :bg-color="isReadOnly ? '#f2f2f2' : ''"
-              v-show="descricaoShow"
-            >
-            </v-textarea>
-          </v-col>
-        </v-row>
+      <v-col>
+        <v-textarea
+          variant="outlined"
+          :label="descricaoLabel"
+          class="text-primary"
+          v-model="solicitacao.descricao"
+          :readOnly="isReadOnly"
+          :bg-color="isReadOnly ? '#f2f2f2' : ''"
+          v-show="descricaoShow"
+        >
+        </v-textarea>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -114,8 +82,8 @@ const props = defineProps({
       return new Solicitacao();
     },
   },
-  descricaoLabel: {type: String, default: "Observação"},
-  descricaoShow: {type: Boolean, default: true},
+  descricaoLabel: { type: String, default: "Observação" },
+  descricaoShow: { type: Boolean, default: true },
   listClientes: {
     type: Array,
     default: function () {
@@ -141,8 +109,7 @@ const props = defineProps({
     },
   },
 
-  comboTipoShow: {type: Boolean, default: true},
-  isReadOnly: {type: Boolean, default: false},
+  comboTipoShow: { type: Boolean, default: true },
+  isReadOnly: { type: Boolean, default: false },
 });
-
 </script>

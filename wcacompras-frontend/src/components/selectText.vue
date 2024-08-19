@@ -13,7 +13,7 @@
       :rules="fieldRules"
       v-if="selectMode"
       :disabled="disabled"
-      
+      :multiple="isMultiple"
     >
       <template v-slot:append v-if="buttonShow">
       <v-icon
@@ -73,7 +73,8 @@ defineProps({
     buttonTitle: {type: String, default: 'Adicionar'},
     buttonShow: {type: Boolean, default: false},
     buttonIcon: {type: String, default: 'mdi-plus'},
-    buttonLoading: {type: Boolean, default: false}
+    buttonLoading: {type: Boolean, default: false},
+    isMultiple: {type: Boolean, default: false}
 })
 //const emit = defineEmits(['buttonClick'])
 

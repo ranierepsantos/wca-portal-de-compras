@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Solicitacoes.Common;
+using wca.share.application.Features.Solicitacoes.Common.Data.Extensions;
 
 namespace wca.share.application.Features.Solicitacoes.Queries
 {
@@ -24,22 +25,11 @@ namespace wca.share.application.Features.Solicitacoes.Queries
         public async Task<ErrorOr<SolicitacaoResponse>> Handle(SolicitacaoByIdQuerie request, CancellationToken cancellationToken)
         {
 
-            var dado = await _repository.SolicitacaoRepository.ToQuery()
-                .Include(x => x.Cliente)
-                .Include(x => x.Funcionario)
-                .Include(x => x.CentroCusto)
-                .Include(x => x.Comunicado).ThenInclude(x => x.Assunto)
-                .Include(x => x.Ferias).ThenInclude(x => x.TipoFerias)
-                .Include(x => x.Desligamento)
-                .Include(x => x.Anexos)
-                .Include(x => x.MudancaBase)
-                    .ThenInclude(z => z.ClienteDestino)
-                .Include(x => x.MudancaBase)
-                    .ThenInclude(x => x.ItensMudanca)
-                .Include(q => q.Historico.OrderByDescending(f => f.DataHora))
+            var dado = await _repository.SolicitacaoRepository.ToQuery().IncludeAll()
                 .Where(q => q.Id.Equals(request.Id))
                 .AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken: cancellationToken); 
+
 
             if (dado == null)
             {

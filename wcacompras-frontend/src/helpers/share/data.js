@@ -3,6 +3,7 @@ export const TipoSolicitacao = [
   { text: "Comunicado", value: 2 },
   { text: "Férias", value: 3 },
   { text: "Mudança de base", value: 4 },
+  { text: "Vaga", value: 5 },
 ];
 
 //FUNCTIONS
@@ -39,6 +40,8 @@ export function getObservacaoLabelDescricao(solicitacaoTipoId) {
       return "Observação Férias";
     case 4:
       return "Observação";
+    case 5:
+        return "Andamentos";
     default:
       return "Observação";
   }

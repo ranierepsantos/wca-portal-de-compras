@@ -42,8 +42,7 @@ namespace wca.share.infrastruture.Context
         internal DbSet<Sexo> Sexo { get; set; }
         public DbSet<TipoContrato> TiposContrato { get; set; }
         internal DbSet<TipoFaturamento> TipoFaturamento { get; set; }
-        internal DbSet<Vaga> Vagas { get; set; }
-        internal DbSet<VagaHistorico> VagaHistoricos { get; set; }
+        internal DbSet<SolicitacaoVaga> Vagas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,18 +56,21 @@ namespace wca.share.infrastruture.Context
             modelBuilder.Entity<SolicitacaoMudancaBase>().HasMany(o => o.ItensMudanca).WithMany();
             modelBuilder.Entity<SolicitacaoFerias>().HasKey(pk => new { pk.SolicitacaoId });
             modelBuilder.Entity<SolicitacaoFerias>().HasOne(o => o.TipoFerias);
-
+            modelBuilder.Entity<SolicitacaoVaga>().HasKey(pk => new { pk.SolicitacaoId });
 
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.Desligamento);
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.MudancaBase);
             modelBuilder.Entity<Solicitacao>().HasOne(o => o.Comunicado);
+            modelBuilder.Entity<Solicitacao>().HasOne(o => o.Ferias);
+            modelBuilder.Entity<Solicitacao>().HasOne(o => o.Vaga);
+
 
             modelBuilder.Entity<UsuarioCentrodeCustos>().HasKey(pk => new { pk.UsuarioId, pk.CentroCustoId });
             modelBuilder.Entity<UsuarioConfiguracoes>().HasKey(pk => new { pk.UsuarioId });
 
             modelBuilder.Entity<Funcionario>().HasIndex(ix =>  ix.eSocialMatricula).IsUnique();
 
-            modelBuilder.Entity<Vaga>()
+            modelBuilder.Entity<SolicitacaoVaga>()
                 .HasMany<DocumentoComplementar>(o => o.DocumentoComplementares).WithMany();
 
 

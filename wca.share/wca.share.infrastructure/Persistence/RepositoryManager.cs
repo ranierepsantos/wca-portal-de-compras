@@ -46,5 +46,10 @@ namespace wca.share.infrastruture.Persistence
         {
             return _context.Set<T>();
         }
+
+        public IQueryable<T> FromQuery<T>(string query) where T : class
+        {
+            return _context.Set<T>().FromSqlRaw(query);
+        }
     }
 }

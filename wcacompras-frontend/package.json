@@ -1,6 +1,6 @@
 {
   "name": "WCA-APP",
-  "version": "1.5.12",
+  "version": "1.5.13",
   "private": true,
   "enviroment": "Homologação",
   "scripts": {
@@ -22,6 +22,7 @@
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vue-sweetalert2": "^5.0.5",
+    "vuedraggable": "^4.1.0",
     "vuetify": "^3.0.1"
   },
   "devDependencies": {

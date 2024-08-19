@@ -2,8 +2,8 @@
   <v-card
     max-width="400"
     class="mx-auto drop-zone"
-    style="margin: auto;"
-    rounded="lg"
+    style="margin: auto;border-radius: 15px;"
+    
     :color="color"
   >
     <v-card-title>
@@ -20,7 +20,7 @@
           width="380"
           class="drag-el mx-auto"
           :key="element.id"
-          style="margin-top: 5px; margin-bottom: 5px"
+          style="margin-top: 5px; margin-bottom: 5px; border-radius: 15px;"
         >
           <v-card-title>{{ element.nome }}</v-card-title>
           <v-card-text>{{ element.id }} / {{ element.list }}</v-card-text>

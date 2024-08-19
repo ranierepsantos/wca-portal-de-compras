@@ -18,7 +18,8 @@ namespace wca.share.infrastructure
                                                         IConfiguration configuration)
         {
             services.AddDbContext<WcaContext>(
-                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             );
 
             services.AddScoped<IRepositoryManager, RepositoryManager>();

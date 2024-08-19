@@ -71,31 +71,5 @@ namespace wca.share.application.Common
                 }
             }
         }
-
-        public async Task VagaEnviarNotificacaoAsync(int[] usersId, string template, Vaga vaga, CancellationToken cancellationToken = default)
-        {
-            List<Usuario> users = await _repository.GetDbSet<Usuario>()
-                                  .Include("UsuarioConfiguracoes")
-                                  .Where(q => usersId.Contains(q.Id)).ToListAsync(cancellationToken: cancellationToken);
-
-            foreach (Usuario user in users)
-            {
-                string mensagem = template.Replace("{TipoSolicitacao}", GetDescricaoTipoSolicitacao((int) EnumTipoSolicitacao.Vaga )).Replace("{id}", vaga.Id.ToString());
-
-                var notificacao = new NotificacaoCreateCommand(user.Id, mensagem, GetEntidadeTipoSolicitacao((int)EnumTipoSolicitacao.Vaga), vaga.Id);
-
-                await _mediator.Send(notificacao, cancellationToken);
-
-                if (user.UsuarioConfiguracoes?.NotificarPorEmail ?? false)
-                {
-                    string assunto = GetEntidadeTipoSolicitacao((int)EnumTipoSolicitacao.Vaga) + $" - código: {vaga.Id}";
-
-                    string body = $"Olá {user.Nome}, <br/> <br/>";
-                    body += mensagem;
-
-                    _emailService.SendNotificacao(new string[] { user.Email }, assunto, body);
-                }
-            }
-        }
     }
 }
