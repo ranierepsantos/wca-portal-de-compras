@@ -1192,7 +1192,7 @@ async function salvar(forceUpdate = false) {
   try {
     isBusy.value = true;
     let data = {}
-    let saveData = false;
+    let saveData = true;
     if (forceUpdate) {
       //neste caso não deve ter alteração de dados, segue o original somente envia o status para retornar para aprovação
       data = checarSeRequerAprovacao({ ...requisicaoOriginal.value })
