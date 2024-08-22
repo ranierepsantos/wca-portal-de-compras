@@ -1,9 +1,8 @@
 <template>
   <v-card
-    max-width="400"
+    max-width="450"
     class="mx-auto drop-zone"
-    style="margin: auto;border-radius: 15px;"
-    
+    style="margin: auto; border-radius: 15px"
     :color="color"
   >
     <v-card-title>
@@ -17,22 +16,45 @@
     >
       <template #item="{ element }">
         <v-card
-          width="380"
+          width="430"
           class="drag-el mx-auto"
           :key="element.id"
-          style="margin-top: 5px; margin-bottom: 5px; border-radius: 15px;"
+          style="margin-top: 5px; margin-bottom: 5px; border-radius: 15px"
         >
-          <v-card-title>{{ element.nome }}</v-card-title>
-          <v-card-text>{{ element.id }} / {{ element.list }}</v-card-text>
+          <v-card-title class="text-left">
+            <v-row>
+              <v-col>{{ element.nome }}</v-col>
+              <v-col class="text-right">
+                <v-btn
+                  prepend-icon="mdi-arrow-right-circle-outline"
+                  variant="plain"
+                  color="primary"
+                  size="small"
+                >
+                  Acessar
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-title>
+          <v-card-text class="text-left">
+            <v-row>
+              <v-col>Cliente</v-col>
+              <v-col>cliente</v-col>
+            </v-row>
+            <v-row>
+              <v-col>Funcionário</v-col>
+              <v-col>{{ element.id }}</v-col>
+            </v-row>
+            <v-row>
+              <v-col>Responsável</v-col>
+              <v-col>{{ element.list }}</v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
       </template>
 
       <template #footer>
-        <v-pagination
-          v-model="page"
-          length="10"
-          
-        ></v-pagination>
+        <v-pagination v-model="page" length="10"></v-pagination>
       </template>
     </draggable>
   </v-card>
@@ -59,8 +81,8 @@ defineProps({
   },
   page: {
     type: Number,
-    default: 1
-  }
+    default: 1,
+  },
 });
 </script>
 
