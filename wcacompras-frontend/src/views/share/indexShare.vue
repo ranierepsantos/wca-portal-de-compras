@@ -80,14 +80,7 @@
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <!-- If using vue-router -->
-        <!-- <v-row>
-          <v-col><card-list :list-data="listPendente" color="orange-lighten-2" card-title="Aguardando"></card-list></v-col>
-          <v-col><card-list :list-data="listAndamento" color="lime-darken-1" card-title="Em Andamento"></card-list></v-col>
-          <v-col><card-list :list-data="listConcluido" color="deep-purple-lighten-1" card-title="Concluídos"></card-list></v-col>
-        </v-row>
-         -->
         <router-view :key="route.fullPath"></router-view>
-        
       </v-container>
     </v-main>
 
@@ -107,27 +100,6 @@ import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import { useRoute } from "vue-router";
 import { onUnmounted } from "vue";
 import notificacaoList from "@/components/notificacaoList.vue";
-import cardList from "@/components/share/cardlist.vue";
-
-//VARIABLES
-const listPendente = ref([
-  {id: 1, nome:'Pendente 1', list: 1},
-  {id: 2, nome:'Pendente 2', list: 1},
-  {id: 3, nome:'Pendente 3', list: 1}
-])
-
-const listAndamento = ref([
-  {id: 1, nome:'Andamento 1', list: 2},
-  {id: 2, nome:'Andamento 2', list: 2},
-  {id: 3, nome:'Andamento 3', list: 2}
-])
-
-const listConcluido = ref([
-  {id: 1, nome:'Concluido 1', list: 3},
-  {id: 2, nome:'Concluido 2', list: 3},
-  {id: 3, nome:'Concluido 3', list: 3}
-])
-
 
 const route = useRoute();
 const drawer = ref(true);
