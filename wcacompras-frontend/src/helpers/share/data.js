@@ -30,6 +30,26 @@ export function getPageTitle(solicitacaoTipoId) {
   }
 }
 
+export function getShareRouteName(solicitacaoTipoId) 
+{
+  switch (solicitacaoTipoId) {
+    case 1:
+      return "shareDesligamento";
+    case 2:
+      return "shareComunicado";
+    case 3:
+      return "shareFerias";
+    case 4:
+      return "shareMudancaBase";
+    case 5:
+        return "shareVaga";
+    default:
+      return "XXXX";
+  }
+}
+
+
+
 export function getObservacaoLabelDescricao(solicitacaoTipoId) {
   switch (solicitacaoTipoId) {
     case 1:

@@ -59,6 +59,7 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
+          multiple
         ></v-select>
       </v-col>
       <v-col cols="2">
@@ -221,7 +222,7 @@ import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import { getPageTitle } from "@/helpers/share/data";
 import { useRoute } from "vue-router";
 import { compararValor } from "@/helpers/functions";
-import { degrees } from "pdf-lib";
+
 //DATA
 const route = useRoute();
 const authStore = useAuthStore();
@@ -292,12 +293,9 @@ onBeforeMount(async () => {
         pageTipo.value.tipo = "Vaga";
     }
 
-    meusClientesId.value = await useShareClienteStore().ListByUsuario(authStore.user.id)
-    meusClientesId.value = meusClientesId.value.map(x =>{ return x.id})
-
-    meusCentrosDeCustoId.value = await useShareUsuarioStore().getCentrosdeCusto(authStore.user.id);
-    meusCentrosDeCustoId.value = meusCentrosDeCustoId.value.map(x =>{ return x.id})
-
+    meusClientesId.value = await authStore.retornarMeusClientes(true);
+    meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
+    
     await getFiliaisToList();
     isMatriz.value = authStore.sistema.isMatriz;
     authStore.user.filial = authStore.sistema.filial.value;
@@ -332,7 +330,7 @@ async function clearFilters() {
   } catch (error) {
     console.error(error);
   } finally {
-    isLoading.busy = false;
+    isLoading.value.busy = false;
   }
 }
 
@@ -366,7 +364,6 @@ async function showHistorico(item) {
 
 async function getItems() {
   try {
-    debugger
     isLoading.value.busy = true;
     if (
       (filter.value.dataIni && !filter.value.dataFim) ||
