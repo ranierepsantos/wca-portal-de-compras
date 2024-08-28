@@ -18,7 +18,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
         int? ResponsavelId, 
         int[]? ClienteIds,
         int[]? CentroCustoIds,
-        int? Status,
+        int[]? Status,
         EnumTipoSolicitacao TipoSolicitacao = EnumTipoSolicitacao.Todos) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     internal sealed class SolicitacaoToPaginateQueryHandle :
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
@@ -86,8 +86,8 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 if (request.ClienteIds?.Length > 0)
                     query = query.Where(q => request.ClienteIds.Contains(q.ClienteId));
 
-                if (request.Status > 0)
-                    query = query.Where(q => q.StatusSolicitacaoId.Equals(request.Status));
+                if (request.Status?.Length > 0)
+                    query = query.Where(q => request.Status.Contains(q.StatusSolicitacaoId));
 
                 if (request.TipoSolicitacao != EnumTipoSolicitacao.Todos)
                     query = query.Where(q => q.SolicitacaoTipoId.Equals((int)request.TipoSolicitacao));
@@ -135,8 +135,6 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                         .IncludeFerias()
                         .IncludeMudancaBase()
                         .IncludeVagaToPaginate();
-                        
-                    
                 }
 
                 query = query.OrderByDescending(q => q.DataSolicitacao);
