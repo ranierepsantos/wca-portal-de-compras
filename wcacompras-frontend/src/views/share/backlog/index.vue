@@ -85,6 +85,7 @@
           color="primary"
           variant="outlined"
           class="text-capitalize"
+          @click="getItems()"
         >
           <b>Aplicar Filtros</b>
         </v-btn>
@@ -113,7 +114,7 @@
           :pagination-data="listPendente"
           color="orange-lighten-4"
           card-title="Pendentes"
-          @page-change="getPendentes($event)"
+          @page-change="getPendentes($event, true)"
         ></card-list
       ></v-col>
       <v-col
@@ -121,7 +122,7 @@
           :pagination-data="listAndamento"
           color="blue-accent-1"
           card-title="Em Andamento"
-          @page-change="getEmAndamento($event)"
+          @page-change="getEmAndamento($event, true)"
         ></card-list
       ></v-col>
       <v-col
@@ -129,7 +130,7 @@
           :pagination-data="listConcluido"
           color="green-lighten-3"
           card-title="Concluídos"
-          @page-change="getConcluido($event)"
+          @page-change="getConcluido($event, true)"
         ></card-list
       ></v-col>
     </v-row>
@@ -154,9 +155,6 @@ import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useShareClienteStore } from "@/store/share/cliente.store";
 import { useShareUsuarioStore } from "@/store/share/usuario.store";
-
-
-
 
 //VARIABLES
 const pageSize = 5//process.env.VUE_APP_PAGE_SIZE;
@@ -239,6 +237,8 @@ async function init() {
   }
 }
 
+
+
 async function clearFilters() {
   try {
     isLoading.value.busy = true;
@@ -267,7 +267,9 @@ async function clearFilters() {
 }
 
 async function getItems() {
-  if (
+  try {
+    isLoading.value.busy = true;
+    if (
       (filter.value.dataIni && !filter.value.dataFim) ||
       (filter.value.dataFim && !filter.value.dataIni)
     )
@@ -289,13 +291,25 @@ async function getItems() {
 
     sessionStorage.setItem("backlog.filtros", JSON.stringify(filtros))
 
-    await getPendentes(1);
-    await getEmAndamento(1)
-    await getConcluido(1)
+    let pendentes = await getPendentes(1);
+    let andamentos = await getEmAndamento(1)
+    let concluidos = await getConcluido(1)  
+
+    listPendente.value = pendentes
+    listAndamento.value = andamentos  
+    listConcluido.value = concluidos
+
+  } catch (error) {
+    console.error("getItems.error",error);
+    handleErrors(error);
+  } finally {
+    isLoading.value.busy = false;
+  }
+  
 }
 
 
-async function getPendentes(page) {
+async function getPendentes(page, fillList = false) {
   let filtros = JSON.parse(sessionStorage.getItem('backlog.filtros'))
   filtros.status = [1,4]
 
@@ -304,10 +318,13 @@ async function getPendentes(page) {
       pageSize,
       filtros
     );
-    listPendente.value = data;
+    if (fillList)
+      listPendente.value = data;
+    else
+      return data;
 }
 
-async function getEmAndamento(page) {
+async function getEmAndamento(page, fillList = false) {
   let filtros = JSON.parse(sessionStorage.getItem('backlog.filtros'))
   filtros.status = [2]
 
@@ -316,10 +333,13 @@ async function getEmAndamento(page) {
       pageSize,
       filtros
     );
-    listAndamento.value = data;
+    if (fillList)
+      listAndamento.value = data;
+    else
+    return data;
 }
 
-async function getConcluido(page) {
+async function getConcluido(page, fillList = false) {
   let filtros = JSON.parse(sessionStorage.getItem('backlog.filtros'))
   filtros.status = [3,5]
 
@@ -328,7 +348,10 @@ async function getConcluido(page) {
       pageSize,
       filtros
     );
-    listConcluido.value = data;
+    if (fillList)
+      listConcluido.value = data;
+    else
+    return data;
 }
 
 async function getClientesToList(filialId = 0, usuarioId = 0) {
