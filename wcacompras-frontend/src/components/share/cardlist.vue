@@ -11,8 +11,10 @@
     <draggable
       class="list-group"
       :list="paginationData.items"
-      group="people"
-      itemKey="name"
+      :group="cardTitle"
+      :itemKey="cardTitle.toLowerCase()"
+      @start="drag=false" 
+      @end="drag=false" 
     >
       <template #item="{ element }">
         <v-card

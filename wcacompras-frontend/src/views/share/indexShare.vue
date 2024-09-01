@@ -105,9 +105,15 @@ const route = useRoute();
 const drawer = ref(true);
 const menuItems = ref([
   {
-    title: " Home",
+    title: "  Home",
     value: 1,
     route: "/share",
+    permissao: "livre"
+  },
+  {
+    title: " Backlog",
+    value: 21,
+    route: "/share/backlog",
     permissao: "livre"
   },
   {
