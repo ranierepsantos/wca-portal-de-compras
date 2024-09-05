@@ -49,10 +49,16 @@
               <Mudancabase v-else-if="solicitacao.solicitacaoTipoId == 4" 
               :data-model="solicitacao.mudancaBase" 
               :list-clientes="[]"
+              :list-centro-custos="[]"
               :list-itens-mudanca="listItensMudanca"
               :cliente-selected="solicitacao.clienteId && solicitacao.clienteId > 0"
               :create-mode="false"
               :is-read-only="true"
+              />
+              <vaga v-else-if="solicitacao.solicitacaoTipoId == 5"
+                :list-documento-complementar="listEntidade['documentocomplementar']"
+                :is-read-only="true"
+                :data-model="solicitacao.vaga"
               />
             </SolicitacaoForm>
             <v-card>
@@ -88,15 +94,14 @@
         :entidade="permissao.charAt(0).toUpperCase() + permissao.slice(1)"
         :entidade-id="solicitacao.id"
       />
-                    
     </v-dialog>
     <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
     <v-dialog
-        v-model="openAprovacaoForm"
-        max-width="700"
-        :absolute="false"
-        persistent
-      >
+      v-model="openAprovacaoForm"
+      max-width="700"
+      :absolute="false"
+      persistent
+    >
         <aprovar-rejeitar-form
           :title="getPageTitle(solicitacao.solicitacaoTipoId) + ' - Aprovar / Reprovar'"
           @aprovar-click="aprovarReprovar(true, $event)"
@@ -105,7 +110,7 @@
           :is-running-event="isRunningEvent"
           reprovar-title="Reprovar"
         />
-      </v-dialog>
+    </v-dialog>
   </div>
 </template>
 
@@ -113,6 +118,7 @@
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import SolicitacaoForm from "@/components/share/solicitacaoForm.vue";
 import desligamento from "@/components/share/desligamento.vue";
+import vaga from "@/components/share/vaga.vue";
 import { Solicitacao } from "@/store/share/solicitacao.store";
 import { ref } from "vue";
 import Comunicado from "@/components/share/comunicado.vue";
@@ -134,9 +140,10 @@ import router from "@/router";
 import { inject } from "vue";
 import Historico from "@/components/reembolso/historico.vue";
 import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
-import moment from "moment";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
+import moment from "moment";
 import { computed } from "vue";
+import { useShareEntidadeAuxiliarStore } from "@/store/share/entidadesauxiliares.store";
 
 
 const tableUploadItems = ref([{text: "Outros"}])
@@ -152,8 +159,24 @@ const mForm = ref(null);
 const swal = inject("$swal");
 const openNotificacao = ref(false)
 const openAprovacaoForm = ref(false)
-const permissao = ref("")
 const isRunningEvent = ref(false)
+const permissao = ref("")
+const entidadeStore = useShareEntidadeAuxiliarStore();
+
+const listEntidade = ref({
+  documentocomplementar: [],
+  escala : [],
+  escolaridade : [],
+  funcao : [],
+  gestor : [],
+  horario: [],
+  motivocontratacao: [],
+  sexo: [],
+  tipocontrato: [],
+  tipofaturamento: [],
+})
+
+
 const listItensMudanca = ref([])
 //VUE FUNCTIONS
 onBeforeMount(async () => {
@@ -176,6 +199,9 @@ onBeforeMount(async () => {
     } else if (route.path.includes("mudancabase")) {
       permissao.value = 'mudancabase' 
       listItensMudanca.value = await useShareSolicitacaoStore().getListaItensMudanca();
+    }else if (route.path.includes("vaga")) {
+      listEntidade.value["documentocomplementar"] = await entidadeStore.getToComboList("DocumentoComplementar");
+      permissao.value = 'vaga' 
     }
     
     await getById(route.query.id);
@@ -189,9 +215,10 @@ onBeforeMount(async () => {
       tableUploadItems.value.push({text: "Ficha EPI"})
     } else if (solicitacao.value.solicitacaoTipoId == 2) {
     } else if (solicitacao.value.solicitacaoTipoId == 3) {
-    } else if (solicitacao.value.solicitacaoTipoId == 4) {
+    } else if (solicitacao.value.solicitacaoTipoId == 4)
       ItensMudancaListRemove()
-    }
+    else if (solicitacao.value.solicitacaoTipoId == 5)
+      documentoComplementarListRemove()
     
   } catch (error) {
     console.error("edit.beforeMount.error", error);
@@ -321,10 +348,7 @@ async function getById(id) {
     if (data.solicitacaoTipoId == 1 && data.statusSolicitacaoId !== 3) {
       let dias = moment(data.desligamento.dataDemissao).diff(data.funcionarioDataAdmissao, "days");
       data.desligamento.statusExameDemissional = dias <= 90 ? 3 : data.desligamento.statusExameDemissional
-    }else if (data.solicitacaoTipoId == 4 ) {
-      ItensMudancaListRemove()
     }
-
     solicitacao.value = data;
   } catch (error) {
     console.error("getById.error:", error);
@@ -420,5 +444,15 @@ function ItensMudancaListRemove(removerTodos = false) {
     });
   }
 }
+
+function documentoComplementarListRemove(removerTodos = false) {
+    if (removerTodos == true) listEntidade.value['documentocomplementar'].splice(0, listEntidade.value['documentocomplementar'].length);
+    else {
+      solicitacao.value.vaga.documentoComplementares.forEach((cc) => {
+        let index = listEntidade.value['documentocomplementar'].findIndex((c) => c.value == cc.value);
+        if (index > -1) listEntidade.value['documentocomplementar'].splice(index, 1);
+      });
+    }
+  }
 
 </script>

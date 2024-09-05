@@ -31,18 +31,32 @@ namespace wca.share.application.Features.Notificacoes.Commands
 
         public async Task<ErrorOr<bool>> Handle(NotificacaoSendCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Enviando notificação {JsonSerializer.Serialize(request)}");
-
-            Solicitacao? solicitacao = await _repository.SolicitacaoRepository
-                                                        .ToQuery()
-                                                        .Where(q => q.Id.Equals(request.EntidadeId))
-                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            if ( solicitacao is not null)
+            try
             {
-                await _notificacaoHandle.SolicitacaoEnviarNotificacaoAsync(new int[] { request.UsuarioId }, request.Nota, solicitacao, cancellationToken);
-            }
+                
+                Solicitacao? solicitacao = await _repository.SolicitacaoRepository
+                                                            .ToQuery()
+                                                            .Where(q => q.Id.Equals(request.EntidadeId))
+                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                if (solicitacao == null)
+                {
+                    _logger.LogError($"Solicitacao #{request.EntidadeId} não localizada!");
+                    return Error.NotFound(description: $"Não localizamos a solicitação #{request.EntidadeId}!");
+                }
+                else
+                    await _notificacaoHandle.SolicitacaoEnviarNotificacaoAsync(new int[] { request.UsuarioId }, request.Nota, solicitacao, cancellationToken);
+
             
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error.Request: {JsonSerializer.Serialize(request)}");
+                _logger.LogError($"Error.Message: {ex.Message}");
+                _logger.LogError($"Error.InnerException: {ex.InnerException?.Message}");
+                return Error.Failure(ex.Message);
+            }
+
         }
     }
 }

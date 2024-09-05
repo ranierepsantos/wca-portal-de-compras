@@ -4,7 +4,6 @@ using wca.share.application.Contracts;
 using wca.share.application.Contracts.Integration.Email;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Notificacoes.Commands;
-using wca.share.application.Features.Solicitacoes.Common;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Common
@@ -23,6 +22,7 @@ namespace wca.share.application.Common
                 (int)EnumTipoSolicitacao.Desligamento => "Desligamento",
                 (int)EnumTipoSolicitacao.Ferias => "Férias",
                 (int)EnumTipoSolicitacao.MudancaBase => "Mudança de Base",
+                (int)EnumTipoSolicitacao.Vaga => "Vaga",
             };
         }
 
@@ -34,6 +34,7 @@ namespace wca.share.application.Common
                 (int)EnumTipoSolicitacao.Desligamento => EnumTipoSolicitacao.Desligamento.ToString(),
                 (int)EnumTipoSolicitacao.Ferias => EnumTipoSolicitacao.Ferias.ToString(),
                 (int)EnumTipoSolicitacao.MudancaBase => EnumTipoSolicitacao.MudancaBase.ToString(),
+                (int)EnumTipoSolicitacao.Vaga => EnumTipoSolicitacao.Vaga.ToString(),
             };
         }
 

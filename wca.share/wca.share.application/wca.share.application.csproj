@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Assuntos\Behaviors\**" />
+    <EmbeddedResource Remove="Features\Assuntos\Behaviors\**" />
+    <None Remove="Features\Assuntos\Behaviors\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="ErrorOr" Version="1.9.0" />
@@ -15,6 +21,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.15" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="NETCore.MailKit" Version="2.1.0" />
@@ -22,10 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\wca.share.domain\wca.share.domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Assuntos\Behaviors\" />
   </ItemGroup>
 
 </Project>

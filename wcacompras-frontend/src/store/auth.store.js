@@ -144,8 +144,42 @@ export const useAuthStore = defineStore("auth", {
         await apiShare.put("Notificacao/MarcarComoLido", {id: notificacaoId})
       else if (this.sistema.nome =='reembolso')
         await apiReembolso.put("Notificacao/MarcarComoLido", {id: notificacaoId})
-    }
+    },
 
+    async retornarMeusClientes(onlyId = false) {
+      let response = null
+      if (this.sistema.nome == 'share')
+        response = await apiShare.get('Cliente/ListarClientesPorUsuario', {params: {usuarioId: this.user.id}})
+      else if (this.sistema.nome == 'reembolso')
+        response = await apiReembolso.get('Cliente/ListarClientesPorUsuario', {params: {usuarioId: this.user.id}})
+
+      let clientes = []
+      if (response) {
+        clientes = response.data;
+        if (onlyId) 
+          clientes = clientes.map(x => x.id)
+      }
+      return clientes;
+    },
+
+    async retornarMeusCentrosdeCustos(clienteId = 0, onlyId = false) {
+      let response = null
+      let rota = 'Usuario/ListarCentroCusto/{usuarioId}/{clienteId}'
+      rota = rota.replace('{usuarioId}', this.user.id).replace('{clienteId}', clienteId)
+      if (this.sistema.nome == 'share')
+        response = await apiShare.get(rota)
+      else if (this.sistema.nome == 'reembolso')
+        response = await apiReembolso.get(rota)
+
+      let centros = []
+      if (response) {
+        centros = response.data;
+        if (onlyId) 
+          centros = centros.map(x => x.id)
+      }
+      return centros;
+    }
+  
 
   },
 });

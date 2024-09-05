@@ -59,6 +59,7 @@
           variant="outlined"
           color="primary"
           :hide-details="true"
+          multiple
         ></v-select>
       </v-col>
       <v-col cols="2">
@@ -114,9 +115,9 @@
           <th class="text-center text-grey">#</th>
           <th class="text-center text-grey">DATA</th>
           <th class="text-left text-grey">CLIENTE</th>
-          <th class="text-left text-grey">FUNCIONÁRIO</th>
+          <th class="text-left text-grey" v-if="pageTipo.id ==5">FUNÇÃO</th>
+          <th class="text-left text-grey" v-else>FUNCIONÁRIO</th>
           <th class="text-left text-grey">RESPONSÁVEL</th>
-          <th class="text-left text-grey" v-show="pageTipo.id == 0">TIPO SOLICITAÇÃO</th>
           <th class="text-left text-grey">STATUS</th>
           <th></th>
         </tr>
@@ -128,9 +129,8 @@
             {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
           </td>
           <td class="text-left">{{ item.clienteNome }}</td>
-          <td class="text-left">{{ item.funcionarioNome }}</td>
+          <td class="text-left">{{ getFuncNome(item)  }}</td>
           <td class="text-left">{{ item.responsavelNome || "Não atribuído" }}</td>
-          <td class="text-left" v-show="pageTipo.id == 0">{{ item.responsaveNome }}</td>
           <td class="text-left">
             <v-btn
               :color="item.statusSolicitacao.color"
@@ -207,14 +207,13 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import handleErrors from "@/helpers/HandleErrors";
 import BreadCrumbs from "@/components/breadcrumbs.vue";
 import router from "@/router";
 import moment from "moment";
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import historico from "@/components/reembolso/historico.vue";
-import { realizarDownload } from "@/helpers/functions";
 import filialService from "@/services/filial.service";
 import { useAuthStore } from "@/store/auth.store";
 import { onBeforeMount } from "vue";
@@ -223,6 +222,7 @@ import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import { getPageTitle } from "@/helpers/share/data";
 import { useRoute } from "vue-router";
 import { compararValor } from "@/helpers/functions";
+
 //DATA
 const route = useRoute();
 const authStore = useAuthStore();
@@ -288,14 +288,14 @@ onBeforeMount(async () => {
     } else if (route.path.includes("mudancabase")) {
         pageTipo.value.id = 4
         pageTipo.value.tipo = "MudancaBase";
+    }else if (route.path.includes("vagas")) {
+        pageTipo.value.id = 5
+        pageTipo.value.tipo = "Vaga";
     }
 
-    meusClientesId.value = await useShareClienteStore().ListByUsuario(authStore.user.id)
-    meusClientesId.value = meusClientesId.value.map(x =>{ return x.id})
-
-    meusCentrosDeCustoId.value = await useShareUsuarioStore().getCentrosdeCusto(authStore.user.id);
-    meusCentrosDeCustoId.value = meusCentrosDeCustoId.value.map(x =>{ return x.id})
-
+    meusClientesId.value = await authStore.retornarMeusClientes(true);
+    meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
+    
     await getFiliaisToList();
     isMatriz.value = authStore.sistema.isMatriz;
     authStore.user.filial = authStore.sistema.filial.value;
@@ -308,6 +308,7 @@ onBeforeMount(async () => {
 });
 
 watch(page, () => getItems());
+
 
 //METHODS
 async function clearFilters() {
@@ -329,7 +330,7 @@ async function clearFilters() {
   } catch (error) {
     console.error(error);
   } finally {
-    isLoading.busy = false;
+    isLoading.value.busy = false;
   }
 }
 
@@ -340,6 +341,22 @@ function toPage(id = null) {
         router.push({ name: `share${pageTipo.value.tipo}Create`});
 }
 
+function getFuncNome(item){
+  
+  if (item.solicitacaoTipoId == 1)
+    return item.desligamento.funcionarioNome;
+  else if (item.solicitacaoTipoId == 2)
+    return item.comunicado.funcionarioNome;
+  else if (item.solicitacaoTipoId == 3)
+    return item.ferias.funcionarioNome;
+  else if (item.solicitacaoTipoId == 4)
+    return item.mudancaBase.funcionarioNome;
+  else if (item.solicitacaoTipoId == 5)
+    return item.vaga.funcaoNome;
+  else  
+     return '';  
+}
+
 async function showHistorico(item) {
   eventos.value = item.historico;
   openHistorico.value = true;
@@ -347,7 +364,6 @@ async function showHistorico(item) {
 
 async function getItems() {
   try {
-    debugger
     isLoading.value.busy = true;
     if (
       (filter.value.dataIni && !filter.value.dataFim) ||

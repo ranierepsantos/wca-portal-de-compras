@@ -3,6 +3,7 @@ export const TipoSolicitacao = [
   { text: "Comunicado", value: 2 },
   { text: "Férias", value: 3 },
   { text: "Mudança de base", value: 4 },
+  { text: "Vaga", value: 5 },
 ];
 
 //FUNCTIONS
@@ -22,10 +23,32 @@ export function getPageTitle(solicitacaoTipoId) {
       return "Férias";
     case 4:
       return "Mudança de Base";
+    case 5:
+        return "Vagas";
     default:
       return "Solicitação";
   }
 }
+
+export function getShareRouteName(solicitacaoTipoId) 
+{
+  switch (solicitacaoTipoId) {
+    case 1:
+      return "shareDesligamento";
+    case 2:
+      return "shareComunicado";
+    case 3:
+      return "shareFerias";
+    case 4:
+      return "shareMudancaBase";
+    case 5:
+        return "shareVaga";
+    default:
+      return "XXXX";
+  }
+}
+
+
 
 export function getObservacaoLabelDescricao(solicitacaoTipoId) {
   switch (solicitacaoTipoId) {
@@ -37,6 +60,8 @@ export function getObservacaoLabelDescricao(solicitacaoTipoId) {
       return "Observação Férias";
     case 4:
       return "Observação";
+    case 5:
+        return "Andamentos";
     default:
       return "Observação";
   }

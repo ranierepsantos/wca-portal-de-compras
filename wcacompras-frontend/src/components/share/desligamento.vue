@@ -1,6 +1,42 @@
 <template>
   <div>
     <v-row>
+      <v-col>
+        <select-text
+          v-model="dataModel.funcionarioId"
+          :combo-items="listFuncionarios"
+          :select-mode="createMode"
+          :text-field-value="dataModel.funcionarioNome"
+          label-text="Funcionário"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+        ></select-text>
+      </v-col>
+      <v-col cols="2">
+        <v-text-field
+          variant="outlined"
+          label="eSocial Matrícula"
+          class="text-primary"
+          v-model="dataModel.eSocialMatricula"
+          :readOnly="true"
+          bg-color="#f2f2f2"
+          density="compact"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <select-text
+          v-model="dataModel.centroCustoId"
+          :combo-items="listCentroCustos"
+          :select-mode="false"
+          :text-field-value="dataModel.centroCustoNome"
+          label-text="Centro de Custo"
+          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
+        ></select-text>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="2">
         <v-text-field
           label="Data Admissão"
@@ -8,7 +44,7 @@
           variant="outlined"
           color="primary"
           density="compact"
-          v-model="dataAdmissao"
+          v-model="dataModel.funcionarioDataAdmissao"
           :rules="[(v) => !!v || 'Campo obrigatório']"
           :readonly="true"
           bg-color="#f2f2f2"
@@ -178,18 +214,47 @@ import selectText from "../selectText.vue";
 import {
   getTextFromListByCodigo,
 } from "@/helpers/share/data";
+import { watch } from "vue";
+import moment from "moment";
 
-defineProps({
+const props = defineProps({
   dataModel: {
     type: Object,
     default: function () {
       return new Desligamento();
     },
   },
-  dataAdmissao: {type: String, default: ""},
   createMode: { type: Boolean, default: true },
   isReadOnly: { type: Boolean, default: false },
+  listCentroCustos: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
+  listFuncionarios: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
 });
+
+watch(() => props.dataModel.funcionarioId, () => {
+  
+  let oFunc = props.listFuncionarios.find(q => q.value == props.dataModel.funcionarioId)
+    props.dataModel.centroCustoNome = null
+    props.dataModel.centroCustoId = null
+    props.dataModel.eSocialMatricula =null
+    props.dataModel.funcionarioDataAdmissao =null
+  if (oFunc) {
+    props.dataModel.centroCustoNome = oFunc.centroCustoNome
+    props.dataModel.centroCustoId = oFunc.centroCustoId
+    props.dataModel.eSocialMatricula = oFunc.eSocialMatricula
+    props.dataModel.funcionarioDataAdmissao = moment(oFunc.dataAdmissao).format("YYYY-MM-DD");
+  }
+});
+
 const listMotivoDemissao = useShareSolicitacaoStore().motivosDemissao;
 const listAvisoPrevioStatus = useShareSolicitacaoStore().avisoPrevioStatus;
 const listFieldStatus = useShareSolicitacaoStore().fieldStatus;

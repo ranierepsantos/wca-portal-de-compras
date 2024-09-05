@@ -1,15 +1,16 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer" app color="#4A148C"
+    <v-navigation-drawer v-model="drawer" app color="#4A148C" 
       style="padding-top: 30px; padding-left: 2px; padding-right: 2px;">
       <img src="@/assets/images/logoWCA.png" alt="" class="side-bar-logo" />
       <br />
+      
       <!-- <br />
       <v-btn block color="orange" rounded="lg" class="text-capitalize"
         @click="router.push({ name: 'shareSolicitacaoCreate' })">
         <b>Nova solicitação</b>
       </v-btn> -->
-      <br />
+      
       <v-list class="text-left" density="compact">
         <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
           v-show="checkPermissao(item.permissao)">
@@ -19,6 +20,32 @@
             </v-list-item-title>
           </router-link>
         </v-list-item>
+        <br/>
+        <v-divider color="white"></v-divider>
+        <br/>
+        <v-list-group value="auxmenu" v-show="checkPermissao(auxPermissao)"> 
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              active-color="info"
+              style="color: white;"
+            >
+            <v-list-item-title >
+              Cadastros Auxiliares
+            </v-list-item-title>
+            </v-list-item>
+          </template>
+
+          <v-list-item v-for="item in auxItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
+          v-show="checkPermissao(item.permissao)">
+          <router-link :to="item.route" class="text-decoration-none">
+            <v-list-item-title>
+              {{ item.title }}
+            </v-list-item-title>
+          </router-link>
+        </v-list-item>
+        </v-list-group>
+
         <v-list-item v-show="checkPermissao('configuracao')" active-color="info" key="configuracoes" value="9999">
           <router-link to="/share/configuracoes" class="text-decoration-none">
             <v-list-item-title >
@@ -53,14 +80,7 @@
       <!-- Provides the application the proper gutter -->
       <v-container fluid>
         <!-- If using vue-router -->
-        <!-- <v-row>
-          <v-col><card-list :list-data="list1" color="orange-lighten-2" card-title="Aguardando"></card-list></v-col>
-          <v-col><card-list :list-data="list2" color="lime-darken-1" card-title="Em Andamento"></card-list></v-col>
-          <v-col><card-list :list-data="list3" color="deep-purple-lighten-1" card-title="Concluídos"></card-list></v-col>
-        </v-row> -->
-        
         <router-view :key="route.fullPath"></router-view>
-        
       </v-container>
     </v-main>
 
@@ -81,14 +101,19 @@ import { useRoute } from "vue-router";
 import { onUnmounted } from "vue";
 import notificacaoList from "@/components/notificacaoList.vue";
 
-//VARIABLES
 const route = useRoute();
 const drawer = ref(true);
 const menuItems = ref([
   {
-    title: " Home",
+    title: "  Home",
     value: 1,
     route: "/share",
+    permissao: "livre"
+  },
+  {
+    title: " Backlog",
+    value: 21,
+    route: "/share/backlog",
     permissao: "livre"
   },
   {
@@ -133,15 +158,9 @@ const menuItems = ref([
     route: "/share/ferias",
     permissao: "ferias-criar|ferias-executar|ferias-finalizar"
   },
-  // {
-  //   title: "Filiais",
-  //   value: 9,
-  //   route: "/share/filial",
-  //   permissao: "Filial"
-  // },
   {
     title: "Funcionários",
-    value: 10,
+    value: 9,
     route: "/share/funcionarios",
     permissao: "funcionario"
   },
@@ -152,10 +171,68 @@ const menuItems = ref([
     permissao: "livre"
   },
   {
+    title: "Vagas",
+    value: 19,
+    route: "/share/vagas",
+    permissao: "vaga-criar|vaga-executar|vaga-finalizar"
+  },
+  
+]);
+
+const auxItems = ref([
+  {
     title: "Assuntos",
-    value: 10,
+    value: 11,
     route: "/share/assuntos",
     permissao: "assunto"
+  },
+  {
+    title: "Docs. Complementares",
+    value: 12,
+    route: "/share/documentoscomplementares",
+    permissao: "documentocomplementar"
+  },
+  {
+    title: "Escalas",
+    value: 13,
+    route: "/share/escalas",
+    permissao: "escala"
+  },
+  {
+    title: "Escolaridade",
+    value: 14,
+    route: "/share/escolaridades",
+    permissao: "escolaridade"
+  },
+  {
+    title: "Funções",
+    value: 15,
+    route: "/share/funcoes",
+    permissao: "funcao"
+  },
+  {
+    title: "Gestores",
+    value: 16,
+    route: "/share/gestores",
+    permissao: "gestor"
+  },
+  {
+    title: "Horários",
+    value: 17,
+    route: "/share/horarios",
+    permissao: "horario"
+  },
+  {
+    title: "Tipos de Contrato",
+    value: 18,
+    route: "/share/tiposcontrato",
+    permissao: "tipocontrato"
+  },
+  {
+    title: "Tipos de Faturamento",
+    value: 20,
+    route: "/share/tiposfaturamento",
+    permissao: "tipofaturamento"
   },
 ]);
 
@@ -164,6 +241,13 @@ const usuario = computed(() =>
 {
   return authStore.user;
 })
+
+const auxPermissao = computed(() => {
+  let _perms = auxItems.value.map(p => p.permissao)
+  return _perms.join("|")
+})
+
+
 const checkNotificacoes = ref(null);
 const notificacoes = ref ([])
 

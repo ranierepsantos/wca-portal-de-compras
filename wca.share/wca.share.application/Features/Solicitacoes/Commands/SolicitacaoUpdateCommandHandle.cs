@@ -17,16 +17,15 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         int Id, 
         int SolicitacaoTipoId,
         int ClienteId,
-        int FuncionarioId,
         int StatusSolicitacaoId,
         string UsuarioAtualizador,
-        int? CentroCustoId,
         int? ResponsavelId,
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
         SolicitacaoMudancaBaseResponse? MudancaBase,
         SolicitacaoFerias? Ferias,
+        SolicitacaoVagaResponse? Vaga,
         List<SolicitacaoArquivo>? Anexos,
         StatusSolicitacao? Status,
         int[]? NotificarUsuarioIds
@@ -68,6 +67,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                                 .Include(x => x.Ferias)
                                 .Include(x => x.Anexos)
                                 .Include(x => x.MudancaBase).ThenInclude(x => x.ItensMudanca)
+                                .Include(x => x.Vaga).ThenInclude(x =>  x.DocumentoComplementares)
                                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken: cancellationToken);
             if (dado == null)
             {
@@ -123,9 +123,41 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                         _mud.ItensMudanca.AddRange(items);
                     }
                     _repository.GetDbSet<SolicitacaoMudancaBase>().Update(_mud);
-
+                    
                 }
-            }
+            } 
+            else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Vaga)
+            {
+                dado.Vaga.Escala = null;
+                dado.Vaga.Escolaridade = null;
+                dado.Vaga.Funcao = null;
+                dado.Vaga.Gestor = null;
+                dado.Vaga.Horario = null;
+                dado.Vaga.MotivoContratacao = null;
+                dado.Vaga.Sexo = null;
+                dado.Vaga.TipoContrato = null;
+                dado.Vaga.TipoFaturamento = null;
+
+                SolicitacaoVaga? vaga = await _repository.GetDbSet<SolicitacaoVaga>().AsNoTracking()
+                                                        .Where(q => q.SolicitacaoId.Equals(request.Id))
+                                                        .FirstOrDefaultAsync();
+                if (vaga is not null) {
+                    _repository.GetDbSet<SolicitacaoVaga>().Entry(vaga).CurrentValues.SetValues(request.Vaga);
+                    
+                    List<int> ids = request.Vaga.DocumentoComplementares.Select(c => c.Value).ToList();
+
+                    //excluir o documentos complementares e atualizar com o que veio
+                    await _repository.ExecuteCommandAsync($"delete from DocumentoComplementarSolicitacaoVaga where SolicitacaoVagaSolicitacaoId ={request.Id}");
+
+                    List<DocumentoComplementar> items = _repository.GetDbSet<DocumentoComplementar>().AsNoTracking()
+                        .Where(q => ids.Contains(q.Id)).ToList();
+                    if (items.Any())
+                    {
+                        vaga.DocumentoComplementares.AddRange(items);
+                    }
+                    _repository.GetDbSet<SolicitacaoVaga>().Update(vaga);
+                }
+            } 
             else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Comunicado)
                 _repository.GetDbSet<SolicitacaoComunicado>().Entry(dado.Comunicado).State = EntityState.Modified;
             else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Desligamento)

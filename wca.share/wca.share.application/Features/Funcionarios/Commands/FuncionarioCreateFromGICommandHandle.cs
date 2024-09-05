@@ -60,11 +60,11 @@ namespace wca.share.application.Features.Funcionarios.Commands
 
                                 _ = await _mediator.Send(command, cancellationToken);
                             }
-                            //else
-                            //    Console.WriteLine($"Funcionário sem centro de custo - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}");
+                            else
+                                Console.WriteLine($"Funcionário sem centro de custo - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}");
                         }
-                        //else
-                        //    Console.WriteLine($"Funcionário sem cliente - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}");
+                        else
+                            Console.WriteLine($"Funcionário sem cliente - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}");
                     }
                     else
                     {
