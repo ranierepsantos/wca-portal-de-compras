@@ -6,7 +6,7 @@
       @novoClick="toPage()"
     />
     <v-row v-show="!isLoading.form">
-      <v-col>
+      <!-- <v-col>
         <v-select
           label="Filiais"
           v-model="filter.filialId"
@@ -19,7 +19,7 @@
           :hide-details="true"
           v-show="isMatriz"
         ></v-select>
-      </v-col>
+      </v-col> -->
       <v-col>
         <v-autocomplete
           label="Clientes"
@@ -116,6 +116,7 @@
           <th class="text-center text-grey">DATA</th>
           <th class="text-left text-grey">CLIENTE</th>
           <th class="text-left text-grey" v-if="pageTipo.id ==5">FUNÇÃO</th>
+          <th class="text-left text-grey" v-else-if="pageTipo.id ==2">ASSUNTO</th>
           <th class="text-left text-grey" v-else>FUNCIONÁRIO</th>
           <th class="text-left text-grey">RESPONSÁVEL</th>
           <th class="text-left text-grey">STATUS</th>
@@ -346,7 +347,7 @@ function getFuncNome(item){
   if (item.solicitacaoTipoId == 1)
     return item.desligamento.funcionarioNome;
   else if (item.solicitacaoTipoId == 2)
-    return item.comunicado.funcionarioNome;
+    return item.comunicado.assuntoNome;
   else if (item.solicitacaoTipoId == 3)
     return item.ferias.funcionarioNome;
   else if (item.solicitacaoTipoId == 4)

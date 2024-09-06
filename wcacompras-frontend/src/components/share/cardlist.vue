@@ -1,6 +1,6 @@
 <template>
   <v-card
-    max-width="450"
+    min-width="396"
     class="mx-auto drop-zone"
     style="margin: auto; border-radius: 15px"
     :color="color"
@@ -18,10 +18,11 @@
     >
       <template #item="{ element }">
         <v-card
-          width="430"
+          
+          max-width="97.5%"
           class="drag-el mx-auto"
           :key="element.id"
-          style="margin-top: 5px; margin-bottom: 5px; border-radius: 15px"
+          style="margin-bottom: 5px; border-radius: 15px"
         >
           <v-card-title class="text-left">
             <v-row>
@@ -44,6 +45,10 @@
               <v-col :cols="cols">Cliente</v-col>
               <v-col>{{element.clienteNome}}</v-col>
             </v-row>
+            <v-row v-if="element.solicitacaoTipoId == 2">
+              <v-col :cols="cols">Assunto</v-col>
+              <v-col>{{element.comunicado.assuntoNome}}</v-col>
+            </v-row>
             <v-row v-if="element.solicitacaoTipoId != 5">
               <v-col :cols="cols">Funcionário</v-col>
               <v-col v-if="element.solicitacaoTipoId == 1">{{ element.desligamento.funcionarioNome }}</v-col>
@@ -55,7 +60,7 @@
               <v-col :cols="cols">Função</v-col>
               <v-col>{{ element.vaga.funcaoNome }}</v-col>
             </v-row>
-            <v-row>
+            <v-row v-show="showResponsavel">
               <v-col :cols="cols">Responsável</v-col>
               <v-col>{{ element.responsavelNome }}</v-col>
             </v-row>
@@ -100,6 +105,10 @@ defineProps({
   cardTitle: {
     type: String,
     default: "Título",
+  },
+  showResponsavel: {
+    type: Boolean,
+    default: true
   }
 });
 const emit = defineEmits(['pageChange'])

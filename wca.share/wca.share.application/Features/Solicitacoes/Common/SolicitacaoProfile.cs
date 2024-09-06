@@ -74,9 +74,10 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.TipoFaturamentoNome, opt => opt.MapFrom(src => src.TipoFaturamento.Nome))
                 .ReverseMap();
 
-            CreateMap<SolicitacaoComunicado, SolicitacaoFuncionarioCentroCustoPaginateResponse>()
+            CreateMap<SolicitacaoComunicado, SolicitacaoComunicadoPaginateResponse>()
                 .ForMember(dest => dest.FuncionarioNome, opt => opt.MapFrom(src => src.Funcionario.Nome))
-                .ForMember(dest => dest.CentroCustoNome, opt => opt.MapFrom(src => src.CentroCusto.Nome));
+                .ForMember(dest => dest.CentroCustoNome, opt => opt.MapFrom(src => src.CentroCusto.Nome))
+                .ForMember(dest => dest.AssuntoNome, opt => opt.MapFrom(src => src.Assunto.Nome));
 
             CreateMap<SolicitacaoDesligamento, SolicitacaoFuncionarioCentroCustoPaginateResponse>()
                 .ForMember(dest => dest.FuncionarioNome, opt => opt.MapFrom(src => src.Funcionario.Nome))

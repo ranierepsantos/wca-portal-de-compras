@@ -14,7 +14,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public DateTime DataSolicitacao { get;  set; }
         public string Descricao { get;  set; }
         public int StatusSolicitacaoId { get;  set; }
-        public SolicitacaoComunicadoResponse? Comunicado { get;  set; }
+        public SolicitacaoComunicadoPaginateResponse? Comunicado { get;  set; }
         public SolicitacaoDesligamentoResponse? Desligamento { get;  set; }
         public SolicitacaoFeriasResponse? Ferias { get;  set; }
         public SolicitacaoMudancaBaseResponse? MudancaBase { get;  set; }
@@ -32,7 +32,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public DateTime DataSolicitacao { get; set; }
         public string ClienteNome { get; set; }
         public string? ResponsavelNome { get; set; }
-        public SolicitacaoFuncionarioCentroCustoPaginateResponse? Comunicado { get; set; }
+        public SolicitacaoComunicadoPaginateResponse? Comunicado { get; set; }
         public SolicitacaoFuncionarioCentroCustoPaginateResponse? Desligamento { get; set; }
         public SolicitacaoFuncionarioCentroCustoPaginateResponse? Ferias { get; set; }
         public SolicitacaoFuncionarioCentroCustoPaginateResponse? MudancaBase { get; set; }
@@ -53,10 +53,15 @@ namespace wca.share.application.Features.Solicitacoes.Common
 
     }
 
-    public sealed class SolicitacaoFuncionarioCentroCustoPaginateResponse
+    public class SolicitacaoFuncionarioCentroCustoPaginateResponse
     {
         public string? FuncionarioNome { get; init; }
         public string? CentroCustoNome { get; set; }
+    }
+
+    public class SolicitacaoComunicadoPaginateResponse : SolicitacaoFuncionarioCentroCustoPaginateResponse
+    {
+        public string? AssuntoNome { get; set; }
     }
 
     public sealed class SolicitacaoVagaPaginateResponse

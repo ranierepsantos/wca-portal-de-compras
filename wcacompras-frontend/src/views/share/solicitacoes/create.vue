@@ -244,15 +244,28 @@ watch(
       funcionarioList.value = [];
       centrosCustoList.value = [];
       if (clienteId) {
-        if (permissao.value == 'mudancabase')
-          solicitacao.value.mudancaBase.clienteDestinoId = null;
+        if (permissao.value != 'vaga') 
+        {
+          if (permissao.value == 'mudancabase')
+            solicitacao.value.mudancaBase.clienteDestinoId = null;
 
           solicitacao.value.funcionarioId = null
-
           funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId, useAuthStore().user.id)
+          //Trazer centros de custo
+          centrosCustoList.value = await useShareUsuarioStore().getCentrosdeCusto(useAuthStore().user.id, clienteId)         
+        }else {
+          let _cliente = await useShareClienteStore().getClienteById(clienteId)
+          if (_cliente) {
+            let _endereco  = _cliente.endereco 
+            _endereco += _cliente.numero && _cliente.numero.trim() == '' ?'': `, ${_cliente.numero}\n`
+            _endereco += _cliente.cep && _cliente.cep.trim() =='' ?'': `${_cliente.cep} - `
+            _endereco += _cliente.cidade && _cliente.cidade.trim() =='' ?'': `${_cliente.cidade}`
+            _endereco += _cliente.uf && _cliente.uf.trim() =='' ?'': ` - ${_cliente.uf}`
+            solicitacao.value.vaga.enderecoCliente = _endereco;
 
-        //Trazer centros de custo
-        centrosCustoList.value = await useShareUsuarioStore().getCentrosdeCusto(useAuthStore().user.id, clienteId)       
+          }
+
+        }
         
       }  
     } catch (error) {

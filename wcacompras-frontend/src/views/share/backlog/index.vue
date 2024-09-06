@@ -3,7 +3,7 @@
     <bread-crumbs title="Backlog" :show-button="false" />
     <!--FILTROS -->
     <v-row v-show="!isLoading.form">
-      <v-col>
+      <!-- <v-col>
         <v-select
           label="Filiais"
           v-model="filter.filialId"
@@ -16,7 +16,7 @@
           :hide-details="true"
           v-show="isMatriz"
         ></v-select>
-      </v-col>
+      </v-col> -->
       <v-col>
         <v-autocomplete
           label="Clientes"
@@ -80,6 +80,9 @@
           density="compact"
         ></v-text-field>
       </v-col>
+      <v-col cols="2">
+        <v-checkbox v-model="mostrarConcluidos" label="Mostrar Concluídos" color="primary"></v-checkbox>
+      </v-col>
       <v-col class="text-right">
         <v-btn
           color="primary"
@@ -115,6 +118,7 @@
           color="orange-lighten-4"
           card-title="Pendentes"
           @page-change="getPendentes($event, true)"
+          :show-responsavel="false"
         ></card-list
       ></v-col>
       <v-col
@@ -125,7 +129,7 @@
           @page-change="getEmAndamento($event, true)"
         ></card-list
       ></v-col>
-      <v-col
+      <v-col v-show="mostrarConcluidos"
         ><card-list
           :pagination-data="listConcluido"
           color="green-lighten-3"
@@ -139,7 +143,7 @@
 
 <script setup>
 //LIBRARYS
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import handleErrors from "@/helpers/HandleErrors";
 import moment from "moment";
 
@@ -164,36 +168,18 @@ const isMatriz = ref(true)
 const listPendente = ref(
   {
     currentPage: 1,
-    totalPage: 1,
-    totalCount: 5,
+    totalPage: 0,
+    totalCount: 0,
     pageSize: 10,
     hasPrevious: false,
     hasNext: false,
-    items: [
-      { id: 1, nome: "Comunicado", list: 1 },
-      { id: 2, nome: "Desligamento", list: 1 },
-      { id: 3, nome: "Férias", list: 1 },
-      { id: 4, nome: "Mudança de base", list: 1 },
-      { id: 5, nome: "Vaga", list: 1 },
-    ]
+    items: []
   }
 );
 
-const listAndamento = ref([
-{ id: 1, nome: "Comunicado", list: 2 },
-  { id: 2, nome: "Desligamento", list: 2 },
-  { id: 3, nome: "Férias", list: 2 },
-  { id: 4, nome: "Mudança de base", list: 2 },
-  { id: 5, nome: "Vaga", list: 2 },
-]);
+const listAndamento = ref([]);
 
-const listConcluido = ref([
-  { id: 1, nome: "Comunicado", list: 3 },
-  { id: 2, nome: "Desligamento", list: 3 },
-  { id: 3, nome: "Férias", list: 3 },
-  { id: 4, nome: "Mudança de base", list: 3 },
-  { id: 5, nome: "Vaga", list: 3 },
-]);
+const listConcluido = ref([]);
 
 const listClientes = ref([])
 const listUsuarios = ref([])
@@ -212,8 +198,16 @@ const filter = ref({
 });
 const meusClientesId = ref([])
 const meusCentrosDeCustoId = ref([])
+const mostrarConcluidos = ref(false);
+
 //VUE FUNCTIONS
 onBeforeMount (init);
+
+watch(() => mostrarConcluidos.value , async (value) => {
+  if (value) {
+    await getConcluido(1,true);
+  }
+})
 //FUNCTIONS
 async function init() {
   try {
@@ -221,7 +215,7 @@ async function init() {
     meusClientesId.value = await authStore.retornarMeusClientes(true);
     meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
     
-    await getFiliaisToList();
+    //await getFiliaisToList();
     
     isMatriz.value = authStore.sistema.isMatriz;
     authStore.user.filial = authStore.sistema.filial.value;
@@ -236,8 +230,6 @@ async function init() {
     isLoading.value.form = false
   }
 }
-
-
 
 async function clearFilters() {
   try {
@@ -293,8 +285,22 @@ async function getItems() {
 
     let pendentes = await getPendentes(1);
     let andamentos = await getEmAndamento(1)
-    let concluidos = await getConcluido(1)  
 
+    let concluidos = {
+      currentPage: 1,
+      totalPage: 0,
+      totalCount: 0,
+      pageSize: 10,
+      hasPrevious: false,
+      hasNext: false,
+      items: []
+    }
+    if (mostrarConcluidos.value)
+    {
+      concluidos = await getConcluido(1)  
+  
+    }
+    
     listPendente.value = pendentes
     listAndamento.value = andamentos  
     listConcluido.value = concluidos
