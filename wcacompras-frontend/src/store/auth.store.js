@@ -93,8 +93,9 @@ export const useAuthStore = defineStore("auth", {
         )[0];
       }
 
-      if (permissao == "filial") {
-        return perm != undefined && this.sistema.isMatriz;
+      //Se o sistema for o Reembolso ou Share, checar se além da permissão, o usuário é matriz
+      if (permissao == "filial" && this.sistema.id != 1) {
+          return perm != undefined && this.sistema.isMatriz;
       }
       // if (permissao == "perfil") {
       //   return perm != undefined && this.sistema.isMatriz;
