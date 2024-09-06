@@ -466,6 +466,9 @@
           list-destino-titulo="Documentos Complementares"
           :show-search-text="false"
           :is-read-only="isReadOnly"
+          :plus-button-show="!isReadOnly"
+          plus-button-title="Adicionar Documento Complementar"
+          @plus-click="$emit('selectButtonClick', 'DocumentoComplementar')"
         />
       </v-col>
     </v-row>
