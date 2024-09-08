@@ -66,7 +66,15 @@ namespace wca.share.application.Features.Funcionarios.Commands
                                     _ = await _mediator.Send(command, cancellationToken);
                                 }
                                 else
-                                    Console.WriteLine($"Funcionário sem centro de custo - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}");
+                                {
+                                    _repository.GetDbSet<EventLogGi>().Add(new EventLogGi()
+                                    {
+                                        Log = $"{ofunc.CodigoFuncionario} - {ofunc.Nome}, , código cliente: {ofunc.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}, centro de custo não localizado!",
+                                        Entidade = "Funcionário"
+
+                                    });
+                                   await _repository.SaveAsync();
+                                }
                             }
                             else
                             {
