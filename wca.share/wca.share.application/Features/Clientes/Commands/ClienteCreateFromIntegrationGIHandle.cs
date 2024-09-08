@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ErrorOr;
+﻿using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using wca.share.application.Contracts.Integration.GI;
