@@ -58,5 +58,10 @@ namespace wca.share.infrastructure.Integration.GI
         {
             return await _client.FuncionarioGetAll(token.Token);
         }
+
+        public async Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllJsonAsync(WhereCondition where)
+        {
+            return await _client.FuncionarioGetAllJson(token.Token, where);
+        }
     }
 }

@@ -19,5 +19,8 @@ namespace wca.share.infrastructure.Integration.GI
         [Get("/Funcionario/GetAll")]
         Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAll([Authorize("Bearer")] string token);
 
+        [Post("/Funcionario/GetAllJson")]
+        Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllJson([Authorize("Bearer")] string token,[Body] WhereCondition where);
+
     }
 }
