@@ -147,4 +147,17 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         public string eSocialMatricula { get; set; }
 
     }
+
+    public class WhereCondition
+    {
+        [JsonPropertyName("where")]
+        public List<Condition> Conditions { get; set; } = new List<Condition>();
+    }
+    public class Condition
+    {
+        [JsonPropertyName("campo")]
+        public string Campo { get; set; }
+        [JsonPropertyName("valor")]
+        public string Valor { get; set; }  
+    }
 }

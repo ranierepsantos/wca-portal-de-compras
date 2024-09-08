@@ -7,5 +7,6 @@ namespace wca.share.application.Contracts.Integration.GI
         Task<IEnumerable<ClienteResponse>> ClienteGetAllAsync();
         Task<IEnumerable<CentroCustoResponse>> CentroCustoGetAllAsync();
         Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllAsync();
+        Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllJsonAsync(WhereCondition where);
     }
 }
