@@ -14,7 +14,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public DateTime DataSolicitacao { get;  set; }
         public string Descricao { get;  set; }
         public int StatusSolicitacaoId { get;  set; }
-        public SolicitacaoComunicadoPaginateResponse? Comunicado { get;  set; }
+        public SolicitacaoComunicadoResponse? Comunicado { get;  set; }
         public SolicitacaoDesligamentoResponse? Desligamento { get;  set; }
         public SolicitacaoFeriasResponse? Ferias { get;  set; }
         public SolicitacaoMudancaBaseResponse? MudancaBase { get;  set; }
