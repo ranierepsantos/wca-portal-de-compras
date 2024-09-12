@@ -45,7 +45,7 @@
           combo-item-title="descricao"
           combo-item-value="id"
           :select-mode="createMode"
-          :text-field-value="dataModel.tipoFerias.descricao"
+          :text-field-value="dataModel.tipoFeriasNome"
           label-text="Tipo Férias"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>

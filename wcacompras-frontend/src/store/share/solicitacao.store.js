@@ -113,7 +113,8 @@ export class Ferias {
         this.dataSaida = data.dataSaida? moment(data.dataSaida).format("YYYY-MM-DD") : null
         this.dataRetorno = data.dataRetorno? moment(data.dataRetorno).format("YYYY-MM-DD") : null
         this.tipoFeriasId = data.tipoFeriasId || null
-        this.tipoFerias = data.tipoFerias || {id: null, descricao: "", quantidadeDias: 0}
+        //this.tipoFerias = data.tipoFerias || {id: null, descricao: "", quantidadeDias: 0}
+        this.tipoFeriasNome = data.tipoFeriasNome || null;
     }
 }
 
