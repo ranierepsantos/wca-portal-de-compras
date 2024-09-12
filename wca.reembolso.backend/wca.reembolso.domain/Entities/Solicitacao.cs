@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-using wca.reembolso.domain.Common.Enum;
 
 namespace wca.reembolso.domain.Entities
 {
@@ -32,7 +30,7 @@ namespace wca.reembolso.domain.Entities
         [Column("projeto", TypeName = "varchar(100)")]
         public string Projeto { get; set; }
 
-        [Column("objetivo", TypeName = "varchar(100)")]
+        [Column("objetivo", TypeName = "varchar(1000)")]
         public string Objetivo { get; set;}
 
         [Column("periodo_inicial", TypeName = "smalldatetime")]
@@ -58,6 +56,10 @@ namespace wca.reembolso.domain.Entities
 
         [Column("data_status", TypeName = "smalldatetime")]
         public DateTime DataStatus { get; set; } = DateTime.Now;
+
+        [Column("data_prevista", TypeName = "smalldatetime")]
+        public DateTime? DataPrevistaEntrega { get; set; }
+
 
         public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();
