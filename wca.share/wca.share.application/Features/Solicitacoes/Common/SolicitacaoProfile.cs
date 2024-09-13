@@ -53,6 +53,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.FuncionarioNome, opt => opt.MapFrom(src => src.Funcionario.Nome))
                 .ForMember(dest => dest.CentroCustoNome, opt => opt.MapFrom(src => src.CentroCusto.Nome))
                 .ForMember(dest => dest.eSocialMatricula, opt => opt.MapFrom(src => src.Funcionario.eSocialMatricula))
+                .ForMember(dest => dest.TipoFeriasNome, opt => opt.MapFrom(src => src.TipoFerias.Descricao))
                 .ReverseMap();
 
             CreateMap<SolicitacaoMudancaBase, SolicitacaoMudancaBaseResponse>()
