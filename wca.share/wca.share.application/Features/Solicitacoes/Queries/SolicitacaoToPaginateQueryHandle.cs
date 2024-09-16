@@ -138,11 +138,20 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 }
                 else
                 {
-                    query = query.IncludeComunicado()
+                    try
+                    {
+                        query = query.IncludeComunicado()
                         .IncludeDesligamento()
                         .IncludeFerias()
                         .IncludeMudancaBase()
                         .IncludeVagaToPaginate();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Error.Message: {ex.Message}\n Error.InnerException: {ex.InnerException?.Message}");
+                        throw;
+                    }
+                    
                 }
 
                 query = query.OrderByDescending(q => q.DataSolicitacao).ThenBy(q => q.Id);
@@ -154,9 +163,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"Parâmetros: {JsonSerializer.Serialize(request)}");
-                _logger.LogError($"Error.Message: {ex.Message}");
-                _logger.LogError($"Error.InnerException: {ex.InnerException?.Message}");
+                _logger.LogError($"Parâmetros: {JsonSerializer.Serialize(request)}\n Error.Message: {ex.Message}\n Error.InnerException: {ex.InnerException?.Message}");
                 return Error.Failure(ex.Message);
             }
         }
