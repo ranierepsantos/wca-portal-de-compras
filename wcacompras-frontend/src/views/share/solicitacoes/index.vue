@@ -241,6 +241,7 @@ const filter = ref({
   status: null,
   dataIni: null,
   dataFim: null,
+  usuarioId: authStore.user.id
 });
 const solicitacaoStore = useShareSolicitacaoStore();
 const eventos = ref([]);
@@ -294,8 +295,8 @@ onBeforeMount(async () => {
         pageTipo.value.tipo = "Vaga";
     }
 
-    meusClientesId.value = await authStore.retornarMeusClientes(true);
-    meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
+    //meusClientesId.value = await authStore.retornarMeusClientes(true);
+    //meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
     
     await getFiliaisToList();
     isMatriz.value = authStore.sistema.isMatriz;
@@ -322,6 +323,7 @@ async function clearFilters() {
       status: null,
       dataIni: null,
       dataFim: null,
+      usuarioId: authStore.user.id
     };
 
     await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
@@ -380,13 +382,14 @@ async function getItems() {
 
 
     filtros.filialId = filtros.filialId ?? 0
-    filtros.clienteIds = meusClientesId.value
-    filtros.centroCustoIds = meusCentrosDeCustoId.value 
+    //filtros.clienteIds = meusClientesId.value
+    //filtros.centroCustoIds = meusCentrosDeCustoId.value 
     filtros.tipoSolicitacao = pageTipo.value.id
 
     if (filter.value.clienteId != null) 
       filtros.clienteIds = [filter.value.clienteId]
 
+    console.debug("solicitacoes.filtros", filtros)
     let response = await solicitacaoStore.getPaginate(
       page.value,
       pageSize,

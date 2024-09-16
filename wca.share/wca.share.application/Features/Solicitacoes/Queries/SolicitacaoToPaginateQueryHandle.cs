@@ -19,6 +19,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
         int[]? ClienteIds,
         int[]? CentroCustoIds,
         int[]? Status,
+        int UsuarioId = 0,
         EnumTipoSolicitacao TipoSolicitacao = EnumTipoSolicitacao.Todos) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     internal sealed class SolicitacaoToPaginateQueryHandle :
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
@@ -46,24 +47,26 @@ namespace wca.share.application.Features.Solicitacoes.Queries
 
                 IQueryable<Solicitacao> query;
 
-                if (request.TipoSolicitacao == EnumTipoSolicitacao.Todos && request.CentroCustoIds.Length > 0)
+                if (request.TipoSolicitacao == EnumTipoSolicitacao.Todos)
                 {
-                    string condicao = String.Join(",", request.CentroCustoIds);
+                    string condicao = "";
+                    if (request.UsuarioId > 0)
+                        condicao = $" and ucc.usuarioid = {request.UsuarioId}"; 
 
                     string consulta = @$"
                                     select s.id, s.solicitacaotipo_id, s.cliente_id, s.responsavel_id, s.data_solicitacao, s.status_id, s.descricao
                                     from solicitacoes s
                                     inner join clientes c on c.id = s.cliente_id
                                     left  join Usuarios u on u.id = s.responsavel_id
-                                    left  join SolicitacaoComunicado sc on sc.solicitacao_id = s.id  and sc.centrocusto_id in ({condicao})
-                                    left  join SolicitacaoDesligamento sd on sd.solicitacao_id = s.id  and sd.centrocusto_id in ({condicao})
-                                    left  join SolicitacaoFerias sf on sf.solicitacao_id = s.id  and sf.centrocusto_id in ({condicao})
-                                    left  join SolicitacaoMudancaBase sm on sm.solicitacao_id = s.id  and sm.centrocusto_id in ({condicao})
+                                    left  join (select solicitacao_id from SolicitacaoComunicado sc inner join UsuarioCentrodeCustos ucc on ucc.CentroCustoId = sc.centrocusto_id {condicao} ) sc on sc.solicitacao_id = s.id  
+                                    left  join (select solicitacao_id from SolicitacaoDesligamento sd inner join UsuarioCentrodeCustos ucc on ucc.CentroCustoId = sd.centrocusto_id {condicao}) sd on sd.solicitacao_id = s.id
+                                    left  join (select solicitacao_id from SolicitacaoFerias sf inner join UsuarioCentrodeCustos ucc on ucc.CentroCustoId = sf.centrocusto_id {condicao}) sf on sf.solicitacao_id = s.id
+                                    left  join (select solicitacao_id from SolicitacaoMudancaBase sm inner join UsuarioCentrodeCustos ucc on ucc.CentroCustoId = sm.centrocusto_id {condicao}) sm on sm.solicitacao_id = s.id
                                     where solicitacaotipo_id = 5
-                                       or (solicitacaotipo_id =1 and sd.centrocusto_id is not null) 
-                                       or (solicitacaotipo_id =2 and sc.centrocusto_id is not null)
-                                       or (solicitacaotipo_id =3 and sf.centrocusto_id is not null)
-                                       or (solicitacaotipo_id =4 and sm.centrocusto_id is not null)
+                                       or (solicitacaotipo_id =1 and sd.solicitacao_id is not null) 
+                                       or (solicitacaotipo_id =2 and sc.solicitacao_id is not null)
+                                       or (solicitacaotipo_id =3 and sf.solicitacao_id is not null)
+                                       or (solicitacaotipo_id =4 and sm.solicitacao_id is not null)
                                     ";
                     query = _repository.FromQuery<Solicitacao>(consulta);
                 }else
@@ -85,6 +88,9 @@ namespace wca.share.application.Features.Solicitacoes.Queries
 
                 if (request.ClienteIds?.Length > 0)
                     query = query.Where(q => request.ClienteIds.Contains(q.ClienteId));
+                else if (request.UsuarioId > 0)
+                    query = query.Where(q => q.Cliente.UsuarioClientes.Where(q1 => q1.UsuarioId == request.UsuarioId).Any() );
+                   
 
                 if (request.Status?.Length > 0)
                     query = query.Where(q => request.Status.Contains(q.StatusSolicitacaoId));
@@ -102,27 +108,23 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 if (request.TipoSolicitacao == EnumTipoSolicitacao.Comunicado)
                 {
                     query = query.IncludeComunicado();
-                    if (request.CentroCustoIds?.Length > 0)
-                        query = query.Where(q => request.CentroCustoIds.Contains(q.Comunicado.CentroCustoId));
+                    query = query.Where(q => q.Comunicado.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
                 }
                 else if (request.TipoSolicitacao == EnumTipoSolicitacao.Desligamento)
                 {
                     query = query.IncludeDesligamento();
-                    if (request.CentroCustoIds?.Length > 0)
-                        query = query.Where(q => request.CentroCustoIds.Contains(q.Desligamento.CentroCustoId));
+                    query = query.Where(q => q.Desligamento.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
 
                 } else if (request.TipoSolicitacao == EnumTipoSolicitacao.Ferias)
                 {
                     query = query.IncludeFerias();
-                    if (request.CentroCustoIds?.Length > 0)
-                        query = query.Where(q => request.CentroCustoIds.Contains(q.Ferias.CentroCustoId));
+                    query = query.Where(q => q.Ferias.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
 
                 }
                 else if (request.TipoSolicitacao == EnumTipoSolicitacao.MudancaBase)
                 {
                     query = query.IncludeMudancaBase();
-                    if (request.CentroCustoIds?.Length > 0)
-                        query = query.Where(q => request.CentroCustoIds.Contains(q.MudancaBase.CentroCustoId));
+                    query = query.Where(q => q.MudancaBase.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
                 }
                 else if (request.TipoSolicitacao == EnumTipoSolicitacao.Vaga)
                 {
@@ -137,7 +139,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                         .IncludeVagaToPaginate();
                 }
 
-                query = query.OrderByDescending(q => q.DataSolicitacao);
+                query = query.OrderByDescending(q => q.DataSolicitacao).ThenBy(q => q.Id);
 
                 var pagination = Pagination<SolicitacaoToPaginateResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 
