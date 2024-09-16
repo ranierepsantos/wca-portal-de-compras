@@ -45,7 +45,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                     return Error.Validation("Data início ou fim inválida!");
                 }
 
-                IQueryable<Solicitacao> query;
+                IQueryable<Solicitacao> query = _repository.GetDbSet<Solicitacao>();
 
                 if (request.TipoSolicitacao == EnumTipoSolicitacao.Todos)
                 {
@@ -68,10 +68,16 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                                        or (solicitacaotipo_id =3 and sf.solicitacao_id is not null)
                                        or (solicitacaotipo_id =4 and sm.solicitacao_id is not null)
                                     ";
-                    query = _repository.FromQuery<Solicitacao>(consulta);
-                }else
-                {
-                    query = _repository.GetDbSet<Solicitacao>();
+                    try
+                    {
+                        query = _repository.FromQuery<Solicitacao>(consulta);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"FromQuery.Error {ex.Message}");
+                        
+                    }
+                    
                 }
 
                 query = query.IncludeCliente()
