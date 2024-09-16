@@ -177,9 +177,25 @@ const listPendente = ref(
   }
 );
 
-const listAndamento = ref([]);
+const listAndamento = ref({
+    currentPage: 1,
+    totalPage: 0,
+    totalCount: 0,
+    pageSize: 10,
+    hasPrevious: false,
+    hasNext: false,
+    items: []
+  });
 
-const listConcluido = ref([]);
+const listConcluido = ref({
+    currentPage: 1,
+    totalPage: 0,
+    totalCount: 0,
+    pageSize: 10,
+    hasPrevious: false,
+    hasNext: false,
+    items: []
+  });
 
 const listClientes = ref([])
 const listUsuarios = ref([])
@@ -195,6 +211,7 @@ const filter = ref({
   status: null,
   dataIni: null,
   dataFim: null,
+  usuarioId:  authStore.user.id
 });
 const meusClientesId = ref([])
 const meusCentrosDeCustoId = ref([])
@@ -212,8 +229,8 @@ watch(() => mostrarConcluidos.value , async (value) => {
 async function init() {
   try {
     isLoading.value.form = true
-    meusClientesId.value = await authStore.retornarMeusClientes(true);
-    meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
+    //meusClientesId.value = await authStore.retornarMeusClientes(true);
+    //meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
     
     //await getFiliaisToList();
     
@@ -241,6 +258,7 @@ async function clearFilters() {
       status: null,
       dataIni: null,
       dataFim: null,
+      usuarioId: authStore.user.id
     };
     
     if (!isMatriz.value) 
@@ -274,8 +292,8 @@ async function getItems() {
     delete filtros.clienteId
 
     filtros.filialId = filtros.filialId ?? 0
-    filtros.clienteIds = meusClientesId.value
-    filtros.centroCustoIds = meusCentrosDeCustoId.value 
+    //filtros.clienteIds = meusClientesId.value
+    //filtros.centroCustoIds = meusCentrosDeCustoId.value 
     filtros.tipoSolicitacao = 0
 
     if (filter.value.clienteId != null) 

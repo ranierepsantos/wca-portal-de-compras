@@ -365,18 +365,9 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
     },
     async getPaginate(page = 1, pageSize = 10, filters) {
         try {
-            let parametros = {
-                page: page,
-                pageSize: pageSize,
-                filialId: filters.filialId,
-                responsavelId: filters.responsavelId,
-                clienteIds: filters.clienteIds,
-                centroCustoIds: filters.centroCustoIds,
-                dataIni: filters.dataIni,
-                dataFim: filters.dataFim,
-                status: filters.status,
-                tipoSolicitacao: filters.tipoSolicitacao
-            }
+            let parametros =  {...filters}
+            parametros.page = page;
+            parametros.pageSize = pageSize;
             
 
             let response = await api.post(rotas.Paginar, parametros );
