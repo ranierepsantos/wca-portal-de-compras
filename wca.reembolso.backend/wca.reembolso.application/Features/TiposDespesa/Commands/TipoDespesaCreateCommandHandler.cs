@@ -14,8 +14,11 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
     public record TipoDespesaCreateCommand (
         string Nome,
         EnumTipoDespesaTipo Tipo,
-        decimal Valor = 0
-    ):IRequest<ErrorOr<TipoDespesaResponse>>;
+        decimal Valor = 0,
+        bool FaturarCliente = true,
+        bool ReembolsarColaborador = true,
+        bool ExibirParaColaborador = true
+    ) :IRequest<ErrorOr<TipoDespesaResponse>>;
 
     public class TipoDespesaCreateCommandHandler : IRequestHandler<TipoDespesaCreateCommand, ErrorOr<TipoDespesaResponse>>
     {

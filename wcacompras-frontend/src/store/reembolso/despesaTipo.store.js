@@ -2,13 +2,17 @@ import { defineStore } from "pinia";
 import api from "@/services/reembolso/tipodespesa.service"
 
 export class TipoDespesa {
-    constructor(data = null)
+    constructor(data = {})
     {
-        this.id     = data? data.id : 0;
-        this.nome   = data? data.nome : "";
-        this.ativo  = data? data.ativo: true
-        this.tipo   = data? data.tipo: 1,
-        this.valor  = data? data.valor: 0.0
+        this.id     = data.id    ?? 0;
+        this.nome   = data.nome  ?? "";
+        this.ativo  = data.ativo ?? true
+        this.tipo   = data.tipo  ?? 1,
+        this.valor  = data.valor ?? 0.0
+        this.reembolsarColaborador = data.reembolsarColaborador ?? true;
+        this.faturarCliente = data.faturarCliente ?? true;
+        this.exibirParaColaborador = data.exibirParaColaborador ?? true;
+
     }
 }
 
@@ -52,8 +56,12 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
             throw error
         }  
     },
-    async toComboList() {
-        let response = await api.toList();
+    async toComboList(exibirParaColaborador = true) {
+        let listarTipoDespesa = 1; //todos
+        if (exibirParaColaborador)
+            listarTipoDespesa = 2 // somente visivel para colaborador
+
+        let response = await api.toList(listarTipoDespesa);
         return response.data;
     },
     getTipoDespesa(tipo) {

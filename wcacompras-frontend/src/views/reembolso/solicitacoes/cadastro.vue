@@ -228,7 +228,7 @@
                   {{ moment(item.dataEvento).format("DD/MM/YYYY") }}
                 </td>
                 <td class="text-center">
-                  {{ getDespesaTipo(item.tipoDespesaId).nome }}
+                  {{ item.tipoDespesaNome }}
                 </td>
                 <td class="text-center" colspan="2">
                   {{
@@ -514,7 +514,7 @@ onMounted(async () => {
     isBusy.value = true;
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
-    despesaTipos.value = await despesaTipoStore.toComboList();
+    despesaTipos.value = await despesaTipoStore.toComboList(isColaborador.value);
 
     if (parseInt(route.query.id) > 0) {
       await getSolicitacao(route.query.id);

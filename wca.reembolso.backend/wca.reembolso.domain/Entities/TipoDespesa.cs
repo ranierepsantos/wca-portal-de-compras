@@ -27,8 +27,8 @@ namespace wca.reembolso.domain.Entities
         [Column("reembolsar_colaborador")]
         public bool ReembolsarColaborador { get; set; } = true;
 
-        [Column("especial")]
-        public bool Especial { get; set; } = false;
+        [Column("exibir_para_colaborador")]
+        public bool ExibirParaColaborador { get; set; } = true;
 
     }
 }

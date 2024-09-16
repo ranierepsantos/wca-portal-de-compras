@@ -48,9 +48,21 @@
               
             </v-row>
             <v-row>
-              <v-col cols="6">
-                <v-checkbox v-show="model.id > 0" v-model="model.ativo" label="Ativo" color="primary"></v-checkbox>
+              <v-col>
+                <v-checkbox v-model="model.exibirParaColaborador" label="Exibe para colaborador" color="primary" density="compact" :hide-details="true"></v-checkbox>
               </v-col>
+              <v-col>
+                <v-checkbox v-model="model.reembolsarColaborador" label="Reembolsa colaborador" color="primary" density="compact" :hide-details="true"></v-checkbox>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-checkbox v-model="model.faturarCliente" label="Faturar cliente" color="primary" density="compact" :hide-details="true"></v-checkbox>
+              </v-col>
+              <v-col>
+                <v-checkbox v-show="model.id > 0" v-model="model.ativo" label="Ativo" color="primary" density="compact" :hide-details="true"></v-checkbox>
+              </v-col>
+              
             </v-row>
 
             <v-row>
