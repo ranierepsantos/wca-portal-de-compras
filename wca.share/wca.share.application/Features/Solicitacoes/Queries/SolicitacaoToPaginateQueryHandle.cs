@@ -68,16 +68,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                                        or (solicitacaotipo_id =3 and sf.solicitacao_id is not null)
                                        or (solicitacaotipo_id =4 and sm.solicitacao_id is not null)
                                     ";
-                    try
-                    {
-                        query = _repository.FromQuery<Solicitacao>(consulta);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError($"FromQuery.Error {ex.Message}");
-                        
-                    }
-                    
+                    query = _repository.FromQuery<Solicitacao>(consulta);
                 }
 
                 query = query.IncludeCliente()
@@ -138,20 +129,11 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 }
                 else
                 {
-                    try
-                    {
-                        query = query.IncludeComunicado()
-                        .IncludeDesligamento()
-                        .IncludeFerias()
-                        .IncludeMudancaBase()
-                        .IncludeVagaToPaginate();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError($"Error.Message: {ex.Message}\n Error.InnerException: {ex.InnerException?.Message}");
-                        throw;
-                    }
-                    
+                    query = query.IncludeComunicado()
+                                .IncludeDesligamento()
+                                .IncludeFerias()
+                                .IncludeMudancaBase()
+                                .IncludeVagaToPaginate();
                 }
 
                 query = query.OrderByDescending(q => q.DataSolicitacao).ThenBy(q => q.Id);
