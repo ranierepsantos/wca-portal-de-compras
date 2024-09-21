@@ -6,7 +6,8 @@ const rotas = {
     ListFilialByUsuario: "Usuario/ListFilialByUsuario/{usuarioId}",
     ListarCentroCusto: "Usuario/ListarCentroCusto/{usuarioId}/{clienteId}",
     RelacionarUsuarioCentroCusto: "Usuario/RelacionarUsuarioCentroCusto",
-    ListarPorCentroCusto: "Usuario/ListarPorCentroCusto/{id}"
+    ListarPorCentroCusto: "Usuario/ListarPorCentroCusto/{id}",
+    ToComboList: "Usuario/ToComboList"
 }
 
 
@@ -29,6 +30,11 @@ export default {
     },
     getListByCentroCusto(idCentroCusto) {
         return api.get(rotas.ListarPorCentroCusto.replace("{id}", idCentroCusto));
+    },
+
+    toComboListByClienteOrPerfil(clienteId, perfilId = 0)
+    {
+        return api.get(rotas.ToComboList+`?clienteId=${clienteId}&perfilId=${perfilId}`);
     }
 
 }

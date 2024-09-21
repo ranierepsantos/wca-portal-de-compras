@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.IO.Compression;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
+using wca.reembolso.application.Features.Solicitacoes.Common;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Solicitacoes.Queries
@@ -34,7 +35,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
 
                 Dictionary<int,string> files = new();
 
-                foreach (Despesa despesa in findResult.Value.Despesa)
+                foreach (DespesaResponse despesa in findResult.Value.Despesa)
                 {
                     if (!string.IsNullOrEmpty(despesa.ImagePath))
                         files.TryAdd(despesa.Id, despesa.ImagePath.Replace(MyHttpContext.AppBaseUrl, "wwwroot"));

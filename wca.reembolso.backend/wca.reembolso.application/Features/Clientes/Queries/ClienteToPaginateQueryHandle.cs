@@ -38,6 +38,7 @@ namespace wca.reembolso.application.Features.Clientes.Queries
 
             query = query.Include(x => x.CentroCusto);
 
+            query = query.OrderBy(c => c.Nome).ThenBy(c => c.Id);
 
             var pagination = Pagination<ClienteResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 

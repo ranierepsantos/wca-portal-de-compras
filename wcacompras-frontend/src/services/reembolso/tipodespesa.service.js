@@ -23,9 +23,9 @@ export default {
         return api.put(rotas.Update, data);
     },
 
-    toList()
+    toList(listarTipoDespesa = 1)
     {
-        return api.get(rotas.ToComboList);
+        return api.get(`${rotas.ToComboList}?ListarTipoDespesa=${listarTipoDespesa}`);
     },
 
     paginate(pageSize, page, termo = "")

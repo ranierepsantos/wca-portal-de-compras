@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.reembolso.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.reembolso.infrastruture.Context;
 namespace wca.reembolso.infrastruture.Migrations
 {
     [DbContext(typeof(WcaReembolsoContext))]
-    partial class WcaReembolsoContextModelSnapshot : ModelSnapshot
+    [Migration("20240914004946_AlterTables_Solicitacao_TipoDespesa")]
+    partial class AlterTables_Solicitacao_TipoDespesa
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -431,12 +434,8 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnName("data_status");
 
                     b.Property<string>("Descricao")
-                        .HasColumnType("varchar(1000)")
+                        .HasColumnType("varchar(1000")
                         .HasColumnName("descricao");
-
-                    b.Property<string>("Marca")
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("marca");
 
                     b.Property<string>("Objetivo")
                         .IsRequired()
@@ -455,10 +454,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(100)")
                         .HasColumnName("projeto");
-
-                    b.Property<int?>("Quantidade")
-                        .HasColumnType("int")
-                        .HasColumnName("quantidade");
 
                     b.Property<int>("Status")
                         .HasColumnType("int")
@@ -479,14 +474,6 @@ namespace wca.reembolso.infrastruture.Migrations
                     b.Property<decimal>("ValorDespesa")
                         .HasColumnType("money")
                         .HasColumnName("valor_despesa");
-
-                    b.Property<decimal?>("ValorFrete")
-                        .HasColumnType("money")
-                        .HasColumnName("valor_frete");
-
-                    b.Property<decimal?>("ValorUnitario")
-                        .HasColumnType("money")
-                        .HasColumnName("valor_unitario");
 
                     b.HasKey("Id");
 
@@ -698,10 +685,6 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("ativo");
 
-                    b.Property<string>("Cargo")
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("cargo");
-
                     b.Property<string>("Celular")
                         .HasColumnType("varchar(30)")
                         .HasColumnName("celular");
@@ -712,19 +695,11 @@ namespace wca.reembolso.infrastruture.Migrations
                         .HasColumnType("varchar(150)")
                         .HasColumnName("email");
 
-                    b.Property<int?>("GestorId")
-                        .HasColumnType("int")
-                        .HasColumnName("gestor_id");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("nome");
-
-                    b.Property<int?>("PerfilId")
-                        .HasColumnType("int")
-                        .HasColumnName("perfil_id");
 
                     b.HasKey("Id");
 

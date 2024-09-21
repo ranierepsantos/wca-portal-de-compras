@@ -131,6 +131,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Queries
                 {
                     1 => "Reembolso",
                     2 => "Adiantamento",
+                    3 => "Solicitação Especial",
                     _ => $"{item.TipoSolicitacao}  - Desconhecido"
 
                 } );

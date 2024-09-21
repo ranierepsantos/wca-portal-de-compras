@@ -245,7 +245,7 @@
                   <td class="text-left">{{ item.colaboradorNome }}</td>
                   <td class="text-left">{{ item.centroCustoNome }}</td>
                   <td class="text-right">
-                    {{ formatToCurrencyBRL(parseFloat(item.valorDespesa)) }}
+                    {{ formatToCurrencyBRL(parseFloat(item.valorFaturavelCliente)) }}
                   </td>
                   <td class="text-center">
                     <v-btn
@@ -587,11 +587,13 @@ watch(
 );
 
 const valorFaturamento = computed(() => {
-  faturamento.value.valor = 0;
-  faturamento.value.faturamentoItem.forEach((item) => {
-    faturamento.value.valor += parseFloat(item.solicitacao.valorDespesa);
-  });
-  return faturamento.value.valor;
+  let valor = faturamento.value.valor;
+  if (valor <=0) {
+    faturamento.value.faturamentoItem.forEach((item) => {
+      valor += parseFloat(item.solicitacao.valorFaturavelCliente);
+    });
+  }
+  return valor;
 });
 
 //FUNCTIONS
@@ -727,7 +729,7 @@ async function salvar() {
       let status = faturamentoStore.getStatus(1);
       data.notificar = await getUsuarioToNotificar(status);
       data.status = status;
-
+      data.valor = valorFaturamento.value;
       await faturamentoStore.add(data);
 
       swal.fire({

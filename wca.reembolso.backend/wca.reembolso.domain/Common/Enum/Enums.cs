@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace wca.reembolso.domain.Common.Enum
+﻿namespace wca.reembolso.domain.Common.Enum
 {
 
     public enum EnumTipoSolicitacao
     {
         Reembolso =1,
-        Adiantamento =2
+        Adiantamento =2,
+        SolicitacaoEspecial = 3
     }
     public enum EnumTipoDespesaTipo
     {
@@ -24,5 +19,12 @@ namespace wca.reembolso.domain.Common.Enum
         Cliente = 2,
         Usuario = 3
     }
-    
+
+    public enum EnumListarTipoDespesa
+    {
+        MostrarTodas = 1,
+        ExibirColaborador = 2,
+        NaoExibirColaborador =3
+    }
+
 }

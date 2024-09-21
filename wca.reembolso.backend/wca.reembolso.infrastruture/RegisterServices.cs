@@ -48,7 +48,8 @@ namespace wca.reembolso.infrastruture
             //});
 
             services.AddDbContext<WcaReembolsoContext>(
-                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")
+                , o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             );
 
             services.AddScoped<IRepositoryManager, RepositoryManager>();

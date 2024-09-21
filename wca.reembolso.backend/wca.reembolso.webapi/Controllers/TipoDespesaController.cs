@@ -47,9 +47,9 @@ namespace wca.reembolso.webapi.Controllers
         }
 
         [HttpGet("ToComboList")]
-        public async Task<IActionResult> ToComboList()
+        public async Task<IActionResult> ToComboList([FromQuery] TipoDespesaToComboListQuerie query)
         {
-            var result = await _mediator.Send(new TipoDespesaToComboListQuerie());
+            var result = await _mediator.Send(query);
 
             if (result.IsError) { return Problem(result.Errors); }
 
