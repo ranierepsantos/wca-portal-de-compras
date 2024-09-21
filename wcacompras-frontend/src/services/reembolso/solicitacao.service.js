@@ -36,14 +36,12 @@ export default {
 
     ListarPorColaboradorGestor(colaboradorId = 0, status = [])
     {
-        console.log("ListarPorColaboradorGestor.status: ", status)
         let parametros ={
             params: {
                 colaboradorId: colaboradorId,
                 status: status
             }
         }
-        console.log("ListarPorColaboradorGestor.parametros: ", parametros)
         return api.get(rotas.ListarPorColaboradorGestor, parametros);
     },
 

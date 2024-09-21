@@ -26,7 +26,7 @@ namespace wca.reembolso.domain.Entities
 
         [Column("colaborador_cargo", TypeName = "varchar(100)")]
         public string ColaboradorCargo { get; set; }
-        
+                
         [Column("projeto", TypeName = "varchar(100)")]
         public string Projeto { get; set; }
 
@@ -65,6 +65,18 @@ namespace wca.reembolso.domain.Entities
 
         [Column("data_entrega", TypeName = "smalldatetime")]
         public DateTime? DataEntrega { get; set; }
+
+        [Column("marca", TypeName = "varchar(100)")]
+        public string? Marca { get; set; }
+
+        [Column("valor_unitario", TypeName = "money")]
+        public decimal? ValorUnitario { get; set; }
+
+        [Column("quantidade")]
+        public int? Quantidade { get; set; }
+
+        [Column("valor_frete", TypeName = "money")]
+        public decimal? ValorFrete { get; set; }
 
         public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();

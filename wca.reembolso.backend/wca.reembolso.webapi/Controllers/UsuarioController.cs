@@ -1,7 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using wca.reembolso.application.Features.Clientes.Commands;
-using wca.reembolso.application.Features.Clientes.Queries;
 using wca.reembolso.application.Features.Usuarios.Commands;
 using wca.reembolso.application.Features.Usuarios.Queries;
 
@@ -58,6 +56,15 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
+        [HttpGet("ToComboList")]
+        public async Task<IActionResult> ToComboList([FromQuery] UsuarioToComboListQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
 
     }
 }

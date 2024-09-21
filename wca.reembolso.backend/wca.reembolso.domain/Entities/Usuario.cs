@@ -25,8 +25,16 @@ namespace wca.reembolso.domain.Entities
         [Column("celular", TypeName = "varchar(30)")]
         public string? Celular { get; set; }
 
-        public ContaCorrente? ContaCorrente { get; set;}
+        [Column("cargo", TypeName = "varchar(100)")]
+        public string? Cargo { get; set; }
+        
+        [Column("perfil_id")]
+        public int? PerfilId { get; set; }
 
+        [Column("gestor_id")]
+        public int? GestorId { get; set; }
+
+        public ContaCorrente? ContaCorrente { get; set;}
         public List<UsuarioClientes>? UsuarioClientes { get; set;}
         public List<UsuarioCentrodeCustos>? UsuarioCentrodeCustos { get; set; }
         public UsuarioConfiguracoes? UsuarioConfiguracoes { get; set; }

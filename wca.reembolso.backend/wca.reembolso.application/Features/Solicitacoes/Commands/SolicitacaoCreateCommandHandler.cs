@@ -30,6 +30,13 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         decimal? ValorDespesa,
         int Status,
         int TipoSolicitacao,
+        string? Descricao,
+        DateTime? DataEntrega,
+        DateTime? DataPrevistaEntrega,
+        string? Marca,
+        decimal? ValorUnitario,
+        decimal? ValorFrete,
+        int? Quantidade,
         IList<Despesa> Despesa, 
         int[] Notificar
     ) : IRequest<ErrorOr<SolicitacaoResponse>>;

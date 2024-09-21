@@ -10,7 +10,9 @@ namespace wca.reembolso.domain.Common.Enum
     public enum EnumTipoSolicitacao
     {
         Reembolso =1,
-        Adiantamento =2
+        Adiantamento =2,
+        EPI = 3,
+        Voucher = 4,
     }
     public enum EnumTipoDespesaTipo
     {

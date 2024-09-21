@@ -38,6 +38,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
                          .Include(q => q.Colaborador)
                          .Include(q => q.CentroCusto)
                          .Include(q => q.Despesa)
+                            .ThenInclude(q => q.TipoDespesa)
                          .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora));
 
             if (request.FilialId > 1)
@@ -61,8 +62,7 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
                 query = query.Where(c => c.DataSolicitacao >= request.DataIni && c.DataSolicitacao <= dataFim);
             }
 
-
-            query = query.OrderByDescending (q => q.DataSolicitacao).ThenBy(q => q.Id);
+            query = query.OrderByDescending(q => q.Id);
 
             var pagination = Pagination<SolicitacaoToPaginateResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
 
