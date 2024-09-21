@@ -448,7 +448,7 @@ async function gerarRelatorio() {
 function getValue(solicitacao, field)
 {
   
-  if (isColaborador.value && '3,4'.includes(solicitacao.tipoSolicitacao))
+  if (isColaborador.value && solicitacao.tipoSolicitacao == 3)
     return formatToCurrencyBRL(0.00)
   else
     return formatToCurrencyBRL(solicitacao[field])

@@ -121,9 +121,8 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
   state: () => ({
     tipoSolicitacao: [
         {text: "Adiantamento", value: 2},
-        {text: "EPI", value: 3},
         {text: "Reembolso", value: 1},
-        {text: "Voucher", value: 4},
+        {text: "Solicitação Especial", value: 3},
     ],
     statusSolicitacao: JSON.parse(localStorage.getItem("reembolso-status-solicitacao")) || [],
     usuarios: []
