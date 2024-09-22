@@ -316,7 +316,7 @@ onMounted(async () => {
       formButtons.value.push({ text: "Gerar relatório", icon: "mdi-microsoft-excel", event: "report-click" });
     }
     if (authStore.hasPermissao("solicitacao")) {
-      formButtons.value.push({ text: "Novo", icon: "", event: "novo-click" });
+      formButtons.value.push({ text: "Novo", icon: "mdi-plus", event: "novo-click" });
     }
     
 
