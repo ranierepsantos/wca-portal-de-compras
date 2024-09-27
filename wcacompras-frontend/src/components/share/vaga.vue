@@ -409,8 +409,8 @@
           variant="outlined"
           class="text-primary"
           density="compact"
-          :readOnly="isReadOnly"
-          :bg-color="isReadOnly ? '#f2f2f2' : ''"
+          :readOnly="isReadOnly && statusSolicitacao == 3"
+          :bg-color="isReadOnly && statusSolicitacao == 3 ? '#f2f2f2' : ''"
         ></v-text-field>
       </v-col>
       <v-col>
@@ -499,6 +499,11 @@ const props = defineProps({
     default: function () {
       return new Vaga();
     },
+  },
+  statusSolicitacao:
+  {
+    type: Number,
+    default: 0
   },
   isReadOnly: { type: Boolean, default: false },
   listDocumentoComplementar: {
