@@ -59,6 +59,7 @@
                 :list-documento-complementar="listEntidade['documentocomplementar']"
                 :is-read-only="true"
                 :data-model="solicitacao.vaga"
+                :status-solicitacao="solicitacao.statusSolicitacaoId"
               />
             </SolicitacaoForm>
             <v-card>

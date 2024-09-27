@@ -64,6 +64,7 @@
                 :is-read-only="false"
                 :data-model="solicitacao.vaga"
                 @select-button-click="abrirCadastroAuxiliar($event)"
+                :status-solicitacao="solicitacao.statusSolicitacaoId"
               />
             </SolicitacaoForm>
 
