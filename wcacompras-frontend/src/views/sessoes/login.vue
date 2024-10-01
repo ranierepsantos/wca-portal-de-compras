@@ -1,10 +1,10 @@
 <template>
   <v-row>
-    <v-col cols="6" id="background">
+    <v-col cols="12" sm="6" id="background">
       <img :src="logoWCA" alt="" />
     </v-col>
-    <v-col cols="6">
-      <v-col cols="10">
+    <v-col cols="12" sm="6">
+      <v-col cols="10" class="ml-10">
         <div class="text-h4 mb-10 mt-16 pt-16" style="color: #000066">
           Login
         </div>
@@ -69,7 +69,7 @@ async function authenticate(loginData) {
 img {
   position: relative;
   width: 80%;
-  left: 30px;
+  left: 50px;
   top: 120px;
 }
 
@@ -79,7 +79,6 @@ img {
 
   left: 0;
   width: 50%;
-  min-height: 103vh;
-  background-color: #e3f3f4;
+  /* background-color: #e3f3f4; */
 }
 </style>

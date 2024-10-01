@@ -615,7 +615,7 @@ const solicitacaoCanEdit = computed(
   }
 );
 
-const isSolicitacaoEspecial = computed(() => '3,4'.includes(solicitacao.value.tipoSolicitacao))
+const isSolicitacaoEspecial = computed(() => solicitacao.value.tipoSolicitacao == 3)
 
 const canShowValue = computed(() =>
   (isSolicitacaoEspecial.value && (
@@ -650,7 +650,7 @@ onMounted(async () => {
     solicitacaoTipos.value = solicitacaoStore.tipoSolicitacao
 
     if (isColaborador.value)
-      solicitacaoTipos.value = solicitacaoTipos.value.filter(q => !'3,4'.includes(q.value) )
+      solicitacaoTipos.value = solicitacaoTipos.value.filter(q => !q.value == 3)
 
 
     if (parseInt(route.query.id) > 0) {
@@ -734,8 +734,8 @@ watch(
 );
 watch(() => solicitacao.value.tipoSolicitacao, (value) => {
   if (solicitacao.value.id == 0) {
-    if ('3,4'.includes(value)) {
-      //solicitacão especial - 3: EPI, 4: VOUCHER
+    if (value == 3) {
+      //3 - solicitacão especial 
       solicitacao.value.colaboradorId = null;
       solicitacao.value.colaboradorCargo = null;
       solicitacao.value.centroCustoNome = null;
