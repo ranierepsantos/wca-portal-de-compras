@@ -1,4 +1,6 @@
-﻿using wca.reembolso.application.Features.Clientes.Common;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using wca.reembolso.application.Features.Clientes.Common;
 using wca.reembolso.domain.Common.Enum;
 using wca.reembolso.domain.Entities;
 
@@ -24,7 +26,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         int StatusAnterior,
         int TipoSolicitacao,
         ClienteResponse Cliente,
-        IList<Despesa> Despesa,
+        IList<DespesaResponse> Despesa,
         IList<SolicitacaoHistorico> SolicitacaoHistorico
     );
 
@@ -43,4 +45,28 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         public DateTime? DataMaiorDespesa { get; init; }
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; init; }
     }
+
+    public sealed class DespesaResponse
+    {
+        public int Id { get; init; }
+        public int SolicitacaoId { get; init; }
+        public DateTime? DataEvento { get; init; }
+        public int TipoDespesaId { get; init; }
+        public string? TipoDespesaNome { get; init; } 
+        public string? NumeroFiscal { get; init; } 
+        public decimal Valor { get; init; }
+        public string? ImagePath { get; init; } 
+        public string? RazaoSocial { get; init; } 
+        public string? CNPJ { get; init; } 
+        public string? InscricaoEstadual { get; init; } 
+        public string? Motivo { get; init; } 
+        public string? Origem { get; init; } 
+        public string? Destino { get; init; } 
+        public decimal KmPercorrido { get; init; }
+        public int Aprovada { get; init; }
+        public string? Observacao { get; init; } 
+        public bool ReembolsarColaborador { get; init; }
+        public bool FaturarCliente { get; init; }
+    }
+
 }

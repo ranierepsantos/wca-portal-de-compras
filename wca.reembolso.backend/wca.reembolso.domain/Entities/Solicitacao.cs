@@ -59,6 +59,15 @@ namespace wca.reembolso.domain.Entities
         [Column("data_status", TypeName = "smalldatetime")]
         public DateTime DataStatus { get; set; } = DateTime.Now;
 
+        [Column("data_prevista_entrega", TypeName = "smalldatetime")]
+        public DateTime? DataPrevistaEntrega { get; set; }
+
+        [Column("descricao", TypeName ="varchar(1000)")]
+        public string? Descricao { get; set; }
+
+        [Column("data_entrega", TypeName = "smalldatetime")]
+        public DateTime? DataEntrega { get; set; }
+
         public IList<Despesa> Despesa { get; set;} = new List<Despesa>();
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; set; } = new List<SolicitacaoHistorico>();
     }

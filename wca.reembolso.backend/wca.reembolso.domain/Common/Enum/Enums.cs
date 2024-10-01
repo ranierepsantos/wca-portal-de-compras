@@ -24,5 +24,12 @@ namespace wca.reembolso.domain.Common.Enum
         Cliente = 2,
         Usuario = 3
     }
-    
+
+    public enum EnumListarTipoDespesa
+    {
+        MostrarTodas = 1,
+        ExibirColaborador = 2,
+        NaoExibirColaborador =3
+    }
+
 }

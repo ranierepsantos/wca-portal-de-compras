@@ -18,6 +18,10 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
                 .ForMember(src => src.Cliente, dest => dest.Ignore());
             CreateMap<SolicitacaoCreateCommand, Solicitacao>();
             CreateMap<SolicitacaoUpdateCommand, Solicitacao>();
+            CreateMap<Despesa, DespesaResponse>()
+                .ForMember(dest =>  dest.FaturarCliente, src =>  src.MapFrom(x =>  x.TipoDespesa.FaturarCliente))
+                .ForMember(dest =>  dest.ReembolsarColaborador, src =>  src.MapFrom(x =>  x.TipoDespesa.ReembolsarColaborador))
+                .ForMember(dest =>  dest.TipoDespesaNome, src =>  src.MapFrom(x =>  x.TipoDespesa.Nome));
         }
     }
 }

@@ -20,6 +20,15 @@ namespace wca.reembolso.domain.Entities
 
         [Column("valor", TypeName ="money")]
         public decimal Valor { get; set; } = decimal.Zero;
-        
+
+        [Column("faturar_cliente")]
+        public bool FaturarCliente { get; set; } = true;
+
+        [Column("reembolsar_colaborador")]
+        public bool ReembolsarColaborador { get; set; } = true;
+
+        [Column("exibir_para_colaborador")]
+        public bool ExibirParaColaborador { get; set; } = true;
+
     }
 }

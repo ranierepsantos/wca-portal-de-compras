@@ -26,9 +26,10 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
 
             var dado = await _repository.SolicitacaoRepository.ToQuery()
                 .Include("Cliente")
-                .Include("Despesa")
-                .Include(q =>  q.Colaborador)
-                .Include(q =>  q.CentroCusto)
+                .Include(ic => ic.Despesa)
+                    .ThenInclude(ic => ic.TipoDespesa)
+                .Include(q => q.Colaborador)
+                .Include(q => q.CentroCusto)
                 .Include(q => q.SolicitacaoHistorico.OrderByDescending(f => f.DataHora))
                 .Where(q => q.Id.Equals(request.Id)).AsNoTracking().FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
