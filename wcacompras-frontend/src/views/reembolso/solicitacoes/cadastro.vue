@@ -653,7 +653,7 @@ onMounted(async () => {
     solicitacaoTipos.value = solicitacaoStore.tipoSolicitacao
 
     if (isColaborador.value)
-      solicitacaoTipos.value = solicitacaoTipos.value.filter(q => !q.value == 3)
+      solicitacaoTipos.value = solicitacaoTipos.value.filter(q => q.value != 3)
 
 
     if (parseInt(route.query.id) > 0) {

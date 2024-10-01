@@ -150,3 +150,4 @@ wca.share/wca.share.domain/obj/
 wca.share/wca.share.infrastructure/bin/
 wca.share/wca.share.infrastructure/obj/
 wca.share/wca.share.webapi/wwwroot/Media
+wcacompras-frontend/vue.config.js
