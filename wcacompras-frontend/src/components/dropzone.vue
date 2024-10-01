@@ -29,7 +29,8 @@ const toggleActive = () => {
 
 <style scoped>
 .dropzone {
-  width: 400px;
+  width: auto;
+  max-width: 400px;
   height: 200px;
   display: flex;
   flex-direction: column;

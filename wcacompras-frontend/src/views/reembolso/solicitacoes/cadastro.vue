@@ -283,38 +283,40 @@
 
       <v-card style="margin-top: 20px" v-show="showSecaoDespesa">
         <v-card-title>
-          <v-breadcrumbs>
-            <div class="text-h6 text-primary">Detalhamento de Despesas</div>
-            <v-spacer></v-spacer>
-            <v-progress-circular
+          <v-row>
+            <v-col cols="12" sm="6" class="text-left">
+              <div class="text-h6 text-primary">Detalhamento de Despesas</div>
+            </v-col>
+            <v-col class="text-right">
+              <v-progress-circular
               color="primary"
               indeterminate
               v-show="isDownload"
-            ></v-progress-circular>
-            &nbsp;
-            <v-btn
-              color="primary"
-              variant="outlined"
-              class="text-capitalize"
-              @click="baixarComprovantes()"
-              v-show="solicitacao.despesa.length > 0 && canShowValue"
-              :disabled="isDownload"
-              title="Baixar Comprovantes"
-              
-            >
-            <v-icon icon="mdi-download"/>
-              <b> Comprovantes</b>
-            </v-btn>
-            <v-btn
-              color="primary"
-              variant="outlined"
-              class="text-capitalize"
-              @click="openDespesaForm = true"
-              v-show="despesaCanAdd"
-            >
-              <b>Nova Despesa</b>
-            </v-btn>
-          </v-breadcrumbs>
+              class="mr-2"
+              ></v-progress-circular>
+              <v-btn
+                color="primary"
+                variant="outlined"
+                class="text-capitalize"
+                @click="baixarComprovantes()"
+                v-show="solicitacao.despesa.length > 0 && canShowValue"
+                :disabled="isDownload"
+                title="Baixar Comprovantes"
+              >
+              <v-icon icon="mdi-download"/>
+                <b> Comprovantes</b>
+              </v-btn>
+              <v-btn
+                color="primary"
+                variant="outlined"
+                class="text-capitalize ml-1"
+                @click="openDespesaForm = true"
+                v-show="despesaCanAdd"
+              >
+                <b>Nova Despesa</b>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-title>
 
         <v-card-text>
@@ -444,7 +446,8 @@
       <!-- FORM PARA CADASTRO DE DESPESA -->
       <v-dialog
         v-model="openDespesaForm"
-        min-width="1024"
+        width="920px"
+        height="auto"
         :absolute="false"
         persistent
       >

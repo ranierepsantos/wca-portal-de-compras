@@ -1,10 +1,14 @@
 <template>
   <v-container class="justify-center">
     <v-card>
-      <v-breadcrumbs>
-        <div class="text-h6 text-primary">Detalhamento de Despesa</div>
-        <v-spacer></v-spacer>
-        <v-btn
+      <!-- <v-card-title>
+        <v-row>
+        <v-col cols="12" sm="6">
+          <div class="text-h6 text-primary">Detalhamento de Despesa</div>
+        </v-col>
+        
+        <v-col cols="12" sm="6" class="text-right">
+          <v-btn
           color="primary"
           variant="outlined"
           class="text-capitalize"
@@ -34,10 +38,26 @@
         >
           <b>Salvar</b>
         </v-btn>
-      </v-breadcrumbs>
-      <v-card-text>
+        </v-col>
+      </v-row>
+      </v-card-title> -->
+      <bread-crumbs
+      :back-button-show="false"
+      title="Despesa"
+      title-size="h5"
+      :show-button="false"
+      :buttons="[
+        {text: 'Aprovar/Rejeitar',icon:'', event:'aprovar-click', visible: canAprove && (despesa.aprovada == null || despesa.aprovada == 0) },
+        {text: (readOnly? 'Voltar': 'Cancelar'),icon:'', event:'cancelar-click', visible: true },
+        {text: 'Salvar',icon:'', event:'salvar-click', visible: (!readOnly && (despesa.aprovada == 0 || despesa.aprovada == 2 || despesa.aprovada == null)) }
+      ]"
+      @aprovar-click = "openAprovacaoForm=true"
+      @cancelar-click = "emit('cancelaClick')"
+      @salvar-click = "submitData()"
+    />
+      <v-card-text class="show-scroll">
         <v-row>
-          <v-col>
+          <v-col cols="12" md="6">
             <v-form ref="despesaForm">
               <v-row>
                 <v-col>
@@ -102,7 +122,7 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col>
+                  <v-col cols="12" sm="6">
                     <v-text-field
                       label="CNPJ"
                       type="text"
@@ -120,7 +140,7 @@
                       :bg-color = 'readOnly ? "#f2f2f2":"" '
                     ></v-text-field>
                   </v-col>
-                  <v-col>
+                  <v-col cols="12" sm="6">
                     <v-text-field
                       label="Inscrição Estadual"
                       type="text"
@@ -200,22 +220,6 @@
                 </v-row>
                 <v-row>
                   <v-col>
-                    <!-- <v-text-field
-                      label="Km percorrido"
-                      type="text"
-                      variant="outlined"
-                      color="primary"
-                      density="compact"
-                      v-model="despesa.kmPercorrido"
-                      :rules="
-                        despesaTipo.tipo == 2
-                          ? [(v) => !!v || 'Campo é obrigatório']
-                          : []
-                      "
-                      @update:model-value="calcularValor()"
-                      :readonly="readOnly"
-                      :bg-color = 'readOnly ? "#f2f2f2":"" '
-                    ></v-text-field> -->
                     <v-text-field-money
                     label="KM percorrido"
                     :number-decimal="3"
@@ -284,7 +288,7 @@
               </v-row>
             </v-form>
           </v-col>
-          <v-col v-show="despesaTipo.tipo==1">
+          <v-col v-show="despesaTipo.tipo==1" cols="12" md="6">
             <dropzone
               @drop.prevent="drop"
               @change="selectedFile"
@@ -332,7 +336,7 @@
         persistent
       >
         <aprovar-rejeitar-form
-          title="DESPESA - Aprovar / Rejeitar"
+          title="Aprovar / Rejeitar"
           @aprovar-click="aprovarReprovar(true, $event)"
           @reprovar-click="aprovarReprovar(false, $event)"
           @close-form="openAprovacaoForm = false"
@@ -351,6 +355,7 @@ import { watch } from "vue";
 import { computed } from "vue";
 import { ref,inject } from "vue";
 import handleErrors from "@/helpers/HandleErrors";
+import breadCrumbs from "@/components/breadcrumbs.vue";
 
 const props = defineProps({
   despesa: {
@@ -374,7 +379,7 @@ const props = defineProps({
 const openAprovacaoForm = ref(false)
 const despesaForm = ref(null);
 const emit = defineEmits(["cancelaClick", "changeImage", "changeValor", "saveClick"]);
-
+const formButtons = ref([]);
 const dropzoneFile = ref("");
 const tipoEscolhido = ref({
   tipo: 0,
@@ -475,4 +480,23 @@ async function submitData(fromSaveButton = true) {
     emit('saveClick')
   }
 }
+
+function carregarBotoes() {
+
+  if (canAprove.value && (props.despesa.aprovada == null || props.despesa.aprovada == 0)) {
+    formButtons.value.push({
+      text: "Aprovar / Rejeitar",
+      icon: "",
+      event: "salvar-click",
+    });
+  }
+    
+}
 </script>
+
+<style lang="css" scoped>
+  .show-scroll {
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+  };
+</style>
