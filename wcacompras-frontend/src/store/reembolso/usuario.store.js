@@ -50,7 +50,10 @@ export const useUsuarioStore = defineStore("usuario", {
                 let response = await userService.create(data);
 
                 data.id = response.data.id;
-                
+                data.cargo = data.usuarioReembolsoComplemento.cargo
+                data.gestorId = data.usuarioReembolsoComplemento.gestorId
+                data.perfilId = data.usuarioSistemaPerfil[0].perfilId
+
                 await reembolsoUsuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
@@ -111,6 +114,7 @@ export const useUsuarioStore = defineStore("usuario", {
             await userService.update(data);
         },
         async update (data) {
+                
                 let clientes = data.cliente.map(function (el) { return el.value; });
                 data.cliente = [];
                 
@@ -121,6 +125,10 @@ export const useUsuarioStore = defineStore("usuario", {
 
                 await userService.update(data);
 
+                data.cargo = data.usuarioReembolsoComplemento.cargo
+                data.gestorId = data.usuarioReembolsoComplemento.gestorId
+                data.perfilId = data.usuarioSistemaPerfil[0].perfilId
+                
                 await reembolsoUsuarioService.createUpdate(data)
             
                 // relacionar clientes x usuario
@@ -186,6 +194,12 @@ export const useUsuarioStore = defineStore("usuario", {
             )
 
             return list;
+        },
+
+        async toComboListByClienteOrPerfil(clienteId, perfilId  = 0)
+        {
+            let response = await reembolsoUsuarioService.toComboListByClienteOrPerfil(clienteId, perfilId);
+            return response.data;
         },
 
         async getUsuarioToNotificacaoByCliente(clienteId, permissao) {

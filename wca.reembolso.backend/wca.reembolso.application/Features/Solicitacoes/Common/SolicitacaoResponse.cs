@@ -26,6 +26,13 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         int StatusAnterior,
         int TipoSolicitacao,
         ClienteResponse Cliente,
+        string? Descricao,
+        DateTime? DataEntrega,
+        DateTime? DataPrevistaEntrega,
+        string? Marca,
+        decimal? ValorUnitario,
+        decimal? ValorFrete,
+        int? Quantidade,
         IList<DespesaResponse> Despesa,
         IList<SolicitacaoHistorico> SolicitacaoHistorico
     );
@@ -43,6 +50,8 @@ namespace wca.reembolso.application.Features.Solicitacoes.Common
         public int TipoSolicitacao { get; init; }
         public DateTime? DataMenorDespesa { get; init; }
         public DateTime? DataMaiorDespesa { get; init; }
+        public Decimal? ValorFaturavelCliente { get; init; }
+        public Decimal? ValorReembolsoColaborador { get; init; }
         public IList<SolicitacaoHistorico> SolicitacaoHistorico { get; init; }
     }
 

@@ -19,7 +19,21 @@
         <v-card-text>
           <v-form>
             <v-row>
-              <v-col cols="6">
+              <v-col v-show="solicitacao.id > 0" cols="12" class="text-right">
+                <v-btn
+                  :color="solicitacaoStore.getStatus(solicitacao.status).color"
+                  variant="tonal"
+                  class="text-center"
+                  style="font-size: x-small"
+                >
+                  {{
+                    solicitacaoStore.getStatus(solicitacao.status).status
+                  }}</v-btn
+                >
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" sm="8">
                 <select-text
                   v-model="solicitacao.clienteId"
                   :combo-items="clientes"
@@ -30,56 +44,31 @@
                   label-text="Cliente"
                 ></select-text>
               </v-col>
-              <v-col>
+              <v-col cols="12" sm="4">
                 <select-text
                   v-model="solicitacao.tipoSolicitacao"
-                  :combo-items="solicitacaoStore.tipoSolicitacao"
+                  :combo-items="solicitacaoTipos"
                   :select-mode="solicitacao.id == 0"
                   :text-field-value="solicitacao.id == 0 ? '' : solicitacaoStore.tipoSolicitacao.find(p => p.value == solicitacao.tipoSolicitacao ).text"
                   label-text="Tipo Solicitação"
+                  :disabled="solicitacao.clienteId == null"
                 ></select-text>
               </v-col>
-              <v-col v-show="solicitacao.id > 0">
-                <v-btn
-                  :color="solicitacaoStore.getStatus(solicitacao.status).color"
-                  variant="tonal"
-                  class="text-center"
-                >
-                  {{
-                    solicitacaoStore.getStatus(solicitacao.status).status
-                  }}</v-btn
-                >
-              </v-col>
             </v-row>
-            <v-row v-show="solicitacao.id > 0">
-              <v-col>
-                <v-text-field
-                  label="Colaborador"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                  v-model="solicitacao.colaboradorNome"
-                  :readonly="true"
-                  bg-color="#f2f2f2"
-                ></v-text-field>
+            <v-row v-show="solicitacao.id > 0 || isSolicitacaoEspecial">
+              <v-col cols="12" :sm="solicitacao.id > 0 ? 6 : 12">
+                <select-text
+                  v-model="solicitacao.colaboradorId"
+                  :combo-items="colaboradores"
+                  combo-item-title="nome"
+                  combo-item-value="id"
+                  :select-mode="solicitacao.id == 0 && isSolicitacaoEspecial"
+                  :text-field-value="solicitacao.colaboradorNome"
+                  label-text="Colaborador"
+                  :disabled="solicitacao.clienteId == null"
+                ></select-text>
               </v-col>
-              <v-col>
-                <v-text-field
-                  label="Centro de Custo"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.centroCustoNome"
-                  :readonly="true"
-                  bg-color="#f2f2f2"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col v-show="solicitacao.id > 0">
+              <v-col v-show="solicitacao.id > 0" cols="12" sm="6">
                 <v-text-field
                   label="Cargo"
                   type="text"
@@ -91,36 +80,25 @@
                   :readonly="true"
                 ></v-text-field>
               </v-col>
-              <v-col v-show="solicitacao.id == 0 && !isColaborador">
-                <v-select
-                  label="Centro de Custo"
-                  :items="listCentroCusto"
-                  density="compact"
-                  item-title="nome"
-                  item-value="id"
-                  variant="outlined"
-                  color="primary"
-                  v-model="solicitacao.centroCustoId"
-                  :rules="[(v) => !!v || 'Campo obrigatório']"
-                ></v-select>
-              </v-col>
-              <v-col v-show="solicitacao.id == 0 && isColaborador">
-                <v-text-field
-                  label="Centro de Custo"
-                  type="text"
-                  variant="outlined"
-                  color="primary"
-                  density="compact"
-                  v-model="solicitacao.centroCustoNome"
-                  :readonly="true"
-                  bg-color="#f2f2f2"
-                ></v-text-field>
-              </v-col>
             </v-row>
             <v-row>
-              <v-col cols="6">
+              <v-col>
+                <select-text
+                  v-model="solicitacao.centroCustoId"
+                  :combo-items="listCentroCusto"
+                  combo-item-title="nome"
+                  combo-item-value="id"
+                  :select-mode="solicitacao.id == 0 && !isColaborador && !isSolicitacaoEspecial"
+                  :text-field-value="solicitacao.centroCustoNome"
+                  label-text="Centro de Custo"
+                  :disabled="solicitacao.clienteId == null"
+                ></select-text>
+              </v-col>
+            </v-row>
+            <v-row v-if="isSolicitacaoEspecial">
+              <v-col cols="12" sm="10">
                 <v-text-field
-                  label="Objetivo Solicitação"
+                  label="Motivo solicitação"
                   type="text"
                   variant="outlined"
                   color="primary"
@@ -130,7 +108,33 @@
                   :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field>
               </v-col>
-              <v-col>
+              <v-col cols="12" sm="2">
+                <v-text-field
+                  label="Data Prevista Entrega"
+                  type="date"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  v-model="solicitacao.dataPrevistaEntrega"
+                  :readonly="isReadonly"
+                  :bg-color="isReadonly ? '#f2f2f2' : ''"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row v-else>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  label="Motivo solicitação"
+                  type="text"
+                  variant="outlined"
+                  color="primary"
+                  density="compact"
+                  v-model="solicitacao.objetivo"
+                  :readonly="isReadonly"
+                  :bg-color="isReadonly ? '#f2f2f2' : ''"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" :sm="solicitacao.tipoSolicitacao == 2 ? 2: 3">
                 <v-text-field
                   label="Período Inicial"
                   type="date"
@@ -142,7 +146,7 @@
                   :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field>
               </v-col>
-              <v-col>
+              <v-col cols="12" :sm="solicitacao.tipoSolicitacao == 2 ? 2: 3" >
                 <v-text-field
                   label="Período Final"
                   type="date"
@@ -154,7 +158,8 @@
                   :bg-color="isReadonly ? '#f2f2f2' : ''"
                 ></v-text-field>
               </v-col>
-              <v-col v-show="solicitacao.tipoSolicitacao == 2">
+
+              <v-col v-show="solicitacao.tipoSolicitacao == 2" cols="12" sm="2">
                 <v-text-field-money
                   label-text="Valor Solicitação"
                   v-model="solicitacao.valorAdiantamento"
@@ -166,6 +171,112 @@
                 ></v-text-field-money>
               </v-col>
             </v-row>
+            <div  v-if="isSolicitacaoEspecial">
+              <v-row>
+                <v-col>
+                  <v-text-field
+                    label="Marca / Fornecedor"
+                    type="text"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.marca"
+                    :readonly="isReadonly"
+                    :bg-color="isReadonly ? '#f2f2f2' : ''"
+                ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" sm="3">
+                  <v-text-field-money v-if="canShowValue"
+                    label-text="Valor Unitário"
+                    v-model="solicitacao.valorUnitario"
+                    color="primary"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="isReadonly"
+                    :bg-color="isReadonly ? '#f2f2f2' : ''"
+                  ></v-text-field-money>
+                  <v-text-field-money v-else
+                    label-text="Valor Unitário"
+                    color="primary"
+                    value="0.00"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="true"
+                    bg-color="#f2f2f2"
+                  ></v-text-field-money>
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <v-text-field
+                    label="Quantidade"
+                    type="number"
+                    variant="outlined"
+                    color="primary"
+                    density="compact"
+                    v-model="solicitacao.quantidade"
+                    :readonly="isReadonly"
+                    :bg-color="isReadonly ? '#f2f2f2' : ''"
+                    min="1"
+                ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <v-text-field-money v-if="canShowValue"
+                    label-text="Frete"
+                    v-model="solicitacao.valorFrete"
+                    color="primary"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="isReadonly"
+                    :bg-color="isReadonly ? '#f2f2f2' : ''"
+                  ></v-text-field-money>
+                  <v-text-field-money v-else
+                    label-text="Frete"
+                    color="primary"
+                    value="0.00"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="true"
+                    bg-color="#f2f2f2"
+                  ></v-text-field-money>
+                </v-col>
+                <v-col cols="12" sm="3">
+                  <v-text-field-money v-if="canShowValue"
+                    label-text="Valor Solicitação"
+                    v-model="solicitacao.valorAdiantamento"
+                    color="primary"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="true"
+                    bg-color="#f2f2f2"
+                  ></v-text-field-money>
+                  <v-text-field-money v-else
+                    label-text="Valor Solicitação"
+                    color="primary"
+                    value="0.00"
+                    :number-decimal="2"
+                    prefix="R$"
+                    :readonly="true"
+                    bg-color="#f2f2f2"
+                  ></v-text-field-money>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-textarea
+                    variant="outlined"
+                    label="Descrição"
+                    class="text-primary"
+                    v-model="solicitacao.descricao"
+                    rows="3"
+                    :readonly="isReadonly"
+                    :bg-color = 'isReadonly ? "#f2f2f2":"" '
+                  >
+                  </v-textarea>
+                </v-col>
+              </v-row>
+            </div>
+            
           </v-form>
         </v-card-text>
       </v-card>
@@ -186,9 +297,10 @@
               variant="outlined"
               class="text-capitalize"
               @click="baixarComprovantes()"
-              v-show="solicitacao.despesa.length > 0"
+              v-show="solicitacao.despesa.length > 0 && canShowValue"
               :disabled="isDownload"
               title="Baixar Comprovantes"
+              
             >
             <v-icon icon="mdi-download"/>
               <b> Comprovantes</b>
@@ -238,7 +350,7 @@
                   }}
                 </td>
                 <td class="text-right">
-                  {{ formatToCurrencyBRL(parseFloat(item.valor)) }}
+                  {{ formatToCurrencyBRL(parseFloat((canShowValue ? item.valor : 0))) }}
                 </td>
                 <td v-if="!item.aprovada">
                   <v-icon
@@ -268,7 +380,7 @@
                     color="primary"
                     @click="editarDespesa(item)"
                     title="Visualizar"
-                    v-show="despesaCanView && !despesaCanEdit"
+                    v-show="despesaCanView && !despesaCanEdit && canShowValue"
                   ></v-btn>
                   <v-btn
                     icon="mdi-lead-pencil"
@@ -300,7 +412,7 @@
               <tr>
                 <td class="text-right" colspan="5"><b>TOTAL:</b></td>
                 <td class="text-right">
-                  {{ formatToCurrencyBRL(calcularTotalDespesa()) }}
+                  {{ formatToCurrencyBRL(canShowValue ? calcularTotalDespesa():0)}}
                 </td>
                 <td></td>
               </tr>
@@ -441,24 +553,27 @@ const content = ref(null);
 const formButtons = ref([]);
 const usuario = ref(new Usuario());
 const listCentroCusto = ref([]);
+const colaboradores = ref ([])
 const dadosDeposito = ref({
   saldo: 0,
   dataDeposito: moment().format("YYYY-MM-DD"),
   valorDeposito: 0,
 });
+const solicitacaoTipos = ref([])
 //COMPUTED
 const isReadonly = computed(() => {
   return (
     (solicitacao.value.id > 0 &&
       solicitacao.value.status != 4 &&
       solicitacao.value.status != 10) ||
-    solicitacao.value.colaboradorId != authStore.user.id
+      (solicitacao.value.id > 0 && solicitacao.value.colaboradorId != authStore.user.id)
   );
 });
 const showSecaoDespesa = computed(() => {
   return (
     solicitacao.value.tipoSolicitacao == 1 ||
-    (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1)
+    (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status != 1) ||
+    (isSolicitacaoEspecial.value && solicitacao.value.status != 1)
   );
 });
 const despesaCanAdd = computed(() => {
@@ -467,33 +582,50 @@ const despesaCanAdd = computed(() => {
    * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
    * colaborador != auth.user && status == 5 && hasPermissao('despesa-aprovar'))
    */
-  let can =
-    (solicitacao.value.colaboradorId == authStore.user.id &&
-      solicitacao.value.id == 0) ||
-    (solicitacao.value.colaboradorId == authStore.user.id &&
-      "3,4,10,12".includes(solicitacao.value.status));
-  return can;
+  let solicitacaoEspecialCanAdd = isSolicitacaoEspecial.value && authStore.hasPermissao("solicitacao_especial") && solicitacao.value.status ==3
+  let colaboradorCanAdd = !isSolicitacaoEspecial.value && solicitacao.value.colaboradorId == authStore.user.id && (solicitacao.value.id == 0 || "3,4,10,12".includes(solicitacao.value.status))
+
+  return solicitacaoEspecialCanAdd || colaboradorCanAdd;
 });
 
 const despesaCanEdit = computed(() => {
   /**
    * pode adicionar despesa quando:
-   * colaborador = auth.user && (status == 3 || status == 4 || status ==10)
+   * colaborador = auth.user && (status == 3 || status == 4 || status ==10 || status == 12)
    * colaborador != auth.user && status == 5 && hasPermissao('despesa-editar'))
-   */
-  let can =
-    (solicitacao.value.colaboradorId == authStore.user.id &&
-      "3,4,10,12".includes(solicitacao.value.status)) ||
-    (solicitacao.value.status == 5 && authStore.hasPermissao("despesa-editar"));
-  return can;
+   * é solicitação especial, tem permissao e status = 3 - prestar contas  
+  */
+  
+  let colaboradorCanEdit = !isSolicitacaoEspecial.value && solicitacao.value.colaboradorId == authStore.user.id && "3,4,10,12".includes(solicitacao.value.status)
+  
+  let solicitacaoEspecialCanEdit =  isSolicitacaoEspecial.value && authStore.hasPermissao("solicitacao_especial") && solicitacao.value.status == 3
+   
+  let outrosCanEdit = solicitacao.value.status == 5 && authStore.hasPermissao("despesa-editar")
+
+  return colaboradorCanEdit || solicitacaoEspecialCanEdit || outrosCanEdit;
 });
 
 const solicitacaoCanEdit = computed(
-  () =>
-    solicitacao.value.colaboradorId == authStore.user.id &&
-    "1,3,4,10,12".includes(solicitacao.value.status) &&
-    authStore.hasPermissao("solicitacao")
+  () => {
+    //tipo de solicitação 3,4 - colaborador não pode editar
+    return (solicitacao.value.colaboradorId == authStore.user.id &&
+            "1,3,4,10,12".includes(solicitacao.value.status) &&
+            authStore.hasPermissao("solicitacao") && !isSolicitacaoEspecial.value
+           ) ||("1,3".includes(solicitacao.value.status) && authStore.hasPermissao("solicitacao_especial") && isSolicitacaoEspecial.value)
+  }
 );
+
+const isSolicitacaoEspecial = computed(() => '3,4'.includes(solicitacao.value.tipoSolicitacao))
+
+const canShowValue = computed(() =>
+  (isSolicitacaoEspecial.value && (
+      authStore.hasPermissao("solicitacao_especial") ||
+      authStore.hasPermissao("wca_aprovacao") ||
+      authStore.hasPermissao("cliente_aprovacao")
+    )
+  ) || !isSolicitacaoEspecial.value
+)
+
 
 const despesaCanView = computed(
   () =>
@@ -515,6 +647,11 @@ onMounted(async () => {
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
     despesaTipos.value = await despesaTipoStore.toComboList(isColaborador.value);
+    solicitacaoTipos.value = solicitacaoStore.tipoSolicitacao
+
+    if (isColaborador.value)
+      solicitacaoTipos.value = solicitacaoTipos.value.filter(q => !'3,4'.includes(q.value) )
+
 
     if (parseInt(route.query.id) > 0) {
       await getSolicitacao(route.query.id);
@@ -538,12 +675,13 @@ onMounted(async () => {
         router.push({ name: "reembolsoSolicitacoes" });
         return;
       }
-      solicitacao.value.colaboradorId = usuario.value.id;
-      solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
       if (clientes.value.length > 0) {
-        let centroCusto = clientes.value[0].centroCusto.find(q => q.centroCustoId == usuario.value.usuarioReembolsoComplemento.centroCustoId)
-        solicitacao.value.centroCustoId = centroCusto ? centroCusto.id: null
-        solicitacao.value.centroCustoNome = centroCusto? centroCusto.nome: ""
+        let centroCusto = clientes.value[0].centroCusto.find(
+          (q) =>
+            q.centroCustoId ==
+            usuario.value.usuarioReembolsoComplemento.centroCustoId
+        );
+        usuario.value.centroCusto = centroCusto
       }
       
       if (clientes.value.length ==1)
@@ -559,18 +697,86 @@ onMounted(async () => {
   }
 });
 
-watch(() => solicitacao.value.clienteId, async (newValue,oldValue) => {
-  if (newValue != oldValue) {
-    let cliente = clientes.value.find(q => q.id == newValue)
-    if (cliente) {
-      listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(authStore.user.id, cliente.id)
-      if (!isColaborador.value && solicitacao.value.id == 0)
-        solicitacao.value.centroCustoId = null
+watch(
+  () => solicitacao.value.clienteId,
+  async (newValue, oldValue) => {
+    if (newValue != oldValue) {
+      let cliente = clientes.value.find((q) => q.id == newValue);
+      if (cliente) {
+        listCentroCusto.value = await useUsuarioStore().getCentrosdeCusto(
+          authStore.user.id,
+          cliente.id
+        );
+        await getColaboradoresToList(cliente.id)
+        
+        if (solicitacao.value.id == 0)
+        {
+          if (isSolicitacaoEspecial.value)
+          {
+            solicitacao.value.colaboradorId = null;
+            solicitacao.value.colaboradorCargo = null;
+            solicitacao.value.centroCustoNome = null;
+          } else {
+            solicitacao.value.colaboradorId = usuario.value.id;
+            solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
+            solicitacao.value.centroCustoId = null;
+            solicitacao.value.centroCustoNome = null;
+            if (isColaborador.value ) {
+              solicitacao.value.centroCustoId = usuario.value.centroCusto ? usuario.value.centroCusto.id: null;
+              solicitacao.value.centroCustoNome = usuario.value.centroCusto ? usuario.value.centroCusto.nome : "";  
+            }
+          }
+        }
+      
+      }
     }
   }
-  
-})
+);
+watch(() => solicitacao.value.tipoSolicitacao, (value) => {
+  if (solicitacao.value.id == 0) {
+    if ('3,4'.includes(value)) {
+      //solicitacão especial - 3: EPI, 4: VOUCHER
+      solicitacao.value.colaboradorId = null;
+      solicitacao.value.colaboradorCargo = null;
+      solicitacao.value.centroCustoNome = null;
+    }else {
+      //solicitacão especial - 1: REEMBOLSO, 2 - ADIANTAMENTO
+      solicitacao.value.colaboradorId = usuario.value.id;
+      solicitacao.value.colaboradorCargo = usuario.value.usuarioReembolsoComplemento.cargo;
+      solicitacao.value.centroCustoId = usuario.value.centroCusto ? usuario.value.centroCusto.id: null;
+      solicitacao.value.centroCustoNome = usuario.value.centroCusto ? usuario.value.centroCusto.nome : "";
+    }
+  }
+});
 
+watch(() => solicitacao.value.colaboradorId, (value) => {
+
+  if (value  && isSolicitacaoEspecial.value) {
+    let colaborador = colaboradores.value.find(q =>  q.id == value)
+    if (colaborador)
+    {
+      solicitacao.value.colaboradorId = colaborador.id;
+      solicitacao.value.colaboradorCargo = colaborador.cargo;
+      solicitacao.value.centroCustoId = colaborador.centroCustoId;
+      solicitacao.value.centroCustoNome = listCentroCusto.value.find(q => q.id == colaborador.centroCustoId).nome || null
+    }
+  }
+});
+
+watch (() => solicitacao.value.quantidade, (value, oldValue) => calcularValorEspecial(value, "quantidade"))
+
+watch (() => solicitacao.value.valorUnitario, (value, oldValue) => 
+  calcularValorEspecial(value, "valorUnitario")
+)
+
+watch (() => solicitacao.value.valorFrete, (value, oldValue) => 
+  calcularValorEspecial(value, "valorFrete")
+)
+
+function calcularValorEspecial (){
+  
+  solicitacao.value.calcularValorSolicitacaoEspecial();
+}
 
 //FUNCTIONS
 
@@ -609,47 +815,47 @@ async function aprovarReprovar(isAprovado, comentario) {
       9 - Cancelado
       10 - Pré Cadastro
       11 - Aguardando Depósito (somente adiantamento, quando valor da despesa > valor adiantamento)
+      12 - Vencido
     **/
 
     if (!isAprovado) solicitacao.value.status = 4; //rejeitado
     else {
-      //tipoSolicitacao: Adiantamento, Status: Solicitado
-      if (
-        solicitacao.value.tipoSolicitacao == 2 &&
-        solicitacao.value.status == 1
-      )
-        solicitacao.value.status = 2; //2 - Aguardando Depósito
-      //Status: 5 - Aguardando conferência
-      else if (solicitacao.value.status == 5) {
-        solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
-        //21.03.2024 - Luciano solicitou para adicionar débito quando cliente aprovar
-        // let transacao = new Transacao(
-        //   `Débito - solicitação ${solicitacao.value.id}`,
-        //   "-",
-        //   solicitacao.value.valorDespesa
-        // );
-        // contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
-      }
-      //Status: 6 - Aguardando Aprovação Cliente
-      else if (solicitacao.value.status == 6) {
-        solicitacao.value.status = 7; //7 - Aguardando Faturamento
+      if (isSolicitacaoEspecial.value) {
+        //3 - EPI e 4 - Voucher
+        if (solicitacao.value.status == 1)
+          solicitacao.value.status = 3 //3 - Prestar Contas
+        else if (solicitacao.value.status == 3)
+          solicitacao.value.status = 7
 
-        //Adicionar o valor da despesa com débito do colaborador
-        let transacao = new Transacao(
-          `Débito - solicitação ${solicitacao.value.id}`,
-          "-",
-          solicitacao.value.valorDespesa
-        );
-        contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
-
-        // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
-        if (solicitacao.value.tipoSolicitacao == 1) {
+      } else { 
+        //1 - Reembolso e 2 - Adiantamento
+        //tipoSolicitacao: Adiantamento, Status: Solicitado
+        if (solicitacao.value.tipoSolicitacao == 2 && solicitacao.value.status == 1)
           solicitacao.value.status = 2; //2 - Aguardando Depósito
-        } else if (
-          solicitacao.value.tipoSolicitacao == 2 &&
-          solicitacao.value.valorAdiantamento - calcularTotalDespesa() < 0
-        ) {
-          solicitacao.value.status = 11; //11 - Aguardando Depósito
+        //Status: 5 - Aguardando conferência
+        else if (solicitacao.value.status == 5) 
+          solicitacao.value.status = 6; //6 - Aguardando Aprovação Cliente
+        //Status: 6 - Aguardando Aprovação Cliente
+        else if (solicitacao.value.status == 6) {
+          solicitacao.value.status = 7; //7 - Aguardando Faturamento
+
+          //Adicionar o valor da despesa com débito do colaborador
+          let transacao = new Transacao(
+            `Débito - solicitação ${solicitacao.value.id}`,
+            "-",
+            solicitacao.value.valorDespesa
+          );
+          contaStore.addTransacao(solicitacao.value.colaboradorId, transacao);
+
+          // Se o tipo de solicitação for reembolso - enviar para aguardando depósito
+          if (solicitacao.value.tipoSolicitacao == 1) {
+            solicitacao.value.status = 2; //2 - Aguardando Depósito
+          } else if (
+            solicitacao.value.tipoSolicitacao == 2 &&
+            solicitacao.value.valorAdiantamento - solicitacao.value.calcularColaboradorReembolso() < 0
+          ) {
+            solicitacao.value.status = 11; //11 - Aguardando Depósito
+          }
         }
       }
     }
@@ -718,11 +924,15 @@ function getDespesaTipo(id) {
 async function getSolicitacao(solicitacaoId) {
   try {
     let data = await solicitacaoStore.getById(solicitacaoId);
-    data.periodoInicial = data.periodoInicial.split("T")[0];
-    data.periodoFinal = data.periodoFinal.split("T")[0];
+    data.periodoInicial = data.periodoInicial ? data.periodoInicial.split("T")[0]: null;
+    data.periodoFinal = data.periodoFinal ? data.periodoFinal.split("T")[0]: null;
+    data.dataPrevistaEntrega =data.dataPrevistaEntrega ? data.dataPrevistaEntrega.split("T")[0] : null;
     data.despesa.forEach((element) => {
       element.dataEvento = element.dataEvento.split("T")[0];
     });
+
+
+
     solicitacao.value = data;
   } catch (error) {
     console.log("getSolicitacao.error:", error);
@@ -753,10 +963,11 @@ async function salvar() {
 
     //checar se o status esta aguardando prestação de contas e se há despesa lançadas
     //verificar se finalizou o cadastro de despesas
-    if (
-      data.tipoSolicitacao == 2 &&
-      (data.status == 3 || data.status == 12) &&
-      data.despesa.length > 0
+    if ((
+        (data.tipoSolicitacao == 2 && (data.status == 3 || data.status == 12)) ||
+         isSolicitacaoEspecial.value
+        ) && 
+        data.despesa.length > 0
     ) {
       let options = {
         title: "Confirmação",
@@ -768,7 +979,14 @@ async function salvar() {
       };
 
       let response = await swal.fire(options);
-      if (response.isConfirmed) data.status = 5; //5 - aguardando conferência
+      if (response.isConfirmed) {
+        if (isSolicitacaoEspecial.value) 
+          data.status = 7; //7 - aguardando faturamento
+        else
+          data.status = 5; //5 - aguardando conferência
+      }
+        
+
     } else if (
       data.tipoSolicitacao == 2 &&
       (data.status == 3 || data.status == 12) &&
@@ -796,7 +1014,7 @@ async function salvar() {
     } else {
       if (data.id == 0 || data.status == 10) {
         //status 10 - pré cadastro
-        if (data.tipoSolicitacao == 2) data.status = 1; //1 - solicitado
+        if ('2,3,4'.includes(data.tipoSolicitacao)) data.status = 1; //1 - solicitado
         else data.status = 5; //5 - aguardando conferência
       }
       statusAtual = data.status;
@@ -840,11 +1058,10 @@ async function abrirDepositoForm() {
   let valorDeposito =
     solicitacao.value.tipoSolicitacao == 2
       ? solicitacao.value.valorAdiantamento
-      : solicitacao.value.valorDespesa;
+      : solicitacao.value.calcularColaboradorReembolso ();
 
   if (solicitacao.value.status == 11)
-    valorDeposito =
-      calcularTotalDespesa() - solicitacao.value.valorAdiantamento;
+    valorDeposito = solicitacao.value.calcularColaboradorReembolso () - solicitacao.value.valorAdiantamento;
 
   dadosDeposito.value.valorDeposito = valorDeposito;
 
@@ -943,12 +1160,14 @@ async function salvarDespesa() {
       });
       return;
     }
+    despesa.value.aprovada = isSolicitacaoEspecial.value && despesa.value.id <= 0 ? 1: despesa.value.aprovada ;
+    despesa.value.tipoDespesaNome = getDespesaTipo(despesa.value.tipoDespesaId).nome
+    
     if (solicitacao.value.id == 0) {
       solicitacao.value.status = 10; // pré cadastro
       solicitacao.value.despesa.push({ ...despesa.value });
       solicitacao.value.notificar = [];
       let response = await solicitacaoStore.add(solicitacao.value);
-      console.log(response);
       solicitacao.value = new Solicitacao(response.data);
     } else {
       despesa.value.solicitacaoId = solicitacao.value.id;
@@ -1071,29 +1290,23 @@ async function baixarComprovantes() {
     isDownload.value = true;
     const routeData = router.resolve({name: 'reembolsoSolicitacaoPdf', query: {id: solicitacao.value.id}});
     window.open(routeData.href, '_blank');
-
-
-    // if (solicitacao.value.id > 0) {
-    //   let response = await solicitacaoStore.getDespesasToZipFile(
-    //     solicitacao.value.id
-    //   );
-    //   console.log("baixar->", response);
-
-    //   if (response.status == 200) {
-    //     let nomeArquivo = `comprovantes_solicitacao_${solicitacao.value.id}.zip`;
-    //     await new Promise((r) => setTimeout(r, 2000));
-    //     realizarDownload(
-    //       response,
-    //       nomeArquivo,
-    //       response.headers.getContentType()
-    //     );
-    //   }
-    // }
   } catch (error) {
     console.error(error);
     handleErrors(error, error.response.status == 404 ? "Não há comprovantes anexos!": null);
   } finally {
     isDownload.value = false;
+  }
+}
+
+async function getColaboradoresToList(clienteId) {
+  try {
+    colaboradores.value = await useUsuarioStore().toComboListByClienteOrPerfil(
+      clienteId,
+      IDPERFILCOLABORADOR
+    );
+  } catch (error) {
+    console.error("getColaboradoresToList.error:", error);
+    handleErrors(error);
   }
 }
 </script>

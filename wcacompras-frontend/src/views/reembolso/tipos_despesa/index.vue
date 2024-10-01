@@ -84,6 +84,9 @@
           <th class="text-left text-grey">TIPO</th>
           <th class="text-center text-grey">VALOR</th>
           <th class="text-center text-grey">ATIVO</th>
+          <th class="text-center text-grey">REEMSOLSA COLAB.</th>
+          <th class="text-center text-grey">FATURA CLIENTE</th>
+          <th class="text-center text-grey">EXIBE COLAB.</th>
           <th></th>
         </tr>
       </thead>
@@ -99,6 +102,18 @@
             <v-icon :icon="item.ativo ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="item.ativo ? 'success' : 'error'"></v-icon>
           </td>
+          <td class="text-center">
+            <v-icon :icon="item.reembolsarColaborador ? 'mdi-check' : 'mdi-close'" variant="plain"
+              :color="item.reembolsarColaborador ? 'success' : 'error'"></v-icon>
+          </td>
+          <td class="text-center">
+            <v-icon :icon="item.faturarCliente ? 'mdi-check' : 'mdi-close'" variant="plain"
+              :color="item.faturarCliente ? 'success' : 'error'"></v-icon>
+          </td>
+          <td class="text-center">
+            <v-icon :icon="item.exibirParaColaborador ? 'mdi-check' : 'mdi-close'" variant="plain"
+              :color="item.exibirParaColaborador ? 'success' : 'error'"></v-icon>
+          </td>
           <td class="text-right">
             <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"></v-btn>
             <v-btn variant="plain" :color="item.ativo ? 'error' : 'success'"
@@ -110,7 +125,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="5">
+          <td colspan="8">
             <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>

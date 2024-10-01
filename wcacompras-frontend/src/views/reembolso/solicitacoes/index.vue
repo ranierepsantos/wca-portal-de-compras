@@ -6,7 +6,7 @@
      @report-click="gerarRelatorio"
     />
     <v-row v-show="!isLoading.form">
-      <v-col v-show="isMatriz && !isGestor && !isColaborador">
+      <v-col v-show="isMatriz && !isGestor && !isColaborador" cols="12" sm="4" md="4">
         <v-select
           label="Filiais"
           v-model="filter.filialId"
@@ -19,7 +19,7 @@
           :hide-details="true"
         ></v-select>
       </v-col>
-      <v-col v-show="!isGestor && !isColaborador">
+      <v-col v-show="!isGestor && !isColaborador" cols="12" sm="4" md="4">
         <v-select
           label="Clientes"
           v-model="filter.clienteId"
@@ -32,7 +32,7 @@
           :hide-details="true"
         ></v-select>
       </v-col>
-      <v-col v-show="!isGestor && !isColaborador && isAprovador">
+      <v-col v-show="!isGestor && !isColaborador && isAprovador" cols="12" sm="4" md="4">
         <v-select
           label="Usuário"
           v-model="filter.usuarioId"
@@ -47,7 +47,7 @@
       </v-col>
     </v-row>
     <v-row v-show="!isLoading.form">
-      <v-col cols="3">
+      <v-col cols="12" xs="4" sm="4" md="4">
         <v-select
           label="Status"
           v-model="filter.status"
@@ -61,7 +61,7 @@
           multiple
       ></v-select>
       </v-col>
-      <v-col cols="2">
+      <v-col cols="auto">
         <v-text-field
           label="Data Início"
           v-model="filter.dataIni"
@@ -71,7 +71,7 @@
           density="compact"
         ></v-text-field>
       </v-col>
-      <v-col cols="2">
+      <v-col cols="auto" >
         <v-text-field
           label="Data Fim"
           v-model="filter.dataFim"
@@ -81,7 +81,7 @@
           density="compact"
         ></v-text-field>
       </v-col>
-      <v-col class="text-right">
+      <v-col cols="auto">
         <v-btn
           color="primary"
           variant="outlined"
@@ -115,9 +115,9 @@
           <th class="text-center text-grey">DATA</th>
           <th class="text-left text-grey">CLIENTE</th>
           <th class="text-left text-grey">COLABORADOR</th>
-          <th class="text-center text-grey">VALOR ADIANTAMENTO</th>
-          <th class="text-center text-grey">VALOR DESPESA</th>
           <th class="text-left text-grey">TIPO SOLICITAÇÃO</th>
+          <th class="text-center text-grey">VALOR PROVISIONADO</th>
+          <th class="text-center text-grey">VALOR DESPESA</th>
           <th class="text-left text-grey">PERÍODO</th>
           <th class="text-left text-grey">STATUS</th>
           <th></th>
@@ -131,15 +131,14 @@
           </td>
           <td class="text-left">{{ item.clienteNome }}</td>
           <td class="text-left">{{ item.colaboradorNome }}</td>
-          
-          <td class="text-right">
-            {{ formatToCurrencyBRL(item.valorAdiantamento) }}
-          </td>
-          <td class="text-right">
-            {{ formatToCurrencyBRL(item.valorDespesa) }}
-          </td>
           <td class="text-left">
             {{ solicitacaoStore.getTipoSolicitacao(item.tipoSolicitacao).text }}
+          </td>
+          <td class="text-right">
+            {{ getValue(item, 'valorAdiantamento')  }}
+          </td>
+          <td class="text-right">
+            {{ getValue(item, 'valorDespesa')  }}
           </td>
           <td class="text-left">{{ item.dataMenorDespesa ? `${moment(item.dataMenorDespesa).format("DD/MM/YY")} à ${moment(item.dataMaiorDespesa).format("DD/MM/YY")}` : "" }}</td>
           <td class="text-left">
@@ -242,6 +241,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { computed } from "vue";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
+
 //DATA
 const authStore = useAuthStore();
 const page = ref(1);
@@ -445,5 +445,15 @@ async function gerarRelatorio() {
     handleErrors(error);
   }finally {isLoading.value.busy =false}
 }
+
+function getValue(solicitacao, field)
+{
+  
+  if (isColaborador.value && '3,4'.includes(solicitacao.tipoSolicitacao))
+    return formatToCurrencyBRL(0.00)
+  else
+    return formatToCurrencyBRL(solicitacao[field])
+}
+
 
 </script>

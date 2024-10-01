@@ -15,6 +15,9 @@ namespace wca.reembolso.application.Features.Usuarios.Commands
       string Email,
       bool Ativo,
       string? Celular,
+      int? PerfilId,
+      string? Cargo,
+      int? GestorId,
       UsuarioConfiguracoes? Configuracoes
     ) : IRequest<ErrorOr<bool>>;
 
@@ -49,6 +52,9 @@ namespace wca.reembolso.application.Features.Usuarios.Commands
                 usuario.Email = request.Email;
                 usuario.Ativo = request.Ativo;
                 usuario.Celular = request.Celular;
+                usuario.PerfilId = request.PerfilId;
+                usuario.Cargo = request.Cargo;
+                usuario.GestorId = request.GestorId;
 
                 _repository.GetDbSet<Usuario>().Entry(usuario).State = EntityState.Modified;
             }

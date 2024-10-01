@@ -4,27 +4,33 @@ import moment from "moment/moment";
 
 export class Solicitacao {
     controlIdDespesa = sessionStorage.getItem("reembolso-despesa-fakeid")||0
-    constructor(data = undefined) {
-        this.id= data == undefined? 0: data.id
-        this.clienteId= data == undefined? null: data.clienteId
-        this.dataSolicitacao= data == undefined? moment().format("YYYY-MM-DD"): data.dataSolicitacao
-        this.colaboradorId= data == undefined? "": data.colaboradorId
-        this.colaboradorNome = data ==undefined? "": data.colaboradorNome
-        this.centroCustoId = data == undefined? "": data.centroCustoId
-        this.centroCustoNome = data ==undefined? "": data.centroCustoNome
-        this.colaboradorCargo= data == undefined? "": data.colaboradorCargo
-        this.projeto= data == undefined? "": data.projeto
-        this.objetivo=data == undefined? "": data.objetivo
-        this.periodoInicial= data == undefined? moment().format("YYYY-MM-DD"): data.periodoInicial
-        this.periodoFinal= data == undefined? moment().format("YYYY-MM-DD"): data.periodoFinal
-        this.valorAdiantamento= data == undefined? 0.00: data.valorAdiantamento
-        this.valorDespesa= data == undefined? 0.00: data.valorDespesa
-        this.status = data == undefined? 1: data.status
-        this.statusAnterior = data == undefined? 1: data.statusAnterior
-        this.cliente = data == undefined? {}: data.cliente
-        this.despesa= data == undefined? []: data.despesa
-        this.solicitacaoHistorico = data == undefined? []: data.solicitacaoHistorico
-        this.tipoSolicitacao= data == undefined? null: data.tipoSolicitacao
+    constructor(data = {}) {
+        this.id= data.id || 0
+        this.clienteId= data.clienteId || null
+        this.dataSolicitacao=data.dataSolicitacao || moment().format("YYYY-MM-DD")
+        this.colaboradorId= data.colaboradorId || null
+        this.colaboradorNome = data.colaboradorNome || ""
+        this.centroCustoId = data.centroCustoId || null
+        this.centroCustoNome = data.centroCustoNome || ""
+        this.colaboradorCargo= data.colaboradorCargo || ""
+        this.projeto= data == data.projeto || ""
+        this.objetivo= data.objetivo || ""
+        this.periodoInicial= data.periodoInicial ||moment().format("YYYY-MM-DD")
+        this.periodoFinal=  data.periodoFinal || moment().format("YYYY-MM-DD")
+        this.valorAdiantamento = data.valorAdiantamento || 0.00
+        this.valorDespesa =  data.valorDespesa || 0.00
+        this.status = data.status || 1
+        this.statusAnterior =  data.statusAnterior || 1
+        this.cliente = data.cliente || {}
+        this.despesa= data.despesa || []
+        this.solicitacaoHistorico = data.solicitacaoHistorico ||[]
+        this.tipoSolicitacao= data.tipoSolicitacao || null
+        this.marca = data.marca || null
+        this.valorUnitario = data.valorUnitario || 0.00
+        this.quantidade = data.quantidade || 1
+        this.valorFrete = data.valorFrete || 0.00
+        this.descricao = data.descricao || null
+        this.dataPrevistaEntrega = data.dataPrevistaEntrega || null
     }
 
     salvarDespesa(despesa) {
@@ -50,6 +56,36 @@ export class Solicitacao {
             this.despesa.splice(index, 1);
         }
     }
+
+    calcularTotalDespesas() {
+        let valorTotalDespesa = 0;
+
+        this.despesa.forEach((item) => {
+            valorTotalDespesa += parseFloat(item.valor);
+        });
+        valorTotalDespesa = valorTotalDespesa.toFixed(2);
+        this.valorDespesa = valorTotalDespesa;
+        return valorTotalDespesa;
+    }
+
+    calcularColaboradorReembolso() {
+        let valor = 0;
+        this.despesa.forEach((item) => {
+            if (item.reembolsarColaborador)
+                valor += parseFloat(item.valor);
+        });
+        valor = valor.toFixed(2);
+        return valor;
+    }
+
+    calcularValorSolicitacaoEspecial() {
+        let valor = 0
+
+        valor = (parseFloat(this.valorUnitario) * parseInt(this.quantidade)) + parseFloat(this.valorFrete)
+        valor = valor.toFixed(2);
+        this.valorAdiantamento = valor;
+        return valor;
+    }
 }
 
 export class Despesa {
@@ -57,6 +93,7 @@ export class Despesa {
         this.id = data ?  data.id: 0
         this.solicitacaoId = data ?  data.solicitacaoId : 0
         this.tipoDespesaId = data ?  data.tipoDespesaId : null
+        this.tipoDespesaNome = data && data.tipoDespesaNome ? data.tipoDespesaNome: null
         this.dataEvento = data ?  moment(data.dataEvento).format("YYYY-MM-DD"): moment().format("YYYY-MM-DD")
         this.razaoSocial = data ?  data.razaoSocial :""
         this.cnpj = data ?  data.cnpj :""
@@ -84,7 +121,9 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
   state: () => ({
     tipoSolicitacao: [
         {text: "Adiantamento", value: 2},
-        {text: "Reembolso", value: 1}
+        {text: "EPI", value: 3},
+        {text: "Reembolso", value: 1},
+        {text: "Voucher", value: 4},
     ],
     statusSolicitacao: JSON.parse(localStorage.getItem("reembolso-status-solicitacao")) || [],
     usuarios: []
@@ -110,7 +149,8 @@ export const useSolicitacaoStore = defineStore("solicitacao", {
     
     async getById (id) {
         let response = await api.getById(id);
-        return new Solicitacao(response.data);
+        let solicitacao = new Solicitacao(response.data);
+        return solicitacao
     },
 
     async update (data) {
