@@ -54,9 +54,11 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             //armazenar o status anterior
             dado.StatusAnterior = dado.Status;
-
             dado.Status = request.Status.Id;
             dado.DataStatus = DateTime.Now;
+
+            foreach (Despesa despesa in dado.Despesa)
+                despesa.TipoDespesa = null;
 
             _repository.SolicitacaoRepository.Update(dado);
             
