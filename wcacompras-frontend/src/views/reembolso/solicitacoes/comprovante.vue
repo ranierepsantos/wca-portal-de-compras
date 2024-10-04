@@ -260,7 +260,7 @@ onMounted(async () => {
     isBusy.value = true;
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
-    despesaTipos.value = await despesaTipoStore.toComboList();
+    despesaTipos.value = await despesaTipoStore.toComboList(false);
 
     if (parseInt(route.query.id) > 0) {
       await getSolicitacao(route.query.id);
