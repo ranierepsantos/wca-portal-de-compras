@@ -30,6 +30,7 @@
               :combo-tipo-show="comboTipoShow"
               :list-responsavel="responsavelList"
               :is-read-only="modeReadOnly"
+              :is-descricao-read-only="!useAuthStore().hasPermissao(permissao + '-executar')"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
@@ -312,7 +313,7 @@ async function salvar() {
       data.notificarUsuarioIds = [];
       data.usuarioAtualizador = useAuthStore().user.nome;
 
-      if (data.responsavelId && data.responsavelId > 0) {
+      if (data.statusSolicitacaoId != 3 && data.responsavelId && data.responsavelId > 0) {
         let status = useShareSolicitacaoStore().statusSolicitacao.find(
           (x) => x.status.toLowerCase() == "em andamento"
         );
@@ -370,8 +371,14 @@ function changeFieldStatus(tipo) {
 
 function getButtons() {
   if (solicitacao.value.status.status.toLowerCase() == 'concluído')
+  {
+    if (useAuthStore().hasPermissao(permissao.value + '-executar')) {
+      
+      return [{ text: 'Salvar', icon: '', event: 'salvar-click', disabled: isBusy.value.save }];
+    } else  
       return []
-  else if (solicitacao.value.status.autorizar) 
+    
+  } else if (solicitacao.value.status.autorizar) 
   {
     if (useAuthStore().hasPermissao(permissao.value + '-aprovar'))
       return [{ text: 'Aprovar/Reprovar', icon: '', event: 'aprovar-click', disabled: isBusy.value.save }]

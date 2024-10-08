@@ -60,8 +60,8 @@
           :label="descricaoLabel"
           class="text-primary"
           v-model="solicitacao.descricao"
-          :readOnly="isReadOnly"
-          :bg-color="isReadOnly ? '#f2f2f2' : ''"
+          :readOnly="isDescricaoReadOnly"
+          :bg-color="isDescricaoReadOnly ? '#f2f2f2' : ''"
           v-show="descricaoShow"
         >
         </v-textarea>
@@ -111,5 +111,6 @@ const props = defineProps({
 
   comboTipoShow: { type: Boolean, default: true },
   isReadOnly: { type: Boolean, default: false },
+  isDescricaoReadOnly: { type: Boolean, default: false },
 });
 </script>

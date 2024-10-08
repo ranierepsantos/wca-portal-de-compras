@@ -47,7 +47,7 @@
       density="compact"
       :model-value="textFieldValue"
       :readonly="true"
-      bg-color="#f2f2f2"
+      :bg-color="!printMode? '#f2f2f2': ''"
       v-else
     ></v-text-field>
   </div>
@@ -74,7 +74,8 @@ defineProps({
     buttonShow: {type: Boolean, default: false},
     buttonIcon: {type: String, default: 'mdi-plus'},
     buttonLoading: {type: Boolean, default: false},
-    isMultiple: {type: Boolean, default: false}
+    isMultiple: {type: Boolean, default: false},
+    printMode:{type: Boolean, default: false},
 })
 //const emit = defineEmits(['buttonClick'])
 

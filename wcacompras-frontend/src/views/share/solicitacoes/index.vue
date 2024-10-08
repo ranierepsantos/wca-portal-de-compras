@@ -389,7 +389,6 @@ async function getItems() {
     if (filter.value.clienteId != null) 
       filtros.clienteIds = [filter.value.clienteId]
 
-    console.debug("solicitacoes.filtros", filtros)
     let response = await solicitacaoStore.getPaginate(
       page.value,
       pageSize,
