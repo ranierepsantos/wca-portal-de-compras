@@ -472,17 +472,6 @@
         />
       </v-col>
     </v-row>
-    <!-- <v-row>
-      <v-col>
-        <v-textarea
-          variant="outlined"
-          label="Andamentos"
-          class="text-primary"
-          v-model="dataModel.anotacoes"
-          rows="2"
-        ></v-textarea>
-      </v-col>
-    </v-row> -->
   </div>
 </template>
 

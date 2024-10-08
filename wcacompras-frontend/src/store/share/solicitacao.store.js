@@ -350,7 +350,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 
                 solicitacao.vaga.permiteFumante = solicitacao.vaga.permiteFumante ? 1 : 0; 
                 solicitacao.vaga.temCNH = solicitacao.vaga.temCNH ? 1 : 0; 
-                solicitacao.vaga.temCopaAdmissaoCliente = solicitacao.vaga.temCopiaAdmissaoCliente ? 1 : 0;
+                solicitacao.vaga.temCopiaAdmissaoCliente = solicitacao.vaga.temCopiaAdmissaoCliente ? 1 : 0;
                 solicitacao.vaga.temInsalubridade = solicitacao.vaga.temInsalubridade ? 1 : 0;
                 solicitacao.vaga.temIntegracaoCliente = solicitacao.vaga.temIntegracaoCliente ? 1 : 0;
                 solicitacao.vaga.temPericulosidade = solicitacao.vaga.temPericulosidade ? 1 : 0; 
