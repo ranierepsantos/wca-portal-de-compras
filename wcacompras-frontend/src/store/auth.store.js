@@ -3,6 +3,8 @@ import authService from "@/services/auth.service";
 import apiReembolso from "@/services/reembolso/api"
 import apiShare from "@/services/share/shareApi"
 import filialService from "@/services/filial.service";
+import { getActivePinia } from "pinia"
+
 
 const modelUser = {
   id: 0,
@@ -54,7 +56,32 @@ export const useAuthStore = defineStore("auth", {
       this.sistema.isMatriz = this.sistema.filial.text.toLowerCase() =="matriz"
     },
 
+    clearStores() 
+    {
+        getActivePinia()._s.forEach(store => {
+          store.$reset()
+        });
+
+    },
+    clearLocalStorage() {
+      let keys = Object.keys(window.localStorage)
+      
+      for(let index = 0; index < keys.length; index++)
+
+        {
+            if (keys[index].toLowerCase().includes('reembolso') || keys[index].toLowerCase().includes('share'))
+            {
+              window.localStorage.removeItem(keys[index])
+            }
+              
+        }
+    },
     async setSistema (sistema) {
+        //limpar local storage do share e reembolso
+        // map through that list and use the **$reset** fn to reset the state
+        this.clearStores();
+        this.clearLocalStorage()
+        
         this.sistema.id = sistema.id;
         this.sistema.nome = sistema.nome 
         this.sistema.descricao = sistema.descricao
@@ -67,6 +94,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     finishSession() {
+      this.clearStores();
       window.localStorage.clear();
       this.token = "";
       this.expireIn = "";

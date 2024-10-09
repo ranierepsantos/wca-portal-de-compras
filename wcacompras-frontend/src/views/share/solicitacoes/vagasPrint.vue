@@ -12,6 +12,7 @@
       <v-icon icon="mdi-download" />
       <b> Gerar PDF</b>
     </v-btn>
+    <v-spacer></v-spacer>
   </v-breadcrumbs>
   <v-progress-linear
     color="orange"

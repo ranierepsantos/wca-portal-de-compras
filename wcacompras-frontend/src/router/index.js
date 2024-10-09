@@ -26,6 +26,17 @@ const routes = [
     
   },
   {
+    path: '/app/share/vagas/gerar-pdf',
+    name: 'shareVagaPdf',
+    meta: {permissao: "vaga-executar|vaga-finalizar", sistema: 3},
+    beforeEnter: protectRoute,
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "share" */ '../views/share/solicitacoes/vagasPrint'),
+    
+  },
+  {
     path: '/app/acessonegado',
     name: 'acessonegado',
     // route level code-splitting
