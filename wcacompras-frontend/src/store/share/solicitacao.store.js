@@ -228,7 +228,7 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
                 data.comunicado  = null
                 data.mudancaBase = null 
                 data.ferias = null
-
+                data.vaga = null
                 //Não checar aprovação se motivo demissão for:
                 //  3 - PEDIDO DE DEMISSÃO ou 
                 //  6 - TERMINO CONTRATO DETERMINADO
