@@ -63,7 +63,7 @@
         <v-divider class="mt-3"></v-divider>
       </v-col>
     </v-row>
-    <endereco v-model:data="cliente"/>
+    <endereco v-bind:data="cliente"/>
   </div>
 </template>
 

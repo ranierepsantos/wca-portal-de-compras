@@ -36,6 +36,10 @@
           label-text="Cliente"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
+        <!-- <select name="clientes" id="clientes" v-model="solicitacao.clienteId" style="width: 100%; height: 30px; border: 1px solid; border-radius: 2px;">
+          <option value="1">Teste</option>
+          <option v-for="cliente in listClientes" :key="cliente.value" :value="cliente.value">{{cliente.text}}</option>
+        </select> -->
       </v-col>
     </v-row>
     <v-row>

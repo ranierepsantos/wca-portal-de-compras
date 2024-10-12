@@ -11,7 +11,7 @@
       </v-btn>
       <br />
       <v-list class="text-left" density="compact">
-        <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
+        <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" color="info"
           v-show="checkPermissao(item.permissao)">
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
