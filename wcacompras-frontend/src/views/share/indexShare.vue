@@ -12,7 +12,7 @@
       </v-btn> -->
       
       <v-list class="text-left" density="compact">
-        <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
+        <v-list-item v-for="item in menuItems.sort(compararValor('title'))" :key="item.title" :value="item.value" color="info"
           v-show="checkPermissao(item.permissao)">
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
@@ -27,7 +27,7 @@
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
-              active-color="info"
+              color="info"
               style="color: white;"
             >
             <v-list-item-title >
@@ -36,7 +36,7 @@
             </v-list-item>
           </template>
 
-          <v-list-item v-for="item in auxItems.sort(compararValor('title'))" :key="item.title" :value="item.value" active-color="info"
+          <v-list-item v-for="item in auxItems.sort(compararValor('title'))" :key="item.title" :value="item.value" color="info"
           v-show="checkPermissao(item.permissao)">
           <router-link :to="item.route" class="text-decoration-none">
             <v-list-item-title>
@@ -46,7 +46,7 @@
         </v-list-item>
         </v-list-group>
 
-        <v-list-item v-show="checkPermissao('configuracao')" active-color="info" key="configuracoes" value="9999">
+        <v-list-item v-show="checkPermissao('configuracao')" color="info" key="configuracoes" value="9999">
           <router-link to="/share/configuracoes" class="text-decoration-none">
             <v-list-item-title >
               Configurações

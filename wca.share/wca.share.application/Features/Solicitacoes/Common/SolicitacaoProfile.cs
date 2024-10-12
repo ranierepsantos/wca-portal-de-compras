@@ -11,7 +11,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         {
             CreateMap<Solicitacao, SolicitacaoResponse>()
                 .ForSourceMember(src =>src.StatusSolicitacao, opt => opt.DoNotValidate())
-                .ForMember(dest => dest.ClienteNome, opt => opt.MapFrom(src => src.Cliente.Nome))
+                .ForMember(dest => dest.ClienteNome, opt => opt.MapFrom(src =>  (src.Cliente.CodigoCliente == null ? "": src.Cliente.CodigoCliente.ToString() + " - ")  + src.Cliente.Nome))
                 .ReverseMap();
 
             CreateMap<SolicitacaoCreateCommand, Solicitacao>();
@@ -24,7 +24,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
                 .ForMember(dest => dest.Tipo, opt => opt.MapFrom(src => src.SolicitacaoTipo.Tipo))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.StatusSolicitacaoId))
                 .ForMember(dest => dest.DataSolicitacao, opt =>  opt.MapFrom(src =>  src.DataSolicitacao))
-                .ForMember(dest => dest.ClienteNome, opt =>  opt.MapFrom(src =>  src.Cliente.Nome))
+                .ForMember(dest => dest.ClienteNome, opt =>  opt.MapFrom(src =>  (src.Cliente.CodigoCliente == null ? "": src.Cliente.CodigoCliente.ToString() + " - ")  + src.Cliente.Nome))
                 .ForMember(dest => dest.ResponsavelNome, opt => opt.MapFrom(src => src.Responsavel.Nome));
 
             CreateMap<StatusSolicitacao, StatusSolicitacaoResponse>();
