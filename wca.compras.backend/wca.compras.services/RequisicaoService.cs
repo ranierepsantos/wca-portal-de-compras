@@ -1095,31 +1095,49 @@ namespace wca.compras.services
                             + "inner join ClienteUsuario cu on cu.ClienteId = c.id "
                             + "inner join RequisicaoItens ri  on ri.requisicao_id  = r.id "
                             + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId "
-                            + $"where cu.UsuarioId ={logedUserId}"
-                            + "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
-                            + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                            + "r.usuario_id, r.valor_icms, r.valor_total, r.valor_frete ";
+                            + $"where cu.UsuarioId ={logedUserId}";
+                if (filials != null && filials.Length > 0)
+                {
+                    consulta += " and r.filial_id in (" + string.Join(",", filials) + ")";
+                }
+
+                if (clienteId > 0)
+                    consulta += $" and r.cliente_id = {clienteId}";
+
+                if (usuarioId > 0)
+                    consulta += $" and r.usuario_id = {usuarioId}";
+
+                if (fornecedorId > 0)
+                    consulta += $" and r.fornecedor_id = {fornecedorId}";
+
+                if (status.Length > 0)
+                    consulta += " and r.status in (" + string.Join(",", status) + ")";
+
+                consulta += "group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
+                        + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
+                        + "r.usuario_id, r.valor_icms, r.valor_total, r.valor_frete ";
                 query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
-            }
-
-            if (filials != null && filials.Length > 0)
+            }else
             {
-                query = query.Where(c => filials.Contains(c.FilialId));
+                if (filials != null && filials.Length > 0)
+                {
+                    query = query.Where(c => filials.Contains(c.FilialId));
+                }
+
+                if (clienteId > 0)
+                    query = query.Where(c => c.ClienteId == clienteId);
+
+                if (usuarioId > 0)
+                    query = query.Where(c => c.UsuarioId == usuarioId);
+
+
+                if (fornecedorId > 0)
+                    query = query.Where(c => c.FornecedorId == fornecedorId);
+
+
+                if (status.Length > 0)
+                    query = query.Where(c => status.Contains(c.Status));
             }
-
-            if (clienteId > 0)
-                query = query.Where(c => c.ClienteId == clienteId);
-
-            if (usuarioId > 0)
-                query = query.Where(c => c.UsuarioId == usuarioId);
-
-
-            if (fornecedorId > 0)
-                query = query.Where(c => c.FornecedorId == fornecedorId);
-
-            
-            if (status.Length > 0)
-                query = query.Where(c => status.Contains(c.Status));
 
             if (dataInicio != null && dataFim != null)
             {
