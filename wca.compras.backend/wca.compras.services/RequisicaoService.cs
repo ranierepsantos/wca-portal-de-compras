@@ -1094,40 +1094,34 @@ namespace wca.compras.services
                         + "inner join RequisicaoItens ri  on ri.requisicao_id  = r.id "
                         + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId ";
 
+            string condicao = "";
+            if (logedUserId > 0)
+                condicao += $" cu.UsuarioId ={logedUserId} and ";
 
-                string condicao = "";
-                if (logedUserId > 0)
-                    condicao += $" cu.UsuarioId ={logedUserId} and ";
+            if (filials != null && filials.Length > 0)
+                condicao += " r.filial_id in (" + string.Join(",", filials) + ") and ";
+                
+            if (clienteId > 0)
+                condicao += $" r.cliente_id = {clienteId}  and ";
 
-                if (filials != null && filials.Length > 0)
-                {
-                    condicao += " r.filial_id in (" + string.Join(",", filials) + ") and ";
-                }
+            if (usuarioId > 0)
+                condicao += $" r.usuario_id = {usuarioId} and ";
 
-                if (clienteId > 0)
-                    condicao += $" r.cliente_id = {clienteId}  and ";
+            if (fornecedorId > 0)
+                condicao += $" r.fornecedor_id = {fornecedorId} and ";
 
-                if (usuarioId > 0)
-                    condicao += $" r.usuario_id = {usuarioId} and ";
+            if (status.Length > 0)
+                condicao += " r.status in (" + string.Join(",", status) + ")  and ";
 
-                if (fornecedorId > 0)
-                    condicao += $" r.fornecedor_id = {fornecedorId} and ";
+            if (!string.IsNullOrEmpty(condicao))
+                condicao = string.Concat("where ", condicao.AsSpan(1, condicao.Length - 5)); 
 
-                if (status.Length > 0)
-                    condicao += " r.status in (" + string.Join(",", status) + ")  and ";
-
-                if (!string.IsNullOrEmpty(condicao))
-                    condicao = string.Concat("where ", condicao.AsSpan(1, condicao.Length - 5)); 
-
-
-                consulta += condicao + " group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
-                        + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
-                        + "r.usuario_id, r.valor_icms, r.valor_total, r.valor_frete ";
+            consulta += condicao + " group by r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
+                    + "r.nota_fiscal, r.numero, r.periodo_entrega, r.requer_autorizacao_cliente, r.requer_autorizacao_wca, r.status, r.taxa_gestao, r.uf,"
+                    + "r.usuario_id, r.valor_icms, r.valor_total, r.valor_frete ";
             
             var query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
             
-
-
             if (dataInicio != null && dataFim != null)
             {
                 dataFim = dataFim.Value.AddDays(1);
