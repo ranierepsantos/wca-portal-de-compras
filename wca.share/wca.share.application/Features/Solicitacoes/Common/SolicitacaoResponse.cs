@@ -8,12 +8,13 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public int Id { get; set; }
         public int SolicitacaoTipoId { get; set; }
         public int ClienteId { get; set; }
-        public string ClienteNome { get; set; }
+        public string? ClienteNome { get; set; }
         public int? ResponsavelId { get; set; }
         public string? ResponsavelNome { get; set; }
         public DateTime DataSolicitacao { get;  set; }
-        public string Descricao { get;  set; }
+        public string? Descricao { get;  set; }
         public int StatusSolicitacaoId { get;  set; }
+        public int? CriadoPor { get; set; }
         public SolicitacaoComunicadoResponse? Comunicado { get;  set; }
         public SolicitacaoDesligamentoResponse? Desligamento { get;  set; }
         public SolicitacaoFeriasResponse? Ferias { get;  set; }
@@ -30,7 +31,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public string? Tipo { get; set; }
         public int Status { get; set; }
         public DateTime DataSolicitacao { get; set; }
-        public string ClienteNome { get; set; }
+        public string? ClienteNome { get; set; }
         public string? ResponsavelNome { get; set; }
         public SolicitacaoComunicadoPaginateResponse? Comunicado { get; set; }
         public SolicitacaoFuncionarioCentroCustoPaginateResponse? Desligamento { get; set; }
@@ -38,7 +39,7 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public SolicitacaoFuncionarioCentroCustoPaginateResponse? MudancaBase { get; set; }
         public SolicitacaoVagaPaginateResponse? Vaga { get; set; }   
         public StatusSolicitacaoResponse StatusSolicitacao { get; set; }
-        public List<SolicitacaoHistorico> Historico { get; set; }
+        public List<SolicitacaoHistorico>? Historico { get; set; }
     }
 
     public sealed class  StatusSolicitacaoResponse

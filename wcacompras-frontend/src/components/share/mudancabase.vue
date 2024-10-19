@@ -68,8 +68,8 @@
               variant="outlined"
               label="Descricão da Mudança"
               class="text-primary"
-              :readOnly = "isReadOnly"
-              :bg-color="isReadOnly ? '#f2f2f2' : ''"
+              :readOnly = "!createMode"
+              :bg-color="!createMode ? '#f2f2f2' : ''"
               v-model="dataModel.observacao"
             >
             </v-textarea>
@@ -83,16 +83,16 @@
               list-origem-titulo = "Selecione os Itens de Mudança"
               list-destino-titulo = "Itens de Mudança"
               :show-search-text="false"
-              v-show="!isReadOnly"
+              v-show="createMode"
             />
             <v-textarea
               variant="outlined"
               label="Items de Mudança"
               class="text-primary"
-              :readOnly = "isReadOnly"
-              :bg-color="isReadOnly ? '#f2f2f2' : ''"
+              :readOnly = "!createMode"
+              :bg-color="!createMode ? '#f2f2f2' : ''"
               :model-value="getItensMudancaDescricao()"
-              v-show="isReadOnly"
+              v-show="!createMode"
               rows="2"
             >
             
@@ -110,6 +110,7 @@ import boxTransfer from "@/components/boxTransfer.vue";
 import selectText from "../selectText.vue";
 import { watch } from "vue";
 import moment from "moment";
+
 
 const props = defineProps({
   dataModel: {

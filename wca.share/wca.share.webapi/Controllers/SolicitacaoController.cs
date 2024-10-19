@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using wca.share.application.Features.SolicitacaoHistoricos.Commands;
 using wca.share.application.Features.Solicitacoes.Commands;
 using wca.share.application.Features.Solicitacoes.Queries;
 
@@ -117,6 +118,16 @@ namespace wca.share.webapi.Controllers
 
             return Ok(result.Value);
 
+        }
+
+        [HttpPost("Historico/Adicionar")]
+        public async Task<IActionResult> AdicionarHistorico([FromBody] SolicitacaoHistorioCreateCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
         }
     }
 }
