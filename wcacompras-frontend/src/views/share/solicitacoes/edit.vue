@@ -11,6 +11,7 @@
       @gerar-pdf-click="gerarPDF()"
       @cancelar-click="cancelarSolicitacao()"
       @editar-click="openModeEdicaoForm=true"
+      @reabrir-click="openReabrirSolicitacao=true"
     />
     <v-progress-linear
       color="primary"
@@ -101,7 +102,7 @@
               </v-card-text>
             </v-card>
             <Historico
-              :eventos="solicitacao.historico"
+              :eventos="solicitacao.historico.sort(compararValor('dataHora','desc'))"
               style="margin-top: 15px"
             />
           </v-form>
@@ -195,6 +196,27 @@
         aprovar-title="Cancelar"
       />
     </v-dialog>
+    <!-- FORM PARA REABRIR SOLICITAÇÃO-->
+    <v-dialog
+      v-model="openReabrirSolicitacao"
+      max-width="700"
+      :absolute="false"
+      persistent
+    >
+      <aprovar-rejeitar-form
+        :title="
+          getPageTitle(solicitacao.solicitacaoTipoId) + ' - Reabrir Solicitação'
+        "
+        @aprovar-click="openReabrirSolicitacao = false"
+        aprovar-color="secondary"
+        reprovar-color="success"
+        @reprovar-click="reabrirSolicitacao($event)"
+        @close-form="openReabrirSolicitacao = false"
+        :is-running-event="isRunningEvent"
+        reprovar-title="Reabrir"
+        aprovar-title="Cancelar"
+      />
+    </v-dialog>
   </div>
 </template>
 
@@ -229,6 +251,7 @@ import moment from "moment";
 import { computed } from "vue";
 import { EntidadeAuxiliar, useShareEntidadeAuxiliarStore } from "@/store/share/entidadesauxiliares.store";
 import { useShareFuncionarioStore } from "@/store/share/funcionario.store";
+import { compararValor } from "@/helpers/functions";
 
 const tableUploadItems = ref([{ text: "Outros" }]);
 const isBusy = ref({
@@ -282,6 +305,8 @@ const entidadeTipos = ref([
 ])
 const isSavingEntity = ref(false)
 const openModeEdicaoForm = ref(false)
+const openReabrirSolicitacao = ref(false)
+
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -485,6 +510,34 @@ async function habilitarEdicao(comentario) {
   }
 }
 
+async function reabrirSolicitacao(comentario) {
+  isRunningEvent.value = true;
+  try {
+    let texto = null;
+    let status = useShareSolicitacaoStore().getStatus(1); //pendente
+
+    texto = `Reabertura de solicitação por ${useAuthStore().user.nome}!`;
+    if (comentario && comentario.trim() != "") {
+      texto += `<br/>Comentário: ${comentario}`;
+    }
+    let data ={
+      solicitacaoId: solicitacao.value.id,
+      evento: texto
+    }
+    await AlterarStatus(solicitacao.value, status, texto, "nao-notificar");
+
+    data.dataHora = new Date().toUTCString();
+    solicitacao.value.historico.push(data)
+    await getById(solicitacao.value.id);
+    openReabrirSolicitacao.value = false
+    
+  } catch (error) {
+    console.error("reabrirSolicitacao.error:", error);
+    handleErrors(error);
+  } finally {
+    isRunningEvent.value = false;
+  }
+}
 async function salvar() {
   try {
     isBusy.value.save = true;
@@ -575,8 +628,12 @@ function getButtons() {
       )
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
 
-    if (useAuthStore().hasPermissao(permissao.value + "-executar")) 
-      buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+      if (useAuthStore().hasPermissao(permissao.value + "-executar")) 
+      {
+        buttons.value.push({ text: "Reabrir", icon: "", event: "reabrir-click" });
+        buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+      }
+      
     
   } else if (solicitacao.value.status.statusIntermediario.toLowerCase() == "cancelado") {
     if (solicitacao.value.solicitacaoTipoId == 5)
