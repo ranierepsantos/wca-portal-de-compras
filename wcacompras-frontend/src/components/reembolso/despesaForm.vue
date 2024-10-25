@@ -49,7 +49,7 @@
       :buttons="[
         {text: 'Aprovar/Rejeitar',icon:'', event:'aprovar-click', visible: canAprove && (despesa.aprovada == null || despesa.aprovada == 0) },
         {text: (readOnly? 'Voltar': 'Cancelar'),icon:'', event:'cancelar-click', visible: true },
-        {text: 'Salvar',icon:'', event:'salvar-click', visible: (!readOnly && (despesa.aprovada == 0 || despesa.aprovada == 2 || despesa.aprovada == null)) }
+        {text: 'Salvar',icon:'', event:'salvar-click', visible: (!readOnly && (despesa.aprovada == 0 || despesa.aprovada == 2 || despesa.aprovada == null)), disabled: disableSaveButton }
       ]"
       @aprovar-click = "openAprovacaoForm=true"
       @cancelar-click = "emit('cancelaClick')"
@@ -351,9 +351,7 @@ import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import dropzone from "@/components/dropzone.vue";
 import { Despesa } from "@/store/reembolso/solicitacao.store";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
-import { watch } from "vue";
-import { computed } from "vue";
-import { ref,inject } from "vue";
+import { watch, computed, ref } from "vue";
 import handleErrors from "@/helpers/HandleErrors";
 import breadCrumbs from "@/components/breadcrumbs.vue";
 
@@ -373,6 +371,10 @@ const props = defineProps({
   readOnly: {
     type: Boolean,
     default: true
+  },
+  disableSaveButton: {
+    type: Boolean,
+    default: false
   },
   canAprove: {type: Boolean, default: false}
 });
