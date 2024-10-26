@@ -31,7 +31,8 @@
               :list-centro-custos="[]"
               :combo-tipo-show="comboTipoShow"
               :list-responsavel="responsavelList"
-              :is-read-only="modeReadOnly"
+              :list-status="useShareSolicitacaoStore().statusSolicitacao.filter(q => 'info, warning'.includes(q.color))"
+              :is-read-only="modeReadOnly "
               :is-descricao-read-only="descricaoReadOnly"
             >
               <desligamento
@@ -190,6 +191,27 @@ const listEntidade = ref({
 });
 
 const listItensMudanca = ref([]);
+
+const entidadeDialog = ref(false)
+const dialogTitle = ref("")
+const entidadeForm = ref(null)
+const entidade = ref(new EntidadeAuxiliar());
+const entidadeTipo = ref(null)
+const entidadeTipos = ref([
+  {title: "Documento Complementar", type: "DocumentoComplementar"},
+  {title: "Escala", type: "Escala"},
+  {title: "Escolaridade", type: "Escolaridade"},
+  {title: "Função", type: "Funcao"},
+  {title: "Gestor", type: "Gestor"},
+  {title: "Horário", type: "Horario"},
+  {title: "Motivo Contratação", type: "MotivoContratacao"},
+  {title: "Tipo de Contrato", type: "TipoContrato"},
+  {title: "Tipo de Faturamento", type: "TipoFaturamento"},
+])
+const isSavingEntity = ref(false)
+const openModeEdicaoForm = ref(false)
+const openReabrirSolicitacao = ref(false)
+let solicitacaoOriginal = null
 //VUE FUNCTIONS
 onBeforeMount(async () => {
   try {
@@ -360,16 +382,8 @@ async function salvar() {
       data.notificarUsuarioIds = [];
       data.usuarioAtualizador = useAuthStore().user.nome;
 
-      if (
-        data.statusSolicitacaoId != 3 &&
-        data.responsavelId &&
-        data.responsavelId > 0
-      ) {
-        let status = useShareSolicitacaoStore().statusSolicitacao.find(
-          (x) => x.status.toLowerCase() == "em andamento"
-        );
-        if (status && data.statusSolicitacaoId != status.id)
-          data.statusSolicitacaoId = status.id;
+      if (solicitacaoOriginal.responsavelId != data.responsavelId) {
+        data.notificarUsuarioIds.push(data.responsavelId)
       }
 
       await useShareSolicitacaoStore().update(data);
@@ -413,6 +427,7 @@ async function getById(id) {
       data.desligamento.statusExameDemissional =
         dias <= 90 ? 3 : data.desligamento.statusExameDemissional;
     }
+    solicitacaoOriginal = {...data }
     solicitacao.value = data;
     getButtons()
   } catch (error) {
@@ -443,7 +458,7 @@ function getButtons() {
     if (useAuthStore().hasPermissao(permissao.value + "-executar")) 
       buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
     
-  } else if (solicitacao.value.status.statusIntermediario.toLowerCase() == "cancelado") {
+  } else if ("cancelado,reprovado".includes(solicitacao.value.status.statusIntermediario.toLowerCase())) {
     if (solicitacao.value.solicitacaoTipoId == 5)
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
     
@@ -471,24 +486,33 @@ function getButtons() {
 }
 
 async function AlterarStatus(solicitacao, status, evento, notificarPermissao) {
-  let notificarUsuario = [];
-  if (status.notifica == 1)
-    //verificar se precisa notificar
-    notificarUsuario =
-      await useShareSolicitacaoStore().retornaUsuariosParaNotificar(
-        status,
-        solicitacao.clienteId,
-        notificarPermissao
-      );
+  try {
+    isBusy.value.save = true;
+    let notificarUsuario = [];
+    if (status.notifica == 1)
+      //verificar se precisa notificar
+      notificarUsuario =
+        await useShareSolicitacaoStore().retornaUsuariosParaNotificar(
+          status,
+          solicitacao.clienteId,
+          notificarPermissao
+        );
 
-  let solicitacaoStatus = {
-    solicitacaoId: solicitacao.id,
-    evento: evento,
-    status: status,
-    notificar: notificarUsuario,
-  };
+    let solicitacaoStatus = {
+      solicitacaoId: solicitacao.id,
+      evento: evento,
+      status: status,
+      notificar: notificarUsuario,
+    };
 
-  await useShareSolicitacaoStore().changeStatus(solicitacaoStatus);
+    await useShareSolicitacaoStore().changeStatus(solicitacaoStatus);
+  } catch (error) {
+    console.error("alterarStatus.error:", error);
+    handleErrors(error)
+  }finally {
+    isBusy.value.save = false
+  }
+  
 }
 
 async function FinalizarSolicitacao() {
@@ -510,7 +534,7 @@ async function FinalizarSolicitacao() {
       useAuthStore().user.nome
     }!`;
     let status = useShareSolicitacaoStore().getStatus(3);
-    await AlterarStatus(solicitacao.value, status, texto, "");
+    await AlterarStatus(solicitacao.value, status, texto, "naonotifica");
 
     await swal.fire({
       toast: true,
@@ -581,7 +605,7 @@ async function cancelarSolicitacao() {
       (p) => p.statusIntermediario.toLowerCase() == "cancelado"
     );
     if (status) {
-      await AlterarStatus(solicitacao.value, status, texto, "");
+      await AlterarStatus(solicitacao.value, status, texto, "naonotifica");
 
       await swal.fire({
         toast: true,

@@ -158,12 +158,12 @@
                 <v-list>
                   <v-list-item>
                     <v-btn
-                      prepend-icon="mdi-lead-pencil"
+                      prepend-icon="mdi-eye-outline"
                       variant="plain"
                       color="primary"
                       @click="toPage(item.id)"
                       size="small"
-                      >Editar</v-btn
+                      >Visualizar</v-btn
                     >
                   </v-list-item>
                   <v-list-item>
