@@ -368,7 +368,6 @@ function abrirCadastroAuxiliar(_entidade) {
   {
     try
     {
-      debugger
       let { valid } = await entidadeForm.value.validate();
       if (valid)
       {

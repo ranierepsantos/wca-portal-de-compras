@@ -36,7 +36,7 @@ namespace wca.share.domain.Entities
         public int StatusSolicitacaoId { get; set; } = 1;
 
         [Column("criado_por")]
-        public int? CriadorPor { get; set; }
+        public int? CriadoPor { get; set; }
 
         [JsonIgnore]
         public StatusSolicitacao? StatusSolicitacao { get; set; }
