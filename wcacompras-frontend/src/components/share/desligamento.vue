@@ -5,7 +5,7 @@
         <select-text
           v-model="dataModel.funcionarioId"
           :combo-items="listFuncionarios"
-          :select-mode="createMode"
+          :select-mode="isEditabled"
           :text-field-value="dataModel.funcionarioNome"
           label-text="Funcionário"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
@@ -59,8 +59,8 @@
           density="compact"
           v-model="dataModel.dataDemissao"
           :rules="[(v) => !!v || 'Campo obrigatório']"
-          :readonly="!createMode"
-          :bg-color="!createMode ? '#f2f2f2' : ''"
+          :readonly="!isEditabled"
+          :bg-color="!isEditabled ? '#f2f2f2' : ''"
         ></v-text-field>
       </v-col>
       <v-col>
@@ -69,7 +69,7 @@
           :combo-items="listMotivoDemissao"
           combo-item-title="motivo"
           combo-item-value="id"
-          :select-mode="createMode"
+          :select-mode="isEditabled"
           :text-field-value="getMotivoDemissaoText(dataModel.motivoDemissaoId)"
           label-text="Motivo Demissão"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
@@ -80,7 +80,7 @@
         <v-col>
             <v-checkbox v-model="dataModel.temContratoExperiencia" 
                         label="Contrato de Experiência?"
-                        color="primary" :disabled="!createMode">
+                        color="primary" :disabled="!isEditabled">
             </v-checkbox>
         </v-col>
       <v-col>
@@ -89,7 +89,7 @@
           :combo-items="listAvisoPrevioStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="createMode"
+          :select-mode="isEditabled"
           :text-field-value="
             getTextFromListByCodigo(
               listAvisoPrevioStatus,
@@ -105,7 +105,7 @@
           :combo-items="listFieldStatus"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="createMode"
+          :select-mode="isEditabled"
           :text-field-value="
             getTextFromListByCodigo(
               listFieldStatus,
@@ -214,7 +214,7 @@ import selectText from "../selectText.vue";
 import {
   getTextFromListByCodigo,
 } from "@/helpers/share/data";
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import moment from "moment";
 
 const props = defineProps({
@@ -225,6 +225,7 @@ const props = defineProps({
     },
   },
   createMode: { type: Boolean, default: true },
+  editMode: { type: Boolean, default: true },
   isReadOnly: { type: Boolean, default: false },
   listCentroCustos: {
     type: Array,
@@ -264,4 +265,8 @@ function getMotivoDemissaoText(motivoId) {
   let _motivo = listMotivoDemissao.find((x) => x.id == motivoId);
   return _motivo ? _motivo.motivo : "tipo desconhecido";
 }
+
+const isEditabled = computed(() => {
+  return props.createMode || props.editMode
+})
 </script>

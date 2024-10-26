@@ -14,6 +14,7 @@
       v-if="selectMode"
       :disabled="disabled"
       :multiple="isMultiple"
+      
     >
       <template v-slot:append v-if="buttonShow">
       <v-icon

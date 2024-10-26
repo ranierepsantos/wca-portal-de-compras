@@ -32,15 +32,21 @@
         </v-row>
         <v-row>
           <v-col class="text-right">
+            <v-progress-circular v-show="isRunningEvent"
+              color="primary"
+              indeterminate
+            ></v-progress-circular>
+          </v-col>
+          <v-col class="text-right">
             <v-btn
-              color="success"
+              :color="aprovarColor"
               @click="aprovarReprovar(true)"
               :disabled="isRunningEvent"
-              >Aprovar</v-btn
+              >{{aprovarTitle}}</v-btn
             >
             &nbsp;
             <v-btn
-              color="#EDCCCC"
+              :color="reprovarColor"
               class="mr-3"
               style="color: #950000; font-weight: bold"
               @click="aprovarReprovar(false)"
@@ -61,7 +67,10 @@ import { ref } from 'vue';
 const props =  defineProps({
     title: "",
     isRunningEvent: false,
-    reprovarTitle: {Type: String, default: "Rejeitar"}
+    aprovarTitle: {Type: String, default: "Aprovar"},
+    reprovarTitle: {Type: String, default: "Rejeitar"},
+    aprovarColor: {Type: String, default: "sucess"},
+    reprovarColor: {Type: String, default: "#EDCCCC"}
 });
 const emit = defineEmits(['closeForm', 'aprovarClick', 'reprovarClick'])
 

@@ -469,7 +469,31 @@
           :plus-button-show="!isReadOnly"
           plus-button-title="Adicionar Documento Complementar"
           @plus-click="$emit('selectButtonClick', 'DocumentoComplementar')"
+          v-show="!isReadOnly"
         />
+        <v-textarea
+              variant="outlined"
+              label="Documentos Complementares"
+              class="text-primary"
+              :readOnly = "true"
+              bg-color="#f2f2f2"
+              :model-value="getDocumentosComplementaresDescricao()"
+              v-show="isReadOnly"
+              rows="2"
+        ></v-textarea>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-textarea
+          variant="outlined"
+          label="Andamento Recrutamento"
+          class="text-primary"
+          v-model="dataModel.anotacoes"
+          :readOnly="isAndamentoReadOnly"
+          :bg-color="isAndamentoReadOnly ? '#f2f2f2' : ''"
+        >
+        </v-textarea>
       </v-col>
     </v-row>
   </div>
@@ -555,6 +579,7 @@ const props = defineProps({
       return [];
     },
   },
+  isAndamentoReadOnly: {type: Boolean, default: false}
 });
 
 const listDiasSemana = [
@@ -576,4 +601,13 @@ const integracaoDiasSemanaText = computed(() => {
     return props.dataModel.integracaoDiasSemana.join(", ");
   else return "";
 });
+
+function getDocumentosComplementaresDescricao () {
+  let text = "";
+  props.dataModel.documentoComplementares.forEach(item => {
+    text += item.text + "; "
+  });
+  return text.trimEnd();
+
+}
 </script>

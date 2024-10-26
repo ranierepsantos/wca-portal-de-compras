@@ -3,6 +3,7 @@ import moment from "moment/moment";
 import api from "@/services/share/shareApi"
 import configuracaoService from "@/services/share/configuracao.service";
 import { useShareUsuarioStore } from "./usuario.store";
+import { status } from "@/helpers/functions";
 
 const rotas = {
     Create: "Solicitacao",
@@ -18,6 +19,7 @@ const rotas = {
     ListarAssuntos: "Solicitacao/ListarAssuntos",
     ListarTipoFerias: "Solicitacao/ListarTipoFerias",
     ListarItensMudanca: "Solicitacao/ListarItensMudanca",
+    HistoricoAdicionar: "Solicitacao/Historico/Adicionar"
 }
 
 export class Solicitacao {
@@ -47,6 +49,7 @@ export class Solicitacao {
             proximoStatusId: null
         };
         this.vaga = data && data.vaga ? new Vaga(data.vaga) : new Vaga() 
+        this.criadoPor = data ? data.criadoPor : null;
     }
 }
 export class Anexo {
@@ -189,6 +192,7 @@ export class Vaga {
         this.horarioIntegracao = data.horarioIntegracao || null;
         this.integracaoDiasSemana = data.integracaoDiasSemana || null;
         this.documentoComplementares = data.documentoComplementares || [];
+        this.andamentoRecrutamento = data.andamentoRecrutamento || null;
     }
 }
 
@@ -285,7 +289,10 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             }
             
             //retorna a lista de usuários que serão notificados
-            data.notificarUsuarioIds = await this.retornaUsuariosParaNotificar(data.status, data.clienteId, notificacaopermissao)
+            //data.notificarUsuarioIds = await this.retornaUsuariosParaNotificar(data.status, data.clienteId, notificacaopermissao)
+            //2024.10.15 - notificar somente responsável
+            if (data.responsavelId && data.responsavelId > 0 && status.notifica == 1)
+                data.notificarUsuarioIds = [data.responsavelId];
 
             await api.post(rotas.Create, data);
         } catch (error) {
@@ -464,5 +471,13 @@ export const useShareSolicitacaoStore = defineStore("shareSolicitacao", {
             throw error
         }  
     },
+    async adicionarHistorico(historico) {
+        try {
+            await api.post(rotas.HistoricoAdicionar, historico);
+        } catch (error) {
+            throw error
+        }  
+    },
+    
   }
 })

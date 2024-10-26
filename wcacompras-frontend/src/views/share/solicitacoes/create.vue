@@ -22,6 +22,8 @@
               :descricao-label="getObservacaoLabelDescricao(solicitacao.solicitacaoTipoId)"
               :combo-tipo-show="comboTipoShow"
               :descricao-show="![2,4].includes(solicitacao.solicitacaoTipoId)"
+              
+              :list-responsavel="responsavelList"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
@@ -29,6 +31,7 @@
                 v-if="solicitacao.solicitacaoTipoId == 1"
                 :list-funcionarios="funcionarioList"
                 :list-centro-custos="centrosCustoList"
+                
               />
               <Comunicado v-else-if="solicitacao.solicitacaoTipoId == 2" 
                 :data-model="solicitacao.comunicado"
@@ -110,7 +113,7 @@
           </v-card-text>
           <v-card-actions> </v-card-actions>
         </v-card>
-      </v-dialog>
+    </v-dialog>
   </div>
 </template>
 
@@ -146,6 +149,7 @@ const clienteList = ref([]);
 const comboTipoShow = ref(true);
 const funcionarioList = ref([]);
 const centrosCustoList = ref([]);
+const responsavelList = ref([]);
 const route = useRoute();
 const mForm = ref(null);
 const swal = inject("$swal");
@@ -207,7 +211,6 @@ onBeforeMount(async () => {
       await useShareSolicitacaoStore().getTipoFerias();
 
     } else if (route.path.includes("mudancabase")) {
-      console.info("mudança-de-base")
       solicitacao.value.solicitacaoTipoId = 4;
       permissao.value = 'mudancabase' 
       listItensMudanca.value = await useShareSolicitacaoStore().getListaItensMudanca();
@@ -244,6 +247,7 @@ watch(
     try {
       funcionarioList.value = [];
       centrosCustoList.value = [];
+      responsavelList.value =[];
       if (clienteId) {
         if (permissao.value != 'vaga') 
         {
@@ -263,10 +267,9 @@ watch(
             _endereco += _cliente.cidade && _cliente.cidade.trim() =='' ?'': `${_cliente.cidade}`
             _endereco += _cliente.uf && _cliente.uf.trim() =='' ?'': ` - ${_cliente.uf}`
             solicitacao.value.vaga.enderecoCliente = _endereco;
-
           }
-
         }
+        responsavelList.value = await useShareUsuarioStore().getListByCliente(clienteId);
         
       }  
     } catch (error) {
@@ -317,9 +320,9 @@ async function salvar() {
       let data = { ...solicitacao.value };
       data.notificarUsuarioIds = [];
       data.usuarioCriador = useAuthStore().user.nome;
+      data.criadoPor = useAuthStore().user.id;
       data.regra = permissao.value
-
-
+      
       await useShareSolicitacaoStore().add(data);
       await swal.fire({
         toast: true,
@@ -330,7 +333,6 @@ async function salvar() {
         showConfirmButton: false,
         timer: 2000,
       });
-      console.debug("router.push", { name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) })
       router.push({ name: "share" + permissao.value.charAt(0).toUpperCase() + permissao.value.slice(1) });
     }
   } catch (error) {
@@ -347,7 +349,6 @@ function getClienteDestinoList()
 }
 
 function abrirCadastroAuxiliar(_entidade) {
-    console.log(_entidade)
     entidadeTipo.value = entidadeTipos.value.find(q =>  q.type == _entidade);
 
     entidade.value = new EntidadeAuxiliar();
@@ -367,6 +368,7 @@ function abrirCadastroAuxiliar(_entidade) {
   {
     try
     {
+      debugger
       let { valid } = await entidadeForm.value.validate();
       if (valid)
       {
