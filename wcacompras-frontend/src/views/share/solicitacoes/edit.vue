@@ -489,7 +489,10 @@ async function AlterarStatus(solicitacao, status, evento, notificarPermissao) {
   try {
     isBusy.value.save = true;
     let notificarUsuario = [];
-    if (status.notifica == 1)
+
+    if ((solicitacao.criadoPor || 0) > 0 && status.status.toLowerCase() =="concluído" && status.notifica == 1)
+      notificarUsuario.push(solicitacao.criadoPor)
+    else if (status.notifica == 1)
       //verificar se precisa notificar
       notificarUsuario =
         await useShareSolicitacaoStore().retornaUsuariosParaNotificar(

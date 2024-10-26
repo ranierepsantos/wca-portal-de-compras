@@ -16,7 +16,8 @@ namespace wca.share.application.Features.Solicitacoes.Common
 
             CreateMap<SolicitacaoCreateCommand, Solicitacao>();
             CreateMap<SolicitacaoUpdateCommand, Solicitacao>()
-                .ForMember(dest => dest.Anexos, src => src.Ignore());
+                .ForMember(dest => dest.Anexos, src => src.Ignore())
+                .ForMember(dest => dest.CriadoPor, src => src.Ignore());
 
             CreateMap<Solicitacao, SolicitacaoToPaginateResponse>()
                 .ForMember(dest => dest.Id, opt =>  opt.MapFrom(src =>  src.Id))
