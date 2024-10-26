@@ -32,6 +32,12 @@
         </v-row>
         <v-row>
           <v-col class="text-right">
+            <v-progress-circular v-show="isRunningEvent"
+              color="primary"
+              indeterminate
+            ></v-progress-circular>
+          </v-col>
+          <v-col class="text-right">
             <v-btn
               :color="aprovarColor"
               @click="aprovarReprovar(true)"
