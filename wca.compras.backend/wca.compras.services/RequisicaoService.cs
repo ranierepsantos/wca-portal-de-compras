@@ -329,7 +329,8 @@ namespace wca.compras.services
                              .Include("Cliente")
                              .Include("Fornecedor");
 
-
+                query = query.OrderByDescending(o => o.DataCriacao);
+                
                 var pagination = Pagination<RequisicaoDto>.ToPagedList(_mapper, query, page, pageSize);
 
                 return pagination;
