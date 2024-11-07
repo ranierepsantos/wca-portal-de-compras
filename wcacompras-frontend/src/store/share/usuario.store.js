@@ -74,7 +74,7 @@ export const useShareUsuarioStore = defineStore("shareUsuario", {
                 response = await clienteService.getListByUser(data.id)
                 
                 if (response.data.length > 0)
-                    data.cliente = response.data.map( item => {return { text: item.nome, value: item.id}})
+                    data.cliente = response.data.map( item => {return { text: (item.codigoCliente ? item.codigoCliente + " - ": "") + item.nome, value: item.id}})
                 else
                     data.cliente = []
 
