@@ -309,7 +309,7 @@ async function salvar() {
       router.push({name:"shareUsuarios"})
     }
   } catch (error) {
-    console.log("share.usuarios.error:", error);
+    console.error("share.usuarios.error:", error);
     handleErrors(error);
   } finally { isSaving.value = false }
 }
@@ -329,7 +329,7 @@ async function getClienteToList(filial) {
     }
       
   } catch (error) {
-    console.log("getClienteToList.error:", error);
+    console.error("getClienteToList.error:", error);
     handleErrors(error);
   }finally {
     isClienteOrigemLoading.value = false
@@ -341,7 +341,7 @@ async function getPerfilToList() {
     let response = await perfilService.toList();
     listPerfil.value = response.data;
   } catch (error) {
-    console.log("getPerfilToList.error:", error);
+    console.error("getPerfilToList.error:", error);
     handleErrors(error);
   }
 }
@@ -351,7 +351,7 @@ async function getFilialToList() {
     let response = await filialService.toList();
     filiais.value = response.data;
   } catch (error) {
-    console.log("getFilialToList.error:", error);
+    console.error("getFilialToList.error:", error);
     handleErrors(error);
   }
 }
@@ -375,7 +375,7 @@ async function getUsuario(usuarioId) {
 
 
   } catch (error) {
-    console.log("getUsuario.error:", error);
+    console.error("getUsuario.error:", error);
     handleErrors(error);
   } finally {
     isBusy.value = false;
@@ -396,7 +396,7 @@ async function checkUserExistsByEmail(email) {
   try {
     let user = (await userService.getByEmail(email)).data;
     let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
-    console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
+    
     if (hasUserInTheSameSystem.length > 0 && usuario.value.id == 0) {
       throw new Error("Email já cadastrado, neste sistema!")
     }
