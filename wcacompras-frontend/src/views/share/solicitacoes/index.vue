@@ -115,8 +115,8 @@
           <th class="text-center text-grey">#</th>
           <th class="text-center text-grey">DATA</th>
           <th class="text-left text-grey">CLIENTE</th>
+          <th class="text-left text-grey" v-if="pageTipo.id ==2">ASSUNTO</th>
           <th class="text-left text-grey" v-if="pageTipo.id ==5">FUNÇÃO</th>
-          <th class="text-left text-grey" v-else-if="pageTipo.id ==2">ASSUNTO</th>
           <th class="text-left text-grey" v-else>FUNCIONÁRIO</th>
           <th class="text-left text-grey">RESPONSÁVEL</th>
           <th class="text-left text-grey">STATUS</th>
@@ -130,8 +130,11 @@
             {{ moment(item.dataSolicitacao).format("DD/MM/YYYY") }}
           </td>
           <td class="text-left">{{ item.clienteNome }}</td>
-          <td class="text-left">{{ getFuncNome(item)  }}</td>
-          <td class="text-left">{{ item.responsavelNome || "Não atribuído" }}</td>
+          
+          <th class="text-left" v-if="pageTipo.id ==2">{{item.comunicado.assuntoNome}}</th>
+          <th class="text-left" v-if="pageTipo.id ==5">{{item.vaga.funcaoNome}}</th>
+          <td class="text-left" v-else>{{ getFuncNome(item)   }}</td>
+          <td class="text-left">{{ item.responsavelNome || "Não atribuído" }}</td>  
           <td class="text-left">
             <v-btn
               :color="item.statusSolicitacao.color"
@@ -349,13 +352,11 @@ function getFuncNome(item){
   if (item.solicitacaoTipoId == 1)
     return item.desligamento.funcionarioNome;
   else if (item.solicitacaoTipoId == 2)
-    return item.comunicado.assuntoNome;
+    return item.comunicado.funcionarioNome;
   else if (item.solicitacaoTipoId == 3)
     return item.ferias.funcionarioNome;
   else if (item.solicitacaoTipoId == 4)
     return item.mudancaBase.funcionarioNome;
-  else if (item.solicitacaoTipoId == 5)
-    return item.vaga.funcaoNome;
   else  
      return '';  
 }
