@@ -238,7 +238,7 @@ async function getItems()
   try
   {
     isBusy.value = true;
-    let response = await despesaTipoStore.getPaginate(page.value, pageSize)
+    let response = await despesaTipoStore.getPaginate(page.value, pageSize,filter.value)
     tableData.value = response.items;
     totalPages.value = response.totalPages;
 
