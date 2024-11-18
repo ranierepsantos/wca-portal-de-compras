@@ -468,6 +468,7 @@
             despesa.aprovada !== 1 &&
             authStore.hasPermissao('wca_aprovacao')
           "
+          :disable-save-button="despesaDisableSaveButton"
         ></despesa-form>
       </v-dialog>
       <!-- FORM PARA APROVAR / REJEITAR PEDIDO -->
@@ -563,6 +564,8 @@ const dadosDeposito = ref({
   valorDeposito: 0,
 });
 const solicitacaoTipos = ref([])
+const despesaDisableSaveButton = ref(false)
+
 //COMPUTED
 const isReadonly = computed(() => {
   return (
@@ -948,7 +951,10 @@ function limparDadosDespesa() {
 }
 
 async function salvar() {
+  let saveButton = formButtons.value.find(q => q.event =="salvar-click");
   try {
+    if (saveButton) saveButton.disabled = true;
+
     let data = { ...solicitacao.value };
 
     // verificar se o limite foi excedido
@@ -1046,6 +1052,7 @@ async function salvar() {
     console.log("solicitacao.cadastro.salvar.erro", error);
     handleErrors(error);
   } finally {
+      if (saveButton) saveButton.disabled = false; 
   }
 }
 
@@ -1144,6 +1151,7 @@ async function registrarPagto(dados) {
 
 async function salvarDespesa() {
   try {
+    despesaDisableSaveButton.value = true;
     let tipoDespesa = despesaTipos.value.find(
       (q) => q.id == despesa.value.tipoDespesaId
     );
@@ -1161,6 +1169,7 @@ async function salvarDespesa() {
         text: "Já existe despesa cadastrada com esta nota e cnpj!",
         showConfirmButton: true,
       });
+      despesaDisableSaveButton.value = false;
       return;
     }
     despesa.value.aprovada = isSolicitacaoEspecial.value && despesa.value.id <= 0 ? 1: despesa.value.aprovada ;
@@ -1185,6 +1194,8 @@ async function salvarDespesa() {
   } catch (error) {
     console.error("salvarDespesa.error", error);
     handleErrors(error);
+  }finally {
+      despesaDisableSaveButton.value = false;  
   }
 }
 
