@@ -164,7 +164,7 @@ const boxDestinoTermo = ref("");
 const isTransferBetween = ref(false);
 //FUNCTIONS
 
-const emit = defineEmits(["destinyChange"]);
+const emit = defineEmits(["destinyChange", "plusClick"]);
 
 function adicionar() {
   if (props.isReadOnly) return;
