@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using wca.share.infrastruture.Context;
 
@@ -11,9 +12,11 @@ using wca.share.infrastruture.Context;
 namespace wca.share.infrastructure.Migrations
 {
     [DbContext(typeof(WcaContext))]
-    partial class WcaContextModelSnapshot : ModelSnapshot
+    [Migration("20241019000320_AlterTable_Solicitacao_AddColumn_CriadoPor_Funcionario_AddIndex")]
+    partial class AlterTable_Solicitacao_AddColumn_CriadoPor_Funcionario_AddIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

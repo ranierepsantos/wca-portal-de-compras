@@ -21,10 +21,17 @@
           label-text="Cliente"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
-        <!-- <select name="clientes" id="clientes" v-model="solicitacao.clienteId" style="width: 100%; height: 30px; border: 1px solid; border-radius: 2px;">
-          <option value="1">Teste</option>
-          <option v-for="cliente in listClientes" :key="cliente.value" :value="cliente.value">{{cliente.text}}</option>
-        </select> -->
+      </v-col>
+      <v-col cols="4" v-show="solicitacao.id > 0 && '1,2'.includes(solicitacao.statusSolicitacaoId)">
+        <select-text
+          v-model="solicitacao.statusSolicitacaoId"
+          :combo-items="listStatus"
+          combo-item-value="id"
+          combo-item-title="statusIntermediario"
+          :select-mode="'3,5,6,8'.includes(solicitacao.statusSolicitacaoId) == false"
+          :text-field-value="solicitacao.status.statusIntermediario"
+          label-text="Status Solicitação"
+        ></select-text>
       </v-col>
       <v-col cols="4" v-show="solicitacao.id > 0 && '1,2'.includes(solicitacao.statusSolicitacaoId)">
         <select-text
@@ -43,12 +50,9 @@
         <select-text
           v-model="solicitacao.responsavelId"
           :combo-items="listResponsavel"
-          :select-mode="solicitacao.id != 0 && !isReadOnly"
-          :text-field-value="
-            getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)
-          "
+          :select-mode="!isReadOnly"
+          :text-field-value="solicitacao.responsavelNome"
           label-text="Responsável"
-          v-show="solicitacao.id != 0"
         ></select-text>
       </v-col>
     </v-row>

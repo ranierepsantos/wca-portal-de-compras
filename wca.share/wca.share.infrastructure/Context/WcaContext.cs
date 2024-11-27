@@ -74,6 +74,8 @@ namespace wca.share.infrastruture.Context
             modelBuilder.Entity<SolicitacaoVaga>()
                 .HasMany<DocumentoComplementar>(o => o.DocumentoComplementares).WithMany();
 
+            modelBuilder.Entity<Funcionario>()
+                .HasIndex(f => f.Nome);
 
         }
     }
