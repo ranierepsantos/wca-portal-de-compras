@@ -66,6 +66,8 @@
               :list-destino="usuario.cliente"
               list-origem-titulo = "Selecione os clientes"
               list-destino-titulo = "Clientes do usuário"
+              @destiny-change="processarAlteracaoCliente()"
+              :is-origem-loading="isClienteOrigemLoading"
             />
             <br />
             <box-transfer
@@ -73,13 +75,21 @@
               :list-destino="usuario.centroCusto"
               list-origem-titulo="Selecione o(s) Centro(s) de Custo"
               list-destino-titulo="Centro(s) de Custo do usuário"
+              :is-origem-loading="isOrigemLoading"
             />
             <v-row style="margin-top: 5px;">
               <v-col class="text-right">
                 <v-btn variant="outlined" color="primary" @click="router.go(-1)"
                   >Cancelar</v-btn
                 >
-                <v-btn color="primary" type="submit" class="ml-3">Salvar</v-btn>
+                <v-progress-circular
+                  color="primary"
+                  indeterminate
+                  :size="40"
+                  class="ml-5 mr-5"
+                  v-if="isSaving"
+                ></v-progress-circular>
+                <v-btn color="primary" type="submit" class="ml-3" v-else>Salvar</v-btn>
               </v-col>
             </v-row>
           </v-form>
@@ -104,9 +114,11 @@ import boxTransfer from "@/components/boxTransfer.vue";
 import { Usuario, useShareUsuarioStore } from "@/store/share/usuario.store";
 import userService from "@/services/user.service";
 import { useShareClienteStore } from "@/store/share/cliente.store";
+import { compararValor } from "@/helpers/functions";
 
 //DATA
 const isBusy = ref(false);
+const isSaving = ref(false);
 const listPerfil = ref([]);
 const filiais = ref([]);
 const clientes = ref([]);
@@ -127,6 +139,8 @@ const usuarioConfiguracoes = ref({
 const centros = ref([]);
 const clientesUsuarios = ref([])
 const isMatriz = ref(false)
+const isOrigemLoading = ref(false)
+const isClienteOrigemLoading = ref(false)
 //VUE METHODS
 onMounted(async () => {
   isMatriz.value = authStore.sistema.isMatriz;
@@ -167,43 +181,43 @@ watch(
   {deep: true}
 );
 
-watch( 
-  () => usuario.value.cliente,
-  async (newClientes) => {
-      if (newClientes.length > 0) {
-        let objA = JSON.parse(JSON.stringify(newClientes));
-        if (objA.length > 0) objA.forEach((e) => delete e.selected);
-        let objB = JSON.parse(JSON.stringify(clientesUsuarios.value));
-        if (objB.length > 0) objB.forEach((e) => delete e.selected);
+// watch( 
+//   () => usuario.value.cliente,
+//   async (newClientes) => {
+//       if (newClientes.length > 0) {
+//         let objA = JSON.parse(JSON.stringify(newClientes));
+//         if (objA.length > 0) objA.forEach((e) => delete e.selected);
+//         let objB = JSON.parse(JSON.stringify(clientesUsuarios.value));
+//         if (objB.length > 0) objB.forEach((e) => delete e.selected);
 
-        if (JSON.stringify(objA) !== JSON.stringify(objB)) {
-          //carregar os centros de custos
-          centros.value = await useShareClienteStore().ListCentrosDeCusto(newClientes.map((p) => { return p.value;}));
+//         if (JSON.stringify(objA) !== JSON.stringify(objB)) {
+//           //carregar os centros de custos
+//           centros.value = await useShareClienteStore().ListCentrosDeCusto(newClientes.map((p) => { return p.value;}));
           
-          //remover o que estiver no usuario
-          centroCustoListRemove();
+//           //remover o que estiver no usuario
+//           centroCustoListRemove();
 
-          //pega a lista de id dos clientes selecionados
-          let listIds = newClientes.map((p) =>{ return p.value})
-          console.log("clientes selecionados: ",listIds)
+//           //pega a lista de id dos clientes selecionados
+//           let listIds = newClientes.map((p) =>{ return p.value})
+//           console.log("clientes selecionados: ",listIds)
 
-          //pega a lista de ids que foram removidos
-          let listToRemove = clientesUsuarios.value.length > 0 ? clientesUsuarios.value.filter(p => !listIds.includes(p.value)):[]
-          console.log("clientes removidos: ",listToRemove)
+//           //pega a lista de ids que foram removidos
+//           let listToRemove = clientesUsuarios.value.length > 0 ? clientesUsuarios.value.filter(p => !listIds.includes(p.value)):[]
+//           console.log("clientes removidos: ",listToRemove)
 
-          // remover os centros de custo do cliente removido da lista do usuario
-          usuarioRemoveCentroCusto(listToRemove.map(p => {return p.value}))
+//           // remover os centros de custo do cliente removido da lista do usuario
+//           usuarioRemoveCentroCusto(listToRemove.map(p => {return p.value}))
           
-          clientesUsuarios.value = JSON.parse(JSON.stringify(newClientes));
-        }
-      } else {
-        centros.value = [];
-        usuarioRemoveCentroCusto(clientesUsuarios.value.map(p => {return p.value}))
-        clientesUsuarios.value =[]
-      }
-  },
-  { deep: true }
-);
+//           clientesUsuarios.value = JSON.parse(JSON.stringify(newClientes));
+//         }
+//       } else {
+//         centros.value = [];
+//         usuarioRemoveCentroCusto(clientesUsuarios.value.map(p => {return p.value}))
+//         clientesUsuarios.value =[]
+//       }
+//   },
+//   { deep: true }
+// );
 
 
 
@@ -256,10 +270,8 @@ function usuarioRemoveClienteFromFilial(filialToRemove =[])
 function clientesListRemove(removerTodos = false) {
   if (removerTodos == true) clientes.value.splice(0, clientes.value.length);
   else {
-    usuario.value.cliente.forEach((cliente) => {
-      let index = clientes.value.findIndex((c) => c.value == cliente.value);
-      if (index > -1) clientes.value.splice(index, 1);
-    });
+    let toRemove = usuario.value.cliente.map(p => p.value)
+    clientes.value = clientes.value.filter(q => !toRemove.includes(q.value));
   }
 }
 
@@ -276,6 +288,7 @@ async function salvar() {
   try {
     let { valid } = await userForm.value.validate();
     if (valid) {
+      isSaving.value = true
       let data = {... usuario.value };
       data.usuarioConfiguracoes[0] = usuarioConfiguracoes.value
       if (data.id == 0) {
@@ -296,9 +309,9 @@ async function salvar() {
       router.push({name:"shareUsuarios"})
     }
   } catch (error) {
-    console.log("share.usuarios.error:", error);
+    console.error("share.usuarios.error:", error);
     handleErrors(error);
-  }
+  } finally { isSaving.value = false }
 }
 
 async function clearData() {
@@ -309,14 +322,17 @@ async function clearData() {
 
 async function getClienteToList(filial) {
   try {
+    isClienteOrigemLoading.value = true
     if (filial.length> 0) {
       let response = await clienteService.toList(filial);
       clientes.value = response.data;
     }
       
   } catch (error) {
-    console.log("getClienteToList.error:", error);
+    console.error("getClienteToList.error:", error);
     handleErrors(error);
+  }finally {
+    isClienteOrigemLoading.value = false
   }
 }
 
@@ -325,7 +341,7 @@ async function getPerfilToList() {
     let response = await perfilService.toList();
     listPerfil.value = response.data;
   } catch (error) {
-    console.log("getPerfilToList.error:", error);
+    console.error("getPerfilToList.error:", error);
     handleErrors(error);
   }
 }
@@ -335,22 +351,31 @@ async function getFilialToList() {
     let response = await filialService.toList();
     filiais.value = response.data;
   } catch (error) {
-    console.log("getFilialToList.error:", error);
+    console.error("getFilialToList.error:", error);
     handleErrors(error);
   }
 }
 
 async function getUsuario(usuarioId) {
   try {
-    debugger
     isBusy.value = true;
     usuario.value = await usuarioStore.getById(usuarioId);
     if (usuario.value.usuarioConfiguracoes.length > 0)
       usuarioConfiguracoes.value = {...usuario.value.usuarioConfiguracoes[0]}
-
+    
+    //clientesUsuarios.value = usuario.value.cliente.map(p => p.value)
+    await processarAlteracaoCliente()
+    //remover da lista de clientes os clientes que estão na lista do usuário
     clientesListRemove();
+
+    //remover da lista de centros de custo o centro de custo que esta na lista do usuário
+    let centrosToRemove = usuario.value.centroCusto.map(p => p.value)
+    centros.value = centros.value.filter(q =>  !centrosToRemove.includes(q.value));
+
+
+
   } catch (error) {
-    console.log("getUsuario.error:", error);
+    console.error("getUsuario.error:", error);
     handleErrors(error);
   } finally {
     isBusy.value = false;
@@ -371,7 +396,7 @@ async function checkUserExistsByEmail(email) {
   try {
     let user = (await userService.getByEmail(email)).data;
     let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
-    console.log('hasUserInTheSameSystem', hasUserInTheSameSystem)
+    
     if (hasUserInTheSameSystem.length > 0 && usuario.value.id == 0) {
       throw new Error("Email já cadastrado, neste sistema!")
     }
@@ -386,24 +411,57 @@ async function checkUserExistsByEmail(email) {
   
 }
 
-function centroCustoListRemove(removerTodos = false) {
-  if (removerTodos == true) centros.value.splice(0, centros.value.length);
-  else {
-    usuario.value.centroCusto.forEach((cc) => {
-      let index = centros.value.findIndex((c) => c.value == cc.value);
-      if (index > -1) centros.value.splice(index, 1);
-    });
-  }
+function centroCustoListRemoveByCliente(clientesToRemove = []) {
+  centros.value = centros.value.filter(p => !clientesToRemove.includes(p.clienteId))
 }
 
-function usuarioRemoveCentroCusto(clientesToRemove = []) {
-  let removeList = usuario.value.centroCusto.filter(q =>  clientesToRemove.includes(q.clienteId));
-  removeList.forEach(r => {
-    let index = usuario.value.centroCusto.findIndex(q =>  q.value == r.value);
-    usuario.value.centroCusto.splice(index, 1);
-  })
+function usuarioRemoveCentroCustoByCliente(clientesToRemove = []) {
+  let removeList = usuario.value.centroCusto
+                  .filter(q =>  clientesToRemove.includes(q.clienteId))
+                  .map(m => m.value);
+  usuario.value.centroCusto = usuario.value.centroCusto.filter(q => !removeList.includes(q.value))
 }
 
+async function processarAlteracaoCliente() {
+  try {
+    let listagem = usuario.value.cliente;
+    if (listagem.length > 0)  {
+      let _clientesSelecionados = listagem.map((p) => { return p.value;})
+      if (clientesUsuarios.value != _clientesSelecionados) {
+        isOrigemLoading.value = true
+
+        let _onlyDiff  = _clientesSelecionados.filter(q => !clientesUsuarios.value.includes(q))
+        
+        //carregar os centros de custos
+        if (_onlyDiff.length > 0){
+          let _centros = await useShareClienteStore().ListCentrosDeCusto(_onlyDiff);
+          centros.value.push(..._centros);
+          centros.value = centros.value.sort(compararValor("text"))
+        }
+        //pega a lista de ids que foram removidos
+        let listToRemove = clientesUsuarios.value.length > 0 ? clientesUsuarios.value.filter(p => !_clientesSelecionados.includes(p)):[]
+
+        //remover os items de centro de custo do cliente removidos do usuário
+        centroCustoListRemoveByCliente(listToRemove);
+
+        // remover os centros de custo do cliente removido da lista do usuario
+        usuarioRemoveCentroCustoByCliente(listToRemove)
+        
+        clientesUsuarios.value = _clientesSelecionados;
+        isOrigemLoading.value = false
+      }
+
+    } else {
+        centros.value = [];
+        usuario.value.centroCusto = []
+        clientesUsuarios.value =[]
+    }
+  } catch (error) {
+    console.error("processarAlteracaoCliente.error", error)
+    handleErrors(error)
+  }  
+  
+}
 
 
 </script>

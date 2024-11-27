@@ -2,7 +2,7 @@
     <v-row v-for="dia in diasDaSemana" :key="dia.value" >
         <v-col cols="4">
             <v-checkbox :label="dia.text" color="primary" density="compact" :hide-details="true" v-model="diaSelecionado[dia.value].selected"
-            v-on:vnode-updated="onCheckBoxChange(diaSelecionado[dia.value])"
+            @vue:mounted="onCheckBoxChange(diaSelecionado[dia.value])"
             ></v-checkbox>
         </v-col>
         <v-col>

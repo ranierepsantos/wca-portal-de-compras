@@ -1,5 +1,4 @@
-﻿using ErrorOr;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using wca.share.application.Features.Solicitacoes.Commands;
 using wca.share.application.Features.Solicitacoes.Queries;
@@ -87,10 +86,32 @@ namespace wca.share.webapi.Controllers
 
         }
 
+        [HttpGet("ListarTipoFerias")]
+        public async Task<IActionResult> ListarTipoFerias()
+        {
+            var result = await _mediator.Send(new TipoFeriasListQuery());
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
         [HttpPut("AlterarStatus")]
         public async Task<IActionResult> AlterarStatus([FromBody] SolicitacaoChangeStatusCommand command)
         {
             var result = await _mediator.Send(command);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+
+        }
+
+        [HttpGet("ListarItensMudanca")]
+        public async Task<IActionResult> ListarItensMudanca()
+        {
+            var result = await _mediator.Send(new ItemMudancaListQuery());
 
             if (result.IsError) { return Problem(result.Errors); }
 

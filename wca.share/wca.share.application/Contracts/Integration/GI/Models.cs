@@ -96,10 +96,10 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         public string? Nome { get; set; }
 
         [JsonPropertyName("codigoCliente")]
-        public int? CodigoCliente { get; set; }
+        public int CodigoCliente { get; set; }
 
         [JsonPropertyName("codigoCentroCusto")]
-        public int? CodigoCentroCusto { get; set; }
+        public int CodigoCentroCusto { get; set; }
 
         [JsonPropertyName("dataAdmissao")]
         public DateTime? DataAdmissao { get; set; }
@@ -138,9 +138,26 @@ namespace wca.share.application.Contracts.Integration.GI.Models
         public int? SmsdddCel { get; set; }
 
         [JsonPropertyName("smsNroCel")]
-        public int? SmsNroCel { get; set; }
+        public double? SmsNroCel { get; set; }
 
         [JsonPropertyName("pis")]
         public double? Pis { get; set; }
+
+        [JsonPropertyName("eSocialMatricula")]
+        public string eSocialMatricula { get; set; }
+
+    }
+
+    public class WhereCondition
+    {
+        [JsonPropertyName("where")]
+        public List<Condition> Conditions { get; set; } = new List<Condition>();
+    }
+    public class Condition
+    {
+        [JsonPropertyName("campo")]
+        public string Campo { get; set; }
+        [JsonPropertyName("valor")]
+        public string Valor { get; set; }  
     }
 }

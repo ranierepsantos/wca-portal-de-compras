@@ -20,6 +20,7 @@ namespace wca.share.infrastructure.Integration.GI
             {
                 BaseAddress = new Uri(_config["IntegracaoGI:Url"].ToString().TrimEnd('/'))
             };
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
             _client = RestService.For<IGIRefitService>(_httpClient);
             GetToken();
         }
@@ -56,6 +57,11 @@ namespace wca.share.infrastructure.Integration.GI
         public async Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllAsync()
         {
             return await _client.FuncionarioGetAll(token.Token);
+        }
+
+        public async Task<IEnumerable<FuncionarioResponse>> FuncionarioGetAllJsonAsync(WhereCondition where)
+        {
+            return await _client.FuncionarioGetAllJson(token.Token, where);
         }
     }
 }

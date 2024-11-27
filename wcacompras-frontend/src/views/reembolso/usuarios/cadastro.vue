@@ -295,12 +295,10 @@ watch(
 
           //pega a lista de id dos clientes selecionados
           let listIds = newClientes.map((p) =>{ return p.value})
-          console.log("clientes selecionados: ",listIds)
-
+          
           //pega a lista de ids que foram removidos
           let listToRemove = clientesUsuarios.value.length > 0 ? clientesUsuarios.value.filter(p => !listIds.includes(p.value)):[]
-          console.log("clientes removidos: ",listToRemove)
-
+          
           // remover os centros de custo do cliente removido da lista do usuario
           usuarioRemoveCentroCusto(listToRemove.map(p => {return p.value}))
           

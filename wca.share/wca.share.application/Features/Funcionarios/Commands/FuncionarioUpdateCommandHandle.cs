@@ -21,8 +21,8 @@ namespace wca.share.application.Features.Funcionarios.Commands
         DateTime? DataDemissao = null,
         string? Email = null,
         int? DDDCelular = null,
-        int? NumeroCelular = null,
-        string? NumeroPis = null
+        double? NumeroCelular = null,
+        string? eSocialMatricula = null
     ) : IRequest<ErrorOr<FuncionarioResponse>>;
     internal class FuncionarioUpdateCommandHandle : IRequestHandler<FuncionarioUpdateCommand, ErrorOr<FuncionarioResponse>>
     {
@@ -42,7 +42,7 @@ namespace wca.share.application.Features.Funcionarios.Commands
         public async Task<ErrorOr<FuncionarioResponse>> Handle(FuncionarioUpdateCommand request, CancellationToken cancellationToken)
         {
 
-            _logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
+            //_logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
 
             //1. validar dados
             FuncionarioUpdateCommandBehavior validator = new();

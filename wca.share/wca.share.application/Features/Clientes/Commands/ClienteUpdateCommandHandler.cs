@@ -2,6 +2,7 @@
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Clientes.Behaviors;
 using wca.share.application.Features.Clientes.Common;
@@ -43,7 +44,7 @@ namespace wca.share.application.Features.Clientes.Commands
 
         async Task<ErrorOr<ClienteResponse>> IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>.Handle(ClienteUpdateCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("validation");
+            _logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
             //1. validar dados
             UpdateClienteCommandBehavior validator = new UpdateClienteCommandBehavior();
             var validationResult = validator.Validate(request);
@@ -53,9 +54,9 @@ namespace wca.share.application.Features.Clientes.Commands
                 return errors;
             }
             //1. localizar cliente
-            ClienteByIdQuerie querie = new ClienteByIdQuerie(request.id);
+            ClienteByIdQuerie querie = new(request.id);
 
-            var findResult = await _mediator.Send(querie);
+            var findResult = await _mediator.Send(querie, cancellationToken);
 
             if (findResult.IsError) return findResult;
 

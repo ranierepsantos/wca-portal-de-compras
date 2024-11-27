@@ -12,7 +12,34 @@
       @update:model-value="val => $emit('update:modelValue',val)"
       :rules="fieldRules"
       v-if="selectMode"
-    ></v-autocomplete>
+      :disabled="disabled"
+      :multiple="isMultiple"
+      
+    >
+      <template v-slot:append v-if="buttonShow">
+      <v-icon
+        :icon="buttonIcon"
+        color="success"
+        size="small"
+        @click="$emit('buttonClick')"
+        :title="buttonTitle"
+        
+      ></v-icon>      
+    </template>
+
+    <template v-slot:append-inner>
+      <v-fade-transition leave-absolute>
+        <v-progress-circular
+          v-show="buttonLoading"
+          color="primary"
+          size="24"
+          :width="2"
+          indeterminate
+        ></v-progress-circular>
+      </v-fade-transition>
+    </template>
+    
+  </v-autocomplete>
     <v-text-field
       :label="labelText"
       type="text"
@@ -21,7 +48,7 @@
       density="compact"
       :model-value="textFieldValue"
       :readonly="true"
-      bg-color="#f2f2f2"
+      :bg-color="!printMode? '#f2f2f2': ''"
       v-else
     ></v-text-field>
   </div>
@@ -42,8 +69,20 @@ defineProps({
     fieldRules: {
         type: Array,
         default: function() { return []; }
-    }
+    },
+    disabled: { type: Boolean, default: false },
+    buttonTitle: {type: String, default: 'Adicionar'},
+    buttonShow: {type: Boolean, default: false},
+    buttonIcon: {type: String, default: 'mdi-plus'},
+    buttonLoading: {type: Boolean, default: false},
+    isMultiple: {type: Boolean, default: false},
+    printMode:{type: Boolean, default: false},
 })
+//const emit = defineEmits(['buttonClick'])
 
+// function sendCommand() {
+//   console.log('buttonClick')
+//   emit('buttonClick')
+// }
 
 </script>

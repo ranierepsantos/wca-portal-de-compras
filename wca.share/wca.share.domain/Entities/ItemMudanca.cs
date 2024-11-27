@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace wca.share.domain.Entities
 {
@@ -10,6 +9,9 @@ namespace wca.share.domain.Entities
 
         [Column("descricao")]
         public string? Descricao { get; set; }
-        
+
+        [Column("ativo")]
+        public bool Ativo { get; set; } = true;
+
     }
 }

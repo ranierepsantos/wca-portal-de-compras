@@ -1,14 +1,8 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using wca.share.application.Common;
 using wca.share.application.Contracts.Persistence;
 using wca.share.domain.Entities;
@@ -36,6 +30,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
             {
                 List<Assunto>? items = await _repository.GetDbSet<Assunto>()
                                             .AsNoTracking()
+                                            .Where(q => q.Ativo)
                                             .OrderBy(x =>  x.Nome)
                                             .ToListAsync(cancellationToken: cancellationToken);
 

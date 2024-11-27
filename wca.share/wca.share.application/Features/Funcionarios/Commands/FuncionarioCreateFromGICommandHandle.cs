@@ -1,8 +1,9 @@
 ﻿using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+
 using wca.share.application.Contracts.Integration.GI;
+using wca.share.application.Contracts.Integration.GI.Models;
 using wca.share.application.Contracts.Persistence;
 using wca.share.domain.Entities;
 
@@ -24,61 +25,83 @@ namespace wca.share.application.Features.Funcionarios.Commands
 
         public async Task<ErrorOr<bool>> Handle(FuncionarioCreateFromGICommand request, CancellationToken cancellationToken)
         {
-            Console.WriteLine("Funcionarios.FromGI.início: " + DateTime.Now.ToString());
-            var funcionarios = await _gi.FuncionarioGetAllAsync();
 
-            foreach(var ofunc in funcionarios)
+            Console.WriteLine("Funcionarios.FromGI.início: " + DateTime.Now.ToString());
+
+            var clientes = await _repository.GetDbSet<Cliente>().AsNoTracking().ToListAsync(cancellationToken: cancellationToken);
+
+            foreach (var cliente in clientes)
             {
                 try
                 {
-                    Funcionario? _func = await _repository.GetDbSet<Funcionario>()
-                    .AsNoTracking()
-                    .Where(q => q.CodigoFuncionario == ofunc.CodigoFuncionario)
-                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-                    if (_func is null)
+                    WhereCondition whereCondition = new();
+                    whereCondition.Conditions.Add(new Condition()
                     {
-                        //localizar cliente
-                        Cliente? cliente = await _repository.ClienteRepository
-                                                            .ToQuery()
-                                                            .Where(q => q.CodigoCliente == ofunc.CodigoCliente)
-                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                        if (cliente is not null)
-                        {
-                            //localizar centro de custo
-                            CentroCusto? centroCusto = await _repository.GetDbSet<CentroCusto>()
-                                                                        .Where(q => q.ClienteId == cliente.Id && q.Codigo == ofunc.CodigoCentroCusto)
-                                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                            if (centroCusto is not null)
-                            {
-                                FuncionarioCreateCommand command = new(ofunc.Nome, cliente.Id, centroCusto.Id, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
-                                    ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.Pis?.ToString());
+                        Campo = "codigocliente",
+                        Valor = cliente.CodigoCliente?.ToString()
+                    });
 
+                    var funcionarios = await _gi.FuncionarioGetAllJsonAsync(whereCondition);
+
+                    foreach (var ofunc in funcionarios)
+                    {
+                        try
+                        {
+                            Funcionario? _func = await _repository.GetDbSet<Funcionario>()
+                            .AsNoTracking()
+                            .Where(q => q.eSocialMatricula == ofunc.eSocialMatricula)
+                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+                            if (_func is null)
+                            {
+                                //localizar centro de custo
+                                CentroCusto? centroCusto = await _repository.GetDbSet<CentroCusto>()
+                                                                            .Where(q => q.ClienteId == cliente.Id && q.Codigo == ofunc.CodigoCentroCusto)
+                                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                if (centroCusto is not null)
+                                {
+                                    FuncionarioCreateCommand command = new(ofunc.Nome, cliente.Id, centroCusto.Id, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
+                                        ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.eSocialMatricula);
+
+                                    _ = await _mediator.Send(command, cancellationToken);
+                                }
+                                else
+                                {
+                                    _repository.GetDbSet<EventLogGi>().Add(new EventLogGi()
+                                    {
+                                        Log = $"{ofunc.CodigoFuncionario} - {ofunc.Nome}, , código cliente: {ofunc.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}, centro de custo não localizado!",
+                                        Entidade = "Funcionário"
+
+                                    });
+                                   await _repository.SaveAsync();
+                                }
+                            }
+                            else
+                            {
+                                FuncionarioUpdateCommand command = new(_func.Id, ofunc.Nome, _func.ClienteId, _func.CentroCustoId, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
+                                                                        ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.eSocialMatricula);
                                 _ = await _mediator.Send(command, cancellationToken);
                             }
-                            //else
-                            //    Console.WriteLine($"Funcionário sem centro de custo - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}");
                         }
-                        //else
-                        //    Console.WriteLine($"Funcionário sem cliente - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}");
-                    }
-                    else
-                    {
-                        FuncionarioUpdateCommand command = new(_func.Id, ofunc.Nome, _func.ClienteId, _func.CentroCustoId, ofunc.DataAdmissao, ofunc.CodigoFuncionario,
-                                                               ofunc.DataDemissao, ofunc.Email, ofunc.SmsdddCel, ofunc.SmsNroCel, ofunc.Pis?.ToString());
-                        _ = await _mediator.Send(command, cancellationToken);
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error.message: " + ex.Message);
+                            Console.WriteLine("Error.InnerException: " + ex.InnerException?.Message);
+                            Console.WriteLine($"Funcionário com erro - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}, centro de custo: {ofunc.CodigoCentroCusto}");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"Error.cliente: {cliente.CodigoCliente} - {cliente.Nome}");
                     Console.WriteLine("Error.message: " + ex.Message);
                     Console.WriteLine("Error.InnerException: " + ex.InnerException?.Message);
-                    Console.WriteLine($"Funcionário com erro - {ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {ofunc.CodigoCliente}, centro de custo: {ofunc.CodigoCentroCusto}");
                 }
             }
             Console.WriteLine("Funcionarios.FromGI.termíno: " + DateTime.Now.ToString());
-
             return true;
+
+            
         }
     }
 }

@@ -3,16 +3,36 @@
     <v-col cols="6">
       <v-card elevation="3" :subtitle="listOrigemTitulo">
         <v-card-title>
-          <v-text-field label="Pesquisar" v-model="boxOrigemTermo" type="text" required variant="outlined" color="primary"
-                   density="compact">
+          <v-text-field
+            label="Pesquisar"
+            v-model="boxOrigemTermo"
+            type="text"
+            required
+            variant="outlined"
+            color="primary"
+            density="compact"
+            v-show="showSearchText"
+          >
           </v-text-field>
         </v-card-title>
-        
+
         <v-card-text>
-          <v-list density="compact" select-strategy="multiple" color="primary">
+          <v-progress-circular
+            color="primary"
+            indeterminate
+            :size="140"
+            v-if="isOrigemLoading"
+          ></v-progress-circular>
+          <v-list
+            density="compact"
+            select-strategy="multiple"
+            color="primary"
+            :bg-color="isReadOnly ? '#f2f2f2' : ''"
+            v-else
+          >
             <v-list-item
               v-for="item in getFilteredList(listOrigem, boxOrigemTermo)"
-              :key="item.text"
+              :key="item.value"
               @click="item.selected = !item.selected"
               :active="item.selected"
             >
@@ -25,41 +45,75 @@
     <v-col cols="1">
       <v-icon
         icon="mdi-chevron-double-right"
-        color="success"
+        color="primary"
         size="x-large"
         @click="adicionarTodos()"
+        title="Adicionar todos items na lista"
       ></v-icon
       ><br />
       <v-icon
         icon="mdi-chevron-right"
-        color="success"
+        color="primary"
         size="x-large"
         @click="adicionar()"
+        title="Adicionar item na lista"
       ></v-icon
       ><br />
       <v-icon
         icon="mdi-chevron-double-left"
-        color="success"
+        color="primary"
         size="x-large"
         @click="removerTodos()"
-      ></v-icon
-      ><br />
+        title="Remover todos os item da lista"
+      ></v-icon>
+      <br />
       <v-icon
         icon="mdi-chevron-left"
-        color="success"
+        color="primary"
         size="x-large"
         @click="remover()"
+        title="Remover item da lista"
       ></v-icon>
+      <br />
+      <v-icon
+        icon="mdi-plus"
+        color="success"
+        size="x-large"
+        @click="$emit('plusClick')"
+        v-show="plusButtonShow"
+        :title="plusButtonTitle"
+      ></v-icon>
+      <br />
+      <v-progress-circular
+        color="primary"
+        indeterminate
+        :size="40"
+        style="margin-top: 20px"
+        v-show="isTransferBetween"
+      ></v-progress-circular>
     </v-col>
     <v-col cols="5">
-      <v-card elevation="3" :subtitle="listDestinoTitulo">
+      <v-card elevation="3" :subtitle="listDestinoTitulo" readonly>
         <v-card-title>
-          <v-text-field label="Pesquisar" v-model="boxDestinoTermo" type="text" required variant="outlined" color="primary"
-                   density="compact">
+          <v-text-field
+            label="Pesquisar"
+            v-model="boxDestinoTermo"
+            type="text"
+            required
+            variant="outlined"
+            color="primary"
+            density="compact"
+            v-show="showSearchText"
+          >
           </v-text-field>
         </v-card-title>
         <v-card-text>
-          <v-list density="compact" select-strategy="multiple" color="primary">
+          <v-list
+            density="compact"
+            select-strategy="multiple"
+            color="primary"
+            :bg-color="isReadOnly ? '#f2f2f2' : ''"
+          >
             <v-list-item
               v-for="item in getFilteredList(listDestino, boxDestinoTermo)"
               :key="item.value"
@@ -76,85 +130,167 @@
 </template>
 
 <script setup>
-
 import { compararValor } from "@/helpers/functions";
 import { ref } from "vue";
 const props = defineProps({
   listOrigemTitulo: "",
   listOrigem: {
-    type: Object
+    type: Object,
   },
   listDestinoTitulo: "",
   listDestino: {
-    type: Object
-    
+    type: Object,
   },
+  showSearchText: {
+    type: Boolean,
+    default: true,
+  },
+  isReadOnly: {
+    type: Boolean,
+    default: false,
+  },
+  plusButtonShow: {
+    type: Boolean,
+    default: false,
+  },
+  plusButtonTitle: {
+    type: String,
+    default: "Adicionar",
+  },
+  isOrigemLoading: { type: Boolean, default: false },
 });
-const boxOrigemTermo = ref("")
-const boxDestinoTermo = ref("")
+const boxOrigemTermo = ref("");
+const boxDestinoTermo = ref("");
+const isTransferBetween = ref(false);
 //FUNCTIONS
 
+const emit = defineEmits(["destinyChange"]);
+
 function adicionar() {
-  let list = props.listOrigem.slice();
-  list.forEach((element) => {
-    if (element.selected != undefined && element.selected == true) {
-      element.selected = false;
-      props.listDestino.push(element);
-    }
-  });
-  removerItemOrigem();
+  if (props.isReadOnly) return;
+  let list = props.listOrigem.filter((e) => e.selected == true);
+  if (list.length > 0) {
+    props.listDestino.push(...list.map(p => {
+      let {selected, ...novoitem } = p
+      return novoitem;
+    }))
+    removerItems(props.listOrigem, list);
+    ordernarLista(props.listDestino, "text");
+    emit("destinyChange");
+  }
 }
 
-function removerItemOrigem(removerTodos = false) {
-  if (removerTodos == true) props.listOrigem.splice(0, props.listOrigem.length);
+function removerItems(list, items = []) {
+  if (props.isReadOnly) return;
+  if (items.length == 0) list.splice(0, list.length);
   else {
-    props.listDestino.forEach((element) => {
-      let index = props.listOrigem.findIndex((c) => c.value == element.value);
-      if (index > -1) props.listOrigem.splice(index, 1);
+    items.forEach((element) => {
+      let index = list.findIndex((c) => c.value == element.value);
+      if (index > -1) list.splice(index, 1);
     });
   }
 }
 
-function adicionarTodos() {
-  props.listDestino.push(...props.listOrigem);
-  props.listOrigem.splice(0, props.listOrigem.length);
-  ordernarLista(props.listDestino, "text");
+async function adicionarTodos() {
+  if (props.isReadOnly) return;
+  
+  let _timeOut = 0
+  
+  let list = props.listOrigem.map(p => ({value: p.value, text: p.text}));
+  if (boxOrigemTermo.value.trim() != "")
+    list = getFilteredList(props.listOrigem, boxOrigemTermo.value).map(p => ({value: p.value, text: p.text}));
+  
+  if (list.length > 1000) _timeOut = 1500;
+
+  isTransferBetween.value = true;
+  setTimeout(() => {
+    if (list.length > 0 && list.length != props.listOrigem.length) {
+      let list = getFilteredList(props.listOrigem, boxOrigemTermo.value);
+      if (list.length > 0) {
+        list.forEach((element) => {
+          element.selected = false;
+          props.listDestino.push(element);
+        });
+        removerItems(props.listOrigem, list);
+        ordernarLista(props.listDestino, "text");
+        emit("destinyChange");
+      }
+    } else {
+      let _ordenar = true
+      if (props.listDestino.length == 0) _ordenar = false
+      props.listDestino.push(...props.listOrigem);
+      removerItems(props.listOrigem, []); //props.listOrigem.splice(0, props.listOrigem.length);
+      if (_ordenar) ordernarLista(props.listDestino, "text");
+      emit("destinyChange");
+    }
+    isTransferBetween.value = false;
+  }, _timeOut);
 }
 
 function remover() {
-  let list = props.listDestino.slice();
-  list.forEach((element) => {
-    if (element.selected != undefined && element.selected == true) {
-      element.selected = false;
-      props.listOrigem.push(element);
-      let index = props.listDestino.findIndex((c) => c.value == element.value);
-      if (index > -1) props.listDestino.splice(index, 1);
-      ordernarLista(props.listOrigem, "text");
-    }
-  });
+  if (props.isReadOnly) return;
+
+  let list = props.listDestino.filter((q) => q.selected == true);
+  if (list.length > 0) {
+    
+    props.listOrigem.push(...list.map(p => {
+      let {selected, ...novoitem } = p
+      return novoitem;
+    }))
+    
+    //props.listOrigem.push(...list.map(p => ({value: p.value, text: p.text})));
+    removerItems(props.listDestino, list);
+    ordernarLista(props.listOrigem, "text");
+    emit("destinyChange");
+  }
 }
 
-function removerTodos() {
-    props.listOrigem.push(...props.listDestino);
-    props.listDestino.splice(0, props.listDestino.length);
-  ordernarLista(props.listOrigem, "text");
+async function removerTodos() {
+  if (props.isReadOnly) return;
+
+  let _timeOut = 0
+  
+  let list = props.listDestino.map(p => ({value: p.value, text: p.text}));
+  if (boxDestinoTermo.value.trim() != "")
+    list = getFilteredList(props.listDestino, boxDestinoTermo.value).map(p => ({value: p.value, text: p.text}));
+  
+  if (list.length > 1000) _timeOut = 1500;
+
+  isTransferBetween.value = true;
+  setTimeout(() => {
+    if (list.length > 0 && list.length != props.listDestino.length) {
+      if (list.length > 0) {
+        props.listOrigem.push(...list);
+        removerItems(props.listDestino, list);
+        ordernarLista(props.listOrigem, "text");
+        emit("destinyChange");
+      }
+    } else {
+      let _ordenar = true
+      if (props.listOrigem.length == 0) _ordenar = false
+      props.listOrigem.push(...props.listDestino);
+      removerItems(props.listDestino, []); //props.listDestino.splice(0, props.listDestino.length);
+      if (_ordenar) ordernarLista(props.listOrigem, "text");
+      emit("destinyChange");
+    }
+    isTransferBetween.value = false;
+  }, _timeOut);
 }
 
 function ordernarLista(lista, campo) {
   lista.sort(compararValor(campo));
 }
 
-function getFilteredList (lista, termo)
-{
-  let listReturn = lista
+function getFilteredList(lista, termo) {
+  let listReturn = lista;
 
   if (termo && termo.trim() != "")
-    listReturn = lista.filter(q => q.text.toLowerCase().includes(termo.toLowerCase()))
+    listReturn = listReturn.filter((q) =>
+      q.text.toLowerCase().includes(termo.toLowerCase())
+    );
 
-  return listReturn
+  return listReturn;
 }
-
-
 </script>
 
 <style scoped>

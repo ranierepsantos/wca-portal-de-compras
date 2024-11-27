@@ -31,6 +31,7 @@ export const useShareNotificacaoStore = defineStore("shareNotificacao",{
         async enviarNotificacao(data) {
             try {
                 let response = await api.post(rotas.EnviarNotificacao, data );
+                console.debug('enviarNotificacao.response', response)
                 return response.data        
             } catch (error) {
                 throw error

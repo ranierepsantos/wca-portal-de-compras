@@ -12,13 +12,17 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
-    <PackageReference Include="MimeKit" Version="3.2.0" />
+    <PackageReference Include="MimeKit" Version="4.7.1" />
     <PackageReference Include="Refit" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\wca.share.application\wca.share.application.csproj" />
     <ProjectReference Include="..\wca.share.domain\wca.share.domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\Extensions\" />
   </ItemGroup>
 
 </Project>

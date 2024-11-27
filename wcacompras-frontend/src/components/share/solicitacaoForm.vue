@@ -1,29 +1,17 @@
 <template>
   <div>
     <v-row>
-      <v-col v-show="solicitacao.id > 0" class="text-right">
-      <v-btn
-        :color="solicitacao.status.color"
-        variant="tonal"
-        class="text-center"
-      >
-        {{
-          solicitacao.status.statusIntermediario
-        }}</v-btn
-      >
-    </v-col>
+      <v-col v-show="solicitacao.id > 0 && !'1,2'.includes(solicitacao.statusSolicitacaoId) " class="text-right">
+        <v-btn
+          :color="solicitacao.status.color"
+          variant="tonal"
+          class="text-center"
+        >
+          {{ solicitacao.status.statusIntermediario }}</v-btn
+        >
+      </v-col>
     </v-row>
     <v-row>
-      <v-col cols="4" v-show="comboTipoShow">
-        <select-text
-          v-model="solicitacao.solicitacaoTipoId"
-          :combo-items="TipoSolicitacao"
-          :select-mode="solicitacao.id == 0"
-          :text-field-value="getTextFromListByCodigo(TipoSolicitacao, solicitacao.solicitacaoTipoId)"
-          label-text="Tipo Solicitação"
-          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
-        ></select-text>
-      </v-col>
       <v-col>
         <select-text
           v-model="solicitacao.clienteId"
@@ -33,52 +21,32 @@
           label-text="Cliente"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
         ></select-text>
+        <!-- <select name="clientes" id="clientes" v-model="solicitacao.clienteId" style="width: 100%; height: 30px; border: 1px solid; border-radius: 2px;">
+          <option value="1">Teste</option>
+          <option v-for="cliente in listClientes" :key="cliente.value" :value="cliente.value">{{cliente.text}}</option>
+        </select> -->
+      </v-col>
+      <v-col cols="4" v-show="solicitacao.id > 0 && '1,2'.includes(solicitacao.statusSolicitacaoId)">
+        <select-text
+          v-model="solicitacao.statusSolicitacaoId"
+          :combo-items="listStatus"
+          combo-item-value="id"
+          combo-item-title="statusIntermediario"
+          :select-mode="'3,5,6,8'.includes(solicitacao.statusSolicitacaoId) == false"
+          :text-field-value="solicitacao.status.statusIntermediario"
+          label-text="Status Solicitação"
+        ></select-text>
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
-        <select-text
-          v-model="solicitacao.funcionarioId"
-          :combo-items="listFuncionarios"
-          :select-mode="solicitacao.id == 0"
-          :text-field-value="solicitacao.funcionarioNome"
-          label-text="Funcionário"
-          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
-        ></select-text>
-      </v-col>
-        <v-col cols="2" v-show="solicitacao.solicitacaoTipoId!=2">
-        <v-text-field
-              variant="outlined"
-              label="PIS"
-              class="text-primary"
-              v-model="solicitacao.numeroPis"
-              :readOnly = "true"
-              bg-color="#f2f2f2"
-              density="compact"
-            >
-          </v-text-field>
-      </v-col>
-      
-    </v-row>
-    <v-row>
-      <v-col>
-        <select-text
-          v-model="solicitacao.centroCustoId"
-          :combo-items="listCentroCustos"
-          :select-mode="false"
-          :text-field-value="solicitacao.centroCustoNome"
-          label-text="Centro de Custo"
-          :field-rules="[(v) => !!v || 'Campo é obrigatório']"
-        ></select-text>
-      </v-col>
-      </v-row>
-      <v-row>
       <v-col>
         <select-text
           v-model="solicitacao.responsavelId"
           :combo-items="listResponsavel"
           :select-mode="solicitacao.id != 0 && !isReadOnly"
-          :text-field-value="getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)"
+          :text-field-value="
+            getTextFromListByCodigo(listResponsavel, solicitacao.responsavelId)
+          "
           label-text="Responsável"
           v-show="solicitacao.id != 0"
         ></select-text>
@@ -86,25 +54,24 @@
     </v-row>
     <slot></slot>
     <v-row>
-          <v-col>
-            <v-textarea
-              variant="outlined"
-              :label="descricaoLabel"
-              class="text-primary"
-              v-model="solicitacao.descricao"
-              :readOnly = "isReadOnly"
-              :bg-color="isReadOnly ? '#f2f2f2' : ''"
-              v-show="descricaoShow"
-            >
-            </v-textarea>
-          </v-col>
-        </v-row>
+      <v-col>
+        <v-textarea
+          variant="outlined"
+          :label="descricaoLabel"
+          class="text-primary"
+          v-model="solicitacao.descricao"
+          :readOnly="isDescricaoReadOnly"
+          :bg-color="isDescricaoReadOnly ? '#f2f2f2' : ''"
+          v-show="descricaoShow"
+        >
+        </v-textarea>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script setup>
 import { Solicitacao } from "@/store/share/solicitacao.store";
-import { TipoSolicitacao, getTextFromListByCodigo } from "@/helpers/share/data";
 import selectText from "../selectText.vue";
 
 const props = defineProps({
@@ -114,8 +81,8 @@ const props = defineProps({
       return new Solicitacao();
     },
   },
-  descricaoLabel: {type: String, default: "Observação"},
-  descricaoShow: {type: Boolean, default: true},
+  descricaoLabel: { type: String, default: "Observação" },
+  descricaoShow: { type: Boolean, default: true },
   listClientes: {
     type: Array,
     default: function () {
@@ -140,9 +107,15 @@ const props = defineProps({
       return [];
     },
   },
+  listStatus: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
 
-  comboTipoShow: {type: Boolean, default: true},
-  isReadOnly: {type: Boolean, default: false},
+  comboTipoShow: { type: Boolean, default: true },
+  isReadOnly: { type: Boolean, default: false },
+  isDescricaoReadOnly: { type: Boolean, default: false },
 });
-
 </script>

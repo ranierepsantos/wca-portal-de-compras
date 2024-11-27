@@ -16,15 +16,15 @@ namespace wca.share.application.Features.Solicitacoes.Commands
     public record SolicitacaoCreateCommand (
         int SolicitacaoTipoId,
         int ClienteId,
-        int FuncionarioId,
         StatusSolicitacao Status,
         string UsuarioCriador,
-        int? CentroCustoId,
         int? ResponsavelId,
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
-        SolicitacaoMudancaBase? MudancaBase,
+        SolicitacaoMudancaBaseResponse? MudancaBase,
+        SolicitacaoFerias? Ferias,
+        SolicitacaoVagaResponse? Vaga,
         List<SolicitacaoArquivo>? Anexos,
         int[]? NotificarUsuarioIds
     ) :IRequest<ErrorOr<SolicitacaoResponse>>;
@@ -73,8 +73,11 @@ namespace wca.share.application.Features.Solicitacoes.Commands
 
             dado.StatusSolicitacaoId = request.Status.Id;
 
-            if (dado.SolicitacaoTipoId == (int) EnumTipoSolicitacao.MudancaBase)
+            if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.MudancaBase)
             {
+                dado.MudancaBase.ClienteDestino = null;
+                dado.MudancaBase.CentroCusto = null;
+                dado.MudancaBase.Funcionario = null;
                 List<int> itensMudancaIds = dado.MudancaBase.ItensMudanca
                                             .Select(x => x.Id)
                                             .ToList();
@@ -84,6 +87,29 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                 if (items.Any())
                 {
                     dado.MudancaBase.ItensMudanca.AddRange(items);
+                }
+            }
+            else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Vaga)
+            {
+                dado.Vaga.Escala = null;
+                dado.Vaga.Escolaridade = null;
+                dado.Vaga.Funcao = null;
+                dado.Vaga.Gestor = null;
+                dado.Vaga.Horario = null;
+                dado.Vaga.MotivoContratacao = null;
+                dado.Vaga.Sexo = null;
+                dado.Vaga.TipoContrato = null;
+                dado.Vaga.TipoFaturamento = null;
+
+                dado.Vaga.DocumentoComplementares = new List<DocumentoComplementar>();
+                List<int>? docsId = request.Vaga.DocumentoComplementares?.Select(f => f.Value).ToList();
+                if (docsId is not null && docsId.Any())
+                {
+                    List<DocumentoComplementar> items = _repository.GetDbSet<DocumentoComplementar>()
+                        .Where(q => docsId.Contains(q.Id))
+                        .ToList();
+
+                    dado.Vaga.DocumentoComplementares.AddRange(items);
                 }
             }
 

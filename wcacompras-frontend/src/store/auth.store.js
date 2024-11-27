@@ -3,6 +3,8 @@ import authService from "@/services/auth.service";
 import apiReembolso from "@/services/reembolso/api"
 import apiShare from "@/services/share/shareApi"
 import filialService from "@/services/filial.service";
+import { getActivePinia } from "pinia"
+
 
 const modelUser = {
   id: 0,
@@ -54,7 +56,32 @@ export const useAuthStore = defineStore("auth", {
       this.sistema.isMatriz = this.sistema.filial.text.toLowerCase() =="matriz"
     },
 
+    clearStores() 
+    {
+        getActivePinia()._s.forEach(store => {
+          store.$reset()
+        });
+
+    },
+    clearLocalStorage() {
+      let keys = Object.keys(window.localStorage)
+      
+      for(let index = 0; index < keys.length; index++)
+
+        {
+            if (keys[index].toLowerCase().includes('reembolso') || keys[index].toLowerCase().includes('share'))
+            {
+              window.localStorage.removeItem(keys[index])
+            }
+              
+        }
+    },
     async setSistema (sistema) {
+        //limpar local storage do share e reembolso
+        // map through that list and use the **$reset** fn to reset the state
+        this.clearStores();
+        this.clearLocalStorage()
+        
         this.sistema.id = sistema.id;
         this.sistema.nome = sistema.nome 
         this.sistema.descricao = sistema.descricao
@@ -67,6 +94,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     finishSession() {
+      this.clearStores();
       window.localStorage.clear();
       this.token = "";
       this.expireIn = "";
@@ -145,8 +173,42 @@ export const useAuthStore = defineStore("auth", {
         await apiShare.put("Notificacao/MarcarComoLido", {id: notificacaoId})
       else if (this.sistema.nome =='reembolso')
         await apiReembolso.put("Notificacao/MarcarComoLido", {id: notificacaoId})
-    }
+    },
 
+    async retornarMeusClientes(onlyId = false) {
+      let response = null
+      if (this.sistema.nome == 'share')
+        response = await apiShare.get('Cliente/ListarClientesPorUsuario', {params: {usuarioId: this.user.id}})
+      else if (this.sistema.nome == 'reembolso')
+        response = await apiReembolso.get('Cliente/ListarClientesPorUsuario', {params: {usuarioId: this.user.id}})
+
+      let clientes = []
+      if (response) {
+        clientes = response.data;
+        if (onlyId) 
+          clientes = clientes.map(x => x.id)
+      }
+      return clientes;
+    },
+
+    async retornarMeusCentrosdeCustos(clienteId = 0, onlyId = false) {
+      let response = null
+      let rota = 'Usuario/ListarCentroCusto/{usuarioId}/{clienteId}'
+      rota = rota.replace('{usuarioId}', this.user.id).replace('{clienteId}', clienteId)
+      if (this.sistema.nome == 'share')
+        response = await apiShare.get(rota)
+      else if (this.sistema.nome == 'reembolso')
+        response = await apiReembolso.get(rota)
+
+      let centros = []
+      if (response) {
+        centros = response.data;
+        if (onlyId) 
+          centros = centros.map(x => x.id)
+      }
+      return centros;
+    }
+  
 
   },
 });

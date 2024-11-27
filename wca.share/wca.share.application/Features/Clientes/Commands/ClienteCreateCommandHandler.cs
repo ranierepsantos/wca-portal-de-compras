@@ -55,7 +55,7 @@ namespace wca.share.application.Features.Clientes.Commands
 
             if (cliente.FilialId == 0)
             {
-                var filial = await  _repository.GetDbSet<Filial>().Where(q => q.Nome.Equals("matriz")).FirstOrDefaultAsync();
+                var filial = await  _repository.GetDbSet<Filial>().Where(q => q.Nome.ToLower().Equals("matriz")).FirstOrDefaultAsync();
                 if (filial != null)
                 {
                     cliente.FilialId = filial.Id;

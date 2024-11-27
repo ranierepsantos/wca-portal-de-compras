@@ -42,7 +42,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td :colspan="isMatriz ? 5 : 4">
+                    <td :colspan="isMatriz ? 6 : 5">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
@@ -81,7 +81,7 @@ onMounted(async () =>
 });
 
 watch(page, () => getItems());
-watch(filter, () => getItems());
+watch(filter, () => getItems(true));
 
 //METHODS
 function editar(id)
@@ -138,11 +138,12 @@ async function getFiliais()
     } 
 }
 
-async function getItems()
+async function getItems(resetPage = false)
 {
     try
     {
         isBusy.value = true;
+        if (resetPage) page.value = 1;
         let response = await clienteStore.getClientesByPaginate(isMatriz.value ? 0: authStore.user.filial, page.value, pageSize, filter.value);
         clientes.value = response.items;
         totalPages.value = response.totalPages;

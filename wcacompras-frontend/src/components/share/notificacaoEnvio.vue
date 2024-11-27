@@ -110,6 +110,7 @@ import { handleError } from 'vue';
           "entidade": props.entidade,
           "entidadeId":props.entidadeId
         }
+        console.debug("send.click.nota", nota)
         await useShareNotificacaoStore().enviarNotificacao(nota)
       })
       emit("closeForm");

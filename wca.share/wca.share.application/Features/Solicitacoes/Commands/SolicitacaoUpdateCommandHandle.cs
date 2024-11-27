@@ -3,11 +3,9 @@ using ErrorOr;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Runtime.CompilerServices;
 using wca.share.application.Common;
 using wca.share.application.Contracts;
 using wca.share.application.Contracts.Persistence;
-using wca.share.application.Features.Notificacoes.Commands;
 using wca.share.application.Features.SolicitacaoHistoricos.Commands;
 using wca.share.application.Features.Solicitacoes.Behaviors;
 using wca.share.application.Features.Solicitacoes.Common;
@@ -19,15 +17,15 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         int Id, 
         int SolicitacaoTipoId,
         int ClienteId,
-        int FuncionarioId,
         int StatusSolicitacaoId,
         string UsuarioAtualizador,
-        int? CentroCustoId,
         int? ResponsavelId,
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,
-        SolicitacaoMudancaBase? MudancaBase,
+        SolicitacaoMudancaBaseResponse? MudancaBase,
+        SolicitacaoFerias? Ferias,
+        SolicitacaoVagaResponse? Vaga,
         List<SolicitacaoArquivo>? Anexos,
         StatusSolicitacao? Status,
         int[]? NotificarUsuarioIds
@@ -66,8 +64,10 @@ namespace wca.share.application.Features.Solicitacoes.Commands
             Solicitacao? dado = await _repository.SolicitacaoRepository.ToQuery().AsNoTracking()
                                 .Include(x => x.Comunicado)
                                 .Include(x => x.Desligamento)
+                                .Include(x => x.Ferias)
                                 .Include(x => x.Anexos)
                                 .Include(x => x.MudancaBase).ThenInclude(x => x.ItensMudanca)
+                                .Include(x => x.Vaga).ThenInclude(x =>  x.DocumentoComplementares)
                                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken: cancellationToken);
             if (dado == null)
             {
@@ -115,7 +115,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                     await _repository.ExecuteCommandAsync($"delete from itemmudancaSolicitacaoMudancabase where SolicitacaoMudancaBaseSolicitacaoId ={request.Id}");
 
                     List<int> itensMudancaId = request.MudancaBase.ItensMudanca
-                    .Select(x => x.Id)
+                    .Select(x => x.Value)
                     .ToList();
                     List<ItemMudanca> items = _repository.ItemMudancaRepository.ToQuery().Where(c => itensMudancaId.Contains(c.Id)).ToList();
                     if (items.Any())
@@ -123,14 +123,47 @@ namespace wca.share.application.Features.Solicitacoes.Commands
                         _mud.ItensMudanca.AddRange(items);
                     }
                     _repository.GetDbSet<SolicitacaoMudancaBase>().Update(_mud);
-
+                    
                 }
-            }
+            } 
+            else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Vaga)
+            {
+                dado.Vaga.Escala = null;
+                dado.Vaga.Escolaridade = null;
+                dado.Vaga.Funcao = null;
+                dado.Vaga.Gestor = null;
+                dado.Vaga.Horario = null;
+                dado.Vaga.MotivoContratacao = null;
+                dado.Vaga.Sexo = null;
+                dado.Vaga.TipoContrato = null;
+                dado.Vaga.TipoFaturamento = null;
+
+                SolicitacaoVaga? vaga = await _repository.GetDbSet<SolicitacaoVaga>().AsNoTracking()
+                                                        .Where(q => q.SolicitacaoId.Equals(request.Id))
+                                                        .FirstOrDefaultAsync();
+                if (vaga is not null) {
+                    _repository.GetDbSet<SolicitacaoVaga>().Entry(vaga).CurrentValues.SetValues(request.Vaga);
+                    
+                    List<int> ids = request.Vaga.DocumentoComplementares.Select(c => c.Value).ToList();
+
+                    //excluir o documentos complementares e atualizar com o que veio
+                    await _repository.ExecuteCommandAsync($"delete from DocumentoComplementarSolicitacaoVaga where SolicitacaoVagaSolicitacaoId ={request.Id}");
+
+                    List<DocumentoComplementar> items = _repository.GetDbSet<DocumentoComplementar>().AsNoTracking()
+                        .Where(q => ids.Contains(q.Id)).ToList();
+                    if (items.Any())
+                    {
+                        vaga.DocumentoComplementares.AddRange(items);
+                    }
+                    _repository.GetDbSet<SolicitacaoVaga>().Update(vaga);
+                }
+            } 
             else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Comunicado)
                 _repository.GetDbSet<SolicitacaoComunicado>().Entry(dado.Comunicado).State = EntityState.Modified;
             else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Desligamento)
                 _repository.GetDbSet<SolicitacaoDesligamento>().Entry(dado.Desligamento).State = EntityState.Modified;
-
+            else if (dado.SolicitacaoTipoId == (int)EnumTipoSolicitacao.Ferias)
+                _repository.GetDbSet<SolicitacaoFerias>().Entry(dado.Ferias).State = EntityState.Modified;
 
             _repository.GetDbSet<Solicitacao>().Entry(dado).State = EntityState.Modified;
 

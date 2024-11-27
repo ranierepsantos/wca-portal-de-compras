@@ -7,6 +7,7 @@
         void Delete(T entity);
         void Attach(T entity);
         IQueryable<T> ToQuery();
+        IQueryable<T> FromQuery(string query);
         Task<int> ExecuteCommandAsync(string command);
 
     }
