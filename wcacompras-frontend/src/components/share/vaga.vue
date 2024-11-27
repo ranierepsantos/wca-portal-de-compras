@@ -579,6 +579,7 @@ const props = defineProps({
       return [];
     },
   },
+  isAndamentoReadOnly: {type: Boolean, default: false}
 });
 
 const listDiasSemana = [
@@ -600,4 +601,13 @@ const integracaoDiasSemanaText = computed(() => {
     return props.dataModel.integracaoDiasSemana.join(", ");
   else return "";
 });
+
+function getDocumentosComplementaresDescricao () {
+  let text = "";
+  props.dataModel.documentoComplementares.forEach(item => {
+    text += item.text + "; "
+  });
+  return text.trimEnd();
+
+}
 </script>

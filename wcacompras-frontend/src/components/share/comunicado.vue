@@ -46,8 +46,8 @@
           density="compact"
           v-model="dataModel.dataAlteracao"
           :rules="[(v) => !!v || 'Campo obrigatório']"
-          :readonly="!createMode"
-          :bg-color="!createMode ? '#f2f2f2' : ''"
+          :readonly="!createMode "
+          :bg-color="!createMode  ? '#f2f2f2' : ''"
         ></v-text-field>
       </v-col>
       <v-col>
@@ -56,7 +56,7 @@
           :combo-items="listAssuntos"
           combo-item-title="text"
           combo-item-value="value"
-          :select-mode="createMode"
+          :select-mode="createMode "
           :text-field-value="dataModel.assuntoNome"
           label-text="Assunto"
           :field-rules="[(v) => !!v || 'Campo é obrigatório']"
@@ -70,8 +70,8 @@
           label="Descrição Pedido"
           class="text-primary"
           v-model="dataModel.observacao"
-          :readonly="!createMode"
-          :bg-color="!createMode ? '#f2f2f2' : ''"
+          :readonly="!createMode "
+          :bg-color="!createMode  ? '#f2f2f2' : ''"
         >
         </v-textarea>
       </v-col>

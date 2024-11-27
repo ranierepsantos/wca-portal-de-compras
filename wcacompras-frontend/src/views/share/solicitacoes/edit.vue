@@ -10,6 +10,8 @@
       @finalizar-click="FinalizarSolicitacao()"
       @gerar-pdf-click="gerarPDF()"
       @cancelar-click="cancelarSolicitacao()"
+      @editar-click="openModeEdicaoForm=true"
+      @reabrir-click="openReabrirSolicitacao=true"
     />
     <v-progress-linear
       color="primary"
@@ -38,20 +40,23 @@
               <desligamento
                 :data-model="solicitacao.desligamento"
                 :create-mode="false"
+                :edit-mode="isEditMode"
                 v-if="solicitacao.solicitacaoTipoId == 1"
                 :is-read-only="modeReadOnly"
                 :data-admissao="solicitacao.funcionarioDataAdmissao"
+                :list-funcionarios="funcionarioList"
               />
               <Comunicado
                 v-else-if="solicitacao.solicitacaoTipoId == 2"
                 :data-model="solicitacao.comunicado"
-                :create-mode="false"
-                :is-read-only="true"
+                :create-mode="isEditMode"
+                :list-funcionarios="funcionarioList"
               />
               <Ferias
                 v-else-if="solicitacao.solicitacaoTipoId == 3"
                 :data-model="solicitacao.ferias"
-                :create-mode="false"
+                :create-mode="isEditMode"
+                :list-funcionarios="funcionarioList"
               />
               <Mudancabase
                 v-else-if="solicitacao.solicitacaoTipoId == 4"
@@ -62,17 +67,28 @@
                 :cliente-selected="
                   solicitacao.clienteId && solicitacao.clienteId > 0
                 "
-                :create-mode="false"
-                :is-read-only="true"
+                :create-mode="isEditMode"
+                :is-read-only="modeReadOnly"
+                :list-funcionarios="funcionarioList"
               />
               <vaga
                 v-else-if="solicitacao.solicitacaoTipoId == 5"
-                :list-documento-complementar="
-                  listEntidade['documentocomplementar']
-                "
-                :is-read-only="true"
+                :list-documento-complementar="listEntidade['documentocomplementar']"
+                :list-escala="listEntidade['escala']"
+                :list-escolaridade="listEntidade['escolaridade']"
+                :list-funcao="listEntidade['funcao']"
+                :list-gestor="listEntidade['gestor']"
+                :list-horario="listEntidade['horario']"
+                :list-motivo-contratacao="listEntidade['motivocontratacao']"
+                :list-sexo="listEntidade['sexo']"
+                :list-tipo-contrato="listEntidade['tipocontrato']"
+                :list-tipo-faturamento="listEntidade['tipofaturamento']"
+                :is-read-only="!isEditMode"
                 :data-model="solicitacao.vaga"
                 :status-solicitacao="solicitacao.statusSolicitacaoId"
+                :is-andamento-read-only="modeReadOnly"
+                @select-button-click="abrirCadastroAuxiliar($event)"
+
                 
               />
             </SolicitacaoForm>
@@ -87,7 +103,7 @@
               </v-card-text>
             </v-card>
             <Historico
-              :eventos="solicitacao.historico"
+              :eventos="solicitacao.historico.sort(compararValor('dataHora','desc'))"
               style="margin-top: 15px"
             />
           </v-form>
@@ -95,6 +111,40 @@
       </v-card>
       <v-card class="mx-auto"> </v-card>
     </v-container>
+    <v-dialog v-model="entidadeDialog" max-width="700" :absolute="false">
+        <v-card>
+          <v-card-title class="text-primary text-h5">
+            {{ dialogTitle }}
+          </v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="salvarEntidade()" ref="entidadeForm">
+              <v-row>
+                <v-col>
+                  <v-text-field label="Nome" v-model="entidade.nome" type="text" required variant="outlined" color="primary"
+                    :rules="[(v) => !!v || 'Nome é obrigatório']" density="compact"></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col class="text-right">
+                  <v-btn variant="outlined" color="primary" @click="fecharDialog()" :disabled="isSavingEntity">Cancelar</v-btn>
+                  <v-btn color="primary" type="submit" class="ml-3" :disabled="isSavingEntity">Salvar</v-btn>
+                  <v-fade-transition leave-absolute>
+                    <v-progress-circular
+                      v-show="isSavingEntity"
+                      color="primary"
+                      size="24"
+                      :width="2"
+                      indeterminate
+                      class="ml-3"
+                    ></v-progress-circular>
+                  </v-fade-transition>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-text>
+          <v-card-actions> </v-card-actions>
+        </v-card>
+    </v-dialog>
     <v-dialog
       v-model="openNotificacao"
       max-width="800"
@@ -124,6 +174,48 @@
         @close-form="openAprovacaoForm = false"
         :is-running-event="isRunningEvent"
         reprovar-title="Reprovar"
+      />
+    </v-dialog>
+    <!--FORM PARA INFORMAR MOTIVO DA EDIÇÃO E HABILITAR MODO EDIÇÃO-->
+    <v-dialog
+      v-model="openModeEdicaoForm"
+      max-width="700"
+      :absolute="false"
+      persistent
+    >
+      <aprovar-rejeitar-form
+        :title="
+          getPageTitle(solicitacao.solicitacaoTipoId) + ' - Habilitar Edição'
+        "
+        @aprovar-click="openModeEdicaoForm = false"
+        aprovar-color="secondary"
+        reprovar-color="success"
+        @reprovar-click="habilitarEdicao($event)"
+        @close-form="openModeEdicaoForm = false"
+        :is-running-event="isRunningEvent"
+        reprovar-title="Habilitar"
+        aprovar-title="Cancelar"
+      />
+    </v-dialog>
+    <!-- FORM PARA REABRIR SOLICITAÇÃO-->
+    <v-dialog
+      v-model="openReabrirSolicitacao"
+      max-width="700"
+      :absolute="false"
+      persistent
+    >
+      <aprovar-rejeitar-form
+        :title="
+          getPageTitle(solicitacao.solicitacaoTipoId) + ' - Reabrir Solicitação'
+        "
+        @aprovar-click="openReabrirSolicitacao = false"
+        aprovar-color="secondary"
+        reprovar-color="success"
+        @reprovar-click="reabrirSolicitacao($event)"
+        @close-form="openReabrirSolicitacao = false"
+        :is-running-event="isRunningEvent"
+        reprovar-title="Reabrir"
+        aprovar-title="Cancelar"
       />
     </v-dialog>
   </div>
@@ -158,7 +250,9 @@ import NotificacaoEnvio from "@/components/share/notificacaoEnvio.vue";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
 import moment from "moment";
 import { computed } from "vue";
-import { useShareEntidadeAuxiliarStore } from "@/store/share/entidadesauxiliares.store";
+import { EntidadeAuxiliar, useShareEntidadeAuxiliarStore } from "@/store/share/entidadesauxiliares.store";
+import { useShareFuncionarioStore } from "@/store/share/funcionario.store";
+import { compararValor } from "@/helpers/functions";
 
 const tableUploadItems = ref([{ text: "Outros" }]);
 const isBusy = ref({
@@ -177,6 +271,8 @@ const isRunningEvent = ref(false);
 const permissao = ref("");
 const entidadeStore = useShareEntidadeAuxiliarStore();
 const buttons = ref([])
+const funcionarioList = ref([])
+const centrosCustoList = ref([])
 const listEntidade = ref({
   documentocomplementar: [],
   escala: [],
@@ -189,7 +285,7 @@ const listEntidade = ref({
   tipocontrato: [],
   tipofaturamento: [],
 });
-
+const isEditMode = ref(false);
 const listItensMudanca = ref([]);
 
 const entidadeDialog = ref(false)
@@ -233,8 +329,16 @@ onBeforeMount(async () => {
       listItensMudanca.value =
         await useShareSolicitacaoStore().getListaItensMudanca();
     } else if (route.path.includes("vaga")) {
-      listEntidade.value["documentocomplementar"] =
-        await entidadeStore.getToComboList("DocumentoComplementar");
+      listEntidade.value["documentocomplementar"] = await entidadeStore.getToComboList("DocumentoComplementar");
+      listEntidade.value["escala"] = await entidadeStore.getToComboList("Escala");
+      listEntidade.value["escolaridade"] = await entidadeStore.getToComboList("Escolaridade");
+      listEntidade.value["funcao"] = await entidadeStore.getToComboList("Funcao");
+      listEntidade.value["gestor"] = await entidadeStore.getToComboList("Gestor");
+      listEntidade.value["horario"] = await entidadeStore.getToComboList("Horario");
+      listEntidade.value["motivocontratacao"]= await entidadeStore.getToComboList("MotivoContratacao");
+      listEntidade.value["tipocontrato"] = await entidadeStore.getToComboList("TipoContrato");
+      listEntidade.value["tipofaturamento"] = await entidadeStore.getToComboList("TipoFaturamento");
+      listEntidade.value["sexo"] = [{value: 3, text: "Indiferente"},{value: 2, text: "Feminino"},{value: 1, text: "Masculino"}]
       permissao.value = "vaga";
     }
 
@@ -271,6 +375,9 @@ watch(
         responsavelList.value = await useShareUsuarioStore().getListByCliente(
           clienteId
         );
+        funcionarioList.value = await useShareFuncionarioStore().getToComboByCliente(clienteId, useAuthStore().user.id)
+        //Trazer centros de custo
+        centrosCustoList.value = await useShareUsuarioStore().getCentrosdeCusto(useAuthStore().user.id, clienteId)         
       }
     } catch (error) {
       handleErrors(error);
@@ -372,6 +479,66 @@ function gerarPDF() {
   }
 }
 
+async function habilitarEdicao(comentario) {
+  isRunningEvent.value = true;
+  try {
+    let texto = null;
+    
+    texto = `Solicitação teve o modo edição <b>HABILITADO</b> por ${useAuthStore().user.nome}!`;
+    if (comentario && comentario.trim() != "") {
+      texto += `<br/>Comentário: ${comentario}`;
+    }
+    let data ={
+      solicitacaoId: solicitacao.value.id,
+      evento: texto
+    }
+    await useShareSolicitacaoStore().adicionarHistorico( data)
+
+    data.dataHora = new Date().toUTCString();
+    solicitacao.value.historico.push(data)
+
+    let button = buttons.value.find(q => q.text == "Editar")
+    if (button)
+      button.disabled = true
+    isEditMode.value = true;
+    openModeEdicaoForm.value = false
+
+  } catch (error) {
+    console.error("habilitarEdicao.error:", error);
+    handleErrors(error);
+  } finally {
+    isRunningEvent.value = false;
+  }
+}
+
+async function reabrirSolicitacao(comentario) {
+  isRunningEvent.value = true;
+  try {
+    let texto = null;
+    let status = useShareSolicitacaoStore().getStatus(1); //pendente
+
+    texto = `Reabertura de solicitação por ${useAuthStore().user.nome}!`;
+    if (comentario && comentario.trim() != "") {
+      texto += `<br/>Comentário: ${comentario}`;
+    }
+    let data ={
+      solicitacaoId: solicitacao.value.id,
+      evento: texto
+    }
+    await AlterarStatus(solicitacao.value, status, texto, "nao-notificar");
+
+    data.dataHora = new Date().toUTCString();
+    solicitacao.value.historico.push(data)
+    await getById(solicitacao.value.id);
+    openReabrirSolicitacao.value = false
+    
+  } catch (error) {
+    console.error("reabrirSolicitacao.error:", error);
+    handleErrors(error);
+  } finally {
+    isRunningEvent.value = false;
+  }
+}
 async function salvar() {
   try {
     isBusy.value.save = true;
@@ -455,8 +622,12 @@ function getButtons() {
       )
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
 
-    if (useAuthStore().hasPermissao(permissao.value + "-executar")) 
-      buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+      if (useAuthStore().hasPermissao(permissao.value + "-executar")) 
+      {
+        buttons.value.push({ text: "Reabrir", icon: "", event: "reabrir-click" });
+        buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+      }
+      
     
   } else if ("cancelado,reprovado".includes(solicitacao.value.status.statusIntermediario.toLowerCase())) {
     if (solicitacao.value.solicitacaoTipoId == 5)
@@ -479,6 +650,7 @@ function getButtons() {
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
       buttons.value.push({ text: "Cancelar", icon: "", event: "cancelar-click" });
     }
+    buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
     buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
     
   }
@@ -628,4 +800,60 @@ async function cancelarSolicitacao() {
     }
   }
 }
+function abrirCadastroAuxiliar(_entidade) {
+    entidadeTipo.value = entidadeTipos.value.find(q =>  q.type == _entidade);
+
+    entidade.value = new EntidadeAuxiliar();
+    dialogTitle.value = `Novo(a) ${entidadeTipo.value.title}`;
+    entidadeDialog.value  = true
+  }
+  
+  function fecharDialog()
+  {
+    entidadeDialog.value = false;
+    entidadeForm.value.reset()
+    entidade.value = new EntidadeAuxiliar();
+    entidadeTipo.value = null;
+  }
+
+  async function salvarEntidade()
+  {
+    try
+    {
+      let { valid } = await entidadeForm.value.validate();
+      if (valid)
+      {
+        isSavingEntity.value = true
+        let data = entidade.value;
+        let response = null
+        if (data.id == 0)
+        {
+          response = await useShareEntidadeAuxiliarStore().add(entidadeTipo.value.type, data);
+        } else
+        {
+          response = await useShareEntidadeAuxiliarStore().update(entidadeTipo.value.type, data);
+        }
+        
+        listEntidade.value[entidadeTipo.value.type.toLowerCase()] = await entidadeStore.getToComboList(entidadeTipo.value.type);
+
+        fecharDialog();
+        
+        swal.fire({
+          toast: true,
+          icon: "success",
+          position: "top-end",
+          title: "Sucesso!",
+          text: "Dados salvos com sucesso!",
+          showConfirmButton: false,
+          timer: 2000,
+        })
+      }
+    } catch (error)
+    {
+      console.error("salvarEntidade.error:", error);
+      handleErrors(error)
+    }finally {
+      isSavingEntity.value = false
+    }
+  }
 </script>
