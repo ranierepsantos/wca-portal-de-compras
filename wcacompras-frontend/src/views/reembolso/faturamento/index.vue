@@ -125,6 +125,23 @@
 
                     <td class="text-right">
                         <div class="text-center">
+                            <v-btn
+                                variant="outlined"
+                                color="primary"
+                                @click="editar(item.id)"
+                                size="small"
+                                :disabled="isLoading.busy"
+                                style="margin-right: 2px; margin-bottom: 2px; width: 103.38px;"
+                            >Visualizar</v-btn>
+                            <v-btn
+                                variant="outlined"
+                                color="primary"
+                                @click="showHistorico(item)"
+                                size="small"
+                                :disabled="isLoading.busy"
+                                style="margin-right: 2px; margin-bottom: 2px; width: 103.38px;"
+                            >Histórico</v-btn>
+                            <!-- 
                             <v-menu open-on-hover>
                                 <template v-slot:activator="{ props }">
                                     <v-btn
@@ -158,13 +175,14 @@
                                     </v-list-item>
                                 </v-list>
                             </v-menu>
+                             -->
                         </div>                        
                     </td>
                 </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="9">
+                    <td colspan="10">
                         <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
                     </td>
                 </tr>
