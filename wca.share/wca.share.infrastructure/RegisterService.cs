@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using wca.share.application.Contracts.Integration.Email;
 using wca.share.application.Contracts.Integration.GI;
@@ -38,6 +39,18 @@ namespace wca.share.infrastructure
                 };
                 return emailConfiguration;
             });
+
+            //executar as migrations
+            try
+            {
+                var context = services.BuildServiceProvider().GetRequiredService<WcaContext>();
+                context.Database.Migrate();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Migration.error: " + ex.Message, ex);
+            }
+
         }
     }
 }

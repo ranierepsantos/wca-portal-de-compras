@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using wca.share.domain.Entities;
+using wca.share.infrastructure.Seeds;
 
 namespace wca.share.infrastruture.Context
 {
@@ -77,6 +78,7 @@ namespace wca.share.infrastruture.Context
             modelBuilder.Entity<Funcionario>()
                 .HasIndex(f => f.Nome);
 
+            SeedData.FillDatabase(modelBuilder);
         }
     }
 }
