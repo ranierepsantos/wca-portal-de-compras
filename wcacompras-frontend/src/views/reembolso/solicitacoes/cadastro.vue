@@ -313,7 +313,8 @@
                 @click="openDespesaForm = true"
                 v-show="despesaCanAdd"
               >
-                <b>Nova Despesa</b>
+              <v-icon icon="mdi-plus"/>
+                <b> Despesa</b>
               </v-btn>
             </v-col>
           </v-row>
@@ -374,7 +375,7 @@
                     :title="item.aprovada == 1 ? 'conferido' : 'reprovado'"
                   ></v-icon>
                 </td>
-                <td class="text-right">
+                <td class="text-center">
                   <v-btn
                     icon="mdi-text-box-search-outline"
                     size="smaller"

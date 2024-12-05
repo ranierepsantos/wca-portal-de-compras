@@ -154,6 +154,34 @@
           </td>
           <td class="text-right">
             <div class="text-center">
+              <v-btn
+                variant="outlined"
+                color="primary"
+                @click="editar(item.id)"
+                size="small"
+                v-show="authStore.hasPermissao('solicitacao')"
+                style="margin-right: 2px; margin-bottom: 2px; width: 103.38px;"
+              >Editar</v-btn>
+
+              <v-btn
+                variant="outlined"
+                color="primary"
+                @click="showHistorico(item)"
+                size="small"
+                :disabled="isLoading.busy"
+                style="margin-right: 2px; margin-bottom: 2px; width: 103.38px;"
+              >Histórico</v-btn>              
+
+              <v-btn
+                variant="outlined"
+                color="primary"
+                @click="editar(item.id)"
+                size="small"
+                :disabled="isLoading.busy"
+                v-show="(authStore.hasPermissao('wca_aprovacao') || authStore.hasPermissao('cliente_aprovacao')) && !authStore.hasPermissao('solicitacao')"
+                style="margin-right: 2px; margin-bottom: 2px; width: 103.38px;"
+              >Visualizar</v-btn>
+<!-- 
               <v-menu open-on-hover>
                 <template v-slot:activator="{ props }">
                   <v-btn
@@ -196,7 +224,8 @@
                       >Visualizar</v-btn>
                   </v-list-item>
                 </v-list>
-              </v-menu>
+              </v-menu> -->
+
             </div>
           </td>
         </tr>
