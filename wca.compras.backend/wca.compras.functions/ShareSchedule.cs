@@ -22,8 +22,8 @@ namespace wca.compras.functions
 
             HttpClient client = new();
 
-            //string baseUrl = "https://api-share-wca.azurewebsites.net/"; //producao
-            string baseUrl = "https://wca-api-share-hml.azurewebsites.net/"; //hml
+            string baseUrl = "https://api-share-wca.azurewebsites.net/"; //producao
+            //string baseUrl = "https://wca-api-share-hml.azurewebsites.net/"; //hml
             //string baseUrl = "https://localhost:7235/"; //desenvolvimento
 
             client.BaseAddress = new Uri(baseUrl);
