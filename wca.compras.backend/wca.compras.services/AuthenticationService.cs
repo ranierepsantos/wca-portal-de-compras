@@ -11,7 +11,6 @@ using wca.compras.domain.Entities;
 using wca.compras.domain.Interfaces;
 using wca.compras.domain.Interfaces.Services;
 using wca.compras.domain.Security;
-using wca.compras.domain.Util;
 using BC = BCrypt.Net.BCrypt;
 
 namespace wca.compras.services
@@ -47,20 +46,20 @@ namespace wca.compras.services
                 
                 if (authUser == null || string.IsNullOrEmpty(authUser.Password) || !BC.Verify(login.Password, authUser.Password))
                 {
-                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, "", null);
+                    return new LoginResponse(false, "Usuário e/ou senha inválida!", "", "", "", 0, "", null);
                 }
 
 
                 var sistemas = await _rm.SistemaRepository
-                    .SelectByCondition(c => c.UsuarioSistemaPerfil.Any(c => c.UsuarioId == authUser.Id))
+                    .SelectByCondition(c => c.Ativo && c.UsuarioSistemaPerfil.Any(c => c.UsuarioId == authUser.Id))
                     .Include(ic => ic.UsuarioSistemaPerfil)
                     .ThenInclude(x => x.Perfil)
                     .Where(p =>  p.UsuarioSistemaPerfil.Any(z => z.Perfil.Ativo))
                     .ToListAsync();
 
-                if (sistemas is null)
+                if (sistemas.Count == 0)
                 {
-                    return new LoginResponse(false, "Falha na autenticação!", "", "", "", 0, "", null);
+                    return new LoginResponse(false, "Usuário sem acesso a sistemas ativos!", "", "", "", 0, "", null);
                 }
 
                 ClaimsIdentity identity = new ClaimsIdentity(

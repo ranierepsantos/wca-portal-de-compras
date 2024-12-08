@@ -22,6 +22,8 @@ namespace wca.compras.domain.Entities
         [Column("icon", TypeName = "varchar(250)")]
         public string Icon { get; set; } = string.Empty;
 
+        [Column("ativo")]
+        public bool Ativo {get; set; } = true;
         public IList<UsuarioSistemaPerfil> UsuarioSistemaPerfil { get; set; } = new List<UsuarioSistemaPerfil>();
     }
 }
