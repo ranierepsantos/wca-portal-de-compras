@@ -51,7 +51,7 @@ async function authenticate(loginData) {
         toast: true,
         icon: "warning",
         position: "top-end",
-        text: "E-mail e/ou senha inválidos!",
+        text: response.message,
         showConfirmButton: false,
         timer: 2000,
       });
