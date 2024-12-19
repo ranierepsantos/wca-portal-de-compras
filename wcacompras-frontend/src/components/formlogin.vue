@@ -4,10 +4,10 @@
             <span v-once style="font-size: 10px;">{{`v${packageJsonInfo.version} ${packageJsonInfo.enviroment}`}}</span>
         </div>
         <v-text-field variant="outlined" density="compact" label="Email" type="email" v-model="formData.email"
-            :rules="emailRules" required></v-text-field>
+            :rules="emailRules" autocomplete="user" required></v-text-field>
 
         <v-text-field variant="outlined" density="compact" label="Senha" type="password" v-model="formData.password"
-            :rules="[(v) => !!v || 'Senha é obrigatório']" required></v-text-field>
+            :rules="[(v) => !!v || 'Senha é obrigatório']" autocomplete="current-password" required></v-text-field>
 
         <v-btn type="submit" block color="primary" size="large" class="mt-5" v-if="!isBusy">
             Entrar
