@@ -105,8 +105,9 @@ const tipo = ref(null);
 const emit = defineEmits(['changeStatus'])
 
 async function handleFile() {
-  if (fileInput.value.length > 0) {
-    let file = fileInput.value[0];
+  console.log("handle.file", fileInput.value)
+  if (fileInput.value.size > 0) {
+    let file = fileInput.value;
     var arquivo = await toBase64(file);
     let anexo = new Anexo();
     anexo.caminhoArquivo = arquivo;

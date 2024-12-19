@@ -33,17 +33,6 @@
           label-text="Status Solicitação"
         ></select-text>
       </v-col>
-      <v-col cols="4" v-show="solicitacao.id > 0 && '1,2'.includes(solicitacao.statusSolicitacaoId)">
-        <select-text
-          v-model="solicitacao.statusSolicitacaoId"
-          :combo-items="listStatus"
-          combo-item-value="id"
-          combo-item-title="statusIntermediario"
-          :select-mode="'3,5,6,8'.includes(solicitacao.statusSolicitacaoId) == false"
-          :text-field-value="solicitacao.status.statusIntermediario"
-          label-text="Status Solicitação"
-        ></select-text>
-      </v-col>
     </v-row>
     <v-row>
       <v-col>
