@@ -6,20 +6,6 @@
       @novoClick="toPage()"
     />
     <v-row v-show="!isLoading.form">
-      <!-- <v-col>
-        <v-select
-          label="Filiais"
-          v-model="filter.filialId"
-          :items="filiais"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          variant="outlined"
-          color="primary"
-          :hide-details="true"
-          v-show="isMatriz"
-        ></v-select>
-      </v-col> -->
       <v-col>
         <v-autocomplete
           label="Clientes"
@@ -82,6 +68,11 @@
           density="compact"
         ></v-text-field>
       </v-col>
+      <v-col>
+        <v-checkbox v-model="filter.showFinishedStatus" label="Mostrar Concluídos" color="primary"></v-checkbox>
+      </v-col>
+
+
       <v-col class="text-right">
         <v-btn
           color="primary"
@@ -244,7 +235,8 @@ const filter = ref({
   status: null,
   dataIni: null,
   dataFim: null,
-  usuarioId: authStore.user.id
+  usuarioId: authStore.user.id,
+  showFinishedStatus: false
 });
 const solicitacaoStore = useShareSolicitacaoStore();
 const eventos = ref([]);
@@ -258,8 +250,6 @@ const pageTipo = ref({
     id: 0,
     tipo: ""
 })
-const meusClientesId = ref([])
-const meusCentrosDeCustoId = ref([])
 //COMPUTED'S
 
 //WATCH'S
@@ -380,15 +370,17 @@ async function getItems() {
 
     let filtros = {...filter.value }
     delete filtros.clienteId
-
-
     filtros.filialId = filtros.filialId ?? 0
-    //filtros.clienteIds = meusClientesId.value
-    //filtros.centroCustoIds = meusCentrosDeCustoId.value 
     filtros.tipoSolicitacao = pageTipo.value.id
 
     if (filter.value.clienteId != null) 
       filtros.clienteIds = [filter.value.clienteId]
+
+    if (!filter.value.showFinishedStatus && (!filtros.status || filtros.status.length == 0))
+      filtros.status = solicitacaoStore.statusSolicitacao.filter(q => q.id != 3).map(f => f.id);
+
+
+
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
