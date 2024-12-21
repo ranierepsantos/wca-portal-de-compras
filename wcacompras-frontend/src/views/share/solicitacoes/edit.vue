@@ -645,12 +645,19 @@ function getButtons() {
     if (useAuthStore().hasPermissao(permissao.value + "-finalizar")) {
       buttons.value.push({ text: "Finalizar", icon: "", event: "finalizar-click" });
     }
+    
+    //5 - Vagas - exibir botão de imprimir
     if (solicitacao.value.solicitacaoTipoId == 5)
-    {
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
+
+    //1 - Desligamento/ 3 - Férias / 5 - Vagas - exibir botão para cancelar
+    if ("1,3,5".includes(solicitacao.value.solicitacaoTipoId))
       buttons.value.push({ text: "Cancelar", icon: "", event: "cancelar-click" });
-    }
-    buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
+    
+    
+    
+    
+      buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
     buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
     
   }
