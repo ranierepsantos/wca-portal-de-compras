@@ -34,6 +34,7 @@ namespace wca.share.application.Features.Funcionarios.Queries
                         .Include(i => i.CentroCusto)
                         .ThenInclude(i => i.UsuarioCentrodeCustos)
                         .Where(x =>  x.CentroCusto.UsuarioCentrodeCustos.Count(x =>  x.UsuarioId.Equals(request.UsuarioId)) > 0)
+                        .Where(x =>  x.DataDemissao == null)
                         .OrderBy(o => o.Nome);
             List<Funcionario> items = await query.ToListAsync();
 
