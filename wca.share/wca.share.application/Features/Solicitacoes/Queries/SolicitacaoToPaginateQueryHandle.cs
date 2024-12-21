@@ -54,7 +54,8 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                         condicao = $" and ucc.usuarioid = {request.UsuarioId}"; 
 
                     string consulta = @$"
-                                    select s.id, s.solicitacaotipo_id, s.cliente_id, s.responsavel_id, s.data_solicitacao, s.status_id, s.descricao, s.criado_por
+                                    select s.id, s.solicitacaotipo_id, s.cliente_id, s.responsavel_id, s.data_solicitacao, s.status_id, 
+                                           s.descricao, s.criado_por, supervisor_id
                                     from solicitacoes s
                                     inner join clientes c on c.id = s.cliente_id
                                     left  join Usuarios u on u.id = s.responsavel_id

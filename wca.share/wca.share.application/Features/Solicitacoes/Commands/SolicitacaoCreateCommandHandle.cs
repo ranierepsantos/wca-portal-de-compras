@@ -20,6 +20,7 @@ namespace wca.share.application.Features.Solicitacoes.Commands
         string UsuarioCriador,
         int? CriadoPor,
         int? ResponsavelId,
+        int? SupervisorId,
         string? Descricao,
         SolicitacaoComunicado? Comunicado,
         SolicitacaoDesligamento? Desligamento,

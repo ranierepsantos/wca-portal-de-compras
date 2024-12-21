@@ -45,6 +45,7 @@ namespace wca.share.infrastruture.Context
         internal DbSet<TipoFaturamento> TipoFaturamento { get; set; }
         internal DbSet<SolicitacaoVaga> Vagas { get; set; }
         internal DbSet<EventLogGi> EventLogGi { get; set; }
+        internal DbSet<Supervisor> Supervisor { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -38,6 +38,12 @@ namespace wca.share.domain.Entities
         [Column("criado_por")]
         public int? CriadoPor { get; set; }
 
+        [Column("supervisor_id")]
+        public int? SupervisorId { get; set; }
+
+        [JsonIgnore]
+        public Supervisor? Supervisor { get; set; }
+
         [JsonIgnore]
         public StatusSolicitacao? StatusSolicitacao { get; set; }
         public SolicitacaoComunicado? Comunicado { get; set; }

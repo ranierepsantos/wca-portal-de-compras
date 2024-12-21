@@ -82,7 +82,7 @@ export const share = {
       {
         path: 'usuario/cadastro',
         name: 'shareUsuarioCadastro',
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "usuario", sistema: 3},
         beforeEnter: protectRoute,
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
@@ -235,56 +235,56 @@ export const share = {
         path: 'documentoscomplementares',
         name: 'shareDocumentosComplementares',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "documentocomplementar", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'escalas',
         name: 'shareEscalas',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "escala", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'escolaridades',
         name: 'shareEscolaridades',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "escolaridade", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'funcoes',
         name: 'shareFuncoes',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "funcao", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'gestores',
         name: 'shareGestores',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "gestor", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'horarios',
         name: 'shareHorarios',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "horario", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'tiposcontrato',
         name: 'shareTiposContrato',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "tipocontrato", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
         path: 'tiposfaturamento',
         name: 'shareTiposFaturamento',
         beforeEnter: protectRoute,
-        meta: {permissao: "livre", sistema: 3},
+        meta: {permissao: "tipofaturamento", sistema: 3},
         component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
       {
@@ -323,6 +323,13 @@ export const share = {
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "share" */ '../views/share/backlog'),
         props: route => ({ query: route.query.id })
+      },
+      {
+        path: 'supervisores',
+        name: 'shareSupervisor',
+        beforeEnter: protectRoute,
+        meta: {permissao: "supervisor", sistema: 3},
+        component: () => import(/* webpackChunkName: "share" */ '../views/share/entidadesauxiliar'),
       },
     ]
 }
