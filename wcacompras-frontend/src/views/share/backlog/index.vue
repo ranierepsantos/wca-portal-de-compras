@@ -3,20 +3,6 @@
     <bread-crumbs title="Backlog" :show-button="false" />
     <!--FILTROS -->
     <v-row v-show="!isLoading.form">
-      <!-- <v-col>
-        <v-select
-          label="Filiais"
-          v-model="filter.filialId"
-          :items="listFiliais"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          variant="outlined"
-          color="primary"
-          :hide-details="true"
-          v-show="isMatriz"
-        ></v-select>
-      </v-col> -->
       <v-col>
         <v-autocomplete
           label="Clientes"
@@ -35,6 +21,19 @@
           label="Responsável"
           v-model="filter.responsavelId"
           :items="listUsuarios"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          variant="outlined"
+          color="primary"
+          :hide-details="true"
+        ></v-autocomplete>
+      </v-col>
+      <v-col>
+        <v-autocomplete
+          label="Funcionário"
+          v-model="filter.funcionarioId"
+          :items="listFuncionarios"
           density="compact"
           item-title="text"
           item-value="value"
@@ -159,6 +158,7 @@ import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
 import { useAuthStore } from "@/store/auth.store";
 import { useShareClienteStore } from "@/store/share/cliente.store";
 import { useShareUsuarioStore } from "@/store/share/usuario.store";
+import { useShareFuncionarioStore } from "@/store/share/funcionario.store";
 
 //VARIABLES
 const pageSize = 5//process.env.VUE_APP_PAGE_SIZE;
@@ -199,6 +199,7 @@ const listConcluido = ref({
 
 const listClientes = ref([])
 const listUsuarios = ref([])
+const listFuncionarios = ref([])
 const listFiliais = ref([])
 const isLoading = ref({
   form: false,
@@ -237,6 +238,7 @@ async function init() {
     isMatriz.value = authStore.sistema.isMatriz;
     authStore.user.filial = authStore.sistema.filial.value;
 
+    getFuncionarioToList();
     await clearFilters();
   
   } catch (error) {
@@ -402,6 +404,15 @@ async function getUsuarioToList(filiais = []) {
     listUsuarios.value = await useShareUsuarioStore().toComboList(filiais);
   } catch (error) {
     console.log("getUsuarioToList.error:", error.response);
+    handleErrors(error);
+  }
+}
+
+async function getFuncionarioToList() {
+  try {
+    listFuncionarios.value = await useShareFuncionarioStore().getToComboByUsuario(authStore.user.id);
+  } catch (error) {
+    console.log("getFuncionarioToList.error:", error.response);
     handleErrors(error);
   }
 }

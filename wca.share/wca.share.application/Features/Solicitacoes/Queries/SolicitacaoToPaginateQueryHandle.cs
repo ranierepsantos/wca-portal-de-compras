@@ -20,6 +20,7 @@ namespace wca.share.application.Features.Solicitacoes.Queries
         int[]? CentroCustoIds,
         int[]? Status,
         int UsuarioId = 0,
+        int? FuncionarioId = 0,
         EnumTipoSolicitacao TipoSolicitacao = EnumTipoSolicitacao.Todos) : PaginationQuery, IRequest<ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>;
     internal sealed class SolicitacaoToPaginateQueryHandle :
         IRequestHandler<SolicitacaoPaginateQuery, ErrorOr<Pagination<SolicitacaoToPaginateResponse>>>
@@ -107,22 +108,30 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                 {
                     query = query.IncludeComunicado();
                     query = query.Where(q => q.Comunicado.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
+                    if (request.FuncionarioId > 0)
+                        query = query.Where(q => q.Comunicado.FuncionarioId.Equals(request.FuncionarioId)); 
                 }
                 else if (request.TipoSolicitacao == EnumTipoSolicitacao.Desligamento)
                 {
                     query = query.IncludeDesligamento();
                     query = query.Where(q => q.Desligamento.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
+                    if (request.FuncionarioId > 0)
+                        query = query.Where(q => q.Desligamento.FuncionarioId.Equals(request.FuncionarioId));
 
                 } else if (request.TipoSolicitacao == EnumTipoSolicitacao.Ferias)
                 {
                     query = query.IncludeFerias();
                     query = query.Where(q => q.Ferias.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
+                    if (request.FuncionarioId > 0)
+                        query = query.Where(q => q.Ferias.FuncionarioId.Equals(request.FuncionarioId));
 
                 }
                 else if (request.TipoSolicitacao == EnumTipoSolicitacao.MudancaBase)
                 {
                     query = query.IncludeMudancaBase();
                     query = query.Where(q => q.MudancaBase.CentroCusto.UsuarioCentrodeCustos.Where(q1 => q1.UsuarioId == request.UsuarioId).Any());
+                    if (request.FuncionarioId > 0)
+                        query = query.Where(q => q.MudancaBase.FuncionarioId.Equals(request.FuncionarioId));
                 }
                 else if (request.TipoSolicitacao == EnumTipoSolicitacao.Vaga)
                 {
@@ -135,6 +144,14 @@ namespace wca.share.application.Features.Solicitacoes.Queries
                                 .IncludeFerias()
                                 .IncludeMudancaBase()
                                 .IncludeVagaToPaginate();
+
+                    if (request.FuncionarioId > 0)
+                    {
+                        query = query.Where(q => q.Comunicado.FuncionarioId.Equals(request.FuncionarioId) ||
+                                                q.Desligamento.FuncionarioId.Equals(request.FuncionarioId) ||
+                                                q.Ferias.FuncionarioId.Equals(request.FuncionarioId) ||
+                                                q.MudancaBase.FuncionarioId.Equals(request.FuncionarioId));
+                    }
                 }
 
                 query = query.OrderByDescending(q => q.DataSolicitacao).ThenBy(q => q.Id);
