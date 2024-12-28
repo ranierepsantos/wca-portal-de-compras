@@ -874,8 +874,6 @@ namespace wca.compras.services
         {
             try
             {
-                //19.12.2024 - ivanildo - solicitado para não enviar e-mail
-                return;
                 var query = _rm.UsuarioRepository.SelectAll()
                             .Include(u => u.Cliente)
                             .Where(c => c.Ativo == true && c.Cliente.Any(c => c.Id == requisicao.ClienteId));
