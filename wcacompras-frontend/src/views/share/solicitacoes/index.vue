@@ -6,20 +6,6 @@
       @novoClick="toPage()"
     />
     <v-row v-show="!isLoading.form">
-      <!-- <v-col>
-        <v-select
-          label="Filiais"
-          v-model="filter.filialId"
-          :items="filiais"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          variant="outlined"
-          color="primary"
-          :hide-details="true"
-          v-show="isMatriz"
-        ></v-select>
-      </v-col> -->
       <v-col>
         <v-autocomplete
           label="Clientes"
@@ -38,6 +24,19 @@
           label="Responsável"
           v-model="filter.responsavelId"
           :items="usuarios"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          variant="outlined"
+          color="primary"
+          :hide-details="true"
+        ></v-autocomplete>
+      </v-col>
+      <v-col>
+        <v-autocomplete
+          label="Funcionário"
+          v-model="filter.funcionarioId"
+          :items="funcionarios"
           density="compact"
           item-title="text"
           item-value="value"
@@ -82,6 +81,11 @@
           density="compact"
         ></v-text-field>
       </v-col>
+      <v-col>
+        <v-checkbox v-model="filter.showFinishedStatus" label="Mostrar Concluídos" color="primary"></v-checkbox>
+      </v-col>
+
+
       <v-col class="text-right">
         <v-btn
           color="primary"
@@ -226,6 +230,7 @@ import { useShareUsuarioStore } from "@/store/share/usuario.store";
 import { getPageTitle } from "@/helpers/share/data";
 import { useRoute } from "vue-router";
 import { compararValor } from "@/helpers/functions";
+import { useShareFuncionarioStore } from "@/store/share/funcionario.store";
 
 //DATA
 const route = useRoute();
@@ -237,6 +242,7 @@ const solicitacoes = ref([]);
 const clientes = ref([]);
 const filiais = ref([]);
 const usuarios = ref([]);
+const funcionarios = ref([]);
 const filter = ref({
   filialId: null,
   clienteId: null,
@@ -244,7 +250,8 @@ const filter = ref({
   status: null,
   dataIni: null,
   dataFim: null,
-  usuarioId: authStore.user.id
+  usuarioId: authStore.user.id,
+  showFinishedStatus: false
 });
 const solicitacaoStore = useShareSolicitacaoStore();
 const eventos = ref([]);
@@ -258,8 +265,6 @@ const pageTipo = ref({
     id: 0,
     tipo: ""
 })
-const meusClientesId = ref([])
-const meusCentrosDeCustoId = ref([])
 //COMPUTED'S
 
 //WATCH'S
@@ -273,6 +278,7 @@ watch(
 
     await getClientesToList(_filiais[0]);
     await getUsuarioToList(_filiais);
+    
   }
 );
 
@@ -302,6 +308,7 @@ onBeforeMount(async () => {
     //meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
     
     await getFiliaisToList();
+    await getFuncionarioToList();
     isMatriz.value = authStore.sistema.isMatriz;
     authStore.user.filial = authStore.sistema.filial.value;
     await clearFilters();
@@ -326,7 +333,8 @@ async function clearFilters() {
       status: null,
       dataIni: null,
       dataFim: null,
-      usuarioId: authStore.user.id
+      usuarioId: authStore.user.id,
+      funcionarioId: null
     };
 
     await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
@@ -380,15 +388,14 @@ async function getItems() {
 
     let filtros = {...filter.value }
     delete filtros.clienteId
-
-
     filtros.filialId = filtros.filialId ?? 0
-    //filtros.clienteIds = meusClientesId.value
-    //filtros.centroCustoIds = meusCentrosDeCustoId.value 
     filtros.tipoSolicitacao = pageTipo.value.id
 
     if (filter.value.clienteId != null) 
       filtros.clienteIds = [filter.value.clienteId]
+
+    if (!filter.value.showFinishedStatus && (!filtros.status || filtros.status.length == 0))
+      filtros.status = solicitacaoStore.statusSolicitacao.filter(q => q.id != 3).map(f => f.id);
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
@@ -429,6 +436,15 @@ async function getUsuarioToList(filiais = []) {
     usuarios.value = await useShareUsuarioStore().toComboList(filiais);
   } catch (error) {
     console.log("solcitacoes.getUsuarioToList.error:", error.response);
+    handleErrors(error);
+  }
+}
+
+async function getFuncionarioToList() {
+  try {
+    funcionarios.value = await useShareFuncionarioStore().getToComboByUsuario(authStore.user.id);
+  } catch (error) {
+    console.log("solcitacoes.getFuncionarioToList.error:", error.response);
     handleErrors(error);
   }
 }

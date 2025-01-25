@@ -137,6 +137,10 @@ import { useRoute } from "vue-router";
       pageInfo.value.title = "Escolaridades";
       pageInfo.value.singleTitle = "Escolaridade";
       pageInfo.value.entidade = "Escolaridade";
+    } else if (route.path.includes("supervisores")) {
+      pageInfo.value.title = "Supervisores";
+      pageInfo.value.singleTitle = "Supervisor";
+      pageInfo.value.entidade = "Supervisor";
     }
   } catch (error) {
   } finally {

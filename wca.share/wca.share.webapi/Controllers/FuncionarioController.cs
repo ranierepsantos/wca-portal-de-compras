@@ -14,6 +14,15 @@ namespace wca.share.webapi.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet("ListByToComboByUsuario")]
+        public async Task<IActionResult> ListByClienteToCombo([FromQuery] FuncionarioListQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
 
         [HttpGet("ListByClienteToCombo")]
         public async Task<IActionResult> ListByClienteToCombo([FromQuery] FuncionarioListByClienteQuery query)

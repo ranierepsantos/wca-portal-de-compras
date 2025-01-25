@@ -18,7 +18,8 @@ namespace wca.share.application.Features.Solicitacoes.Common.Data.Extensions
                 .IncludeMudancaBase()
                 .IncludeVaga()
                 .IncludeHistorico()
-                .IncludeStatus();
+                .IncludeStatus()
+                .IncludeSupervisor();
         }
 
         public static IQueryable<Solicitacao> IncludeTipo(this IQueryable<Solicitacao> query)
@@ -116,6 +117,12 @@ namespace wca.share.application.Features.Solicitacoes.Common.Data.Extensions
         {
             return query
                 .Include(x => x.Vaga).ThenInclude(q => q.Funcao);
+        }
+
+        public static IQueryable<Solicitacao> IncludeSupervisor(this IQueryable<Solicitacao> query)
+        {
+            return query
+                .Include(x => x.Supervisor);
         }
     }
 }

@@ -36,6 +36,8 @@
               :list-status="useShareSolicitacaoStore().statusSolicitacao.filter(q => 'info, warning'.includes(q.color))"
               :is-read-only="modeReadOnly "
               :is-descricao-read-only="descricaoReadOnly"
+              :list-supervisor="listEntidade['supervisor']"
+              @select-button-click="abrirCadastroAuxiliar($event)"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
@@ -284,6 +286,7 @@ const listEntidade = ref({
   sexo: [],
   tipocontrato: [],
   tipofaturamento: [],
+  supervisor: []
 });
 const isEditMode = ref(false);
 const listItensMudanca = ref([]);
@@ -303,6 +306,7 @@ const entidadeTipos = ref([
   {title: "Motivo Contratação", type: "MotivoContratacao"},
   {title: "Tipo de Contrato", type: "TipoContrato"},
   {title: "Tipo de Faturamento", type: "TipoFaturamento"},
+  {title: "Supervisor", type: "Supervisor"},
 ])
 const isSavingEntity = ref(false)
 const openModeEdicaoForm = ref(false)
@@ -341,6 +345,8 @@ onBeforeMount(async () => {
       listEntidade.value["sexo"] = [{value: 3, text: "Indiferente"},{value: 2, text: "Feminino"},{value: 1, text: "Masculino"}]
       permissao.value = "vaga";
     }
+    
+    listEntidade.value["supervisor"] = await entidadeStore.getToComboList("Supervisor");
 
     await getById(route.query.id);
 
@@ -645,12 +651,19 @@ function getButtons() {
     if (useAuthStore().hasPermissao(permissao.value + "-finalizar")) {
       buttons.value.push({ text: "Finalizar", icon: "", event: "finalizar-click" });
     }
+    
+    //5 - Vagas - exibir botão de imprimir
     if (solicitacao.value.solicitacaoTipoId == 5)
-    {
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
+
+    //1 - Desligamento/ 3 - Férias / 5 - Vagas - exibir botão para cancelar
+    if ("1,3,5".includes(solicitacao.value.solicitacaoTipoId))
       buttons.value.push({ text: "Cancelar", icon: "", event: "cancelar-click" });
-    }
-    buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
+    
+    
+    
+    
+      buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
     buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
     
   }
