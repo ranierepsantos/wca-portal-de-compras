@@ -234,6 +234,12 @@ const auxItems = ref([
     route: "/share/tiposfaturamento",
     permissao: "tipofaturamento"
   },
+  {
+    title: "Supervisores",
+    value: 22,
+    route: "/share/supervisores",
+    permissao: "supervisor"
+  },
 ]);
 
 const authStore = useAuthStore();

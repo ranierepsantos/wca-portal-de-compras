@@ -24,6 +24,8 @@
               :descricao-show="![2,4].includes(solicitacao.solicitacaoTipoId)"
               
               :list-responsavel="responsavelList"
+              :list-supervisor="listEntidade['supervisor']"
+              @select-button-click="abrirCadastroAuxiliar($event)"
             >
               <desligamento
                 :data-model="solicitacao.desligamento"
@@ -173,6 +175,7 @@ const entidadeTipos = ref([
   {title: "Motivo Contratação", type: "MotivoContratacao"},
   {title: "Tipo de Contrato", type: "TipoContrato"},
   {title: "Tipo de Faturamento", type: "TipoFaturamento"},
+  {title: "Supervisor", type: "Supervisor"},
 ])
 const listEntidade = ref({
   documentocomplementar: [],
@@ -185,6 +188,7 @@ const listEntidade = ref({
   sexo: [],
   tipocontrato: [],
   tipofaturamento: [],
+  supervisor: []
 })
 const isSavingEntity = ref(false)
 
@@ -232,6 +236,7 @@ onBeforeMount(async () => {
     if (solicitacao.value.solicitacaoTipoId) comboTipoShow.value = false;
 
     clienteList.value = await useShareClienteStore().toComboList(0, useAuthStore().user.id);
+    listEntidade.value["supervisor"] = await entidadeStore.getToComboList("Supervisor");
     
   } catch (error) {
     console.debug("create.beforeMount.error", error);

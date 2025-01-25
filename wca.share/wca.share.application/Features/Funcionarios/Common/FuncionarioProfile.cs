@@ -20,6 +20,10 @@ namespace wca.share.application.Features.Funcionarios.Common
             CreateMap<FuncionarioCreateCommand, Funcionario>();
             CreateMap<FuncionarioUpdateCommand, Funcionario>();
             CreateMap<Funcionario, FuncionarioResponse>();
+
+            CreateMap<Funcionario, ListItem>()
+                    .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
+                    .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Nome));
         }
     }
 }

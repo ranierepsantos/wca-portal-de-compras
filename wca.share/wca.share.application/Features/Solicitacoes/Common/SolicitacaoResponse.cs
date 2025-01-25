@@ -11,6 +11,8 @@ namespace wca.share.application.Features.Solicitacoes.Common
         public string? ClienteNome { get; set; }
         public int? ResponsavelId { get; set; }
         public string? ResponsavelNome { get; set; }
+        public int? SupervisorId { get; set; }
+        public string? SupervisorNome { get; set; }
         public DateTime DataSolicitacao { get;  set; }
         public string? Descricao { get;  set; }
         public int StatusSolicitacaoId { get;  set; }

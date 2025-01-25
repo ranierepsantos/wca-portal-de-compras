@@ -44,6 +44,18 @@
           label-text="Responsável"
         ></select-text>
       </v-col>
+      <v-col>
+        <select-text
+          v-model="solicitacao.supervisorId"
+          :combo-items="listSupervisor"
+          :select-mode="!isReadOnly"
+          :text-field-value="solicitacao.supervisorNome"
+          label-text="Supervisor"
+          :button-show="!isReadOnly"
+          button-title="Adicionar Supervisor"
+          @button-click="$emit('selectButtonClick', 'Supervisor')"
+        ></select-text>
+      </v-col>
     </v-row>
     <slot></slot>
     <v-row>
@@ -106,7 +118,12 @@ const props = defineProps({
       return [];
     },
   },
-
+  listSupervisor: {
+    type: Array,
+    default: function () {
+      return [];
+    },
+  },
   comboTipoShow: { type: Boolean, default: true },
   isReadOnly: { type: Boolean, default: false },
   isDescricaoReadOnly: { type: Boolean, default: false },

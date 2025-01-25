@@ -32,6 +32,9 @@ export class Solicitacao {
         this.descricao = data? data.descricao: null
         this.statusSolicitacaoId = data? data.statusSolicitacaoId: null
         this.responsavelId = data ? data.responsavelId: null
+        this.responsavelNome = data ? data.responsavelNome: null
+        this.supervisorId = data ? data.supervisorId: null
+        this.supervisorNome = data ? data.supervisorNome: null
         this.comunicado = data && data.comunicado ? new Comunicado(data.comunicado) : new Comunicado()
         this.desligamento = data ? new Desligamento(data.desligamento) : new Desligamento()
         this.ferias = data ? new Ferias(data.ferias) : new Ferias()

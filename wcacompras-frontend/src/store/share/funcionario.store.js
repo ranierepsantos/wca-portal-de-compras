@@ -7,7 +7,8 @@ const rotas = {
     Update: "Funcionario",
     GetById: "Funcionario",
     Paginar: "Funcionario/Paginar",
-    ListByClienteToCombo: "Funcionario/ListByClienteToCombo"
+    ListByClienteToCombo: "Funcionario/ListByClienteToCombo",
+    ListByToComboByUsuario: "Funcionario/ListByToComboByUsuario"
 }
 
 export class Funcionario {
@@ -87,8 +88,15 @@ export const useShareFuncionarioStore = defineStore("shareFuncionario", {
         } catch (error) {
             throw error
         }
+    },
+    async getToComboByUsuario(usuarioId){
+        try {
+            let response = await api.get(rotas.ListByToComboByUsuario, {params: {usuarioId: usuarioId}} );
+            return response.data;    
+        } catch (error) {
+            throw error
+        }
     }
-
 
   }
 })
