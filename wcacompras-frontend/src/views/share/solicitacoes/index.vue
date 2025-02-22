@@ -308,7 +308,7 @@ onBeforeMount(async () => {
     //meusCentrosDeCustoId.value = await authStore.retornarMeusCentrosdeCustos(0, true);
     
     await getFiliaisToList();
-    await getFuncionarioToList();
+    getFuncionarioToList();
     isMatriz.value = authStore.sistema.isMatriz;
     authStore.user.filial = authStore.sistema.filial.value;
     await clearFilters();
