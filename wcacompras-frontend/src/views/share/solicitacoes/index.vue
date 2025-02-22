@@ -398,7 +398,7 @@ async function getItems(resetPage = false) {
       filtros.clienteIds = [filter.value.clienteId]
 
     if (!filter.value.showFinishedStatus && (!filtros.status || filtros.status.length == 0))
-      filtros.status = solicitacaoStore.statusSolicitacao.filter(q => q.id != 3).map(f => f.id);
+      filtros.status = solicitacaoStore.statusSolicitacao.filter(q => q.id != 3 && q.id != 6).map(f => f.id);
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
