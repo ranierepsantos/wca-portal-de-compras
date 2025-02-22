@@ -151,7 +151,6 @@ import cardList from "@/components/share/cardlist.vue";
 import breadCrumbs from "@/components/breadcrumbs.vue";
 
 //SERVICES
-import filialService from "@/services/filial.service";
 
 //STORES
 import { useShareSolicitacaoStore } from "@/store/share/solicitacao.store";
@@ -200,7 +199,6 @@ const listConcluido = ref({
 const listClientes = ref([])
 const listUsuarios = ref([])
 const listFuncionarios = ref([])
-const listFiliais = ref([])
 const isLoading = ref({
   form: false,
   busy: false,
@@ -214,8 +212,7 @@ const filter = ref({
   dataFim: null,
   usuarioId:  authStore.user.id
 });
-const meusClientesId = ref([])
-const meusCentrosDeCustoId = ref([])
+
 const mostrarConcluidos = ref(false);
 
 //VUE FUNCTIONS
@@ -367,7 +364,7 @@ async function getEmAndamento(page, fillList = false) {
 
 async function getConcluido(page, fillList = false) {
   let filtros = JSON.parse(sessionStorage.getItem('backlog.filtros'))
-  filtros.status = [3,5]
+  filtros.status = [3,5,6]
 
     let data = await solicitacaoStore.getPaginate(
       page,
@@ -389,15 +386,15 @@ async function getClientesToList(filialId = 0, usuarioId = 0) {
   }
 }
 
-async function getFiliaisToList() {
-  try {
-    let response = await filialService.toList();
-    listFiliais.value = response.data;
-  } catch (error) {
-    console.log("getFiliais.error:", error.response);
-    handleErrors(error);
-  }
-}
+// async function getFiliaisToList() {
+//   try {
+//     let response = await filialService.toList();
+//     listFiliais.value = response.data;
+//   } catch (error) {
+//     console.log("getFiliais.error:", error.response);
+//     handleErrors(error);
+//   }
+// }
 
 async function getUsuarioToList(filiais = []) {
   try {

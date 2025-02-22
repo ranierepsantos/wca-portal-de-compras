@@ -64,6 +64,10 @@
               <v-col :cols="cols">Responsável</v-col>
               <v-col>{{ element.responsavelNome }}</v-col>
             </v-row>
+            <v-row>
+              <v-col :cols="cols">Status</v-col>
+              <v-col>{{ element.statusSolicitacao.statusIntermediario }}</v-col>
+            </v-row>  
           </v-card-text>
         </v-card>
       </template>
