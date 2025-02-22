@@ -91,7 +91,7 @@
           color="primary"
           variant="outlined"
           class="text-capitalize"
-          @click="getItems()"
+          @click="getItems(true)"
         >
           <b>Aplicar Filtros</b>
         </v-btn>
@@ -100,7 +100,7 @@
           color="info"
           variant="outlined"
           class="text-capitalize"
-          @click="clearFilters()"
+          @click="clearFilters(true)"
         >
           <b>Limpar Filtros</b>
         </v-btn>
@@ -323,7 +323,7 @@ watch(page, () => getItems());
 
 
 //METHODS
-async function clearFilters() {
+async function clearFilters(resetPage = false) {
   try {
     isLoading.value.busy = true;
     filter.value = {
@@ -340,7 +340,7 @@ async function clearFilters() {
     await getUsuarioToList(isMatriz.value ? [] : [authStore.user.filialId]);
     await getClientesToList(filter.value.filialId, authStore.user.id);
 
-    await getItems();
+    await getItems(resetPage);
   } catch (error) {
     console.error(error);
   } finally {
@@ -374,9 +374,12 @@ async function showHistorico(item) {
   openHistorico.value = true;
 }
 
-async function getItems() {
+async function getItems(resetPage = false) {
   try {
     isLoading.value.busy = true;
+
+    if (resetPage) page.value = 1;
+
     if (
       (filter.value.dataIni && !filter.value.dataFim) ||
       (filter.value.dataFim && !filter.value.dataIni)
@@ -395,7 +398,7 @@ async function getItems() {
       filtros.clienteIds = [filter.value.clienteId]
 
     if (!filter.value.showFinishedStatus && (!filtros.status || filtros.status.length == 0))
-      filtros.status = solicitacaoStore.statusSolicitacao.filter(q => q.id != 3).map(f => f.id);
+      filtros.status = solicitacaoStore.statusSolicitacao.filter(q => q.id != 3 && q.id != 6).map(f => f.id);
 
     let response = await solicitacaoStore.getPaginate(
       page.value,
