@@ -636,9 +636,15 @@ function getButtons() {
       
     
   } else if ("cancelado,reprovado".includes(solicitacao.value.status.statusIntermediario.toLowerCase())) {
-    if (solicitacao.value.solicitacaoTipoId == 5)
+    if (solicitacao.value.solicitacaoTipoId == 5){
       buttons.value.push({ text: "Imprimir", icon: "", event: "gerar-pdf-click" });
-    
+      //21.07.2025 - Adicionado botão de reabrir
+      if (useAuthStore().hasPermissao(permissao.value + "-executar")) 
+      {
+        buttons.value.push({ text: "Reabrir", icon: "", event: "reabrir-click" });
+        buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
+      }
+    }
   } else if (solicitacao.value.status.autorizar) {
     if (useAuthStore().hasPermissao(permissao.value + "-aprovar"))
       buttons.value.push({ text: "Aprovar/Reprovar", icon: "", event: "aprovar-click" });
@@ -660,10 +666,7 @@ function getButtons() {
     if ("1,3,5".includes(solicitacao.value.solicitacaoTipoId))
       buttons.value.push({ text: "Cancelar", icon: "", event: "cancelar-click" });
     
-    
-    
-    
-      buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
+    buttons.value.push({ text: "Editar", icon: "", event: "editar-click" });
     buttons.value.push({ text: "Salvar", icon: "", event: "salvar-click" });
     
   }
