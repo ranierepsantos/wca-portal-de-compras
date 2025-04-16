@@ -11,8 +11,13 @@ namespace wca.compras.crosscutting.DependencyInjection
     {
         public static void ConfigureDependencyRepository(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<WcaContext>(
-                options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+            int timeOut = configuration.GetValue<int?>("ConnectionTimeout") ?? 180;
+
+            services.AddDbContext<WcaContext>(options =>
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions => sqlOptions.CommandTimeout(timeOut) // Define um timeout
+                )
             );
 
             services.AddScoped<IRepositoryManager, RepositoryManager>();
