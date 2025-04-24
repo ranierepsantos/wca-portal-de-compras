@@ -50,6 +50,12 @@ namespace wca.reembolso.infrastruture.Integration.NorgeChatBot
             {
                 var response = await aex.GetContentAsAsync<Response>();
                 return response;
+            }catch (Exception ex)
+            {
+                return new Response()
+                {
+                    Error = ex.Message
+                };
             }
             
         }
