@@ -14,7 +14,7 @@
             <usuario-form
               :user="usuario"
               :list-filial="filiais"
-              @email-change="searchByEmail"
+              @email-change="checkUserExistsByEmail($event)"
             ></usuario-form>
             <v-card elevation="2">
               <v-tabs v-model="tab" color="primary" align-tabs="start">
@@ -219,6 +219,7 @@ import {
 } from "@/store/reembolso/usuario.store";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import filialService from "@/services/filial.service";
+import userService from "@/services/user.service";
 
 //DATA
 const isBusy = ref(true);
@@ -528,8 +529,23 @@ async function getUsuario(usuarioId) {
   }
 }
 
-function searchByEmail(email) {
-  console.log(email);
+async function checkUserExistsByEmail(email) {
+  try {
+    let user = (await userService.getByEmail(email)).data;
+    let hasUserInTheSameSystem = user.usuarioSistemaPerfil.filter(x => x.sistemaId == authStore.sistema.id)
+    
+    if (hasUserInTheSameSystem.length > 0 && usuario.value.id == 0) {
+      throw new Error("Email já cadastrado, neste sistema!")
+    }
+    usuario.value.id = user.id
+    usuario.value.nome = user.nome
+    usuario.value.celular = user.celular
+
+  } catch (error) {
+    if( !error.response || error.response.status != 404)
+      handleErrors(error)
+  }
+  
 }
 </script>
 
