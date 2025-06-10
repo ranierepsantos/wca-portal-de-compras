@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -35,37 +36,46 @@ namespace wca.reembolso.application.Features.Despesas.Command
     {
         private readonly IMapper _mapper;
         private readonly IRepositoryManager _rm;
-
-        public DespesaCreateCommandHandle(IMapper mapper, IRepositoryManager rm)
+        private readonly ILogger<DespesaCreateCommandHandle> _logger;
+        public DespesaCreateCommandHandle(IMapper mapper, IRepositoryManager rm, ILogger<DespesaCreateCommandHandle> logger)
         {
             _mapper = mapper;
             _rm = rm;
+            _logger = logger;
         }
 
         public async Task<ErrorOr<Despesa>> Handle(DespesaCreateCommand request, CancellationToken cancellationToken)
         {
-            Despesa despesa = _mapper.Map<Despesa>(request);
-
-            if (HandleFile.IsBase64(despesa.ImagePath))
+            try
             {
-                despesa.ImagePath = HandleFile.SaveFile(despesa.ImagePath);
+                Despesa despesa = _mapper.Map<Despesa>(request);
+
+                if (HandleFile.IsBase64(despesa.ImagePath))
+                {
+                    despesa.ImagePath = HandleFile.SaveFile(despesa.ImagePath);
+                }
+
+                _rm.DespesaRepository.Create(despesa);
+
+                await _rm.SaveAsync();
+
+                string sqlCommand = "update s set valor_despesa = dd.valor_despesa from solicitacoes s " +
+                                    "inner join " +
+                                    "(  select solicitacao_id, sum(valor) valor_despesa " +
+                                    "   from despesas group by solicitacao_id " +
+                                    ") dd on dd.solicitacao_id = s.id " +
+                                   $"where id = {request.SolicitacaoId}";
+
+                await _rm.ExecuteCommandAsync(sqlCommand);
+
+                return despesa;
             }
-
-            _rm.DespesaRepository.Create(despesa);
-            
-            await _rm.SaveAsync();
-
-            string sqlCommand = "update s set valor_despesa = dd.valor_despesa from solicitacoes s " +
-                                "inner join " +
-                                "(  select solicitacao_id, sum(valor) valor_despesa " +
-                                "   from despesas group by solicitacao_id "+
-                                ") dd on dd.solicitacao_id = s.id " +
-                               $"where id = {request.SolicitacaoId}";
-
-            await _rm.ExecuteCommandAsync(sqlCommand);
-
-            return despesa;
-
+            catch (Exception e)
+            {
+                _logger.LogError($"Erro ao criar despesa - {e.Message}", e);
+                throw new Exception($"Erro ao criar despesa - {e.Message}");
+                
+            }
         }
     }
 }
