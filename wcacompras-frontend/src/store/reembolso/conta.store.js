@@ -64,8 +64,7 @@ export const useContaStore = defineStore("contaCorrente", {
                 page: page,
                 pageSize: pageSize,
                 filialId: filters.filialId,
-                clienteIds: filters.clientesIds,
-                centroCustoIds: filters.centroCustoIds,
+                usuarioId: filters.usuarioId,
                 usuarioNome: filters.usuarioNome
             }
             let response = await api.get(rotas.Paginar, {params: parametros} );

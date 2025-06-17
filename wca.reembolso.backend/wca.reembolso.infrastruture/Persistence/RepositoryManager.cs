@@ -75,11 +75,16 @@ namespace wca.reembolso.infrastruture.Persistence
             return _context.Set<T>();
         }
 
-        public async Task<List<T>> GetFromSQL<T>(string query) where T: class
+        public async Task<List<T>> GetFromSQL<T>(string query) where T : class
         {
             return await _context.Set<T>().FromSqlRaw(query)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+        
+        public IQueryable<T> FromQuery<T>(string query) where T : class
+        {
+            return _context.Set<T>().FromSqlRaw(query);
         }
     }
 }

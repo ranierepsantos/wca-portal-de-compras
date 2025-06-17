@@ -176,17 +176,17 @@ onMounted(async () => {
   )[0];
   authStore.user.filial = filialUsuario.value;
 
-  meusClientes.value = await clienteStore.ListByUsuario(authStore.user.id);
-  meusClientes.value = meusClientes.value.map((x) => {
-    return x.id;
-  });
+  // meusClientes.value = await clienteStore.ListByUsuario(authStore.user.id);
+  // meusClientes.value = meusClientes.value.map((x) => {
+  //   return x.id;
+  // });
 
-  meusCentroDeCusto.value = await useUsuarioStore().getCentrosdeCusto(
-    authStore.user.id
-  );
-  meusCentroDeCusto.value = meusCentroDeCusto.value.map((x) => {
-    return x.id;
-  });
+  // meusCentroDeCusto.value = await useUsuarioStore().getCentrosdeCusto(
+  //   authStore.user.id
+  // );
+  // meusCentroDeCusto.value = meusCentroDeCusto.value.map((x) => {
+  //   return x.id;
+  // });
 
   await getItems();
 });
@@ -202,8 +202,9 @@ async function getItems() {
     let filtros = {
       filialId: authStore.user.filial.id,
       usuarioNome: filter.value,
-      centroCustoIds: meusCentroDeCusto.value,
-      clientesIds: meusClientes.value,
+      usuarioId: authStore.user.id
+      //centroCustoIds: meusCentroDeCusto.value,
+      //clientesIds: meusClientes.value,
     };
     let response = await useContaStore().getPaginate(
       page.value,

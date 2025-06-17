@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace wca.reembolso.application.Features.Conta.Queries
 {
-    public record ContaCorrenteToPaginateQuery(string UsuarioNome = "",int[]? ClienteIds = null, int[]? CentroCustoIds = null) : PaginationQuery, IRequest<ErrorOr<Pagination<ContaCorrenteResponse>>>;
+    public record ContaCorrenteToPaginateQuery( int UsuarioId, string UsuarioNome = "") : PaginationQuery, IRequest<ErrorOr<Pagination<ContaCorrenteResponse>>>;
     public class ContaCorrenteToPaginateHandle : IRequestHandler<ContaCorrenteToPaginateQuery, ErrorOr<Pagination<ContaCorrenteResponse>>>
     {
         private readonly IRepositoryManager _repository;
@@ -26,44 +26,38 @@ namespace wca.reembolso.application.Features.Conta.Queries
 
         public async Task<ErrorOr<Pagination<ContaCorrenteResponse>>> Handle(ContaCorrenteToPaginateQuery request, CancellationToken cancellationToken)
         {
-            _logger.Log(logLevel: LogLevel.Information, "Buscando Dados de Conta corrente");
-
-            var query = _repository.GetDbSet<ContaCorrente>()
-                .Include(inc => inc.Transacoes)
-                .Include(inc => inc.Usuario)
-                .ThenInclude(inc => inc.UsuarioClientes).AsQueryable();
-
-            if (request.FilialId > 0)
+            try
             {
-                query = query.Where(q => q.Usuario.UsuarioClientes
-                .Where(x => x.Cliente.FilialId == request.FilialId).Count() > 1);
+                _logger.Log(logLevel: LogLevel.Information, "Buscando Dados de Conta corrente");
+
+                string sqlQuery = @$"select distinct c.usuario_id, c.saldo from ContaCorrente c
+                    inner join UsuarioClientes uc on uc.usuario_id  = c.usuario_id
+                    inner join UsuarioCentrodeCustos ucc on ucc.UsuarioId = c.usuario_id
+                    inner join UsuarioClientes cc on cc.usuario_id = {request.UsuarioId} and uc.cliente_id= cc.cliente_id
+                    inner join UsuarioCentrodeCustos ccc on ccc.UsuarioId = {request.UsuarioId} and ccc.CentroCustoId=ucc.CentroCustoId
+                ";
+
+
+                var query = _repository.FromQuery<ContaCorrente>(sqlQuery)
+                    .Include(inc => inc.Transacoes)
+                    .Include(inc => inc.Usuario).AsQueryable();
+
+                if (!string.IsNullOrEmpty(request.UsuarioNome))
+                    query = query.Where(q => q.Usuario.Nome.Contains(request.UsuarioNome));
+
+                query = query.OrderBy(c => c.Usuario.Nome);
+
+
+                var pagination = Pagination<ContaCorrenteResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
+
+                return await Task.FromResult(pagination);    
             }
-
-
-            if (request.ClienteIds?.Count() > 0)
+            catch (System.Exception ex)
             {
-                query = query.Where(
-                        q => q.Usuario.UsuarioClientes.Where(q => request.ClienteIds.Contains(q.ClienteId)).Count() > 0
-                    );
+                _logger.LogError(ex.Message, ex);
+                throw;
             }
             
-            if (request.CentroCustoIds?.Count() > 0)
-            {
-                query = query.Where(
-                        q => q.Usuario.UsuarioCentrodeCustos.Where(q => request.CentroCustoIds.Contains(q.CentroCustoId)).Count() > 0
-                    );
-            }
-
-            if (!string.IsNullOrEmpty(request.UsuarioNome))
-                query = query.Where(q => q.Usuario.Nome.Contains(request.UsuarioNome));
-
-
-            query = query.OrderBy(c => c.Usuario.Nome);
-
-
-            var pagination = Pagination<ContaCorrenteResponse>.ToPagedList(_mapper, query, request.Page, request.PageSize);
-
-            return await Task.FromResult(pagination);
         }
     }
 }

@@ -26,6 +26,8 @@ namespace wca.reembolso.application.Contracts.Persistence
         Task<int> ExecuteCommandAsync(string command);
         DbSet<T> GetDbSet<T>() where T : class;
 
-        Task<List<T>> GetFromSQL<T>(string query) where T:class;
+        Task<List<T>> GetFromSQL<T>(string query) where T : class;
+        
+        IQueryable<T> FromQuery<T>(string query) where T : class;
     }
 }
