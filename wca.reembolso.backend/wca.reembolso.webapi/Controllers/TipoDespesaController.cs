@@ -17,10 +17,10 @@ namespace wca.reembolso.webapi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetById([FromQuery] TipoDespesaByIdQuerie command) 
+        public async Task<IActionResult> GetById([FromQuery] TipoDespesaByIdQuerie command)
         {
             var result = await _mediator.Send(command);
-        
+
             if (result.IsError) { return Problem(result.Errors); }
 
             return Ok(result.Value);
@@ -66,5 +66,24 @@ namespace wca.reembolso.webapi.Controllers
             return Ok(result.Value);
         }
 
+        [HttpPost("RelacionarPerfilTipoDespesa")]
+        public async Task<IActionResult> RelacionarUsuarioCentroCusto(TipoDespesaPerfilAttachCommand tipoDespesaPerfilAttachCommand)
+        {
+            var result = await _mediator.Send(tipoDespesaPerfilAttachCommand);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+        [HttpGet("ListarPorPerfil/{PerfilId}")]
+        public async Task<IActionResult> ListarPorCentroCusto([FromRoute] TipoDespesaByPerfilQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
     }
 }

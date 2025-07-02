@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.VisualBasic;
 using wca.reembolso.domain.Common.Enum;
 
 namespace wca.reembolso.domain.Entities
@@ -8,17 +9,17 @@ namespace wca.reembolso.domain.Entities
     {
         [Column("id")]
         public int Id { get; set; }
-        
-        [Column("nome", TypeName ="varchar(50)")]
+
+        [Column("nome", TypeName = "varchar(50)")]
         public string Nome { get; set; }
 
         [Column("ativo")]
         public bool Ativo { get; set; } = true;
 
-        [Column("tipo", TypeName ="int")]
+        [Column("tipo", TypeName = "int")]
         public EnumTipoDespesaTipo Tipo { get; set; } = EnumTipoDespesaTipo.Consumo;
 
-        [Column("valor", TypeName ="money")]
+        [Column("valor", TypeName = "money")]
         public decimal Valor { get; set; } = decimal.Zero;
 
         [Column("faturar_cliente")]
@@ -29,6 +30,8 @@ namespace wca.reembolso.domain.Entities
 
         [Column("exibir_para_colaborador")]
         public bool ExibirParaColaborador { get; set; } = true;
+
+        public List<PerfilTipoDespesa> Perfil { get; set; } = new List<PerfilTipoDespesa>();
 
     }
 }

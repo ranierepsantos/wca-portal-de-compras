@@ -30,7 +30,7 @@ namespace wca.reembolso.infrastruture.Context
         public DbSet<UsuarioConfiguracoes> UsuarioConfiguracoes { get; set; }
         public DbSet<StatusChatBotMensagem> StatusChatBotMensagem { get; set; }
         //public DbSet<Filial> Filial { get; set; }
-        //public DbSet<FilialUsuario> FilialUsuario { get; set; }
+        public DbSet<PerfilTipoDespesa> PerfilTipoDespesas { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -49,12 +49,12 @@ namespace wca.reembolso.infrastruture.Context
                 .HasOne(c => c.ContaCorrente)
                 .WithOne(t => t.Usuario)
                 .HasPrincipalKey<ContaCorrente>(t => t.UsuarioId);
-                
+
 
             //modelBuilder.Entity<CentroCusto>().HasKey(pk => new { pk.CentroCustoId, pk.ClienteId });
 
             modelBuilder.Entity<CentroCusto>()
-                .HasIndex(entity => new { entity.ClienteId, entity.CentroCustoId})
+                .HasIndex(entity => new { entity.ClienteId, entity.CentroCustoId })
                 .HasDatabaseName("IDX_CentrosDeCustos_ClienteId_CentroCustoId_Unique")
                 .IsUnique();
 
@@ -75,6 +75,7 @@ namespace wca.reembolso.infrastruture.Context
                 .HasIndex(f => new { f.StatusSolicitacaoId, f.EnviarPara })
                 .IsUnique(true);
             
+            modelBuilder.Entity<PerfilTipoDespesa>().HasKey(pk => new { pk.PerfilId, pk.TipoDespesaId });
         }
     }
 }
