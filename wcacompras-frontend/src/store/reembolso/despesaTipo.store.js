@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import api from "@/services/reembolso/tipodespesa.service"
+import perfilService from "@/services/perfil.service";
 
 export class TipoDespesa {
     constructor(data = {})
@@ -12,6 +13,7 @@ export class TipoDespesa {
         this.reembolsarColaborador = data.reembolsarColaborador ?? true;
         this.faturarCliente = data.faturarCliente ?? true;
         this.exibirParaColaborador = data.exibirParaColaborador ?? true;
+        this.perfils = []
 
     }
 }
@@ -29,7 +31,7 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
         try {
             
             let response = await api.create(data);
-            console.log(response);
+            return response;
 
         } catch (error) {
             throw error
@@ -50,7 +52,7 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
         try {
             
             let response = await api.update(data);
-            console.log(response);
+            return response;
 
         } catch (error) {
             throw error
@@ -66,6 +68,38 @@ export const useDespesaTipoStore = defineStore("despesaTipo", {
     },
     getTipoDespesa(tipo) {
         return this.tipoDespesaTipo.find(p => p.value == tipo)
+    },
+
+    async getListByPerfil(perfilId) 
+    {
+        let response = await api.listByPerfil(perfilId);
+        return response.data
+    },
+
+    async relateToProfile(data) {
+        return await api.relateToProfile(data);
+    },
+
+    async getProfiles(tipoDespesaId)
+    {
+        try {
+            
+            let response =  await perfilService.toList()
+            let perfis = response.data;
+
+            response = await api.ListPerfilIdsByTipoDespesa(tipoDespesaId)
+            let tipoDespesaProfiles = response.data;
+
+            let list = perfis.filter(p => 
+                {return tipoDespesaProfiles.includes(p.value) }
+            )
+
+            return list;
+
+        } catch (error) {
+            throw error
+        }  
     }
+
   },
 });

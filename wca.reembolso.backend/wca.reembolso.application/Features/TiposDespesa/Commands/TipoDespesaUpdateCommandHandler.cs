@@ -17,6 +17,7 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
         string Nome,
         bool Ativo,
         EnumTipoDespesaTipo Tipo,
+        int[] Perfils, 
         decimal Valor = 0,
         bool FaturarCliente = true,
         bool ReembolsarColaborador = true,
@@ -63,6 +64,21 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
 
             //4. atualizar e salvar
             _repository.TipoDespesaRepository.Update(tipoDespesa);
+
+            //5. vincular os perfil's ao tipo de despesa
+            await _repository.ExecuteCommandAsync($"DELETE FROM Perfil_TipoDespesa WHERE tipodespesa_id = {tipoDespesa.Id}");
+
+            for (int idx = 0; idx < request.Perfils.Length; idx++)
+            {
+                PerfilTipoDespesa perfilTipoDespesa = new()
+                {
+                    PerfilId = request.Perfils[idx],
+                    TipoDespesaId = tipoDespesa.Id,
+                };
+                _repository.GetDbSet<PerfilTipoDespesa>().Add(perfilTipoDespesa);
+            }
+
+
             await _repository.SaveAsync();
 
             return _mapper.Map<TipoDespesaResponse>(tipoDespesa);

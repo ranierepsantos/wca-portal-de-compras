@@ -11,9 +11,10 @@ using wca.reembolso.domain.Entities;
 namespace wca.reembolso.application.Features.TiposDespesa.Commands
 {
 
-    public record TipoDespesaCreateCommand (
+    public record TipoDespesaCreateCommand(
         string Nome,
         EnumTipoDespesaTipo Tipo,
+        int[] Perfils,
         decimal Valor = 0,
         bool FaturarCliente = true,
         bool ReembolsarColaborador = true,
@@ -49,8 +50,21 @@ namespace wca.reembolso.application.Features.TiposDespesa.Commands
             //2. mapear para entidade
             TipoDespesa tipoDespesa = _mapper.Map<TipoDespesa>(request);
 
+            
+            //4. vincular os perfil's ao tipo de despesa
+            for (int idx = 0; idx < request.Perfils.Length; idx++)
+            {
+                PerfilTipoDespesa perfilTipoDespesa = new()
+                {
+                    PerfilId = request.Perfils[idx],
+                    TipoDespesaId =tipoDespesa.Id,
+                };
+                tipoDespesa.Perfil.Add(perfilTipoDespesa);
+            }
+            
             //3. criar e salvar
-            _repository.TipoDespesaRepository.Create(tipoDespesa);
+            _repository.TipoDespesaRepository.Attach(tipoDespesa);
+
             await _repository.SaveAsync();
 
             return _mapper.Map<TipoDespesaResponse>(tipoDespesa);

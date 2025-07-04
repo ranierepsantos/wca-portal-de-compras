@@ -1,4 +1,5 @@
 ﻿using wca.reembolso.domain.Common.Enum;
+using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.TiposDespesa.Common
 {
@@ -11,5 +12,9 @@ namespace wca.reembolso.application.Features.TiposDespesa.Common
         bool FaturarCliente,
         bool ReembolsarColaborador,
         bool ExibirParaColaborador
+    );
+
+    public record TipoDespesaListPerfilResponse(
+        List<PerfilTipoDespesa> Perfil
     );
 }

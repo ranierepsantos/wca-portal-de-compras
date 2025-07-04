@@ -6,6 +6,9 @@ const rotas = {
     GetById: "TipoDespesa",
     ToComboList: "TipoDespesa/ToComboList",
     Paginar: "TipoDespesa/Paginar",
+    ListarPorPerfil: "TipoDespesa/ListarPorPerfil",
+    RelacionarPerfilTipoDespesa: "TipoDespesa/RelacionarPerfilTipoDespesa",
+    ListarPerfilIdsPorTipoDespesa: "TipoDespesa/ListaPerfilIds",
 }
 
 export default {
@@ -37,6 +40,20 @@ export default {
             termo: termo
         }
         return api.get(rotas.Paginar, {params: parametros} );
+    },
+
+    listByPerfil(perfilId) {
+        return api.get(`${rotas.ListarPorPerfil}/${perfilId}`);
+    },
+
+    relateToProfile(data) {
+        return api.post(`${rotas.RelacionarPerfilTipoDespesa}`, data);
+    },
+
+    ListPerfilIdsByTipoDespesa(tipoDespesaId) {
+        return api.get(`${rotas.ListarPerfilIdsPorTipoDespesa}/${tipoDespesaId}`);
     }
+
+
     
 }

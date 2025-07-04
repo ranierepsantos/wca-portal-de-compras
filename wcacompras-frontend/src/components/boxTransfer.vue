@@ -36,7 +36,7 @@
               @click="item.selected = !item.selected"
               :active="item.selected"
             >
-              <v-list-item-title>{{ item.text }}</v-list-item-title>
+              <v-list-item-title class="text-left">{{ item.text }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-card-text>
@@ -120,7 +120,7 @@
               :active="item.selected"
               @click="item.selected = !item.selected"
             >
-              <v-list-item-title>{{ item.text }}</v-list-item-title>
+              <v-list-item-title class="text-left">{{ item.text }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-card-text>

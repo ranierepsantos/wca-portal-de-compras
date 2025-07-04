@@ -48,21 +48,29 @@
               
             </v-row>
             <v-row>
-              <v-col>
+              <!-- <v-col>
                 <v-checkbox v-model="model.exibirParaColaborador" label="Exibe para colaborador" color="primary" density="compact" :hide-details="true"></v-checkbox>
-              </v-col>
+              </v-col> -->
               <v-col>
                 <v-checkbox v-model="model.reembolsarColaborador" label="Reembolsa colaborador" color="primary" density="compact" :hide-details="true"></v-checkbox>
               </v-col>
-            </v-row>
-            <v-row>
               <v-col>
                 <v-checkbox v-model="model.faturarCliente" label="Faturar cliente" color="primary" density="compact" :hide-details="true"></v-checkbox>
               </v-col>
               <v-col>
                 <v-checkbox v-show="model.id > 0" v-model="model.ativo" label="Ativo" color="primary" density="compact" :hide-details="true"></v-checkbox>
               </v-col>
-              
+            </v-row>
+            <v-row>
+              <v-col>
+                <box-transfer
+                      :list-origem="perfilList"
+                      :list-destino="model.perfils"
+                      list-origem-titulo="Selecione o Perfil"
+                      list-destino-titulo="Perfil(s) que podem visualizar"
+                      :show-search-text="false"
+                    />
+              </v-col>
             </v-row>
 
             <v-row>
@@ -86,7 +94,7 @@
           <th class="text-center text-grey">ATIVO</th>
           <th class="text-center text-grey">REEMSOLSA COLAB.</th>
           <th class="text-center text-grey">FATURA CLIENTE</th>
-          <th class="text-center text-grey">EXIBE COLAB.</th>
+          <!-- <th class="text-center text-grey">EXIBE COLAB.</th> -->
           <th></th>
         </tr>
       </thead>
@@ -110,10 +118,10 @@
             <v-icon :icon="item.faturarCliente ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="item.faturarCliente ? 'success' : 'error'"></v-icon>
           </td>
-          <td class="text-center">
+          <!-- <td class="text-center">
             <v-icon :icon="item.exibirParaColaborador ? 'mdi-check' : 'mdi-close'" variant="plain"
               :color="item.exibirParaColaborador ? 'success' : 'error'"></v-icon>
-          </td>
+          </td> -->
           <td class="text-right">
             <v-btn icon="mdi-lead-pencil" variant="plain" color="primary" @click="editar(item)"></v-btn>
             <v-btn variant="plain" :color="item.ativo ? 'error' : 'success'"
@@ -125,7 +133,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="8">
+          <td colspan="7">
             <v-pagination v-model="page" :length="totalPages" :total-visible="4"></v-pagination>
           </td>
         </tr>
@@ -135,14 +143,14 @@
 </template>
   
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import { ref, onMounted, watch, inject, useCssModule } from "vue";
 import handleErrors from "@/helpers/HandleErrors"
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import { useDespesaTipoStore, TipoDespesa } from "@/store/reembolso/despesaTipo.store";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import { formatToCurrencyBRL } from "@/helpers/functions";
-import { computed } from "vue";
-
+import boxTransfer from "@/components/boxTransfer.vue";
+import perfilService from "@/services/perfil.service";
 //DATA
 const page = ref(1);
 const pageSize = process.env.VUE_APP_PAGE_SIZE;
@@ -155,12 +163,15 @@ const dialog = ref(false);
 const swal = inject("$swal");
 const model = ref(new TipoDespesa());
 const despesaTipoStore = useDespesaTipoStore();
+const perfilList = ref([])
+const listPerfil = ref([])
 
 const form = ref(null)
 
 //VUE METHODS
 onMounted(async () =>
 {
+  listPerfil.value = (await perfilService.toList()).data;
   clearModel();
   await getItems();
 });
@@ -175,6 +186,7 @@ function clearModel()
 {
   dialogTitle.value = "Novo Tipo";
   model.value = new TipoDespesa();
+  perfilList.value = listPerfil.value.map(m => ({value: m.value, text: m.text, selected: false}));
 }
 
 function closeDialog()
@@ -184,9 +196,13 @@ function closeDialog()
   clearModel();
 }
 
-function editar(item)
+async function editar(item)
 {
-  model.value = { ...item };
+  perfilList.value =  listPerfil.value.map(m => ({value: m.value, text: m.text, selected: false}));
+  let perfils = await despesaTipoStore.getProfiles(item.id);
+  model.value = { ...item, perfils: perfils};
+  perfilListRemove()
+
   dialogTitle.value = "Editar Tipo";
   dialog.value = true;
 }
@@ -265,6 +281,7 @@ async function salvar()
     if (valid)
     {
       let data = {...model.value};
+      data.perfils = data.perfils.map(p => p.value);
       if (data.id == 0)
       {
         await despesaTipoStore.add(data)
@@ -288,6 +305,16 @@ async function salvar()
   {
     console.log("tipoDespesa.error:", error);
     handleErrors(error)
+  }
+}
+
+function perfilListRemove(removerTodos = false) {
+  if (removerTodos == true) perfilList.value.splice(0, perfilList.value.length);
+  else {
+    model.value.perfils.forEach((cc) => {
+      let index = perfilList.value.findIndex((c) => c.value == cc.value);
+      if (index > -1) perfilList.value.splice(index, 1);
+    });
   }
 }
 

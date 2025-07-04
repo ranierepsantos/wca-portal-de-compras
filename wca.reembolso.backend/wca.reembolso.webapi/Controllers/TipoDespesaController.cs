@@ -77,7 +77,18 @@ namespace wca.reembolso.webapi.Controllers
         }
 
         [HttpGet("ListarPorPerfil/{PerfilId}")]
-        public async Task<IActionResult> ListarPorCentroCusto([FromRoute] TipoDespesaByPerfilQuery query)
+        public async Task<IActionResult> ListarPorPerfil([FromRoute] TipoDespesaByPerfilQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return Ok(result.Value);
+        }
+
+
+        [HttpGet("ListaPerfilIds/{TipoDespesaId}")]
+        public async Task<IActionResult> ListarPerfilId([FromRoute] TipoDespesaGetPerfilListIdsQuery query)
         {
             var result = await _mediator.Send(query);
 

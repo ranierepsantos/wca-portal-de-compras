@@ -653,7 +653,9 @@ onMounted(async () => {
     isBusy.value = true;
     usuario.value = await useUsuarioStore().getById(authStore.user.id);
     clientes.value = await clienteStore.ListByUsuario(usuario.value.id);
-    despesaTipos.value = await despesaTipoStore.toComboList(isColaborador.value);
+    //despesaTipos.value = await despesaTipoStore.toComboList(isColaborador.value);
+    despesaTipos.value = await despesaTipoStore.getListByPerfil(authStore.sistema.perfil.id);
+    //despesaTipos.value = await despesaTipoStore.getListByPerfil(authStore.sistema.perfil.id);
     solicitacaoTipos.value = solicitacaoStore.tipoSolicitacao
 
     if (isColaborador.value)
