@@ -27,7 +27,8 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             {
                 string sql = "SELECT id,cliente_id,data_solicitacao,colaborador_id,CentroCustoId,colaborador_cargo," +
                               "       projeto,objetivo,periodo_inicial,periodo_final,valor_adiantamento,valor_despesa," +
-                              "       tipo_solicitacao,StatusSolicitacaoId,StatusAnteriorId,data_status " +
+                              "       tipo_solicitacao,StatusSolicitacaoId,StatusAnteriorId, data_status, " +
+                              "       data_entrega, marca, valor_unitario, quantidade, valor_frete, data_prevista_entrega, descricao " +
                               "FROM Solicitacoes (nolock) " +
                               "WHERE StatusSolicitacaoId = 3" +
                               "  AND DATEDIFF(day, data_status, getdate()) > 30";
