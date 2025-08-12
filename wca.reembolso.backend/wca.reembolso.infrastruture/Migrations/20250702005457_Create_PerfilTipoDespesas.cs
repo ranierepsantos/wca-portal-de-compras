@@ -10,14 +10,6 @@ namespace wca.reembolso.infrastruture.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "objetivo",
-                table: "Solicitacoes",
-                type: "varchar(100)",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "varchar(1000)");
-
             migrationBuilder.CreateTable(
                 name: "Perfil_TipoDespesa",
                 columns: table => new
@@ -47,14 +39,6 @@ namespace wca.reembolso.infrastruture.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Perfil_TipoDespesa");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "objetivo",
-                table: "Solicitacoes",
-                type: "varchar(1000)",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "varchar(100)");
         }
     }
 }
