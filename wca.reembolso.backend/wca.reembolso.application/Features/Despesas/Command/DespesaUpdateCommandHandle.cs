@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
-using wca.reembolso.application.Features.Clientes.Commands;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Despesas.Command
@@ -34,12 +33,14 @@ namespace wca.reembolso.application.Features.Despesas.Command
         private readonly IMapper _mapper;
         private readonly IRepositoryManager _rm;
         private ILogger<DespesaUpdateCommandHandle> _logger;
+        private readonly HandleFile _handleFile;
 
-        public DespesaUpdateCommandHandle(IMapper mapper, IRepositoryManager rm, ILogger<DespesaUpdateCommandHandle> logger)
+        public DespesaUpdateCommandHandle(IMapper mapper, IRepositoryManager rm, ILogger<DespesaUpdateCommandHandle> logger, HandleFile handleFile)
         {
             _mapper = mapper;
             _rm = rm;
             _logger = logger;
+            _handleFile = handleFile;
         }
 
         public async Task<ErrorOr<Despesa>> Handle(DespesaUpdateCommand request, CancellationToken cancellationToken)
@@ -56,11 +57,11 @@ namespace wca.reembolso.application.Features.Despesas.Command
 
                 string imagePath = despesa.ImagePath;
 
-                if (HandleFile.IsBase64(request.ImagePath))
+                if (_handleFile.IsBase64(request.ImagePath))
                 {
-                    HandleFile.DeleteFile(despesa.ImagePath);
+                    await _handleFile.DeleteFileAsync(despesa.ImagePath);
 
-                    imagePath = HandleFile.SaveFile(request.ImagePath);
+                    imagePath = await _handleFile.SaveFileAsync(request.ImagePath);
                 }
 
                 despesa = _mapper.Map<Despesa>(request);

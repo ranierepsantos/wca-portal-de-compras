@@ -43,13 +43,16 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         private readonly IMapper _mapper;
         private readonly ILogger<SolicitacaoUpdateCommandHandler> _logger;
         private readonly IChatBotMessageHandle _chatbot;
-        public SolicitacaoUpdateCommandHandler(IMediator mediator, IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoUpdateCommandHandler> logger, IChatBotMessageHandle chatbot)
+        private readonly HandleFile _handleFile;
+
+        public SolicitacaoUpdateCommandHandler(IMediator mediator, IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoUpdateCommandHandler> logger, IChatBotMessageHandle chatbot, HandleFile handleFile)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
             _chatbot = chatbot;
+            _handleFile = handleFile;
         }
 
         async Task<ErrorOr<SolicitacaoResponse>> IRequestHandler<SolicitacaoUpdateCommand, ErrorOr<SolicitacaoResponse>>.Handle(SolicitacaoUpdateCommand request, CancellationToken cancellationToken)
@@ -85,7 +88,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 var despesa = _repository.DespesaRepository.ToQuery().Where(q => q.Id.Equals(item.Id)).FirstOrDefault();
                 if (despesa != null)
                 {
-                    HandleFile.DeleteFile(despesa.ImagePath);
+                    await _handleFile.DeleteFileAsync(despesa.ImagePath);
                     _repository.DespesaRepository.Delete(despesa);
                 }
             }
@@ -99,16 +102,16 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
 
             for (int idx = 0; idx < removerImagens.Count; idx++)
             {
-                HandleFile.DeleteFile(removerImagens[idx]);
+                await _handleFile.DeleteFileAsync(removerImagens[idx]);
             }
 
             // salvar imagens de despesas que trocaram imagem ou são novas
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - salvando imagens");
             for (int idx = 0; idx < request.Despesa.Count; idx++)
             {
-                if (HandleFile.IsBase64(request.Despesa[idx].ImagePath))
+                if (_handleFile.IsBase64(request.Despesa[idx].ImagePath))
                 {
-                    request.Despesa[idx].ImagePath = HandleFile.SaveFile(request.Despesa[idx].ImagePath);
+                    request.Despesa[idx].ImagePath = await _handleFile.SaveFileAsync(request.Despesa[idx].ImagePath);
                 }
             }
 

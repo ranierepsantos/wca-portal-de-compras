@@ -37,11 +37,14 @@ namespace wca.reembolso.application.Features.Despesas.Command
         private readonly IMapper _mapper;
         private readonly IRepositoryManager _rm;
         private readonly ILogger<DespesaCreateCommandHandle> _logger;
-        public DespesaCreateCommandHandle(IMapper mapper, IRepositoryManager rm, ILogger<DespesaCreateCommandHandle> logger)
+        private readonly HandleFile _handleFile;
+
+        public DespesaCreateCommandHandle(IMapper mapper, IRepositoryManager rm, ILogger<DespesaCreateCommandHandle> logger, HandleFile handleFile)
         {
             _mapper = mapper;
             _rm = rm;
             _logger = logger;
+            _handleFile = handleFile;
         }
 
         public async Task<ErrorOr<Despesa>> Handle(DespesaCreateCommand request, CancellationToken cancellationToken)
@@ -50,9 +53,9 @@ namespace wca.reembolso.application.Features.Despesas.Command
             {
                 Despesa despesa = _mapper.Map<Despesa>(request);
 
-                if (HandleFile.IsBase64(despesa.ImagePath))
+                if (_handleFile.IsBase64(despesa.ImagePath))
                 {
-                    despesa.ImagePath = HandleFile.SaveFile(despesa.ImagePath);
+                    despesa.ImagePath = await _handleFile.SaveFileAsync(despesa.ImagePath);
                 }
 
                 _rm.DespesaRepository.Create(despesa);

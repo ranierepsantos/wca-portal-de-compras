@@ -48,13 +48,16 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
         private readonly ILogger<SolicitacaoCreateCommandHandler> _logger;
         private readonly IMediator _mediator;
         private readonly IChatBotMessageHandle _chatbot;
-        public SolicitacaoCreateCommandHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger, IMediator mediator, IChatBotMessageHandle chatbot)
+        private readonly HandleFile _handleFile;
+        public SolicitacaoCreateCommandHandler(IRepositoryManager repository, IMapper mapper, ILogger<SolicitacaoCreateCommandHandler> logger, IMediator mediator, 
+            IChatBotMessageHandle chatbot, HandleFile handleFile)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
             _chatbot = chatbot;
+            _handleFile = handleFile;
         }
 
         async Task<ErrorOr<SolicitacaoResponse>> IRequestHandler<SolicitacaoCreateCommand, ErrorOr<SolicitacaoResponse>>.Handle(SolicitacaoCreateCommand request, CancellationToken cancellationToken)
@@ -72,9 +75,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             //2.salvar as imagens das despesas
             for (int idx = 0; idx < request.Despesa.Count; idx++)
             {
-                if (HandleFile.IsBase64(request.Despesa[idx].ImagePath))
+                if (_handleFile.IsBase64(request.Despesa[idx].ImagePath))
                 {
-                    request.Despesa[idx].ImagePath = HandleFile.SaveFile(request.Despesa[idx].ImagePath);
+                    request.Despesa[idx].ImagePath = await _handleFile.SaveFileAsync(request.Despesa[idx].ImagePath);
                 }
             }
 

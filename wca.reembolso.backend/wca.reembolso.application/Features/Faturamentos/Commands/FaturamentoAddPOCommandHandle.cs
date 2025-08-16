@@ -24,13 +24,15 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
         private readonly IMapper _mapper;
         private readonly ILogger<FaturamentoCreateCommandHandle> _logger;
         private readonly IMediator _mediator;
+        private readonly HandleFile _handleFile;
 
-        public FaturamentoAddPOCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<FaturamentoCreateCommandHandle> logger, IMediator mediator)
+        public FaturamentoAddPOCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<FaturamentoCreateCommandHandle> logger, IMediator mediator, HandleFile handleFile)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
             _mediator = mediator;
+            _handleFile = handleFile;
         }
 
         public async Task<ErrorOr<bool>> Handle(FaturamentoAddPOCommand request, CancellationToken cancellationToken)
@@ -51,7 +53,7 @@ namespace wca.reembolso.application.Features.Faturamentos.Commands
             string nomeArquivo = $"faturamento_{faturamento.Id}_po_" + (String.IsNullOrEmpty(request.NumeroPO)? "naoinfo": request.NumeroPO);
 
             faturamento.NumeroPO = request.NumeroPO;
-            faturamento.DocumentoPO = String.IsNullOrEmpty(request.DocumentoPO) == false ? HandleFile.SaveFile(request.DocumentoPO, nomeArquivo) : "";
+            faturamento.DocumentoPO = String.IsNullOrEmpty(request.DocumentoPO) == false ? await _handleFile.SaveFileAsync(request.DocumentoPO, nomeArquivo) : "";
             faturamento.Status = 2;
 
             _repository.FaturamentoRepository.Update(faturamento);
