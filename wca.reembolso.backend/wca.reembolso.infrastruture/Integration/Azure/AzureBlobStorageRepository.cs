@@ -1,4 +1,6 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Identity;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,17 +26,32 @@ namespace wca.reembolso.infrastruture.Integration.Azure
 
         public async Task<string> SalvarArquivoAsync(Stream arquivo, string nomeArquivo)
         {
-            // Este é o código de integração com o Azure Blob Storage!
-            // Ele vive apenas aqui, na camada de Infraestrutura.
+            try
+            {
+                //var credential = new DefaultAzureCredential();
+                // Crie um credential que pula o Azure CLI 
+                //var credential = new ChainedTokenCredential(
+                //    new EnvironmentCredential(),
+                //    new ManagedIdentityCredential(),
+                //    new VisualStudioCredential(),
+                //    new VisualStudioCodeCredential()
+                //);
+                //var blobServiceClient = new BlobServiceClient(new Uri(_connectionString), credential);
+                BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_container);
+                await containerClient.CreateIfNotExistsAsync();
 
-            BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_container);
-            await containerClient.CreateIfNotExistsAsync();
+                BlobClient blobClient = containerClient.GetBlobClient(nomeArquivo);
+                await blobClient.UploadAsync(arquivo, overwrite: true);
 
-            BlobClient blobClient = containerClient.GetBlobClient(nomeArquivo);
-            await blobClient.UploadAsync(arquivo, overwrite: true);
-
-            return blobClient.Uri.ToString(); // Retorna a URL do arquivo
+                return blobClient.Uri.ToString(); // Retorna a URL do arquivo
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao salvar arquivo '{NomeArquivo}' do container '{Container}'.", nomeArquivo, _container);
+                throw;
+            }
+            
         }
 
         // A nova implementação para exclusão.
@@ -42,6 +59,13 @@ namespace wca.reembolso.infrastruture.Integration.Azure
         {
             try
             {
+                //var credential = new ChainedTokenCredential(
+                //    new EnvironmentCredential(),
+                //    new ManagedIdentityCredential(),
+                //    new VisualStudioCredential(),
+                //    new VisualStudioCodeCredential()
+                //);
+                //var blobServiceClient = new BlobServiceClient(new Uri(_connectionString), credential);
                 var blobServiceClient = new BlobServiceClient(_connectionString);
                 var containerClient = blobServiceClient.GetBlobContainerClient(_container);
                 var blobClient = containerClient.GetBlobClient(nomeArquivo);
@@ -64,5 +88,47 @@ namespace wca.reembolso.infrastruture.Integration.Azure
             }
         }
 
+        public string GetTemporaryLink(string nomeArquivo)
+        {
+            try
+            {
+                //var credential = new ChainedTokenCredential(
+                //    new EnvironmentCredential(),
+                //    new ManagedIdentityCredential(),
+                //    new VisualStudioCredential(),
+                //    new VisualStudioCodeCredential()
+                //);
+                //var credential = new DefaultAzureCredential();
+                //var blobServiceClient = new BlobServiceClient(new Uri("https://comprasappsbrsa.blob.core.windows.net"), credential);
+                var blobServiceClient = new BlobServiceClient(_connectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(_container);
+                BlobClient blobClient = containerClient.GetBlobClient(nomeArquivo);
+
+                if (!blobClient.Exists())
+                {
+                    _logger.LogWarning("Arquivo '{NomeArquivo}' não encontrado no container '{Container}'.", nomeArquivo, _container);
+                    throw new Exception($"File not found in storage {nomeArquivo}, container {_container}.");
+                }
+
+                // Cria uma SAS que expira em 5 minutos e permite apenas leitura.
+                BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                {
+                    BlobContainerName = blobClient.BlobContainerName,
+                    BlobName = blobClient.Name,
+                    Resource = "b", // 'b' para blob
+                    ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(10)
+                };
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+
+                return sasUri.ToString();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao gerar link '{NomeArquivo}' do container '{Container}'.", nomeArquivo, _container);
+                throw;
+            }
+        }
     }
 }

@@ -14,5 +14,8 @@ namespace wca.reembolso.domain.Common.Interfaces
 
         // Adicione o método de exclusão. Ele precisa saber o nome do arquivo e o container.
         Task ExcluirArquivoAsync(string nomeArquivo);
+
+        string GetTemporaryLink(string nomeArquivo); 
+
     }
 }

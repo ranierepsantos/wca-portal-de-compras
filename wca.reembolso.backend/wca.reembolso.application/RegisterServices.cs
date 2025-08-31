@@ -18,7 +18,6 @@ namespace wca.reembolso.application
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IChatBotMessageHandle, ChatBotMessageHandle>();
-            services.AddScoped<UploadArquivoHandle>();
             services.AddScoped<HandleFile>();
 
 
