@@ -148,8 +148,10 @@ const listTipoDespesa = ref([])
 onMounted(async () => {
   
   await getPermissoes();
-  let tiposDespesa = await despesaTipoStore.toComboList(false);
-  listTipoDespesa.value = tiposDespesa.map(m => ({value: m.id, text: m.nome}))
+  if (authStore.sistema.id == 2){
+    let tiposDespesa = await despesaTipoStore.toComboList(false);
+    listTipoDespesa.value = tiposDespesa.map(m => ({value: m.id, text: m.nome}))
+  }
 
   if (parseInt(route.query.id) > 0) {
     await getPerfil(route.query.id);
