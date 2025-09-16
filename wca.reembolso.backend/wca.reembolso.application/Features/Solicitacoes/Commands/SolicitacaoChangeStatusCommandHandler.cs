@@ -53,7 +53,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             var dado = _mapper.Map<Solicitacao>(findResult.Value);
 
             if (dado.Status == request.Status.Id)
-                return Error.Failure("Solicitacao.Status", "O status da solicitação sem alteração!");
+                return true;
 
             //armazenar o status anterior
             dado.StatusAnterior = dado.Status;
