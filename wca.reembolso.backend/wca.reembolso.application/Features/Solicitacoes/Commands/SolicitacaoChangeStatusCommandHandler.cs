@@ -52,6 +52,9 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             // atualizar o status
             var dado = _mapper.Map<Solicitacao>(findResult.Value);
 
+            if (dado.Status == request.Status.Id)
+                return Error.Failure("Solicitacao.Status", "O status da solicitação sem alteração!");
+
             //armazenar o status anterior
             dado.StatusAnterior = dado.Status;
             dado.Status = request.Status.Id;
@@ -84,7 +87,7 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 await _chatbot.SolicitacaoSendMessageAsync(request.Notificar, findResult.Value, cancellationToken);
 
             if ((request.Status.Id == 3 || request.Status.Id == 7) &&
-                (request.DataDeposito is not null && request.ValorDeposito is not null))
+                request.DataDeposito is not null && request.ValorDeposito is not null)
                 await _chatbot.DepositoSendMessageAsync(findResult.Value, request.DataDeposito, request.ValorDeposito, cancellationToken);
 
 

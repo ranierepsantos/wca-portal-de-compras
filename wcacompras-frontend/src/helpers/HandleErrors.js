@@ -22,9 +22,14 @@ const handleErrors = (error, customMessage = null) =>
             router.push({ name: "login" })
             return
         } else if (error.response.status === 500) {
-            if (error.response.data.indexOf("System.Exception:") > -1)
+
+            if (error.response.data.hasOwnProperty("title")) {
+                message = error.response.data.title;
+            } else if ( typeof error.response.data == "string" && error.response.data.indexOf("System.Exception:") > -1)
+            {
                 message = error.response.data.toString().split("\r\n")[0].replace("System.Exception: ", "")
-                    .replace("System.Exception: ","");
+                           .replace("System.Exception: ","");
+            }
         } else if (message.indexOf("Cannot delete or update a parent row") > -1) {
             message = "Este dado esta relacionado à outro(s) cadastro(s) e não pode ser excluído!";
         }
