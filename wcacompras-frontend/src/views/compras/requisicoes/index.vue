@@ -209,7 +209,7 @@
               color="info"
               title="Duplicar"
               @click="duplicar(item)"
-              v-show="authStore.hasPermissao('requisicao')"
+              v-show="authStore.hasPermissao('requisicao-duplicar')"
               :disabled="getStatus(item.status).text == 'Cancelado' || isBusy"
             ></v-btn>
             <v-btn
