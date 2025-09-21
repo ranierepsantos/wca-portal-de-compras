@@ -1,13 +1,8 @@
-﻿using Azure.Identity;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO.Compression;
 using wca.reembolso.domain.Common.Interfaces;
 
 namespace wca.reembolso.infrastruture.Integration.Azure
@@ -92,14 +87,6 @@ namespace wca.reembolso.infrastruture.Integration.Azure
         {
             try
             {
-                //var credential = new ChainedTokenCredential(
-                //    new EnvironmentCredential(),
-                //    new ManagedIdentityCredential(),
-                //    new VisualStudioCredential(),
-                //    new VisualStudioCodeCredential()
-                //);
-                //var credential = new DefaultAzureCredential();
-                //var blobServiceClient = new BlobServiceClient(new Uri("https://comprasappsbrsa.blob.core.windows.net"), credential);
                 var blobServiceClient = new BlobServiceClient(_connectionString);
                 var containerClient = blobServiceClient.GetBlobContainerClient(_container);
                 BlobClient blobClient = containerClient.GetBlobClient(nomeArquivo);
@@ -130,5 +117,33 @@ namespace wca.reembolso.infrastruture.Integration.Azure
                 throw;
             }
         }
+
+        public async Task<Stream> GetFileStream(string nomeArquivo)
+        {
+            try
+            {
+                var blobServiceClient = new BlobServiceClient(_connectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(_container);
+                BlobClient blobClient = containerClient.GetBlobClient(nomeArquivo);
+
+                if (!blobClient.Exists())
+                {
+                    _logger.LogWarning("Arquivo '{NomeArquivo}' não encontrado no container '{Container}'.", nomeArquivo, _container);
+                    throw new Exception($"File not found in storage {nomeArquivo}, container {_container}.");
+                }
+
+                var response = await blobClient.DownloadContentAsync();
+
+                return response.Value.Content.ToStream();
+                
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao retornar '{NomeArquivo}' do container '{Container}'.", nomeArquivo, _container);
+                throw;
+            }
+        }
+
+
     }
 }

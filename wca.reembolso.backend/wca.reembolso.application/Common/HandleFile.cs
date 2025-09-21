@@ -18,8 +18,18 @@ namespace wca.reembolso.application.Common
 
         public async Task DeleteFileAsync(string path)
         {
-            string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
-            await _arquivoRepository.ExcluirArquivoAsync(nomeArquivo);
+            if (path.Contains(MyHttpContext.AppBaseUrl))
+            {
+                string fileToExclude = path.Replace(MyHttpContext.AppBaseUrl, "wwwroot");
+                if (File.Exists(fileToExclude))
+                {
+                    File.Delete(fileToExclude);
+                }
+            }else
+            {
+                string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
+                await _arquivoRepository.ExcluirArquivoAsync(nomeArquivo);
+            }
         }
 
         public async Task<string> SaveFileAsync(string base64String, string nomeArquivo = "")
@@ -45,6 +55,13 @@ namespace wca.reembolso.application.Common
             string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
             string temporaryLink = _arquivoRepository.GetTemporaryLink(nomeArquivo);
             return temporaryLink;
+        }
+
+
+        public async Task<Stream> GetFile(string  path)
+        {
+            string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
+            return await _arquivoRepository.GetFileStream(nomeArquivo);
         }
     }
 }
