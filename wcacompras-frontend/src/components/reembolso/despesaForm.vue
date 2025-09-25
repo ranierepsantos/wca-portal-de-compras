@@ -315,13 +315,13 @@
               style="margin-left: auto; margin-right: auto;"
               v-show="despesa.imagePath != ''"
             >
-              <!-- <img
-                :src="despesa.imagePath"
+              <img
+                :src="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`"
                 style="max-width: 100%; height: 520px"
                 v-if="despesa.imagePath.indexOf('pdf') ==-1"
-              /> -->
-              <object :data="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`" width="100%" height="500px">
-                <p>Não foi possível exibir o PDF. <a :href="despesa.imagePath">Clique aqui</a> para download.</p>
+              />
+              <object v-else :data="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`" width="100%" height="500px">
+                <p>Não foi possível exibir o Arquivo. <a :href="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`">Clique aqui</a> para download.</p>
               </object>  
             </div>
             
