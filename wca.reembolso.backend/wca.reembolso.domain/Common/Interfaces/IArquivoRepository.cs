@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using wca.reembolso.domain.Common.dtos;
 
 namespace wca.reembolso.domain.Common.Interfaces
 {
@@ -17,7 +18,7 @@ namespace wca.reembolso.domain.Common.Interfaces
 
         string GetTemporaryLink(string nomeArquivo);
 
-        Task<Stream> GetFileStream(string nomeArquivo);
+        Task<AzureFile> GetFileStream(string nomeArquivo);
 
     }
 }

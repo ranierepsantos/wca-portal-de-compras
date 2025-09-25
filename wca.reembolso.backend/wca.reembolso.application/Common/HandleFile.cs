@@ -1,4 +1,5 @@
-﻿using wca.reembolso.domain.Common.Interfaces;
+﻿using wca.reembolso.domain.Common.dtos;
+using wca.reembolso.domain.Common.Interfaces;
 
 namespace wca.reembolso.application.Common
 {
@@ -58,7 +59,7 @@ namespace wca.reembolso.application.Common
         }
 
 
-        public async Task<Stream> GetFile(string  path)
+        public async Task<AzureFile> GetFile(string  path)
         {
             string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
             return await _arquivoRepository.GetFileStream(nomeArquivo);

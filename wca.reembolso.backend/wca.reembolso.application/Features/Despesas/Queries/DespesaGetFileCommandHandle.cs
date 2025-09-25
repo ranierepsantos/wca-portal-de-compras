@@ -4,13 +4,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using wca.reembolso.application.Common;
 using wca.reembolso.application.Contracts.Persistence;
+using wca.reembolso.domain.Common.dtos;
 using wca.reembolso.domain.Entities;
 
 namespace wca.reembolso.application.Features.Despesas.Queries
 {
-    public record DespesaGetFileQuery(int Id) : IRequest<ErrorOr<Stream>>;
+    public record DespesaGetFileQuery(int Id) : IRequest<ErrorOr<AzureFile>>;
 
-    internal sealed class DespesaGetFileQueryHandle : IRequestHandler<DespesaGetFileQuery, ErrorOr<Stream>>
+    internal sealed class DespesaGetFileQueryHandle : IRequestHandler<DespesaGetFileQuery, ErrorOr<AzureFile>>
     {
         private readonly IRepositoryManager _rm;
         private readonly HandleFile _handleFile;
@@ -21,7 +22,7 @@ namespace wca.reembolso.application.Features.Despesas.Queries
             _handleFile = handleFile;
         }
 
-        public async Task<ErrorOr<Stream>> Handle(DespesaGetFileQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<AzureFile>> Handle(DespesaGetFileQuery request, CancellationToken cancellationToken)
         {
             Despesa? despesa = await _rm.DespesaRepository.ToQuery()
                                 .FirstOrDefaultAsync(q => q.Id.Equals(request.Id), cancellationToken: cancellationToken);

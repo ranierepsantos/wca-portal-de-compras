@@ -190,7 +190,7 @@ namespace wca.reembolso.webapi.Controllers
 
             if (result.IsError) { return Problem(result.Errors); }
 
-            return File(result.Value, "application/octet-stream");
+            return File(result.Value.Data, result.Value.MimeType);
 
         }
     }

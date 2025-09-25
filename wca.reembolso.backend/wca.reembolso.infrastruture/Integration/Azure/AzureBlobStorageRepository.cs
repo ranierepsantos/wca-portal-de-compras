@@ -3,6 +3,7 @@ using Azure.Storage.Sas;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.IO.Compression;
+using wca.reembolso.domain.Common.dtos;
 using wca.reembolso.domain.Common.Interfaces;
 
 namespace wca.reembolso.infrastruture.Integration.Azure
@@ -46,7 +47,7 @@ namespace wca.reembolso.infrastruture.Integration.Azure
                 _logger.LogError(ex, "Erro ao salvar arquivo '{NomeArquivo}' do container '{Container}'.", nomeArquivo, _container);
                 throw;
             }
-            
+
         }
 
         // A nova implementação para exclusão.
@@ -118,7 +119,7 @@ namespace wca.reembolso.infrastruture.Integration.Azure
             }
         }
 
-        public async Task<Stream> GetFileStream(string nomeArquivo)
+        public async Task<AzureFile> GetFileStream(string nomeArquivo)
         {
             try
             {
@@ -131,12 +132,17 @@ namespace wca.reembolso.infrastruture.Integration.Azure
                     _logger.LogWarning("Arquivo '{NomeArquivo}' não encontrado no container '{Container}'.", nomeArquivo, _container);
                     throw new Exception($"File not found in storage {nomeArquivo}, container {_container}.");
                 }
-
+                var mimeType = GetMimeType(nomeArquivo);
                 var stream = await blobClient.OpenReadAsync();
 
                 // Retorna o arquivo com o MIME type correto e dinâmico
-                return stream;
-                
+                return new AzureFile()
+                {
+                    Data = stream,
+                    Name = nomeArquivo,
+                    MimeType = mimeType
+                };
+
             }
             catch (Exception ex)
             {
@@ -145,6 +151,31 @@ namespace wca.reembolso.infrastruture.Integration.Azure
             }
         }
 
-
+        private string GetMimeType(string fileName)
+        {
+            string extension = Path.GetExtension(fileName).ToLowerInvariant();
+            
+            // Mapeia as extensões mais comuns para seus respectivos MIME types
+            switch (extension)
+            {
+                case ".pdf":
+                    return "application/pdf";
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                case ".doc":
+                    return "application/msword";
+                case ".docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                default:
+                    // Se o tipo for desconhecido, use um MIME type genérico
+                    return "application/octet-stream";
+            }
+        }
+    
     }
 }
