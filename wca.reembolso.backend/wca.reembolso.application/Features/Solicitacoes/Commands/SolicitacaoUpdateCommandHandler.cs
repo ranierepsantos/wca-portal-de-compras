@@ -93,24 +93,17 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
                 }
             }
 
-            // excluir imagem de despesa que trocou de imagem
-            // _logger.LogInformation("SolicitacaoUpdateCommandHandler - excluindo imagens que foram trocadas");
-            // List<string> removerImagens = dado.Despesa
-            //     .Where(x => request.Despesa.Where(q => q.Id == x.Id && q.ImagePath != x.ImagePath).Any())
-            //     .Select(f => f.ImagePath)
-            //     .ToList();
-
-            // for (int idx = 0; idx < removerImagens.Count; idx++)
-            // {
-            //     await _handleFile.DeleteFileAsync(removerImagens[idx]);
-            // }
-
-            // salvar imagens de despesas que trocaram imagem ou são novas
+            // salvar / excluir imagens de despesas que trocaram imagem ou são novas
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - salvando imagens");
             for (int idx = 0; idx < request.Despesa.Count; idx++)
             {
                 if (_handleFile.IsBase64(request.Despesa[idx].ImagePath))
                 {
+                    string? imagePath = dado.Despesa.FirstOrDefault(q => q.Id == request.Despesa[idx].Id)?.ImagePath;
+                    if (!string.IsNullOrEmpty(imagePath))
+                        await _handleFile.DeleteFileAsync(imagePath);
+
+
                     request.Despesa[idx].ImagePath = await _handleFile.SaveFileAsync(request.Despesa[idx].ImagePath);
                 }
             }
