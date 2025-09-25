@@ -13,7 +13,7 @@ namespace wca.reembolso.webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+
     public class SolicitacaoController : ApiController
     {
         private readonly IMediator _mediator;
@@ -24,10 +24,10 @@ namespace wca.reembolso.webapi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetById([FromQuery] SolicitacaoByIdQuerie command) 
+        public async Task<IActionResult> GetById([FromQuery] SolicitacaoByIdQuerie command)
         {
             var result = await _mediator.Send(command);
-        
+
             if (result.IsError) { return Problem(result.Errors); }
 
             return Ok(result.Value);
@@ -95,7 +95,7 @@ namespace wca.reembolso.webapi.Controllers
 
         }
 
-        
+
         [HttpPost("RegistrarEvento")]
         public async Task<IActionResult> RegistrarEvento([FromBody] SolicitacaoHistorioCreateCommand command)
         {
@@ -180,6 +180,17 @@ namespace wca.reembolso.webapi.Controllers
             if (result.IsError) { return Problem(result.Errors); }
 
             return new FileStreamResult(result.Value, "application/zip") { FileDownloadName = $"despesas_solicitacao_{query.Id}.zip" };
+
+        }
+        
+        [HttpGet("Despesa/{Id}/file")]
+        public async Task<IActionResult> DespesaGetFile([FromRoute] DespesaGetFileQuery query)
+        {
+            var result = await _mediator.Send(query);
+
+            if (result.IsError) { return Problem(result.Errors); }
+
+            return File(result.Value, "application/pdf");
 
         }
     }

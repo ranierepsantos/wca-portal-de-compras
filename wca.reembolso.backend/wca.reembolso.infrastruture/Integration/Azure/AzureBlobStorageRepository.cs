@@ -132,9 +132,10 @@ namespace wca.reembolso.infrastruture.Integration.Azure
                     throw new Exception($"File not found in storage {nomeArquivo}, container {_container}.");
                 }
 
-                var response = await blobClient.DownloadContentAsync();
+                var stream = await blobClient.OpenReadAsync();
 
-                return response.Value.Content.ToStream();
+                // Retorna o arquivo com o MIME type correto e dinâmico
+                return stream;
                 
             }
             catch (Exception ex)
