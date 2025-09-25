@@ -47,11 +47,11 @@ namespace wca.reembolso.application.Features.Solicitacaos.Queries
 
             // Se o arquivo da despesa estiver armazenado no storage, tem que gerar um link temporário
             //percorre as despesa e gera o link temporário
-            foreach (var item in dado.Despesa)
-            {
-                if (item.ImagePath.Contains(value: _configuration["AzureStorage:urldomain"] ?? "notfoundconfigurldomain"))
-                    item.ImagePath = _handleFile.GetTemporyLink(item.ImagePath);
-            }    
+            // foreach (var item in dado.Despesa)
+            // {
+            //     if (item.ImagePath.Contains(value: _configuration["AzureStorage:urldomain"] ?? "notfoundconfigurldomain"))
+            //         item.ImagePath = _handleFile.GetTemporyLink(item.ImagePath);
+            // }    
 
             return _mapper.Map<SolicitacaoResponse>(dado);
             
