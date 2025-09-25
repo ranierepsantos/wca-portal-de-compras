@@ -94,16 +94,16 @@ namespace wca.reembolso.application.Features.Solicitacoes.Commands
             }
 
             // excluir imagem de despesa que trocou de imagem
-            _logger.LogInformation("SolicitacaoUpdateCommandHandler - excluindo imagens que foram trocadas");
-            List<string> removerImagens = dado.Despesa
-                .Where(x => request.Despesa.Where(q => q.Id == x.Id && q.ImagePath != x.ImagePath).Any())
-                .Select(f => f.ImagePath)
-                .ToList();
+            // _logger.LogInformation("SolicitacaoUpdateCommandHandler - excluindo imagens que foram trocadas");
+            // List<string> removerImagens = dado.Despesa
+            //     .Where(x => request.Despesa.Where(q => q.Id == x.Id && q.ImagePath != x.ImagePath).Any())
+            //     .Select(f => f.ImagePath)
+            //     .ToList();
 
-            for (int idx = 0; idx < removerImagens.Count; idx++)
-            {
-                await _handleFile.DeleteFileAsync(removerImagens[idx]);
-            }
+            // for (int idx = 0; idx < removerImagens.Count; idx++)
+            // {
+            //     await _handleFile.DeleteFileAsync(removerImagens[idx]);
+            // }
 
             // salvar imagens de despesas que trocaram imagem ou são novas
             _logger.LogInformation("SolicitacaoUpdateCommandHandler - salvando imagens");
