@@ -320,7 +320,7 @@
                 style="max-width: 100%; height: 520px"
                 v-if="despesa.imagePath.indexOf('pdf') ==-1"
               />
-              <object v-else :data="process.env.VUE_APP_REEMBOLSO_API_URL + `/Solicitacao/Despesa/${despesa.id}/file`" type="application/pdf" width="100%" height="500px">
+              <object v-else :data="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`" width="100%" height="500px">
                 <p>Não foi possível exibir o PDF. <a :href="despesa.imagePath">Clique aqui</a> para download.</p>
               </object>  
             </div>
@@ -378,6 +378,7 @@ const props = defineProps({
   },
   canAprove: {type: Boolean, default: false}
 });
+const reembolsoApi = process.env.VUE_APP_REEMBOLSO_API_URL;
 const openAprovacaoForm = ref(false)
 const despesaForm = ref(null);
 const emit = defineEmits(["cancelaClick", "changeImage", "changeValor", "saveClick"]);
