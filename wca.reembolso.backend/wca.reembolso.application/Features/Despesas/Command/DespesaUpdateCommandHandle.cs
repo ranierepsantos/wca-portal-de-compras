@@ -57,9 +57,10 @@ namespace wca.reembolso.application.Features.Despesas.Command
 
                 string imagePath = despesa.ImagePath;
 
-                if (_handleFile.IsBase64(request.ImagePath))
+                if (!string.IsNullOrWhiteSpace(request.ImagePath) && _handleFile.IsBase64(request.ImagePath))
                 {
-                    await _handleFile.DeleteFileAsync(despesa.ImagePath);
+                    if (!string.IsNullOrWhiteSpace(despesa.ImagePath))
+                        await _handleFile.DeleteFileAsync(despesa.ImagePath);
 
                     imagePath = await _handleFile.SaveFileAsync(request.ImagePath);
                 }
