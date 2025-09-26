@@ -316,11 +316,11 @@
               v-show="despesa.imagePath != ''"
             >
               <img
-                :src="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`"
+                :src="despesaFile"
                 style="max-width: 100%; height: 520px"
                 v-if="despesa.imagePath.indexOf('pdf') ==-1"
               />
-              <object v-else :data="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`" width="100%" height="500px">
+              <object v-else :data="despesaFile" width="100%" height="500px">
                 <p>Não foi possível exibir o Arquivo. <a :href="`${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`">Clique aqui</a> para download.</p>
               </object>  
             </div>
@@ -389,6 +389,16 @@ const tipoEscolhido = ref({
   valor: 0
 })
 const isFileInvalid = ref(false);
+
+const despesaFile = computed(() => {
+  if (props.despesa.imagePath.indexOf('data:') > -1)
+    return props.despesa.imagePath;
+  else
+    return `${reembolsoApi}/Solicitacao/Despesa/${props.despesa.id}/file`
+
+})
+
+
 watch( () => tipoEscolhido.value.tipo, (novoTipo, oldTipo) => {
   if (!props.readOnly && oldTipo !=0) {
     if (novoTipo == 1) {
