@@ -30,6 +30,7 @@ namespace wca.reembolso.application.Features.TiposDespesa.Queries
             var items = await _repository.TipoDespesaRepository.ToQuery()
                             .Include(x => x.Perfil)
                             .Where(q => q.Perfil.Any(p => p.PerfilId == request.PerfilId))
+                            .OrderBy(x => x.Nome)
                             .ToListAsync();
 
             return _mapper.Map<List<TipoDespesaResponse>>(items);
