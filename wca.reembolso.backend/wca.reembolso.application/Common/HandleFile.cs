@@ -26,7 +26,8 @@ namespace wca.reembolso.application.Common
                 {
                     File.Delete(fileToExclude);
                 }
-            }else
+            }
+            else
             {
                 string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
                 await _arquivoRepository.ExcluirArquivoAsync(nomeArquivo);
@@ -40,9 +41,9 @@ namespace wca.reembolso.application.Common
 
             if (string.IsNullOrEmpty(nomeArquivo))
             {
-                nomeArquivo = Guid.NewGuid().ToString() + '.'+ extension;
+                nomeArquivo = Guid.NewGuid().ToString() + '.' + extension;
             }
-                
+
 
             byte[] bytes = Convert.FromBase64String(arquivo);
             using var stream = new MemoryStream(bytes);
@@ -59,10 +60,57 @@ namespace wca.reembolso.application.Common
         }
 
 
-        public async Task<AzureFile> GetFile(string  path)
+        public async Task<AzureFile> GetFile(string path)
         {
-            string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
-            return await _arquivoRepository.GetFileStream(nomeArquivo);
+            if (path.Contains(MyHttpContext.AppBaseUrl))
+            {
+                string filePath = path.Replace(MyHttpContext.AppBaseUrl, "wwwroot");
+                FileStream fileStream = new(
+                    filePath,
+                    FileMode.Open,
+                    FileAccess.Read
+                );
+                string mimeType = GetMimeType(filePath);
+                return new AzureFile()
+                {
+                    Data = fileStream,
+                    Name = Path.GetFileName(new Uri(path).AbsolutePath),
+                    MimeType = mimeType
+                };
+            }
+            else
+            {
+                string nomeArquivo = Path.GetFileName(new Uri(path).AbsolutePath);
+                return await _arquivoRepository.GetFileStream(nomeArquivo);
+            }
+
+        }
+        
+        
+        private string GetMimeType(string fileName)
+        {
+            string extension = Path.GetExtension(fileName).ToLowerInvariant();
+            
+            // Mapeia as extensões mais comuns para seus respectivos MIME types
+            switch (extension)
+            {
+                case ".pdf":
+                    return "application/pdf";
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                case ".doc":
+                    return "application/msword";
+                case ".docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                default:
+                    // Se o tipo for desconhecido, use um MIME type genérico
+                    return "application/octet-stream";
+            }
         }
     }
 }
