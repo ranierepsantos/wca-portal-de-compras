@@ -456,10 +456,6 @@ onMounted(async () => {
 });
 
 watch(
-  () => filter.value.page,
-  () => applyFilters()
-);
-watch(
   () => filter.value.filial,
   async () => {
     if (!fromMounted.value) {
