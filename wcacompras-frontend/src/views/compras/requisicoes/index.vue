@@ -457,18 +457,22 @@ onMounted(async () => {
 
 watch(
   () => filter.value.filial,
-  async () => {
+  async (oldValue, newValue) => {
     if (!fromMounted.value) {
       let _filiais = [];
-      if (filter.value.filial != null) _filiais.push(filter.value.filial);
-      filter.value.clienteId = null;
-      filter.value.fornecedorId = null;
-      filter.value.usuarioId = hasPermissionAprovador.value
-        ? null
-        : authStore.user.id;
-      await getClienteToList(_filiais);
-      await getFornecedorToList(_filiais);
-      await getUsuarioToList(_filiais);
+      
+      if (oldValue != newValue) {
+        if (filter.value.filial != null) _filiais.push(filter.value.filial);
+        filter.value.clienteId = null;
+        filter.value.fornecedorId = null;
+        filter.value.usuarioId = hasPermissionAprovador.value
+          ? null
+          : authStore.user.id;
+        await getClienteToList(_filiais);
+        await getFornecedorToList(_filiais);
+        await getUsuarioToList(_filiais);
+      }
+      
     }
   }
 );
