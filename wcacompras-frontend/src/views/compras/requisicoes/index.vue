@@ -473,7 +473,10 @@ watch(
   }
 );
 
-//watch(filter.value, () => getItems());
+watch(
+  () => filter.value.page,
+  () => applyFilters()
+);
 
 //METHODS
 function applyFilters(resetPage = false) {
@@ -517,7 +520,6 @@ async function duplicar(item) {
         item.id,
         authStore.user.id
       );
-      console.log("duplicar.response", response);
       await getItems();
       if (response.data.message == "") {
         swal.fire({
