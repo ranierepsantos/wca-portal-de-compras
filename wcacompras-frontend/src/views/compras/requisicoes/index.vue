@@ -457,11 +457,11 @@ onMounted(async () => {
 
 watch(
   () => filter.value.filial,
-  async (oldValue, newValue) => {
+  async (newValue, oldValue) => {
     if (!fromMounted.value) {
       let _filiais = [];
       
-      if (oldValue != newValue) {
+      if (oldValue !== newValue){
         if (filter.value.filial != null) _filiais.push(filter.value.filial);
         filter.value.clienteId = null;
         filter.value.fornecedorId = null;
