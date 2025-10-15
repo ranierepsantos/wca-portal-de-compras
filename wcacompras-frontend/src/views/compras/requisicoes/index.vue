@@ -475,7 +475,10 @@ watch(
 
 watch(
   () => filter.value.page,
-  () => applyFilters()
+  (oldValue, newValue) =>  {
+    if (oldValue != newValue) applyFilters();
+  } 
+  
 );
 
 //METHODS
@@ -638,6 +641,10 @@ async function getItems() {
     response = await requisicaoService.paginate(pageSize, filtro.page, filtro);
     requisicoes.value = checkItemCarrinho(response.data.items);
     totalPages.value = response.data.totalPages;
+    
+    if (storedFilters) filter.value = storedFilters;
+
+
   } catch (error) {
     console.log("requisicoes.getItems.error:", error.response);
     handleErrors(error);
