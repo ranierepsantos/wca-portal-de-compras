@@ -219,7 +219,7 @@ import { ref, onMounted} from "vue";
 import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
 import { useAuthStore } from "@/store/auth.store";
 import handleErrors from "@/helpers/HandleErrors";
-import { base64ToArrayBuffer, formatToCurrencyBRL } from "@/helpers/functions";
+import { formatToCurrencyBRL } from "@/helpers/functions";
 import { useClienteStore } from "@/store/reembolso/cliente.store";
 import {
   Usuario,
@@ -235,8 +235,9 @@ import { useDespesaTipoStore } from "@/store/reembolso/despesaTipo.store";
 import { compararValor } from "@/helpers/functions";
 import jsPDF from "jspdf";
 import html2canvas from 'html2canvas';
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, degrees } from "pdf-lib";
 import historico from "@/components/reembolso/historico.vue";
+import { markRaw } from "vue";
 
 
 
@@ -252,6 +253,7 @@ const solicitacao = ref(new Solicitacao());
 const despesaTipos = ref([]);
 const usuario = ref(new Usuario());
 const mytest = ref(null)
+const reembolsoApi = process.env.VUE_APP_REEMBOLSO_API_URL;
 //COMPUTED
 
 //VUE FUNCTIONS
@@ -380,34 +382,113 @@ async function baixarComprovantes() {
       let copiedPages = await pdfDoc.copyPages(firstDoc, arrPages);
       copiedPages.forEach((page) => pdfDoc.addPage(page));
 
-      for (let ii = 0; ii < solicitacao.value.despesa.length; ii++)
-      {
-          let _file = solicitacao.value.despesa[ii].imagePath;
-          let secondPdfBytes = await fetch(_file).then(res => res.arrayBuffer())
-          console.log(_file,secondPdfBytes)
-          if (_file.indexOf(".pdf") != -1){
-            let secondDoc = await PDFDocument.load(secondPdfBytes);
-            let secondPage = await pdfDoc.copyPages(secondDoc,secondDoc.getPageIndices());
-            secondPage.forEach((page) => pdfDoc.addPage(page));
-          }else {
+      // for (let ii = 0; ii < solicitacao.value.despesa.length; ii++)
+      // {
+      //     let filePath = solicitacao.value.despesa[ii].imagePath;
+      //     let _file = `${reembolsoApi}/Solicitacao/Despesa/${solicitacao.value.despesa[ii].id}/file`
+      //     let secondPdfBytes = await fetch(_file).then(res => res.arrayBuffer())
+          
+      //     if (filePath.indexOf(".pdf") != -1){
+      //       let secondDoc = await PDFDocument.load(secondPdfBytes);
+      //       let secondPage = await pdfDoc.copyPages(secondDoc,secondDoc.getPageIndices());
+      //       secondPage.forEach((page) => pdfDoc.addPage(page));
+      //     }else {
             
-            let _image = null;
-            if (_file.indexOf(".jpg") != -1 || _file.indexOf(".jpeg") != -1)
-              _image = await pdfDoc.embedJpg(secondPdfBytes)
-            else if (_file.indexOf(".png") != -1 )
-              _image = await pdfDoc.embedPng(secondPdfBytes)
+      //       let _image = null;
+      //       if (filePath.indexOf(".jpg") != -1 || filePath.indexOf(".jpeg") != -1)
+      //         _image = await pdfDoc.embedJpg(secondPdfBytes)
+      //       else if (filePath.indexOf(".png") != -1 )
+      //         _image = await pdfDoc.embedPng(secondPdfBytes)
 
-            if (_image) {
-              const dims = _image.scale(0.25)
-              const page = pdfDoc.addPage()
-              // Draw the JPG image in the center of the page
-              page.drawImage(_image, {
-                x: page.getWidth() / 2 - dims.width / 2,
-                y: page.getHeight() / 2 - dims.height / 2,
-                width: dims.width,
-                height: dims.height,
-              })
-            }
+      //       if (_image) {
+      //         const dims = _image.scale(0.25)
+      //         const page = pdfDoc.addPage()
+      //         // Draw the JPG image in the center of the page
+      //         page.drawImage(_image, {
+      //           x: page.getWidth() / 2 - dims.width / 2,
+      //           y: page.getHeight() / 2 - dims.height / 2,
+      //           width: dims.width,
+      //           height: dims.height,
+      //         })
+      //       }
+      //     }
+      // }
+
+      // Passo 1: Buscar todos os arquivos em paralelo
+      const processamentoDespesas = solicitacao.value.despesa.map(async (despesa) => {
+          const url = `${reembolsoApi}/Solicitacao/Despesa/${despesa.id}/file`;
+          const secondPdfBytes = await fetch(url).then(res => res.arrayBuffer());
+          
+          return {
+              despesa, 
+              secondPdfBytes // Retorna o objeto despesa original e o conteúdo do arquivo
+          };
+      });
+
+      // Aguarda que todas as requisições (Promises) terminem
+      const resultados = await Promise.all(processamentoDespesas);
+
+      // Passo 2: Adicionar os documentos ao PDF (pode ser um loop for...of simples agora)
+      for (const { despesa, secondPdfBytes } of resultados) {
+          
+          const filePath = despesa.imagePath;
+
+          if (filePath.endsWith(".pdf")) {
+              // Lógica para PDF
+              const secondDoc = await PDFDocument.load(secondPdfBytes);
+              const secondPage = await pdfDoc.copyPages(secondDoc, secondDoc.getPageIndices());
+              secondPage.forEach((page) => pdfDoc.addPage(page));
+          } else {
+              // Lógica para Imagens (a mesma do primeiro exemplo)
+              let _image = null;
+              const extension = filePath.slice(filePath.lastIndexOf('.')).toLowerCase();
+
+              if (extension === ".jpg" || extension === ".jpeg") {
+                  _image = await pdfDoc.embedJpg(secondPdfBytes);
+              } else if (extension === ".png") {
+                  _image = await pdfDoc.embedPng(secondPdfBytes);
+              }
+
+              if (_image) {
+                  let dims = _image.scale(0.25); // Escala fixa
+                  let currentImageWidth = dims.width;
+                  let currentImageHeight = dims.height;
+                  let rotationAngle = degrees(0);
+
+                  // Se você vai rotacionar, PRECISA trocar as dimensões para o cálculo de posicionamento!
+                  if (currentImageWidth > currentImageHeight) {
+                      dims = _image.scale(0.15); // Escala fixa
+                      currentImageWidth = dims.width;
+                      currentImageHeight = dims.height;
+                      
+                      // Tenta 270 graus. Se a imagem ficou de ponta-cabeça antes, 270 deve corrigir.
+                      rotationAngle = degrees(270); 
+                      
+                      // CORREÇÃO ESSENCIAL: Inverter largura e altura para o cálculo de 'x' e 'y'
+                      //[currentImageWidth, currentImageHeight] = [currentImageHeight, currentImageWidth];
+                  }
+                  
+                  const page = pdfDoc.addPage();
+                  const MARGEM_ESQUERDA = 50; // Define uma margem de 50 pontos
+                  const MARGEM_TOPO = 50; // Define uma margem de 5 pontos no topo
+
+                  // CORREÇÃO DO 'X' e 'Y':
+                  // X: Centraliza ou usa margem. Para uma margem na direita e esquerda:
+                  let xPos = (page.getWidth() / 2) - (currentImageWidth / 2) - MARGEM_ESQUERDA;// CENTRALIZA HORIZONTALMENTE
+                  if (xPos < 0) xPos = MARGEM_ESQUERDA;
+                  // Y: Posiciona abaixo da margem superior, centralizando o restante
+                  let yPos = (page.getHeight() - currentImageHeight) - currentImageHeight/2 - MARGEM_TOPO;
+                  if (rotationAngle.angle > 0)
+                    yPos = page.getHeight() - MARGEM_TOPO
+
+                  page.drawImage(_image, {
+                      x: xPos,
+                      y: yPos,
+                      width: currentImageWidth,
+                      height: currentImageHeight,
+                      rotate: rotationAngle
+                  });
+              }
           }
       }
 
