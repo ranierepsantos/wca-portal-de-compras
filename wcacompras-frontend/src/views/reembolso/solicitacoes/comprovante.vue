@@ -435,7 +435,7 @@ async function baixarComprovantes() {
 
           if (filePath.endsWith(".pdf")) {
               // Lógica para PDF
-              const secondDoc = await PDFDocument.load(secondPdfBytes);
+              const secondDoc = await PDFDocument.load(secondPdfBytes, { ignoreEncryption: true });
               const secondPage = await pdfDoc.copyPages(secondDoc, secondDoc.getPageIndices());
               secondPage.forEach((page) => pdfDoc.addPage(page));
           } else {
