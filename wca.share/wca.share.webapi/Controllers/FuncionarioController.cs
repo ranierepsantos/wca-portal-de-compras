@@ -75,9 +75,9 @@ namespace wca.share.webapi.Controllers
         }
 
         [HttpGet("CreateFromGI")]
-        public async Task<IActionResult> CreateFromGI()
+        public async Task<IActionResult> CreateFromGI([FromQuery] FuncionarioCreateFromGICommand command)
         {
-            var result = await _mediator.Send(new FuncionarioCreateFromGICommand());
+            var result = await _mediator.Send(command);
             
             if (result.IsError) { return Problem(result.Errors); }
 

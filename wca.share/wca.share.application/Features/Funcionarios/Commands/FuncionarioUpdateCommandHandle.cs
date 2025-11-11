@@ -60,8 +60,8 @@ namespace wca.share.application.Features.Funcionarios.Commands
             Funcionario data = _mapper.Map<Funcionario>(request);
 
             _repository.GetDbSet<Funcionario>().Entry(data).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-
             await _repository.SaveAsync();
+            _repository.GetDbSet<Funcionario>().Entry(data).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
             return _mapper.Map<FuncionarioResponse>(data);
         }

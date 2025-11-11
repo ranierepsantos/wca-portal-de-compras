@@ -44,7 +44,7 @@ namespace wca.share.application.Features.Clientes.Commands
 
         async Task<ErrorOr<ClienteResponse>> IRequestHandler<ClienteUpdateCommand, ErrorOr<ClienteResponse>>.Handle(ClienteUpdateCommand request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
+            //_logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
             //1. validar dados
             UpdateClienteCommandBehavior validator = new UpdateClienteCommandBehavior();
             var validationResult = validator.Validate(request);

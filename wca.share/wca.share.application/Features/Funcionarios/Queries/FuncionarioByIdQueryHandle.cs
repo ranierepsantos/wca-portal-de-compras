@@ -26,7 +26,7 @@ namespace wca.share.application.Features.Funcionarios.Queries
 
         public async Task<ErrorOr<FuncionarioResponse>> Handle(FuncionarioByIdQuery request, CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Buscar pelo id: {request.Id}");
+            //_logger.LogInformation($"Buscar pelo id: {request.Id}");
 
             Funcionario? data = await _repository.GetDbSet<Funcionario>()
                             .Where(q => q.Id.Equals(request.Id))
