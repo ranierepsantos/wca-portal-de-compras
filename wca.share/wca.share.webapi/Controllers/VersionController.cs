@@ -7,7 +7,7 @@ namespace wca.share.webapi.Controllers
         [HttpGet("GetVersion")]
         public IActionResult GetVersion()
         {
-            return Ok("1.5.2");
+            return Ok("1.5.11");
         }
     }
 }
