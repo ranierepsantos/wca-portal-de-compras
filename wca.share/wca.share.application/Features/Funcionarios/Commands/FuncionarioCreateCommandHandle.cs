@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using wca.share.application.Contracts.Persistence;
@@ -28,6 +29,8 @@ namespace wca.share.application.Features.Funcionarios.Commands
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<FuncionarioCreateCommandHandle> _logger;
+        private readonly FuncionarioCreateCommandBehavior _validator = new();
+
 
         public FuncionarioCreateCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<FuncionarioCreateCommandHandle> logger)
         {
@@ -38,25 +41,43 @@ namespace wca.share.application.Features.Funcionarios.Commands
 
         public async Task<ErrorOr<FuncionarioResponse>> Handle(FuncionarioCreateCommand request, CancellationToken cancellationToken)
         {
-            //_logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
-
-            //1. validar dados
-            FuncionarioCreateCommandBehavior validator = new();
-            var validationResult = validator.Validate(request);
+            // 1. Validar dados
+            var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-                var errors = validationResult.Errors.ConvertAll(x => Error.Validation(x.PropertyName, x.ErrorMessage));
+                var errors = validationResult.Errors
+                    .Select(x => Error.Validation(x.PropertyName, x.ErrorMessage))
+                    .ToList();
                 return errors;
             }
 
-            var data = _mapper.Map<Funcionario>(request);
+            // 2. Mapear para entidade
+            var funcionario = _mapper.Map<Funcionario>(request);
 
-            _repository.GetDbSet<Funcionario>().Add(data);
+            // 3. Verificar existência
+            var dbSet = _repository.GetDbSet<Funcionario>();
+            bool exists = await dbSet
+                .AsNoTracking()
+                .AnyAsync(f => f.eSocialMatricula == funcionario.eSocialMatricula, cancellationToken);
 
+            if (exists)
+            {
+                _logger.LogWarning(
+                    "Tentativa de criar funcionário já existente. eSocialMatricula={Matricula}",
+                    funcionario.eSocialMatricula);
+
+                return Error.Conflict(
+                    code: "Funcionario.Duplicado",
+                    description: $"Funcionário com matrícula {funcionario.eSocialMatricula} já existe.");
+            }
+
+            // 4. Persistir
+            dbSet.Add(funcionario);
             await _repository.SaveAsync();
 
-            return _mapper.Map<FuncionarioResponse>(data);
-
+            // 5. Retornar DTO
+            return _mapper.Map<FuncionarioResponse>(funcionario);
         }
+
     }
 }

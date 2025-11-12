@@ -185,7 +185,6 @@ namespace wca.share.application.Features.Funcionarios.Commands
                         Log = $"{ofunc.CodigoFuncionario} - {ofunc.Nome}, código cliente: {cliente.CodigoCliente}, código centro de custo: {ofunc.CodigoCentroCusto}, centro de custo não localizado!",
                         Entidade = "Funcionario"
                     });
-                    // Não é necessário SaveAsync() aqui, o Save final no Handle será suficiente.
                     return;
                 }
 

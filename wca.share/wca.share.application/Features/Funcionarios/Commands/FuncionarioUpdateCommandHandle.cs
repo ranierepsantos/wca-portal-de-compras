@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 using wca.share.application.Contracts.Persistence;
 using wca.share.application.Features.Funcionarios.Behaviors;
 using wca.share.application.Features.Funcionarios.Common;
-using wca.share.application.Features.Funcionarios.Queries;
 using wca.share.domain.Entities;
 
 namespace wca.share.application.Features.Funcionarios.Commands
@@ -24,46 +23,74 @@ namespace wca.share.application.Features.Funcionarios.Commands
         double? NumeroCelular = null,
         string? eSocialMatricula = null
     ) : IRequest<ErrorOr<FuncionarioResponse>>;
-    internal class FuncionarioUpdateCommandHandle : IRequestHandler<FuncionarioUpdateCommand, ErrorOr<FuncionarioResponse>>
+
+    internal class FuncionarioUpdateCommandHandle 
+        : IRequestHandler<FuncionarioUpdateCommand, ErrorOr<FuncionarioResponse>>
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<FuncionarioUpdateCommandHandle> _logger;
-        private readonly IMediator _mediator;
+        private readonly FuncionarioUpdateCommandBehavior _validator = new();
 
-        public FuncionarioUpdateCommandHandle(IRepositoryManager repository, IMapper mapper, ILogger<FuncionarioUpdateCommandHandle> logger, IMediator mediator)
+        public FuncionarioUpdateCommandHandle(
+            IRepositoryManager repository,
+            IMapper mapper,
+            ILogger<FuncionarioUpdateCommandHandle> logger)
         {
             _repository = repository;
             _mapper = mapper;
             _logger = logger;
-            _mediator = mediator;
         }
 
         public async Task<ErrorOr<FuncionarioResponse>> Handle(FuncionarioUpdateCommand request, CancellationToken cancellationToken)
         {
-
-            //_logger.LogInformation($"Parâmetro: {JsonSerializer.Serialize(request)}");
-
-            //1. validar dados
-            FuncionarioUpdateCommandBehavior validator = new();
-            var validationResult = validator.Validate(request);
+            // 1. Validar dados
+            var validationResult = _validator.Validate(request);
             if (!validationResult.IsValid)
             {
-                var errors = validationResult.Errors.ConvertAll(x => Error.Validation(x.PropertyName, x.ErrorMessage));
+                var errors = validationResult.Errors
+                    .Select(x => Error.Validation(x.PropertyName, x.ErrorMessage))
+                    .ToList();
                 return errors;
             }
 
-            //localizar o funcionário
-            var findResult = await _mediator.Send(new FuncionarioByIdQuery(request.Id));
-            if (findResult.IsError) return findResult;
+            var dbSet = _repository.GetDbSet<Funcionario>();
+            // 2. Localizar funcionário
+            var funcionario = await dbSet.FindAsync(new object[] { request.Id }, cancellationToken);
 
-            Funcionario data = _mapper.Map<Funcionario>(request);
+            if (funcionario is null)
+            {
+                _logger.LogWarning("Funcionário não encontrado. Id={Id}", request.Id);
+                return Error.NotFound("Funcionario.NotFound", $"Funcionário {request.Id} não encontrado.");
+            }
 
-            _repository.GetDbSet<Funcionario>().Entry(data).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+            // 3. Verificar duplicidade de matrícula (usando valor do request)
+            if (!string.IsNullOrWhiteSpace(request.eSocialMatricula))
+            {
+                bool exists = await dbSet
+                    .AsNoTracking()
+                    .AnyAsync(f => f.eSocialMatricula == request.eSocialMatricula && f.Id != request.Id, cancellationToken);
+
+                if (exists)
+                {
+                    _logger.LogWarning(
+                        "Tentativa de atualizar funcionário duplicado. Id={Id}, eSocialMatricula={Matricula}",
+                        request.Id, request.eSocialMatricula);
+
+                    return Error.Conflict(
+                        code: "Funcionario.Duplicado",
+                        description: $"Funcionário com matrícula {request.eSocialMatricula} já existe.");
+                }
+            }
+
+            // 4. Atualizar dados
+            _mapper.Map(request, funcionario);
+
             await _repository.SaveAsync();
-            _repository.GetDbSet<Funcionario>().Entry(data).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
-            return _mapper.Map<FuncionarioResponse>(data);
+            // 4. Retornar DTO
+            return _mapper.Map<FuncionarioResponse>(funcionario);
         }
     }
 }
