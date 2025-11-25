@@ -66,23 +66,23 @@
     <v-card-title class="hidden-mobile">
       <v-row style="margin-left: -15px">
           <v-col cols="12" sm="4" class="text-left">
-            <v-icon style="margin-top: -13px"  size="large" icon="mdi-arrow-left" color="primary" @click="router.go(-1)" v-show="backButtonShow"></v-icon>
+            <v-icon style="margin-top: -13px"  size="large" icon="mdi-arrow-left" color="primary" @click.stop.prevent="router.go(-1)" v-show="backButtonShow"></v-icon>
             <span :class="`text-${titleSize} text-primary`">{{ title }}</span>
           </v-col>
           <v-col cols="12" sm="8" class="text-right">
             <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" v-for="(button, index) in buttons"
-              @click="$emit(button.event)" :key="index" :disabled="button.disabled??false" v-show="button.visible ?? true">
+              @click.stop.prevent="$emit(button.event)" :key="index" :disabled="button.disabled??false" v-show="button.visible ?? true">
               <v-icon :icon="button.icon" v-if="button.icon != ''"></v-icon>
               <b>{{ button.text }}</b>
             </v-btn>
             
-            <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" @click="$emit('customClick')"
+            <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" @click.stop.prevent="$emit('customClick')"
               v-show="customButtonShow" :disabled="customButtonDisabled">
               <v-icon :icon="customButtonIcon" v-if="customButtonIcon != ''"></v-icon>
               <b>{{ customButtonText }}</b>
             </v-btn>
             
-            <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" @click="$emit('novoClick')" v-show="showButton">
+            <v-btn color="primary" variant="outlined" class="text-capitalize mr-1" @click.stop.prevent="$emit('novoClick')" v-show="showButton">
               <b>Novo</b>
             </v-btn>
           </v-col>
