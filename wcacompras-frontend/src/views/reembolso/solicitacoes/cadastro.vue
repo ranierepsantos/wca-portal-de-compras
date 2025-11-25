@@ -1163,6 +1163,8 @@ async function registrarPagto(dados) {
 
 async function salvarDespesa() {
   try {
+    if (despesaDisableSaveButton.value) return;
+    
     despesaDisableSaveButton.value = true;
     let tipoDespesa = despesaTipos.value.find(
       (q) => q.id == despesa.value.tipoDespesaId
