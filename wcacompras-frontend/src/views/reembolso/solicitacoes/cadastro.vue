@@ -566,6 +566,7 @@ const dadosDeposito = ref({
 });
 const solicitacaoTipos = ref([])
 const despesaDisableSaveButton = ref(false)
+const isSaveEventRunning = ref(false)
 
 //COMPUTED
 const isReadonly = computed(() => {
@@ -810,6 +811,7 @@ function aprovarReprovarOpen() {
 
 async function aprovarReprovar(isAprovado, comentario) {
   try {
+    if (isRunningEvent.value) return;
     isRunningEvent.value = true;
 
     /**
@@ -958,6 +960,10 @@ async function salvar() {
   try {
     if (saveButton) saveButton.disabled = true;
 
+    if (isSaveEventRunning.value) return;
+
+    isSaveEventRunning.value = true;
+
     let data = { ...solicitacao.value };
 
     // verificar se o limite foi excedido
@@ -1055,7 +1061,8 @@ async function salvar() {
     console.log("solicitacao.cadastro.salvar.erro", error);
     handleErrors(error);
   } finally {
-      if (saveButton) saveButton.disabled = false; 
+      if (saveButton) saveButton.disabled = false;
+      isSaveEventRunning.value = false; 
   }
 }
 
@@ -1083,6 +1090,8 @@ async function abrirDepositoForm() {
 
 async function registrarPagto(dados) {
   try {
+    if (isRunningEvent.value) return;
+
     isRunningEvent.value = true;
     openDepositoForm.value = false;
     let options = {
