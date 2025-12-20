@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using wca.reembolso.application.Features.Faturamentos.Commands;
 using wca.reembolso.application.Features.Faturamentos.Queries;
@@ -90,7 +91,7 @@ namespace wca.reembolso.webapi.Controllers
             return new FileStreamResult(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = $"relatorio_solicitacoes.xlsx" };
 
         }
-
+        [AllowAnonymous]
         [HttpGet("SendChatBotAfterDays/{days}")]
         public async Task<IActionResult> SendChatBotAfterSevenDays(int days)
         {

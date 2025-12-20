@@ -1,9 +1,8 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 using wca.reembolso.application.Features.Despesas.Command;
 using wca.reembolso.application.Features.Despesas.Queries;
-using wca.reembolso.application.Features.Faturamentos.Queries;
 using wca.reembolso.application.Features.SolicitacaoHistoricos.Commands;
 using wca.reembolso.application.Features.Solicitacaos.Queries;
 using wca.reembolso.application.Features.Solicitacoes.Commands;
@@ -161,6 +160,7 @@ namespace wca.reembolso.webapi.Controllers
 
         }
 
+        [AllowAnonymous]
         [HttpGet("ChecarVencidos")]
         public async Task<IActionResult> ChecarVencidos()
         {
