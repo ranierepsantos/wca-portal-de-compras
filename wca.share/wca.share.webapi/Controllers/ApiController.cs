@@ -1,4 +1,5 @@
 ﻿using ErrorOr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -6,6 +7,7 @@ namespace wca.share.webapi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "CanAccessSystem")]
 public class ApiController : ControllerBase
 {
     protected IActionResult Problem(List<Error> errors)

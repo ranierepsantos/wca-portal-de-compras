@@ -13,19 +13,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureDependencyRepository(builder.Configuration);
 builder.Services.ConfigureDependencyService();
 
-//Configuração para utilização de token JWT
-var signingConfiguration = new SigningConfiguration();
-builder.Services.AddSingleton(signingConfiguration);
-
 var tokenConfiguration = new TokenConfiguration();
 new ConfigureFromConfigurationOptions<TokenConfiguration>
     (
         builder.Configuration.GetSection("TokenConfigurations")
     ).Configure(tokenConfiguration);
 
+//Configuraï¿½ï¿½o para utilizaï¿½ï¿½o de token JWT
+var signingConfiguration = new SigningConfiguration(tokenConfiguration.Secret);
+builder.Services.AddSingleton(signingConfiguration);
+
+
 builder.Services.AddSingleton(tokenConfiguration);
 
-//Serviços de autenticação
+//Serviï¿½os de autenticaï¿½ï¿½o
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,7 +35,7 @@ builder.Services.AddAuthentication(options =>
 {
     var paramsValidation = options.TokenValidationParameters;
     paramsValidation.IssuerSigningKey = signingConfiguration.Key;
-    paramsValidation.ValidAudience = tokenConfiguration.Audience;
+    paramsValidation.ValidAudiences = tokenConfiguration.Audience;
     paramsValidation.ValidIssuer = tokenConfiguration.Issuer;
     paramsValidation.ValidateIssuerSigningKey = true;
     paramsValidation.ValidateLifetime = true;
@@ -57,8 +58,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "WCA Gestão de Compras",
-        Description = "Api sistema de gestão de compras"
+        Title = "WCA Gestï¿½o de Compras",
+        Description = "Api sistema de gestï¿½o de compras"
     });
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

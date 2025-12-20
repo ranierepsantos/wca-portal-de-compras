@@ -62,14 +62,20 @@ namespace wca.compras.services
                     return new LoginResponse(false, "Usuário sem acesso a sistemas ativos!", "", "", "", 0, "", null);
                 }
 
+                List<Claim> claims = new List<Claim>();
+
+                foreach(var sistema in sistemas)
+                {
+                    claims.Add(new Claim("sistema", sistema.Nome));
+                }
+                claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+                claims.Add(new Claim("UsuarioNome", authUser.Nome));
+                claims.Add(new Claim("CodigoUsuario", authUser.Id.ToString()));
+
+
                 ClaimsIdentity identity = new ClaimsIdentity(
                     new GenericIdentity(authUser.Email),
-                    new[] {
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("UsuarioNome", authUser.Nome),
-                    new Claim("CodigoUsuario", authUser.Id.ToString()),
-                    //new Claim("Filial",authUser.FilialId.ToString())
-                    }
+                    claims
                 );
 
                 DateTime createDate = DateTime.Now;
@@ -180,7 +186,7 @@ namespace wca.compras.services
             var securityToken = handler.CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = _tokenConfiguration.Issuer,
-                Audience = _tokenConfiguration.Audience,
+                Audience = _tokenConfiguration.Audience[0],
                 SigningCredentials = _signingConfiguration.SigningCredentials,
                 Subject = identity,
                 NotBefore = createDate,
