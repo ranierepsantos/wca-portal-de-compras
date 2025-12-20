@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using wca.share.application.Features.Funcionarios.Commands;
 using wca.share.application.Features.Funcionarios.Queries;
@@ -74,6 +75,7 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
         }
 
+        [AllowAnonymous]
         [HttpGet("CreateFromGI")]
         public async Task<IActionResult> CreateFromGI([FromQuery] FuncionarioCreateFromGICommand command)
         {

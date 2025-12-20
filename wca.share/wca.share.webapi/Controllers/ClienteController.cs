@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using wca.share.application.Features.Clientes.Commands;
 using wca.share.application.Features.Clientes.Queries;
+using Microsoft.AspNetCore.Authorization;
 
 namespace wca.share.webapi.Controllers
 {
@@ -109,6 +110,7 @@ namespace wca.share.webapi.Controllers
             return Ok(result.Value);
         }
 
+        [AllowAnonymous]
         [HttpGet("CreateFromGI")]
         public async Task<IActionResult> CreateFromGI()
         {
