@@ -182,7 +182,8 @@ namespace wca.reembolso.webapi.Controllers
             return new FileStreamResult(result.Value, "application/zip") { FileDownloadName = $"despesas_solicitacao_{query.Id}.zip" };
 
         }
-        
+
+        [AllowAnonymous]
         [HttpGet("Despesa/{Id}/file")]
         public async Task<IActionResult> DespesaGetFile([FromRoute] DespesaGetFileQuery query)
         {
