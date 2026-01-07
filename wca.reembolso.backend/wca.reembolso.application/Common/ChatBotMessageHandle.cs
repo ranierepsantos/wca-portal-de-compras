@@ -62,8 +62,8 @@ namespace wca.reembolso.application.Common
                 foreach (var usuario in usuarios)
                 {
                    var response =  await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
-                    if (!string.IsNullOrEmpty(response.Error))
-                        _logger.LogError($"norgebot.send.error, number: {"55" + usuario?.Celular.ToString()}, error: {response.Error}");
+                    if (!response.data.success)
+                        _logger.LogError($"norgebot.send.error, number: {"55" + usuario?.Celular.ToString()}, error: {response.data.data.response.message}");
                 }
             }
 
@@ -101,16 +101,16 @@ namespace wca.reembolso.application.Common
                     if (message.EnviarPara == (int)EnumNotificaQuem.Usuario && !string.IsNullOrEmpty(solicitacao.ColaboradorCelular))
                     {
                         var response = await _norgeBot.Send("55" + solicitacao.ColaboradorCelular, mensagem);
-                        if (!string.IsNullOrEmpty(response.Error))
-                            _logger.LogError($"norgebot.send.error, number: {"55" + solicitacao.ColaboradorCelular}, error: {response.Error}");
+                        if (!response.data.success)
+                            _logger.LogError($"norgebot.send.error, number: {"55" + solicitacao.ColaboradorCelular.ToString()}, error: {response.data.data.response.message}");
                     }
                     else
                     {
                         foreach(var usuario in usuarios)
                         {
                             var response = await _norgeBot.Send("55" + usuario?.Celular.ToString(), mensagem);
-                            if (!string.IsNullOrEmpty(response.Error))
-                                _logger.LogError($"norgebot.send.error, number: {"55" + usuario?.Celular.ToString()}, error: {response.Error}");
+                            if (!response.data.success)
+                        _logger.LogError($"norgebot.send.error, number: {"55" + usuario?.Celular.ToString()}, error: {response.data.data.response.message}");
                         }
                     }
                 }

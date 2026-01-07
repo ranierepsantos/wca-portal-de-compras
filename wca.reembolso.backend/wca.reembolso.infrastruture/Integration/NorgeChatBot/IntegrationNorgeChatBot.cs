@@ -9,14 +9,14 @@ namespace wca.reembolso.infrastruture.Integration.NorgeChatBot
     {
         private readonly IConfiguration _config;
         private readonly IRefitNorgeChatBotService? _client = null;
-        
+
 
         public IntegrationNorgeChatBot(IConfiguration config)
         {
             _config = config;
             string? chatbotUrl = _config["NorgeChatBot:Url"];
             string? chatbotToken = _config["NorgeChatBot:BearerToken"];
-            HttpClient? _httpClient = new();    
+            HttpClient? _httpClient = new();
             if (!string.IsNullOrEmpty(chatbotUrl) && !string.IsNullOrEmpty(chatbotToken))
             {
                 _httpClient.BaseAddress = new Uri(chatbotUrl);
@@ -28,36 +28,48 @@ namespace wca.reembolso.infrastruture.Integration.NorgeChatBot
             }
         }
 
-        public async Task<Response> Send(string number, string message)
+        public async Task<Rootobject> Send(string number, string message)
         {
             //trazer somente números
             try
             {
                 if (_client is not null)
                 {
-                    number = String.Join("", System.Text.RegularExpressions.Regex.Split(number, @"[^\d]"));
+                    number = string.Join("", System.Text.RegularExpressions.Regex.Split(number, @"[^\d]"));
 
-                    Message _msg = new(number, message);
+                    ChatBotMessage _msg = new(number, message);
                     var response = await _client.SendMessage(_msg);
                     return response;
                 }
-                return new Response()
+                return new Rootobject()
                 {
-                    Error = "Chatbot não configurado"
+                    statusCode = 500,
+                    data = new Data()
+                    {
+                        success = false,
+                        message = "Chatbot não configurado"
+                    }
                 };
             }
             catch (ApiException aex)
             {
-                var response = await aex.GetContentAsAsync<Response>();
+                var response = await aex.GetContentAsAsync<Rootobject>();
                 return response;
-            }catch (Exception ex)
-            {
-                return new Response()
-                {
-                    Error = ex.Message
-                };
             }
-            
+            catch (Exception ex)
+            {
+                return new Rootobject()
+                {
+                    statusCode = 500,
+                    data = new Data()
+                    {
+                        success = false,
+                        message = ex.Message
+                    }
+                };
+
+            }
+
         }
     }
 }

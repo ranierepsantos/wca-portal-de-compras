@@ -2,6 +2,6 @@
 {
     public interface IIntegrationNorgeChatBot
     {
-        Task<Response> Send(string number, string message);
+        Task<Rootobject> Send(string number, string message);
     }
 }
