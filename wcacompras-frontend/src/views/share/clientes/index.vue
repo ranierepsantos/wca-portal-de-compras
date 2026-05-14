@@ -104,11 +104,12 @@ async function enableDisable(item)
             cancelButtonText: "Não",
         }
 
+        let cliente = await clienteStore.getClienteById(item.id);
         let response = await swal.fire(options);
         if (response.isConfirmed)
         {
-            item.ativo = !item.ativo;
-            await clienteStore.updateCliente(item) 
+            cliente.ativo = !item.ativo;
+            await clienteStore.updateCliente(cliente) 
             swal.fire({
                 toast: true,
                 icon: "success",
