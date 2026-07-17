@@ -211,16 +211,6 @@ function setPerfilUsuario(perfilId) {
   }
 }
 
-function usuarioRemoveClienteFromFilial(filialToRemove = []) {
-  let removeCliente = usuario.value.cliente.filter((q) =>
-    filialToRemove.includes(q.filialId),
-  );
-  removeCliente.forEach((r) => {
-    let index = usuario.value.cliente.findIndex((q) => q.value == r.value);
-    usuario.value.cliente.splice(index, 1);
-  });
-}
-
 function getSistemaPerfil(sistemaId) {
   let perfilUsuario = undefined;
   if (
@@ -236,8 +226,11 @@ function getSistemaPerfil(sistemaId) {
 
 async function salvar() {
   try {
+    if (isBusy.value) return;
+
     let { valid } = await userForm.value.validate();
     if (valid) {
+      isBusy.value = true;
       let data = usuario.value;
       if (data.id == 0) {
         await userService.create(data);
@@ -259,6 +252,8 @@ async function salvar() {
   } catch (error) {
     console.log("usuários.error:", error);
     handleErrors(error);
+  } finally {
+    isBusy.value = false;
   }
 }
 
@@ -312,6 +307,8 @@ async function getTipoFornecimentoToList() {
 
 async function getUsuario(usuarioId) {
   try {
+    if (isBusy.value) return;
+
     isBusy.value = true;
     let response = await userService.getById(usuarioId);
     usuario.value = response.data;

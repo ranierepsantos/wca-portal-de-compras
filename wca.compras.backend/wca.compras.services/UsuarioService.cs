@@ -151,7 +151,8 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id, true);
+                var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == usuario.Id, true)
+                .AsSplitQuery();
 
                 query = query.Include("UsuarioSistemaPerfil")
                              .Include(c =>  c.Filial.Where(q =>  q.SistemaId.Equals(sistemaId)))
