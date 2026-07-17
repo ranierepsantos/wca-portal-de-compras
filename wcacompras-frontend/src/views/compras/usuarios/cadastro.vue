@@ -159,7 +159,6 @@ const userFilialIds = computed(() =>
 // );
 
 watch(userFilialIds, async (novosId) => {
-  debugger
   const currentRequest = ++requestId;
 
   if (novosId.length === 0) {
