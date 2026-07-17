@@ -65,11 +65,12 @@ namespace wca.compras.services
             try
             {
                 var query = _rm.UsuarioRepository.SelectByCondition(u => u.Id == id)
+                               .AsSplitQuery()
                                .Include(q => q.Filial.Where(c =>  c.SistemaId == sistemaId))
                                .Include(q => q.UsuarioSistemaPerfil.Where(c => c.SistemaId == sistemaId))
                                .Include(q => q.UsuarioConfiguracoes.Where(c => c.SistemaId == sistemaId));
-
-                Usuario data = new Usuario();
+                               
+                Usuario data = new();
 
                 if (sistemaId == 1) 
                     data = await GetDataToCompras(query);
@@ -257,7 +258,8 @@ namespace wca.compras.services
         {
             try
             {
-                var query = _rm.UsuarioRepository.SelectAll();
+                var query = _rm.UsuarioRepository.SelectAll()
+                            .AsSplitQuery();
                 
                 if (!string.IsNullOrEmpty(termo))
                 {
@@ -359,7 +361,7 @@ namespace wca.compras.services
 
         private async Task<Usuario> GetDataToCompras(IQueryable<Usuario> query)
         {
-            var data = await query.Include("Cliente")
+            var data = await query.Include(u => u.Cliente)
                                   .Include(u => u.TipoFornecimento)
                                   .FirstOrDefaultAsync();
             return data;

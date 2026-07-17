@@ -12,44 +12,44 @@
         <v-card-text>
           <v-form @submit.prevent="salvar()" ref="userForm">
             <usuario-form :user="usuario" :list-filial="filiais"></usuario-form>
-                <v-row style="margin-top: 3px;">
-                  <v-col>
-                    <v-select
-                      label="Perfil"
-                      :model-value="getSistemaPerfil(authStore.sistema.id)"
-                      :items="listPerfil"
-                      item-title="text"
-                      item-value="value"
-                      variant="outlined"
-                      color="primary"
-                      :rules="[(v) => !!v || 'Perfil é obrigatório']"
-                      density="compact"
-                      @update:model-value="setPerfilUsuario($event)"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-                <box-transfer 
-                  :list-origem="filiais" 
-                  :list-destino="usuario.filial"
-                  list-origem-titulo = "Selecione a filial"
-                  list-destino-titulo = "Filiais do usuário"
-                />
-                <box-transfer 
-                  :list-origem="clientes" 
-                  :list-destino="usuario.cliente"
-                  list-origem-titulo = "Selecione os clientes"
-                  list-destino-titulo = "Clientes do usuário"
-                />
+            <v-row class="mt-3">
+              <v-col>
+                <v-select
+                  label="Perfil"
+                  :model-value="getSistemaPerfil(authStore.sistema.id)"
+                  :items="listPerfil"
+                  item-title="text"
+                  item-value="value"
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Perfil é obrigatório']"
+                  density="compact"
+                  @update:model-value="setPerfilUsuario($event)"
+                ></v-select>
+              </v-col>
+            </v-row>
+            <box-transfer
+              :list-origem="filiais"
+              :list-destino="usuario.filial"
+              list-origem-titulo="Selecione a filial"
+              list-destino-titulo="Filiais do usuário"
+            />
+            <box-transfer
+              :list-origem="clientes"
+              :list-destino="usuario.cliente"
+              list-origem-titulo="Selecione os clientes"
+              list-destino-titulo="Clientes do usuário"
+            />
 
-                <box-transfer 
-                  :list-origem="tipos" 
-                  :list-destino="usuario.tipoFornecimento"
-                  list-origem-titulo = "Selecione as categorias de compra"
-                  list-destino-titulo = "Categorias de compra do usuário"
-                  style="margin-bottom: 5px;"
-                />
-            
-            <v-row style="margin-top: 5px;">
+            <box-transfer
+              :list-origem="tipos"
+              :list-destino="usuario.tipoFornecimento"
+              list-origem-titulo="Selecione as categorias de compra"
+              list-destino-titulo="Categorias de compra do usuário"
+              class="mb-5"
+            />
+
+            <v-row class="mt-5">
               <v-col class="text-right">
                 <v-btn variant="outlined" color="primary" @click="router.go(-1)"
                   >Cancelar</v-btn
@@ -65,7 +65,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, inject } from "vue";
+import {
+  ref,
+  onMounted,
+  watch,
+  inject,
+  computed,
+} from "vue";
 import userService from "@/services/user.service";
 import perfilService from "@/services/perfil.service";
 import filialService from "@/services/filial.service";
@@ -73,7 +79,7 @@ import clienteService from "@/services/cliente.service";
 import handleErrors from "@/helpers/HandleErrors";
 import { useAuthStore } from "@/store/auth.store";
 import { useRoute } from "vue-router";
-import router from "@/router"
+import router from "@/router";
 import Breadcrumbs from "@/components/breadcrumbs.vue";
 import tipoFornecimentoService from "@/services/tipofornecimento.service";
 import usuarioForm from "@/components/usuarioForm.vue";
@@ -93,90 +99,140 @@ const authStore = useAuthStore();
 const userForm = ref(null);
 const tipos = ref([]);
 
+let filiaisIdAnteriores = [];
+let requestId = 0;
+
 //VUE METHODS
 onMounted(async () => {
   clearData();
-  await getFilialToList();
-  await getPerfilToList();
-  await getTipoFornecimentoToList();
+  await Promise.all([
+    getFilialToList(),
+    getPerfilToList(),
+    getTipoFornecimentoToList(),
+  ]);
   if (parseInt(route.query.id) > 0) {
     await getUsuario(route.query.id);
   }
   isBusy.value = false;
 });
 
-watch(
-  () => usuario.value.filial,
-  async (newfilials) => {
-    if (newfilials.length> 0) {
-
-      let objA = JSON.parse(JSON.stringify(newfilials))
-      if (objA.length > 0) objA.forEach(e => delete e.selected)
-      let objB = JSON.parse(JSON.stringify(filialUsuario))
-      if (objB.length > 0) objB.forEach(e => delete e.selected)
-
-      if (JSON.stringify(objA) !== JSON.stringify(objB)) {
-        clientes.value = [];
-        await getClienteToList(newfilials.map(p =>  {return p.value}));
-        clientesListRemove();
-        let listIds = newfilials.map((p) =>{ return p.value})
-        let remove = filialUsuario.length>0 ? filialUsuario.filter(p => !listIds.includes(p.value)):[]
-        usuarioRemoveClienteFromFilial(remove.map(p => {return p.value}))
-        filialUsuario = JSON.parse(JSON.stringify(newfilials));
-      }
-    }else {
-      clientes.value = [];
-      usuarioRemoveClienteFromFilial(filiais.value.map(q =>  {return q.value}))
-    }
-  },
-  {deep: true}
+//COMPUTED
+const userFilialIds = computed(() =>
+  (usuario.value.filial || []).map((f) => f.value).sort(),
 );
+
+// watch(
+//   () => usuario.value.filial,
+//   async (newfilials) => {
+//     if (newfilials.length > 0) {
+//       let objA = JSON.parse(JSON.stringify(newfilials));
+//       if (objA.length > 0) objA.forEach((e) => delete e.selected);
+//       let objB = JSON.parse(JSON.stringify(filialUsuario));
+//       if (objB.length > 0) objB.forEach((e) => delete e.selected);
+
+//       if (JSON.stringify(objA) !== JSON.stringify(objB)) {
+//         clientes.value = [];
+//         await getClienteToList(
+//           newfilials.map((p) => {
+//             return p.value;
+//           }),
+//         );
+//         clientes.value = removeFromList(clientes.value, new Set(usuario.value.cliente.map((t) => t.value)));
+//         let listIds = newfilials.map((p) => {
+//           return p.value;
+//         });
+
+//         let remove =
+//           filialUsuario.length > 0
+//             ? filialUsuario.filter((p) => !listIds.includes(p.value))
+//             : [];
+
+//         usuario.value.cliente = removeFromList(usuario.value.cliente, new Set(remove.map((p) => p.value)))
+//         filialUsuario = JSON.parse(JSON.stringify(newfilials));
+//       }
+//     } else {
+//       clientes.value = [];
+//       usuario.value.cliente = removeFromList(usuario.value.cliente, new Set(filiais.value.map((q) => q.value)))
+//     }
+//   },
+//   { deep: true },
+// );
+
+watch(userFilialIds, async (novosId) => {
+  debugger
+  const currentRequest = ++requestId;
+
+  if (novosId.length === 0) {
+    clientes.value = [];
+    usuario.value.cliente = [];
+    filiaisIdAnteriores = [];
+    return;
+  }
+
+  clientes.value = [];
+  await getClienteToList(novosId);
+
+  const removidos = filiaisIdAnteriores.filter((id) => !novosId.includes(id));
+
+  const clientesRemovidos = new Set(usuario.value.cliente.filter((c) => removidos.includes(c.filialId)).map((c) => c.value) );
+
+  usuario.value.cliente = removeFromList(
+    usuario.value.cliente,
+    new Set(clientesRemovidos)
+  );
+
+  // Descarta se outra mudança de filial já foi disparada nesse meio tempo
+  if (currentRequest !== requestId) return;
+
+  clientes.value = removeFromList(
+    clientes.value,
+    new Set(usuario.value.cliente.map((u) => u.value)),
+  );
+  filiaisIdAnteriores = novosId;
+});
+
+
 
 //METHODS
 function setPerfilUsuario(perfilId) {
   let index = -1;
-  if ( usuario.value.usuarioSistemaPerfil.length > 0) {
-    index = usuario.value.usuarioSistemaPerfil.findIndex(c => c.sistemaId == authStore.sistema.id)
+  if (usuario.value.usuarioSistemaPerfil.length > 0) {
+    index = usuario.value.usuarioSistemaPerfil.findIndex(
+      (c) => c.sistemaId == authStore.sistema.id,
+    );
   }
-  
+
   if (index != -1) {
-    usuario.value.usuarioSistemaPerfil[index].perfilId = perfilId
-  }else {
+    usuario.value.usuarioSistemaPerfil[index].perfilId = perfilId;
+  } else {
     usuario.value.usuarioSistemaPerfil.push({
-      "sistemaId": authStore.sistema.id,
-      "perfilId": perfilId 
+      sistemaId: authStore.sistema.id,
+      perfilId: perfilId,
     });
   }
 }
 
-function usuarioRemoveClienteFromFilial(filialToRemove =[]) 
-{
-  let removeCliente = usuario.value.cliente.filter(q =>  filialToRemove.includes(q.filialId));
-  removeCliente.forEach(r => {
-    let index = usuario.value.cliente.findIndex(q =>  q.value == r.value);
+function usuarioRemoveClienteFromFilial(filialToRemove = []) {
+  let removeCliente = usuario.value.cliente.filter((q) =>
+    filialToRemove.includes(q.filialId),
+  );
+  removeCliente.forEach((r) => {
+    let index = usuario.value.cliente.findIndex((q) => q.value == r.value);
     usuario.value.cliente.splice(index, 1);
-  })
- 
-}
-
-
-function clientesListRemove(removerTodos = false) {
-  if (removerTodos == true) clientes.value.splice(0, clientes.value.length);
-  else {
-    usuario.value.cliente.forEach((cliente) => {
-      let index = clientes.value.findIndex((c) => c.value == cliente.value);
-      if (index > -1) clientes.value.splice(index, 1);
-    });
-  }
+  });
 }
 
 function getSistemaPerfil(sistemaId) {
-  let perfilUsuario = undefined
-  if (usuario.value.usuarioSistemaPerfil != undefined && usuario.value.usuarioSistemaPerfil.length> 0)
-    perfilUsuario = usuario.value.usuarioSistemaPerfil.filter(c => c.sistemaId == sistemaId)[0]
-  
-  return perfilUsuario == undefined? null: perfilUsuario.perfilId;
-  
+  let perfilUsuario = undefined;
+  if (
+    usuario.value.usuarioSistemaPerfil != undefined &&
+    usuario.value.usuarioSistemaPerfil.length > 0
+  )
+    perfilUsuario = usuario.value.usuarioSistemaPerfil.filter(
+      (c) => c.sistemaId == sistemaId,
+    )[0];
+
+  return perfilUsuario == undefined ? null : perfilUsuario.perfilId;
 }
 
 async function salvar() {
@@ -199,7 +255,7 @@ async function salvar() {
         showConfirmButton: false,
         timer: 2000,
       });
-      router.push({name:"comprasUsuarios"})
+      router.push({ name: "comprasUsuarios" });
     }
   } catch (error) {
     console.log("usuários.error:", error);
@@ -207,19 +263,18 @@ async function salvar() {
   }
 }
 
-async function clearData() {
+function clearData() {
   usuario.value = new Usuario();
   filialUsuario = [];
-  await getClienteToList(filialUsuario);
+  getClienteToList(filialUsuario);
 }
 
 async function getClienteToList(filial) {
   try {
-    if (filial.length> 0) {
+    if (filial.length > 0) {
       let response = await clienteService.toList(filial);
       clientes.value = response.data;
     }
-      
   } catch (error) {
     console.log("getClienteToList.error:", error);
     handleErrors(error);
@@ -261,9 +316,18 @@ async function getUsuario(usuarioId) {
     isBusy.value = true;
     let response = await userService.getById(usuarioId);
     usuario.value = response.data;
-    tiposListRemove();
-    clientesListRemove();
-    filiaisListRemove();
+    tipos.value = removeFromList(
+      tipos.value,
+      new Set(usuario.value.tipoFornecimento.map((t) => t.value)),
+    );
+    clientes.value = removeFromList(
+      clientes.value,
+      new Set(usuario.value.cliente.map((t) => t.value)),
+    );
+    filiais.value = removeFromList(
+      filiais.value,
+      new Set(usuario.value.filial.map((t) => t.value)),
+    );
   } catch (error) {
     console.log("getUsuario.error:", error);
     handleErrors(error);
@@ -272,26 +336,11 @@ async function getUsuario(usuarioId) {
   }
 }
 
-function filiaisListRemove(removerTodos = false) {
-  if (removerTodos == true) tipos.value.splice(0, clientes.value.length);
-  else {
-    usuario.value.filial.forEach((tipo) => {
-      let index = filiais.value.findIndex((c) => c.value == tipo.value);
-      if (index > -1) filiais.value.splice(index, 1);
-    });
-  }
-}
+function removeFromList(list, selecteds, removeAll = false) {
+  if (removeAll) return list.splice(0, list.length);
 
-function tiposListRemove(removerTodos = false) {
-  if (removerTodos == true) tipos.value.splice(0, clientes.value.length);
-  else {
-    usuario.value.tipoFornecimento.forEach((tipo) => {
-      let index = tipos.value.findIndex((c) => c.value == tipo.value);
-      if (index > -1) tipos.value.splice(index, 1);
-    });
-  }
+  return list.filter((item) => !selecteds.has(item.value));
 }
-
 </script>
 
 <style scoped>
