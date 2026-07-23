@@ -1,7 +1,7 @@
 <template>
   <div>
     <bread-crumbs
-      :title="hasPermissionAprovador ? 'Requisições' : 'Minhas Requisições'"
+      :title="hasPermissionAprovador || viewRequisicaoAllUsers ? 'Requisições' : 'Minhas Requisições'"
       @novoClick="router.push({ name: 'requisicaoCadastro' })"
       :show-button="authStore.hasPermissao('requisicao')"
       :buttons="headerButtons"
@@ -187,18 +187,25 @@
             >
           </td>
           <td class="tex-left" v-show="hasPermissionAprovador">
-            <span v-show="item.status == 0 && 
-                               ((item.requerAutorizacaoWCA == true && authStore.hasPermissao('aprova_requisicao'))
-                            || (item.requerAutorizacaoCliente == true && authStore.hasPermissao('aprova_requisicao_cliente')))
-            ">
-                <v-checkbox
+            <span
+              v-show="
+                item.status == 0 &&
+                ((item.requerAutorizacaoWCA == true &&
+                  authStore.hasPermissao('aprova_requisicao')) ||
+                  (item.requerAutorizacaoCliente == true &&
+                    authStore.hasPermissao('aprova_requisicao_cliente')))
+              "
+            >
+              <v-checkbox
                 v-model="item.aprovar"
                 label=""
                 color="primary"
                 :hide-details="true"
                 density="compact"
-                @update:model-value="(val) => AdicionarRemoverCarrinho(item, val)"
-                ></v-checkbox>
+                @update:model-value="
+                  (val) => AdicionarRemoverCarrinho(item, val)
+                "
+              ></v-checkbox>
             </span>
           </td>
           <td class="text-right">
@@ -319,11 +326,13 @@
             color="primary"
             variant="plain"
             :disabled="carrinho.length == 0 || isRunningAction"
-            @click=" () => {
-                 confirmText = 'Deseja realmente aprovar a lista?'
-                 confirmAction = 'aprove'
-                 confirmDialog=true 
-            }" 
+            @click="
+              () => {
+                confirmText = 'Deseja realmente aprovar a lista?';
+                confirmAction = 'aprove';
+                confirmDialog = true;
+              }
+            "
           >
             APROVAR
           </v-btn>
@@ -331,11 +340,13 @@
           <v-btn
             color="primary"
             variant="plain"
-            @click=" () => {
-                 confirmText = 'Deseja realmente limpar a lista?'
-                 confirmAction = 'clean'
-                 confirmDialog=true 
-            }"
+            @click="
+              () => {
+                confirmText = 'Deseja realmente limpar a lista?';
+                confirmAction = 'clean';
+                confirmDialog = true;
+              }
+            "
             :disabled="carrinho.length == 0 || isRunningAction"
           >
             LIMPAR
@@ -350,25 +361,22 @@
         prepend-icon="mdi-comment-question-outline"
         title="Confirmação"
       >
-      <v-card-text >
-        {{ confirmText }}
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer> 
-        <v-btn
-            variant="plain"
-            
-            @click="confirmDialog = false"
-            size="smaller"
-          >NÃO</v-btn>
+        <v-card-text>
+          {{ confirmText }}
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn variant="plain" @click="confirmDialog = false" size="smaller"
+            >NÃO</v-btn
+          >
           &nbsp;
           <v-btn
             variant="plain"
             @click="executeAction(confirmAction)"
             size="smaller"
-          >SIM</v-btn>
+            >SIM</v-btn
+          >
         </v-card-actions>
-        
       </v-card>
     </v-dialog>
   </div>
@@ -413,13 +421,13 @@ const filter = ref({
 });
 const fromMounted = ref(false);
 const carrinho = ref(
-  JSON.parse(localStorage.getItem("requisicoes.aprovar")) || []
+  JSON.parse(localStorage.getItem("requisicoes.aprovar")) || [],
 );
 const openCarrinho = ref(false);
 const confirmDialog = ref(false);
 const confirmAction = ref("");
 const confirmText = ref("");
-const isRunningAction = ref(false)
+const isRunningAction = ref(false);
 //VUE METHODS
 const headerButtons = computed(() => {
   let buttons = [];
@@ -439,11 +447,19 @@ const valorTotalCarrinho = computed(() => {
   return valor;
 });
 
+const viewRequisicaoAllUsers = computed(() => {
+  return (
+    hasPermissionAprovador.value ||
+    authStore.hasPermissao("requisicao_all_users")
+  );
+});
+
 onMounted(async () => {
   hasPermissionAprovador.value =
     authStore.hasPermissao("aprova_requisicao") ||
     authStore.hasPermissao("aprova_requisicao_cliente");
-  if (!hasPermissionAprovador.value) {
+
+  if (!viewRequisicaoAllUsers) {
     filter.value.usuarioId = authStore.user.id;
   }
   await getFiliaisByUser();
@@ -460,29 +476,27 @@ watch(
   async (newValue, oldValue) => {
     if (!fromMounted.value) {
       let _filiais = [];
-      
-      if (oldValue !== newValue){
+
+      if (oldValue !== newValue) {
         if (filter.value.filial != null) _filiais.push(filter.value.filial);
         filter.value.clienteId = null;
         filter.value.fornecedorId = null;
-        filter.value.usuarioId = hasPermissionAprovador.value
+        filter.value.usuarioId = viewRequisicaoAllUsers
           ? null
           : authStore.user.id;
         await getClienteToList(_filiais);
         await getFornecedorToList(_filiais);
         await getUsuarioToList(_filiais);
       }
-      
     }
-  }
+  },
 );
 
 watch(
   () => filter.value.page,
-  (oldValue, newValue) =>  {
+  (oldValue, newValue) => {
     if (oldValue != newValue) applyFilters();
-  } 
-  
+  },
 );
 
 //METHODS
@@ -491,7 +505,7 @@ function applyFilters(resetPage = false) {
 
   localStorage.setItem(
     "requisicao.index.filters",
-    JSON.stringify(filter.value)
+    JSON.stringify(filter.value),
   );
   getItems();
 }
@@ -525,7 +539,7 @@ async function duplicar(item) {
       isBusy.value = true;
       let response = await requisicaoService.duplicate(
         item.id,
-        authStore.user.id
+        authStore.user.id,
       );
       await getItems();
       if (response.data.message == "") {
@@ -576,13 +590,13 @@ async function gerarRelatorio() {
 
     if (response.status == 200) {
       let nomeArquivo = `requisicao_relatorio_${moment().format(
-        "DDMMYYYY_HHmmSS"
+        "DDMMYYYY_HHmmSS",
       )}.xlsx`;
       await new Promise((r) => setTimeout(r, 1000));
       realizarDownload(
         response,
         nomeArquivo,
-        response.headers.getContentType()
+        response.headers.getContentType(),
       );
     }
   } catch (error) {
@@ -645,10 +659,8 @@ async function getItems() {
     response = await requisicaoService.paginate(pageSize, filtro.page, filtro);
     requisicoes.value = checkItemCarrinho(response.data.items);
     totalPages.value = response.data.totalPages;
-    
+
     if (storedFilters) filter.value = storedFilters;
-
-
   } catch (error) {
     console.log("requisicoes.getItems.error:", error.response);
     handleErrors(error);
@@ -754,43 +766,40 @@ function checkItemCarrinho(items) {
 }
 
 async function limparCarrinho() {
-    carrinho.value = [];
-    requisicoes.value.forEach((item) => (item.aprovar = false));
-    localStorage.setItem("requisicoes.aprovar", JSON.stringify(carrinho.value));
+  carrinho.value = [];
+  requisicoes.value.forEach((item) => (item.aprovar = false));
+  localStorage.setItem("requisicoes.aprovar", JSON.stringify(carrinho.value));
 }
 
 async function aprovarCarrinho() {
-    try {
-        isRunningAction.value = true
-        for (let index = 0; index < carrinho.value.length; index++)
-        {
-            let item = carrinho.value[index];
-            let data = {
-                id: item.id,
-                aprovado: true,
-                comentario: "",
-                token: "TELAEDICAO",
-                nomeUsuario: authStore.user.nome,
-                WCA: authStore.hasPermissao("aprova_requisicao"),
-                Cliente: authStore.hasPermissao("aprova_requisicao_cliente")
-            };
-            await requisicaoService.aprovar(data);
-        }
-        limparCarrinho();
-        getItems()
-    } catch (error) {
-        console.error("aprovar.carrinho.error", error);
-        handleErrors(error)
-    } finally {
-        isRunningAction.value = false
+  try {
+    isRunningAction.value = true;
+    for (let index = 0; index < carrinho.value.length; index++) {
+      let item = carrinho.value[index];
+      let data = {
+        id: item.id,
+        aprovado: true,
+        comentario: "",
+        token: "TELAEDICAO",
+        nomeUsuario: authStore.user.nome,
+        WCA: authStore.hasPermissao("aprova_requisicao"),
+        Cliente: authStore.hasPermissao("aprova_requisicao_cliente"),
+      };
+      await requisicaoService.aprovar(data);
     }
+    limparCarrinho();
+    getItems();
+  } catch (error) {
+    console.error("aprovar.carrinho.error", error);
+    handleErrors(error);
+  } finally {
+    isRunningAction.value = false;
+  }
 }
 
 function executeAction(action) {
-    confirmDialog.value = false
-    if (action == "clean")    
-        limparCarrinho();
-    else
-        aprovarCarrinho();
+  confirmDialog.value = false;
+  if (action == "clean") limparCarrinho();
+  else aprovarCarrinho();
 }
 </script>

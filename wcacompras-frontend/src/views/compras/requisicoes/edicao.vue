@@ -1,36 +1,39 @@
 <template>
   <div>
-    <v-app-bar elevation="1" :height="orcamento!=null ? 84: 0" >
-      <v-row style="margin: 1px 0 1px 0;">
+    <v-app-bar elevation="1" :height="orcamento != null ? 84 : 0">
+      <v-row style="margin: 1px 0 1px 0">
         <v-col v-show="requisicao.cliente.naoUltrapassarLimitePorRequisicao">
           <span style="font-size: 11px" class="text-grey text-left">
             Valor Máximo Pedido
           </span>
           <v-progress-linear
-                    :color="
-                      (parseFloat(valorTotalPedido) / requisicao.cliente.valorLimiteRequisicao) *  100 > 100
-                        ? 'red'
-                        : (parseFloat(valorTotalPedido) /
-                        requisicao.cliente.valorLimiteRequisicao) *
-                            100 >
-                          60
-                        ? 'warning'
-                        : 'success'
-                    "
-                    :model-value="valorTotalPedido"
-                    :max="requisicao.cliente.valorLimiteRequisicao"
-                    :height="7"
-                    title="Valor Máximo Pedido"
-                  >
-                  </v-progress-linear>
-                  <span style="font-size: 11px" class="text-grey">
-                    {{ formatToCurrencyBRL(valorTotalPedido) }} /
-                    {{
-                      formatToCurrencyBRL(
-                        requisicao.cliente.valorLimiteRequisicao.toFixed(2)
-                      )
-                    }}
-                  </span>
+            :color="
+              (parseFloat(valorTotalPedido) /
+                requisicao.cliente.valorLimiteRequisicao) *
+                100 >
+              100
+                ? 'red'
+                : (parseFloat(valorTotalPedido) /
+                    requisicao.cliente.valorLimiteRequisicao) *
+                    100 >
+                  60
+                ? 'warning'
+                : 'success'
+            "
+            :model-value="valorTotalPedido"
+            :max="requisicao.cliente.valorLimiteRequisicao"
+            :height="7"
+            title="Valor Máximo Pedido"
+          >
+          </v-progress-linear>
+          <span style="font-size: 11px" class="text-grey">
+            {{ formatToCurrencyBRL(valorTotalPedido) }} /
+            {{
+              formatToCurrencyBRL(
+                requisicao.cliente.valorLimiteRequisicao.toFixed(2),
+              )
+            }}
+          </span>
         </v-col>
         <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
           <span style="font-size: 11px" class="text-grey text-left">{{
@@ -45,62 +48,91 @@
                 : 'success'
             "
             :model-value="config.valorTotal"
-            :max="config.valorPedido * (1 + config.tolerancia / 100)+1"
+            :max="config.valorPedido * (1 + config.tolerancia / 100) + 1"
             :height="7"
             :title="config.nome"
           ></v-progress-linear>
           <span style="font-size: 11px" class="text-grey"
             >{{ formatToCurrencyBRL(config.valorTotal) }} /
             {{
-              formatToCurrencyBRL(config.valorPedido * (1 + config.tolerancia / 100))
+              formatToCurrencyBRL(
+                config.valorPedido * (1 + config.tolerancia / 100),
+              )
             }}</span
           >
         </v-col>
         <v-col>
-        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete</span><br/>
-        <v-progress-linear
-          :color="TaxaGestaoMenosFreteColor"
-          :model-value="valorTotalPedidoSemTaxa"
-          :max="requisicao.fornecedor.valorCompraMinimoSemFrete"
-          :height="7"
-          title="Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete"
-        ></v-progress-linear>
-        <span style="font-size: 11px" class="text-grey">
-          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }} /
-          {{ formatToCurrencyBRL(requisicao.fornecedor.valorCompraMinimoSemFrete) }} /
-          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa < requisicao.fornecedor.valorCompraMinimoSemFrete ? requisicao.fornecedor.valorFrete: 0) }}
-        </span>
-      </v-col>
+          <span style="font-size: 11px" class="text-grey text-left"
+            >Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete</span
+          ><br />
+          <v-progress-linear
+            :color="TaxaGestaoMenosFreteColor"
+            :model-value="valorTotalPedidoSemTaxa"
+            :max="requisicao.fornecedor.valorCompraMinimoSemFrete"
+            :height="7"
+            title="Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete"
+          ></v-progress-linear>
+          <span style="font-size: 11px" class="text-grey">
+            {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }} /
+            {{
+              formatToCurrencyBRL(
+                requisicao.fornecedor.valorCompraMinimoSemFrete,
+              )
+            }}
+            /
+            {{
+              formatToCurrencyBRL(
+                valorTotalPedidoSemTaxa <
+                  requisicao.fornecedor.valorCompraMinimoSemFrete
+                  ? requisicao.fornecedor.valorFrete
+                  : 0,
+              )
+            }}
+          </span>
+        </v-col>
       </v-row>
     </v-app-bar>
-    <v-app-bar :height="orcamento!=null ? 45: 0">
-    <v-row>  
-      <v-col>
-        <v-table >
-          <tbody>
+    <v-app-bar :height="orcamento != null ? 45 : 0">
+      <v-row>
+        <v-col>
+          <v-table>
+            <tbody>
               <tr>
-                <td>Total Pedido: {{ formatToCurrencyBRL(valorTotalPedido) }}</td>
-                <td>Total S/Taxas: {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }}</td>
-                <td>Tx. Gestão :{{ formatToCurrencyBRL(requisicao.taxaGestao) }}</td>
+                <td>
+                  Total Pedido: {{ formatToCurrencyBRL(valorTotalPedido) }}
+                </td>
+                <td>
+                  Total S/Taxas:
+                  {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }}
+                </td>
+                <td>
+                  Tx. Gestão :{{ formatToCurrencyBRL(requisicao.taxaGestao) }}
+                </td>
                 <td>Frete: {{ formatToCurrencyBRL(requisicao.valorFrete) }}</td>
-                <td>Tx. Gestão - Frete: <span :class="'text-' + TaxaGestaoMenosFreteColor">{{ formatToCurrencyBRL(TaxaGestaoMenosFrete) }}</span></td>
-                <td>Tx. Gestão Miníma: {{ formatToCurrencyBRL(TaxaGestaoMinima) }}</td>
+                <td>
+                  Tx. Gestão - Frete:
+                  <span :class="'text-' + TaxaGestaoMenosFreteColor">{{
+                    formatToCurrencyBRL(TaxaGestaoMenosFrete)
+                  }}</span>
+                </td>
+                <td>
+                  Tx. Gestão Miníma: {{ formatToCurrencyBRL(TaxaGestaoMinima) }}
+                </td>
               </tr>
-          </tbody>
-    </v-table>
-      </v-col>
-    </v-row>
-  </v-app-bar>
+            </tbody>
+          </v-table>
+        </v-col>
+      </v-row>
+    </v-app-bar>
     <bread-crumbs
       :title="'Pedido #' + requisicao.id"
       :show-button="false"
-      :custom-button-show="podeEditar"
+      :custom-button-show="podeEditar || podeAlterarProduto"
       custom-button-text="Salvar"
       @customClick="salvar()"
       :buttons="headerButtons"
       @email-fornecedor-click="enviarEmail(DESTINOEMAIL.FORNECEDOR)"
       @email-cliente-click="enviarEmail(DESTINOEMAIL.CLIENTE)"
-      
     />
     <v-progress-linear
       color="primary"
@@ -110,8 +142,8 @@
       class="mt-1 mb-2"
     >
     </v-progress-linear>
-    
-    <v-row >
+
+    <v-row>
       <v-col>
         <v-form ref="formCadastro">
           <v-row>
@@ -253,8 +285,10 @@
               v-show="
                 getStatus(requisicao.status).text.toLowerCase() ==
                   'aguardando' &&
-                ((authStore.hasPermissao('aprova_requisicao') && requisicao.requerAutorizacaoWCA)
-                ||(authStore.hasPermissao('aprova_requisicao_cliente') && requisicao.requerAutorizacaoCliente))
+                ((authStore.hasPermissao('aprova_requisicao') &&
+                  requisicao.requerAutorizacaoWCA) ||
+                  (authStore.hasPermissao('aprova_requisicao_cliente') &&
+                    requisicao.requerAutorizacaoCliente))
               "
             >
               <v-btn
@@ -267,7 +301,13 @@
               </v-btn>
             </v-col>
 
-            <v-col v-show="getStatus(requisicao.status).text.toLowerCase() =='rejeitado' && authStore.hasPermissao('requisicao_retornaaprovacao')">
+            <v-col
+              v-show="
+                getStatus(requisicao.status).text.toLowerCase() ==
+                  'rejeitado' &&
+                authStore.hasPermissao('requisicao_retornaaprovacao')
+              "
+            >
               <v-btn
                 color="primary"
                 variant="outlined"
@@ -278,15 +318,15 @@
               </v-btn>
             </v-col>
 
-
-
             <v-col class="text-right">
               <v-btn
                 :disabled="requisicao.id == null"
                 :color="requisicao.id == null ? 'grey' : 'success'"
                 style="font-weight: bold"
                 @click="dialog = true"
-                v-show="requisicao.status == 1 && authStore.hasPermissao('requisicao')"
+                v-show="
+                  requisicao.status == 1 && authStore.hasPermissao('requisicao')
+                "
               >
                 Finalizar Pedido
               </v-btn>
@@ -374,7 +414,7 @@
               <th class="text-center text-grey">VL. PRODUTO</th>
               <th class="text-center text-grey">QUANT.</th>
               <th class="text-center text-grey">TOTAL</th>
-              <th class="text-center text-grey" v-show="podeEditar">REMOVER</th>
+              <th class="text-center text-grey" v-show="podeEditar || podeAlterarProduto"></th>
             </tr>
           </thead>
           <tbody>
@@ -416,19 +456,29 @@
                     (
                       retornarValorTotalProduto(item) *
                       (isNaN(item.quantidade) ? 0 : item.quantidade)
-                    ).toFixed(2)
+                    ).toFixed(2),
                   )
                 }}
               </td>
-              <td class="text-center" v-show="podeEditar">
+              <td class="text-center" v-show="podeEditar || podeAlterarProduto">
                 <v-btn
                   icon="mdi-package-variant-minus"
                   variant="plain"
                   color="red"
                   title="Remover Produto"
                   @click="removeProdutoRequisicao(item)"
+                  v-show="podeEditar"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-lead-pencil"
+                  variant="plain"
+                  color="primary"
+                  title="Editar Produto"
+                  @click="editarProduto(item)"
+                  v-show="podeAlterarProduto"
                 ></v-btn>
               </td>
+              
             </tr>
 
             <tr
@@ -472,25 +522,16 @@
                     (
                       retornarValorTotalProduto(item) *
                       (isNaN(item.quantidade) ? 0 : item.quantidade)
-                    ).toFixed(2)
+                    ).toFixed(2),
                   )
                 }}
               </td>
               <td class="text-center">
-                <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
-                            :disabled="(isNaN(item.quantidade) ? 0 : item.quantidade) == 0"
-                            @click="adicionarProdutoRequisicao(item)" title="Incluir Produto"></v-btn> -->
               </td>
             </tr>
           </tbody>
           <tfoot>
             <tr style="font-weight: 600">
-              <!-- <td colspan="3" class="text-right">SUBTOTAL:</td>
-                    <td class="text-right">{{ formatToCurrencyBRL((requisicao.valorTotal - requisicao.valorIcms).toFixed(2))
-                    }}</td>
-                    <td class="text-right">ICMS:</td>
-                    <td class="text-right">{{ formatToCurrencyBRL(requisicao.valorIcms) }}</td>
-                    -->
               <td colspan="8" class="text-right">TOTAL ITENS:</td>
               <td class="text-right">
                 {{ formatToCurrencyBRL(valorTotalPedido - PedidoValorFrete) }}
@@ -500,35 +541,36 @@
           </tfoot>
         </v-table>
         <!--HISTORICO DO PEDIDO -->
-    <v-row class="mt-2">
-      <v-col cols="12" class="text-left">
-        <h4 class="text-grey">Histórico</h4>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="6" class="text-left">
-        <v-timeline align="start" side="end">
-          <v-timeline-item
-            dot-color="grey"
-            size="small"
-            v-for="item in requisicao.requisicaoHistorico"
-          >
-            <div class="d-flex">
-              <div>
-                <div
-                  class="text-caption"
-                  v-html="formatarDataHora(item.dataHora) + ' - ' + item.evento"
-                ></div>
-              </div>
-            </div>
-          </v-timeline-item>
-        </v-timeline>
-      </v-col>
-    </v-row>
+        <v-row class="mt-2">
+          <v-col cols="12" class="text-left">
+            <h4 class="text-grey">Histórico</h4>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6" class="text-left">
+            <v-timeline align="start" side="end">
+              <v-timeline-item
+                dot-color="grey"
+                size="small"
+                v-for="item in requisicao.requisicaoHistorico"
+              >
+                <div class="d-flex">
+                  <div>
+                    <div
+                      class="text-caption"
+                      v-html="
+                        formatarDataHora(item.dataHora) + ' - ' + item.evento
+                      "
+                    ></div>
+                  </div>
+                </div>
+              </v-timeline-item>
+            </v-timeline>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
 
-    
     <!-- ALTERAR PERIODO DE ENTREGA -->
     <v-dialog
       v-model="openPeriodoForm"
@@ -654,13 +696,140 @@
       :absolute="false"
       persistent
     >
-    <aprovar-rejeitar-form
+      <aprovar-rejeitar-form
         title="PEDIDO - APROVAR / REJEITAR"
         @aprovar-click="aprovarReprovar(true, $event)"
         @reprovar-click="aprovarReprovar(false, $event)"
         @close-form="openAprovacaoForm = false"
         :is-running-event="isSaving"
-    />
+      />
+    </v-dialog>
+    <!--FROM PARA ALTERAR VALORES DO PRODUTO -->
+    <v-dialog
+      v-model="openProdutoForm"
+      max-width="900"
+      :absolute="false"
+      persistent
+    >
+      <v-form ref="produtoForm" @submit.prevent="changeProductValue(produto)">
+        <v-card>
+          <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+            {{ produtoFormTitle }}
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="4">
+                <v-text-field
+                  label="Código"
+                  v-model="produto.codigo"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Código é obrigatório']"
+                  density="compact"
+                  :readonly="true"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+              <v-col cols="8">
+                <v-text-field
+                  label="Nome"
+                  v-model="produto.nome"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Nome é obrigatório']"
+                  density="compact"
+                  :readonly="true"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-text-field-money
+                  label-text="Valor"
+                  v-model="produto.valor"
+                  color="primary"
+                  :number-decimal="2"
+                  :field-rules="produtoValorRules"
+                  prefix="R$"
+                ></v-text-field-money>
+              </v-col>
+
+              <v-col>
+                <v-text-field-money
+                  label-text="Taxa Gestão"
+                  v-model="produto.taxaGestao"
+                  color="primary"
+                  :number-decimal="2"
+                  prefix="R$"
+                ></v-text-field-money>
+              </v-col>
+              <v-col>
+                <v-text-field-money
+                  label-text="IPI (%)"
+                  v-model="produto.percentualIPI"
+                  color="primary"
+                  :number-decimal="2"
+                  sufix="%"
+                  :rules="[
+                    (v) =>
+                      parseFloat(v) < 100 ||
+                      'O percentual deve ser no máximo 99.99%',
+                  ]"
+                ></v-text-field-money>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-text-field
+                  label="Unidade Medida"
+                  v-model="produto.unidadeMedida"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'U.M. é obrigatório']"
+                  density="compact"
+                  :readonly="true"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+              <v-col>
+                <v-text-field
+                  label="Valor Total"
+                  type="text"
+                  prefix="R$"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :model-value="retornarValorTotalProduto(produto)"
+                  density="compact"
+                  :readonly="true"
+                  class="right-input"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col class="text-right">
+                <v-btn variant="outlined" color="primary" @click="closeDialog()"
+                  >Cancelar</v-btn
+                >
+                <v-btn color="primary" type="submit" class="ml-3">Salvar</v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-form>
     </v-dialog>
   </div>
 </template>
@@ -686,6 +855,12 @@ import Periodo from "@/components/Periodo.vue";
 import { useRoute } from "vue-router";
 import moment from "moment";
 import aprovarRejeitarForm from "@/components/aprovarRejeitarForm.vue";
+import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
+
+const produtoValorRules = ref([
+  (v) => !!v || "Valor é obrigatório",
+  (v) => parseFloat(v) > 0 || "O campo valor deve ser maior que 0",
+]);
 
 const DESTINOEMAIL = {
   CLIENTE: 1,
@@ -715,7 +890,7 @@ const requisicao = ref({
     text: "",
     value: "",
     valorCompraMinimoSemFrete: 0,
-    valorFrete: 0
+    valorFrete: 0,
   },
   valorTotal: 0,
   taxaGestao: 0,
@@ -774,6 +949,20 @@ let finalizarData = ref({
   dataEntrega: moment().format("YYYY-MM-DD"),
 });
 const isSaving = ref(false);
+const produto = ref({
+  id: 0,
+  fornecedorId: null,
+  codigo: null,
+  nome: null,
+  valor: 0,
+  taxaGestao: 0,
+  tipoFornecimentoId: null,
+  percentualIPI: 0,
+  unidadeMedida: "",
+});
+const openProdutoForm = ref(false);
+const produtoForm = ref(null);
+const produtoFormTitle = ref("Novo Produto");
 
 //VUE METHODS
 onMounted(async () => {
@@ -802,7 +991,7 @@ watch(
     ) {
       await getProdutosToList(requisicao.value.fornecedorId, true);
     }
-  }
+  },
 );
 
 const podeEditar = computed(
@@ -810,7 +999,13 @@ const podeEditar = computed(
     requisicao.value.status != 1 &&
     requisicao.value.status != 3 &&
     requisicao.value.status != 4 &&
-    authStore.hasPermissao("requisicao")
+    authStore.hasPermissao("requisicao"),
+);
+
+const podeAlterarProduto = computed(
+  () =>
+    requisicao.value.status === 0 &&
+    authStore.hasPermissao("requisicao-alterar-valor-produto"),
 );
 
 const aguardaQuem = computed(() => {
@@ -842,16 +1037,20 @@ const valorTotalPedido = computed(() => {
   let valorIcms = 0;
 
   produtos.forEach((produto) => {
-    let produtoValor = produto.quantidade * parseFloat(retornarValorTotalProduto(produto))
+    let produtoValor =
+      produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
     let produtoTaxaGestao = produto.quantidade * parseFloat(produto.taxaGestao);
-    let produtoIcms = produto.quantidade * parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
-    valorTotal += produtoValor - produtoTaxaGestao
-    valorTaxaGestao += produtoTaxaGestao
+    let produtoIcms =
+      produto.quantidade *
+      parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
+    valorTotal += produtoValor - produtoTaxaGestao;
+    valorTaxaGestao += produtoTaxaGestao;
     valorIcms += produtoIcms;
   });
-  valorTotal = parseFloat(valorTotal.toFixed(2))
-             + parseFloat(PedidoValorFrete.value.toFixed(2))
-             + parseFloat(valorTaxaGestao.toFixed(2));
+  valorTotal =
+    parseFloat(valorTotal.toFixed(2)) +
+    parseFloat(PedidoValorFrete.value.toFixed(2)) +
+    parseFloat(valorTaxaGestao.toFixed(2));
   requisicao.value.valorIcms = parseFloat(valorIcms.toFixed(2));
   requisicao.value.valorTotal = parseFloat(valorTotal);
   requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2));
@@ -896,51 +1095,54 @@ const hasChanged = computed(() => {
   return itensOriginals != itens;
 });
 
-const PedidoValorFrete = computed(() =>  {
-  return valorTotalPedidoSemTaxa.value < requisicao.value.fornecedor.valorCompraMinimoSemFrete ? requisicao.value.fornecedor.valorFrete: 0
-})
+const PedidoValorFrete = computed(() => {
+  return valorTotalPedidoSemTaxa.value <
+    requisicao.value.fornecedor.valorCompraMinimoSemFrete
+    ? requisicao.value.fornecedor.valorFrete
+    : 0;
+});
 
-const TaxaGestaoMinima = computed(() =>  {
+const TaxaGestaoMinima = computed(() => {
   let _taxaGestaoMinima = 0;
-  _taxaGestaoMinima = requisicao.value.taxaGestao * (requisicao.value.fornecedor.taxaGestaoMinimaPercentual /100)
-  return parseFloat(_taxaGestaoMinima.toFixed(2))
-})
+  _taxaGestaoMinima =
+    requisicao.value.taxaGestao *
+    (requisicao.value.fornecedor.taxaGestaoMinimaPercentual / 100);
+  return parseFloat(_taxaGestaoMinima.toFixed(2));
+});
 
-const TaxaGestaoMenosFrete = computed(() =>  {
-  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
-  return parseFloat(_valortaxaGestaoFinal.toFixed(2))
-})
+const TaxaGestaoMenosFrete = computed(() => {
+  let _valortaxaGestaoFinal =
+    requisicao.value.taxaGestao - PedidoValorFrete.value;
+  return parseFloat(_valortaxaGestaoFinal.toFixed(2));
+});
 
-const TaxaGestaoMenosFreteColor = computed(() =>  {
-  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
-  if (_valortaxaGestaoFinal < 0) 
-    return 'red'
-  else if (_valortaxaGestaoFinal < TaxaGestaoMinima.value)
-    return 'orange'
-  else 
-    return 'green'
-})
+const TaxaGestaoMenosFreteColor = computed(() => {
+  let _valortaxaGestaoFinal =
+    requisicao.value.taxaGestao - PedidoValorFrete.value;
+  if (_valortaxaGestaoFinal < 0) return "red";
+  else if (_valortaxaGestaoFinal < TaxaGestaoMinima.value) return "orange";
+  else return "green";
+});
 
 const valorTotalPedidoSemTaxa = computed(() => {
   if (requisicao.value.requisicaoItens.length == 0) return 0;
 
   let produtos = requisicao.value.requisicaoItens;
   let valorTotal = 0;
-  
+
   produtos.forEach((produto) => {
-    valorTotal +=
-      produto.quantidade * parseFloat(produto.valor.toFixed(2));
+    valorTotal += produto.quantidade * parseFloat(produto.valor.toFixed(2));
   });
   valorTotal = valorTotal.toFixed(2);
-  
-  return valorTotal
+
+  return valorTotal;
 });
 
 //METHODS
 
 function adicionarProdutoRequisicao(item) {
   let index = requisicao.value.requisicaoItens.findIndex(
-    (p) => p.codigo == item.codigo
+    (p) => p.codigo == item.codigo,
   );
   if (index == -1) {
     let produto = { ...item };
@@ -965,7 +1167,7 @@ async function aprovarReprovar(isAprovado, comentario) {
       token: "TELAEDICAO",
       nomeUsuario: authStore.user.nome,
       WCA: authStore.hasPermissao("aprova_requisicao"),
-      Cliente: authStore.hasPermissao("aprova_requisicao_cliente")
+      Cliente: authStore.hasPermissao("aprova_requisicao_cliente"),
     };
     await requisicaoService.aprovar(data);
     await getRequisicaoData(data.id);
@@ -999,31 +1201,41 @@ function calcularOrcamentoTotais() {
   for (let idx = 0; idx < requisicao.value.requisicaoItens.length; idx++) {
     let item = requisicao.value.requisicaoItens[idx];
     let index = orcamento.value.findIndex(
-      (o) => o.tipoFornecimentoId == item.tipoFornecimentoId
+      (o) => o.tipoFornecimentoId == item.tipoFornecimentoId,
     );
-    if(index > -1) {
-      orcamento.value[index].valorTotal += item.quantidade * parseFloat(retornarValorTotalProduto(item));
-      orcamento.value[index].percentual = (orcamento.value[index].valorTotal / (orcamento.value[index].valorPedido * (1 + orcamento.value[index].tolerancia / 100))) * 100;
+    if (index > -1) {
+      orcamento.value[index].valorTotal +=
+        item.quantidade * parseFloat(retornarValorTotalProduto(item));
+      orcamento.value[index].percentual =
+        (orcamento.value[index].valorTotal /
+          (orcamento.value[index].valorPedido *
+            (1 + orcamento.value[index].tolerancia / 100))) *
+        100;
     }
-    
   }
 }
 
 function carregarConfiguracaoCliente() {
-    let configuracoes = requisicao.value.cliente.clienteOrcamentoConfiguracao.filter(
-      (c) => c.ativo == true
+  let configuracoes =
+    requisicao.value.cliente.clienteOrcamentoConfiguracao.filter(
+      (c) => c.ativo == true,
     );
-    
-    for (let idx = 0; idx < configuracoes.length; idx++) {
-      configuracoes[idx].nome = getTipoFornecimentoNome(configuracoes[idx].tipoFornecimentoId)
-      configuracoes[idx].valorTotal = 0;
-      configuracoes[idx].percentual = 0;
-    }
 
-    let categorias = Array.from(new Set(produtos.value.map((item) => item.tipoFornecimentoId)))
+  for (let idx = 0; idx < configuracoes.length; idx++) {
+    configuracoes[idx].nome = getTipoFornecimentoNome(
+      configuracoes[idx].tipoFornecimentoId,
+    );
+    configuracoes[idx].valorTotal = 0;
+    configuracoes[idx].percentual = 0;
+  }
 
-    orcamento.value =  configuracoes.filter((item) => categorias.includes(item.tipoFornecimentoId))
+  let categorias = Array.from(
+    new Set(produtos.value.map((item) => item.tipoFornecimentoId)),
+  );
 
+  orcamento.value = configuracoes.filter((item) =>
+    categorias.includes(item.tipoFornecimentoId),
+  );
 }
 
 async function enviarEmail(destinoEmail) {
@@ -1087,11 +1299,11 @@ async function getProdutosToList(fornecedorId, changeIcms = false) {
     let response = await fornecedorService.produtoListWithIcms(
       fornecedorId,
       requisicao.value.uf,
-      filter.value
+      filter.value,
     );
     produtos.value = response.data;
-    
-    carregarConfiguracaoCliente()
+
+    carregarConfiguracaoCliente();
 
     for (
       let index = 0;
@@ -1127,7 +1339,6 @@ async function getRequisicaoData(id) {
     data.nomeUsuario = authStore.user.nome;
     requisicao.value = data;
     requisicaoOriginal.value = JSON.parse(JSON.stringify(requisicao.value));
-
   } catch (error) {
     console.log("getRequisicaoData.error:", error);
     handleErrors(error);
@@ -1138,10 +1349,9 @@ async function getRequisicaoData(id) {
 }
 
 function getStatus(codigo) {
-  let dado = { value: -1, text: "Todos" }
-  if (codigo != null)
-    dado = status.filter((s) => s.value == codigo)[0];
-  
+  let dado = { value: -1, text: "Todos" };
+  if (codigo != null) dado = status.filter((s) => s.value == codigo)[0];
+
   return dado;
 }
 
@@ -1149,7 +1359,7 @@ function getTipoFornecimentoNome(tipoId) {
   let tipo = tipoFornecimento.value.find((t) => t.value == tipoId);
   if (tipo) {
     return tipo.text;
-  } 
+  }
   return "";
 }
 
@@ -1178,7 +1388,7 @@ function produtoRemoveFromList(item) {
 
 async function removeProdutoRequisicao(item) {
   let index = requisicao.value.requisicaoItens.findIndex(
-    (p) => p.codigo == item.codigo
+    (p) => p.codigo == item.codigo,
   );
   if (index != -1) {
     requisicao.value.requisicaoItens.splice(index, 1);
@@ -1191,12 +1401,12 @@ async function removeProdutoRequisicao(item) {
 async function salvar(forceUpdate = false) {
   try {
     isBusy.value = true;
-    let data = {}
+    let data = {};
     let saveData = true;
     if (forceUpdate) {
       //neste caso não deve ter alteração de dados, segue o original somente envia o status para retornar para aprovação
-      data = checarSeRequerAprovacao({ ...requisicaoOriginal.value })
-      data.status = -3 //retornar para aprovação
+      data = checarSeRequerAprovacao({ ...requisicaoOriginal.value });
+      data.status = -3; //retornar para aprovação
       saveData = true;
     } else {
       let { valid } = await formCadastro.value.validate();
@@ -1206,20 +1416,19 @@ async function salvar(forceUpdate = false) {
       if (TaxaGestaoMenosFrete.value < 0) {
         valid = false;
         swal.fire({
-              icon: "error",
-              title: "Atenção",
-              text: "Pedido com taxa de gestão negativa, favor revisar o pedido!",
-            })
+          icon: "error",
+          title: "Atenção",
+          text: "Pedido com taxa de gestão negativa, favor revisar o pedido!",
+        });
         saveData = false;
       }
 
       if (valid && hasProduto.value) {
-        
-        data = checarSeRequerAprovacao({ ...requisicao.value })
+        data = checarSeRequerAprovacao({ ...requisicao.value });
 
-        if (TaxaGestaoMenosFreteColor.value == 'orange')
-          data.requerAutorizacaoWCA = true; 
-      
+        if (TaxaGestaoMenosFreteColor.value == "orange")
+          data.requerAutorizacaoWCA = true;
+
         if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
           if (!authStore.hasPermissao("aprova_requisicao")) {
             let result = await swal.fire({
@@ -1245,8 +1454,7 @@ async function salvar(forceUpdate = false) {
         }
       }
     }
-    if (saveData)
-    {
+    if (saveData) {
       await requisicaoService.update(data);
 
       swal.fire({
@@ -1259,9 +1467,7 @@ async function salvar(forceUpdate = false) {
         timer: 2000,
       });
       router.push({ name: "requisicoes" });
-
     }
-    
   } catch (error) {
     console.log("salvar.error:", error);
     handleErrors(error);
@@ -1270,32 +1476,32 @@ async function salvar(forceUpdate = false) {
   }
 }
 
-function checarSeRequerAprovacao( data ) {
-    //remover o campo id da requisicaoItens
-    data.requisicaoItens.forEach((produto) => {
-      produto.valorTotal =
-        retornarValorTotalProduto(produto) * produto.quantidade;
-    });
-    data.periodoEntrega = JSON.stringify(data.periodoEntrega);
-    data.requerAutorizacaoWCA = false;
-    data.requerAutorizacaoCliente = false;
-    // verificar se requer autorização
-    //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
-    orcamento.value.forEach((o) => {
-      if (o.percentual > 100) {
-        if (o.aprovadoPor == 1) data.requerAutorizacaoCliente = true;
-        else data.requerAutorizacaoWCA = true;
-      }
-    });
-    // verificar se ultrassou o limite estabelecido para o cliente
-    if (
-      data.cliente.naoUltrapassarLimitePorRequisicao &&
-      parseFloat(data.cliente.valorLimiteRequisicao) <
-        parseFloat(valorTotalPedido.value)
-    ) {
-      data.requerAutorizacaoWCA = true;
+function checarSeRequerAprovacao(data) {
+  //remover o campo id da requisicaoItens
+  data.requisicaoItens.forEach((produto) => {
+    produto.valorTotal =
+      retornarValorTotalProduto(produto) * produto.quantidade;
+  });
+  data.periodoEntrega = JSON.stringify(data.periodoEntrega);
+  data.requerAutorizacaoWCA = false;
+  data.requerAutorizacaoCliente = false;
+  // verificar se requer autorização
+  //não sei o que fazer quando tiver autorização cliente, vou manter como antes, envio de e-mail
+  orcamento.value.forEach((o) => {
+    if (o.percentual > 100) {
+      if (o.aprovadoPor == 1) data.requerAutorizacaoCliente = true;
+      else data.requerAutorizacaoWCA = true;
     }
-    return data;
+  });
+  // verificar se ultrassou o limite estabelecido para o cliente
+  if (
+    data.cliente.naoUltrapassarLimitePorRequisicao &&
+    parseFloat(data.cliente.valorLimiteRequisicao) <
+      parseFloat(valorTotalPedido.value)
+  ) {
+    data.requerAutorizacaoWCA = true;
+  }
+  return data;
 }
 
 async function retornarParaAprovacao() {
@@ -1313,6 +1519,45 @@ async function retornarParaAprovacao() {
   }
   salvar(true);
 }
+
+
+function editarProduto(item) {
+  produtoFormTitle.value = "Editando...";
+  produto.value = { ...item };
+  openProdutoForm.value = true;
+}
+
+function clearFormData() {
+  produto.value = {
+    id: 0,
+    fornecedorId: 0,
+    codigo: null,
+    nome: null,
+    valor: 0,
+    taxaGestao: 0,
+    percentualIPI: 0,
+    tipoFornecimentoId: null,
+    unidadeMedida: "",
+  };
+}
+function closeDialog() {
+  openProdutoForm.value = false;
+  clearFormData();
+  produtoForm.value?.reset();
+
+}
+function changeProductValue(item) {
+  item.valor = parseFloat(item.valor);
+  item.taxaGestao = parseFloat(item.taxaGestao);
+  item.percentualIPI = parseFloat(item.percentualIPI);
+
+  const index = requisicao.value.requisicaoItens.findIndex(p => p.id === item.id);
+  if (index !== -1) {
+      requisicao.value.requisicaoItens[index] = item;
+  }
+  closeDialog();
+}
+
 </script>
 
 <style scoped>
@@ -1324,7 +1569,7 @@ async function retornarParaAprovacao() {
   background-color: #fff;
   color: #fff;
   left: auto;
-  z-index: 1;  
+  z-index: 1;
 }
 .fixed-column-scroll {
   position: fixed;

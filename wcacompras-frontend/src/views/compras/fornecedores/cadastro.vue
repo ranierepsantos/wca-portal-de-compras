@@ -33,8 +33,12 @@
                                     density="compact"
                                     :rules="[(v) => !!v || 'Filial é obrigatório']"></v-select>
                             </v-col>
-                            <v-col v-show="fornecedor.id > 0">
+                            <v-col v-show="fornecedor.id > 0" cols="2">
                                 <v-checkbox v-model="fornecedor.ativo" color="primary" label="Ativo?" density="compact">
+                                </v-checkbox>
+                            </v-col>
+                            <v-col>
+                                <v-checkbox v-model="fornecedor.permiteAlterarValorProduto" color="primary" label="Permite alterar valor produto?" density="compact">
                                 </v-checkbox>
                             </v-col>
                             

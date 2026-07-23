@@ -1,97 +1,119 @@
 <template>
   <div>
-  <v-app-bar elevation="1" :height="orcamento!=null ? 84: 0" >
-    <v-row style="margin: 1px 0 1px 0;">
-      <v-col v-show="cliente.naoUltrapassarLimitePorRequisicao">
-        <span style="font-size: 11px" class="text-grey text-left">
-          Valor Máximo Pedido
-        </span>
-        <v-progress-linear
-          :color="
-            (parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao) *  100 > 100
-              ? 'red'
-              : (parseFloat(valorTotalPedido) /
-                  cliente.valorLimiteRequisicao) *
-                  100 >
-                60
-              ? 'warning'
-              : 'success'
-          "
-          :model-value="valorTotalPedido"
-          :max="cliente.valorLimiteRequisicao"
-          :height="7"
-          title="Valor Máximo Pedido"
-        >
-        </v-progress-linear>
-        <span style="font-size: 11px" class="text-grey">
-          {{ formatToCurrencyBRL(valorTotalPedido) }} /
-          {{
-            formatToCurrencyBRL(
-              cliente.valorLimiteRequisicao.toFixed(2)
-            )
-          }}
-        </span>
-      </v-col>
-      <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
-        <span style="font-size: 11px" class="text-grey text-left">{{
-          config.nome
-        }}</span>
-        <v-progress-linear
-          :color="
-            config.percentual > 100
-              ? 'red'
-              : config.percentual > 60
-              ? 'warning'
-              : 'success'
-          "
-          :model-value="config.valorTotal"
-          :max="config.valorPedido * (1 + config.tolerancia / 100)+1"
-          :height="7"
-          :title="config.nome"
-        ></v-progress-linear>
-        <span style="font-size: 11px" class="text-grey"
-          >{{ formatToCurrencyBRL(config.valorTotal) }} /
-          {{
-            formatToCurrencyBRL(config.valorPedido * (1 + config.tolerancia / 100))
-          }}</span
-        >
-      </v-col>
-      <v-col>
-        <span style="font-size: 11px" class="text-grey text-left">Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete</span><br/>
-        <v-progress-linear
-          :color="TaxaGestaoMenosFreteColor"
-          :model-value="valorTotalPedidoSemTaxa"
-          :max="fornecedor.valorCompraMinimoSemFrete"
-          :height="7"
-          title="Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete"
-        ></v-progress-linear>
-        <span style="font-size: 11px" class="text-grey">
-          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }} /
-          {{ formatToCurrencyBRL(fornecedor.valorCompraMinimoSemFrete) }} /
-          {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa < fornecedor.valorCompraMinimoSemFrete ? fornecedor.valorFrete: 0) }}
-        </span>
-      </v-col>
-    </v-row>
-  </v-app-bar>
-  <v-app-bar :height="orcamento!=null ? 45: 0">
-    <v-row>  
-      <v-col>
-        <v-table >
-          <tbody>
+    <v-app-bar elevation="1" :height="orcamento != null ? 84 : 0">
+      <v-row style="margin: 1px 0 1px 0">
+        <v-col v-show="cliente.naoUltrapassarLimitePorRequisicao">
+          <span style="font-size: 11px" class="text-grey text-left">
+            Valor Máximo Pedido
+          </span>
+          <v-progress-linear
+            :color="
+              (parseFloat(valorTotalPedido) / cliente.valorLimiteRequisicao) *
+                100 >
+              100
+                ? 'red'
+                : (parseFloat(valorTotalPedido) /
+                    cliente.valorLimiteRequisicao) *
+                    100 >
+                  60
+                ? 'warning'
+                : 'success'
+            "
+            :model-value="valorTotalPedido"
+            :max="cliente.valorLimiteRequisicao"
+            :height="7"
+            title="Valor Máximo Pedido"
+          >
+          </v-progress-linear>
+          <span style="font-size: 11px" class="text-grey">
+            {{ formatToCurrencyBRL(valorTotalPedido) }} /
+            {{ formatToCurrencyBRL(cliente.valorLimiteRequisicao.toFixed(2)) }}
+          </span>
+        </v-col>
+        <v-col v-for="config in orcamento" :key="config.tipoFornecimentoId">
+          <span style="font-size: 11px" class="text-grey text-left">{{
+            config.nome
+          }}</span>
+          <v-progress-linear
+            :color="
+              config.percentual > 100
+                ? 'red'
+                : config.percentual > 60
+                ? 'warning'
+                : 'success'
+            "
+            :model-value="config.valorTotal"
+            :max="config.valorPedido * (1 + config.tolerancia / 100) + 1"
+            :height="7"
+            :title="config.nome"
+          ></v-progress-linear>
+          <span style="font-size: 11px" class="text-grey"
+            >{{ formatToCurrencyBRL(config.valorTotal) }} /
+            {{
+              formatToCurrencyBRL(
+                config.valorPedido * (1 + config.tolerancia / 100),
+              )
+            }}</span
+          >
+        </v-col>
+        <v-col>
+          <span style="font-size: 11px" class="text-grey text-left"
+            >Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete</span
+          ><br />
+          <v-progress-linear
+            :color="TaxaGestaoMenosFreteColor"
+            :model-value="valorTotalPedidoSemTaxa"
+            :max="fornecedor.valorCompraMinimoSemFrete"
+            :height="7"
+            title="Valor Pedido Sem Taxas / Valor Pedido Minímo / Valor Frete"
+          ></v-progress-linear>
+          <span style="font-size: 11px" class="text-grey">
+            {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }} /
+            {{ formatToCurrencyBRL(fornecedor.valorCompraMinimoSemFrete) }} /
+            {{
+              formatToCurrencyBRL(
+                valorTotalPedidoSemTaxa < fornecedor.valorCompraMinimoSemFrete
+                  ? fornecedor.valorFrete
+                  : 0,
+              )
+            }}
+          </span>
+        </v-col>
+      </v-row>
+    </v-app-bar>
+    <v-app-bar :height="orcamento != null ? 45 : 0">
+      <v-row>
+        <v-col>
+          <v-table>
+            <tbody>
               <tr>
-                <td>Total Pedido: {{ formatToCurrencyBRL(valorTotalPedido) }}</td>
-                <td>Total S/Taxas: {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }}</td>
-                <td>Tx. Gestão :{{ formatToCurrencyBRL(requisicao.taxaGestao) }}</td>
+                <td>
+                  Total Pedido: {{ formatToCurrencyBRL(valorTotalPedido) }}
+                </td>
+                <td>
+                  Total S/Taxas:
+                  {{ formatToCurrencyBRL(valorTotalPedidoSemTaxa) }}
+                </td>
+                <td>
+                  Tx. Gestão :{{ formatToCurrencyBRL(requisicao.taxaGestao) }}
+                </td>
                 <td>Frete: {{ formatToCurrencyBRL(requisicao.valorFrete) }}</td>
-                <td>Tx. Gestão - Frete: <span :class="'text-' + TaxaGestaoMenosFreteColor">{{ formatToCurrencyBRL(TaxaGestaoMenosFrete) }}</span></td>
-                <td>Tx. Gestão Miníma: {{ formatToCurrencyBRL(TaxaGestaoMinima) }}</td>
+                <td>
+                  Tx. Gestão - Frete:
+                  <span :class="'text-' + TaxaGestaoMenosFreteColor">{{
+                    formatToCurrencyBRL(TaxaGestaoMenosFrete)
+                  }}</span>
+                </td>
+                <td>
+                  Tx. Gestão Miníma: {{ formatToCurrencyBRL(TaxaGestaoMinima) }}
+                </td>
               </tr>
-          </tbody>
-    </v-table>
-      </v-col>
-    </v-row>
-  </v-app-bar>
-  <bread-crumbs
+            </tbody>
+          </v-table>
+        </v-col>
+      </v-row>
+    </v-app-bar>
+    <bread-crumbs
       title="Nova Requisição"
       :show-button="false"
       :custom-button-show="true"
@@ -106,16 +128,24 @@
       class="mt-1 mb-2"
     >
     </v-progress-linear>
-    
-    <v-row >
+
+    <v-row>
       <v-col>
         <v-form ref="formCadastro">
           <v-row>
             <v-col>
-              <v-select label="Filiais" v-model="filterFilial" :items="filiais" density="compact"
-                item-title="text" item-value="value" variant="outlined" color="primary"
+              <v-select
+                label="Filiais"
+                v-model="filterFilial"
+                :items="filiais"
+                density="compact"
+                item-title="text"
+                item-value="value"
+                variant="outlined"
+                color="primary"
                 :hide-details="true"
-                clearable>
+                clearable
+              >
               </v-select>
             </v-col>
             <v-col>
@@ -272,7 +302,7 @@
                   {{ formatToCurrencyBRL(valorTotalPedido) }} /
                   {{
                     formatToCurrencyBRL(
-                      cliente.valorLimiteRequisicao.toFixed(2)
+                      cliente.valorLimiteRequisicao.toFixed(2),
                     )
                   }}
                 </span>
@@ -307,6 +337,7 @@
             </tr>
           </thead>
           <tbody>
+            <!-- PRODUTOS DA REQUISIÇÃO-->
             <tr v-for="item in requisicao.requisicaoItens" :key="item.id">
               <td class="text-left">{{ item.codigo }}</td>
               <td class="text-left">
@@ -343,11 +374,18 @@
                     (
                       retornarValorTotalProduto(item) *
                       (isNaN(item.quantidade) ? 0 : item.quantidade)
-                    ).toFixed(2)
+                    ).toFixed(2),
                   )
                 }}
               </td>
               <td class="text-center">
+                <v-btn
+                  icon="mdi-lead-pencil"
+                  variant="plain"
+                  color="primary"
+                  title="Editar Produto"
+                  @click="editarProduto(item)"
+                ></v-btn>
                 <v-btn
                   icon="mdi-package-variant-minus"
                   variant="plain"
@@ -357,7 +395,7 @@
                 ></v-btn>
               </td>
             </tr>
-
+            <!-- PRODUTOS SELECIONÁVEIS -->
             <tr v-for="item in produtos" :key="item.id" class="text-grey">
               <td class="text-left">{{ item.codigo }}</td>
               <td class="text-left">
@@ -394,14 +432,11 @@
                     (
                       retornarValorTotalProduto(item) *
                       (isNaN(item.quantidade) ? 0 : item.quantidade)
-                    ).toFixed(2)
+                    ).toFixed(2),
                   )
                 }}
               </td>
               <td class="text-center">
-                <!-- <v-btn icon="mdi-package-variant-plus" variant="plain" color="success"
-                            :disabled="(isNaN(item.quantidade) ? 0 : item.quantidade) == 0"
-                            @click="adicionarProdutoRequisicao(item)" title="Incluir Produto"></v-btn> -->
               </td>
             </tr>
           </tbody>
@@ -480,6 +515,133 @@
         </v-card>
       </v-form>
     </v-dialog>
+
+    <v-dialog
+      v-model="openProdutoForm"
+      max-width="900"
+      :absolute="false"
+      persistent
+    >
+      <v-form ref="produtoForm" @submit.prevent="changeProductValue(produto)">
+        <v-card>
+          <v-card-title class="text-primary text-h5 text-left mb-2 mt-2">
+            {{ produtoFormTitle }}
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="4">
+                <v-text-field
+                  label="Código"
+                  v-model="produto.codigo"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Código é obrigatório']"
+                  density="compact"
+                  :readonly="true"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+              <v-col cols="8">
+                <v-text-field
+                  label="Nome"
+                  v-model="produto.nome"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'Nome é obrigatório']"
+                  density="compact"
+                  :readonly="true"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-text-field-money
+                  label-text="Valor"
+                  v-model="produto.valor"
+                  color="primary"
+                  :number-decimal="2"
+                  :field-rules="produtoValorRules"
+                  prefix="R$"
+                ></v-text-field-money>
+              </v-col>
+
+              <v-col>
+                <v-text-field-money
+                  label-text="Taxa Gestão"
+                  v-model="produto.taxaGestao"
+                  color="primary"
+                  :number-decimal="2"
+                  prefix="R$"
+                ></v-text-field-money>
+              </v-col>
+              <v-col>
+                <v-text-field-money
+                  label-text="IPI (%)"
+                  v-model="produto.percentualIPI"
+                  color="primary"
+                  :number-decimal="2"
+                  sufix="%"
+                  :rules="[
+                    (v) =>
+                      parseFloat(v) < 100 ||
+                      'O percentual deve ser no máximo 99.99%',
+                  ]"
+                ></v-text-field-money>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <v-text-field
+                  label="Unidade Medida"
+                  v-model="produto.unidadeMedida"
+                  type="text"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :rules="[(v) => !!v || 'U.M. é obrigatório']"
+                  density="compact"
+                  :readonly="true"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+              <v-col>
+                <v-text-field
+                  label="Valor Total"
+                  type="text"
+                  prefix="R$"
+                  required
+                  variant="outlined"
+                  color="primary"
+                  :model-value="retornarValorTotalProduto(produto)"
+                  density="compact"
+                  :readonly="true"
+                  class="right-input"
+                  bg-color="blue-lighten-5"
+                >
+                </v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col class="text-right">
+                <v-btn variant="outlined" color="primary" @click="closeDialog()"
+                  >Cancelar</v-btn
+                >
+                <v-btn color="primary" type="submit" class="ml-3">Salvar</v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-form>
+    </v-dialog>
   </div>
 </template>
 
@@ -502,6 +664,12 @@ import clienteService from "@/services/cliente.service";
 import Periodo from "@/components/Periodo.vue";
 import endereco from "@/components/endereco.vue";
 import filialService from "@/services/filial.service";
+import vTextFieldMoney from "@/components/VTextFieldMoney.vue";
+
+const produtoValorRules = ref([
+  (v) => !!v || "Valor é obrigatório",
+  (v) => parseFloat(v) > 0 || "O campo valor deve ser maior que 0",
+]);
 
 //DATA
 const authStore = useAuthStore();
@@ -542,15 +710,15 @@ const fornecedor = ref({
   text: "",
   value: 0,
   valorCompraMinimoSemFrete: 0,
-  valorFrete : 0,
-  taxaGestaoMinimaPercentual: 0
-})
+  valorFrete: 0,
+  taxaGestaoMinimaPercentual: 0,
+});
 const destinos = ref([
   { value: 0, text: "Outros" },
   { value: 1, text: "Diretoria" },
 ]);
 const produtos = ref([]);
-const filiais = ref([])
+const filiais = ref([]);
 const hasProduto = ref(true);
 const swal = inject("$swal");
 const filter = ref("");
@@ -564,75 +732,93 @@ const cliente = ref({
   valorLimiteRequisicao: 0,
   naoUltrapassarLimitePorRequisicao: false,
 });
-
+const produto = ref({
+  id: 0,
+  fornecedorId: null,
+  codigo: null,
+  nome: null,
+  valor: 0,
+  taxaGestao: 0,
+  tipoFornecimentoId: null,
+  percentualIPI: 0,
+  unidadeMedida: "",
+});
+const openProdutoForm = ref(false);
+const produtoForm = ref(null);
+const produtoFormTitle = ref("Novo Produto");
 //VUE METHODS
 onMounted(async () => {
   requisicao.value.NomeUsuario = authStore.user.nome;
   requisicao.value.UsuarioId = authStore.user.id;
-  
+
   await getFiliaisByUser();
   await getClienteListByUser();
   await getTipoFornecimentoToList();
 });
 
-watch(() => filterFilial.value, async (novoValor) => {
-  clientes.value = []
-  requisicao.value.clienteId = null
-  requisicao.value.fornecedorId = null
-  clearFornecedor()
-    
-  await getClienteListByUser(novoValor ? [novoValor]: [])
-  
-  
-})
+watch(
+  () => filterFilial.value,
+  async (novoValor) => {
+    clientes.value = [];
+    requisicao.value.clienteId = null;
+    requisicao.value.fornecedorId = null;
+    clearFornecedor();
+
+    await getClienteListByUser(novoValor ? [novoValor] : []);
+  },
+);
 
 watch(
   () => requisicao.value.fornecedorId,
   async (fornecedorId) => {
     requisicao.value.requisicaoItens = [];
-    produtos.value = []
-    clearFornecedor()
-    if (fornecedorId)  
-    {
-      fornecedor.value = fornecedores.value.find(p => p.value == fornecedorId);
+    produtos.value = [];
+    clearFornecedor();
+    if (fornecedorId) {
+      fornecedor.value = fornecedores.value.find(
+        (p) => p.value == fornecedorId,
+      );
       await getProdutosToList(fornecedorId);
     }
-  }
+  },
 );
 
 watch(
   () => requisicao.value.clienteId,
   async (clienteId) => {
-
-    cliente.value = clienteId ?  clientes.value.find((c) => c.id == clienteId): {
-      id: null,
-      valorLimiteRequisicao: 0,
-      naoUltrapassarLimitePorRequisicao: false,
-    };
-    fornecedores.value = []
-    requisicao.value.endereco = ""
-    requisicao.value.numero =""
-    requisicao.value.cep = ""
-    requisicao.value.cidade = ""
-    requisicao.value.uf = ""
-    requisicao.value.filialId = null
-    orcamento.value = null
-    clearFornecedor()
+    cliente.value = clienteId
+      ? clientes.value.find((c) => c.id == clienteId)
+      : {
+          id: null,
+          valorLimiteRequisicao: 0,
+          naoUltrapassarLimitePorRequisicao: false,
+        };
+    fornecedores.value = [];
+    requisicao.value.endereco = "";
+    requisicao.value.numero = "";
+    requisicao.value.cep = "";
+    requisicao.value.cidade = "";
+    requisicao.value.uf = "";
+    requisicao.value.filialId = null;
+    orcamento.value = null;
+    clearFornecedor();
     if (cliente.value.id) {
-        await getFornecedorToList([cliente.value.filialId])
-        
-        requisicao.value.endereco = cliente.value.endereco;
-        requisicao.value.numero = cliente.value.numero;
-        requisicao.value.cep = cliente.value.cep;
-        requisicao.value.cidade = cliente.value.cidade;
-        requisicao.value.uf = cliente.value.uf;
-        requisicao.value.filialId = cliente.value.filialId
-        if (typeof cliente.value.periodoEntrega === Object)
-          requisicao.value.periodoEntrega = JSON.parse(cliente.value.periodoEntrega);
+      await getFornecedorToList([cliente.value.filialId]);
 
-        openPeriodoForm.value = true;
+      requisicao.value.endereco = cliente.value.endereco;
+      requisicao.value.numero = cliente.value.numero;
+      requisicao.value.cep = cliente.value.cep;
+      requisicao.value.cidade = cliente.value.cidade;
+      requisicao.value.uf = cliente.value.uf;
+      requisicao.value.filialId = cliente.value.filialId;
+      if (typeof cliente.value.periodoEntrega === Object)
+        requisicao.value.periodoEntrega = JSON.parse(
+          cliente.value.periodoEntrega,
+        );
+
+      openPeriodoForm.value = true;
     }
-  }
+  },
 );
 
 watch(filter, async () => {
@@ -654,7 +840,7 @@ watch(
     ) {
       await getProdutosToList(requisicao.value.fornecedorId);
     }
-  }
+  },
 );
 
 const localEntrega = computed(() => {
@@ -665,30 +851,34 @@ const localEntrega = computed(() => {
   return localEntrega;
 });
 
-const PedidoValorFrete = computed(() =>  {
-  return valorTotalPedidoSemTaxa.value < fornecedor.value.valorCompraMinimoSemFrete ? fornecedor.value.valorFrete: 0
-})
+const PedidoValorFrete = computed(() => {
+  return valorTotalPedidoSemTaxa.value <
+    fornecedor.value.valorCompraMinimoSemFrete
+    ? fornecedor.value.valorFrete
+    : 0;
+});
 
-const TaxaGestaoMinima = computed(() =>  {
+const TaxaGestaoMinima = computed(() => {
   let _taxaGestaoMinima = 0;
-  _taxaGestaoMinima = requisicao.value.taxaGestao * (fornecedor.value.taxaGestaoMinimaPercentual /100)
-  return parseFloat(_taxaGestaoMinima.toFixed(2))
-})
+  _taxaGestaoMinima =
+    requisicao.value.taxaGestao *
+    (fornecedor.value.taxaGestaoMinimaPercentual / 100);
+  return parseFloat(_taxaGestaoMinima.toFixed(2));
+});
 
-const TaxaGestaoMenosFrete = computed(() =>  {
-  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
-  return parseFloat(_valortaxaGestaoFinal.toFixed(2))
-})
+const TaxaGestaoMenosFrete = computed(() => {
+  let _valortaxaGestaoFinal =
+    requisicao.value.taxaGestao - PedidoValorFrete.value;
+  return parseFloat(_valortaxaGestaoFinal.toFixed(2));
+});
 
-const TaxaGestaoMenosFreteColor = computed(() =>  {
-  let _valortaxaGestaoFinal = requisicao.value.taxaGestao - PedidoValorFrete.value
-  if (_valortaxaGestaoFinal < 0) 
-    return 'red'
-  else if (_valortaxaGestaoFinal < TaxaGestaoMinima.value)
-    return 'orange'
-  else 
-    return 'green'
-})
+const TaxaGestaoMenosFreteColor = computed(() => {
+  let _valortaxaGestaoFinal =
+    requisicao.value.taxaGestao - PedidoValorFrete.value;
+  if (_valortaxaGestaoFinal < 0) return "red";
+  else if (_valortaxaGestaoFinal < TaxaGestaoMinima.value) return "orange";
+  else return "green";
+});
 
 const valorTotalPedido = computed(() => {
   if (requisicao.value.requisicaoItens.length == 0) return 0;
@@ -699,16 +889,20 @@ const valorTotalPedido = computed(() => {
   let valorIcms = 0;
 
   produtos.forEach((produto) => {
-    let produtoValor = produto.quantidade * parseFloat(retornarValorTotalProduto(produto))
+    let produtoValor =
+      produto.quantidade * parseFloat(retornarValorTotalProduto(produto));
     let produtoTaxaGestao = produto.quantidade * parseFloat(produto.taxaGestao);
-    let produtoIcms = produto.quantidade * parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
-    valorTotal += produtoValor - produtoTaxaGestao
-    valorTaxaGestao += produtoTaxaGestao
+    let produtoIcms =
+      produto.quantidade *
+      parseFloat(((produto.valor * produto.icms) / 100).toFixed(2));
+    valorTotal += produtoValor - produtoTaxaGestao;
+    valorTaxaGestao += produtoTaxaGestao;
     valorIcms += produtoIcms;
   });
-  valorTotal = parseFloat(valorTotal.toFixed(2))
-             + parseFloat(PedidoValorFrete.value.toFixed(2))
-             + parseFloat(valorTaxaGestao.toFixed(2));
+  valorTotal =
+    parseFloat(valorTotal.toFixed(2)) +
+    parseFloat(PedidoValorFrete.value.toFixed(2)) +
+    parseFloat(valorTaxaGestao.toFixed(2));
   requisicao.value.valorIcms = parseFloat(valorIcms.toFixed(2));
   requisicao.value.valorTotal = parseFloat(valorTotal);
   requisicao.value.taxaGestao = parseFloat(valorTaxaGestao.toFixed(2));
@@ -722,32 +916,56 @@ const valorTotalPedidoSemTaxa = computed(() => {
 
   let produtos = requisicao.value.requisicaoItens;
   let valorTotal = 0;
-  
+
   produtos.forEach((produto) => {
-    valorTotal +=
-      produto.quantidade * parseFloat(produto.valor.toFixed(2));
+    valorTotal += produto.quantidade * parseFloat(produto.valor.toFixed(2));
   });
   valorTotal = valorTotal.toFixed(2);
-  
-  return valorTotal
+
+  return valorTotal;
 });
 
-
-
 //METHODS
-function clearFornecedor () {
- fornecedor.value = {
+
+function editarProduto(item) {
+  produtoFormTitle.value = "Editando...";
+  produto.value = { ...item };
+  openProdutoForm.value = true;
+}
+
+function clearFormData() {
+  produto.value = {
+    id: 0,
+    fornecedorId: 0,
+    codigo: null,
+    nome: null,
+    valor: 0,
+    taxaGestao: 0,
+    percentualIPI: 0,
+    tipoFornecimentoId: null,
+    unidadeMedida: "",
+  };
+}
+function closeDialog() {
+  openProdutoForm.value = false;
+  clearFormData();
+  produtoForm.value?.reset();
+
+}
+
+function clearFornecedor() {
+  fornecedor.value = {
     text: "",
     value: 0,
     valorCompraMinimoSemFrete: 0,
-    valorFrete : 0,
-    taxaGestaoMinimaPercentual: 0
-  }
+    valorFrete: 0,
+    taxaGestaoMinimaPercentual: 0,
+  };
 }
 
 function adicionarProdutoRequisicao(item) {
   let index = requisicao.value.requisicaoItens.findIndex(
-    (p) => p.id == item.id
+    (p) => p.id == item.id,
   );
   if (index == -1) {
     let produto = { ...item };
@@ -767,7 +985,6 @@ function adicionarRemoverProduto(item) {
   } else {
     removeProdutoRequisicao(item);
   }
-  
 }
 
 function calcularOrcamentoTotais() {
@@ -775,7 +992,7 @@ function calcularOrcamentoTotais() {
   for (let idx = 0; idx < requisicao.value.requisicaoItens.length; idx++) {
     let item = requisicao.value.requisicaoItens[idx];
     let index = orcamento.value.findIndex(
-      (o) => o.tipoFornecimentoId == item.tipoFornecimentoId
+      (o) => o.tipoFornecimentoId == item.tipoFornecimentoId,
     );
     if (index != -1) {
       orcamento.value[index].valorTotal +=
@@ -795,8 +1012,10 @@ function clearOrcamentoTotais() {
 
 async function getClienteListByUser(filial = []) {
   try {
-      let  response = await clienteService.getListByAuthenticatedUser(filial.length > 0? filial : null);
-      clientes.value = response.data;
+    let response = await clienteService.getListByAuthenticatedUser(
+      filial.length > 0 ? filial : null,
+    );
+    clientes.value = response.data;
   } catch (error) {
     console.log("getClienteListByUser.error:", error);
     handleErrors(error);
@@ -804,29 +1023,27 @@ async function getClienteListByUser(filial = []) {
 }
 
 async function getFiliaisByUser() {
-    try
-    {
-        isBusy.value = true;
-        let response = await filialService.getListByAuthenticatedUser()
-        filiais.value = response.data;
-        
-    } catch (error)
-    {
-        console.log("requisicao.getFiliaisByUser.error:", error.response);
-        handleErrors(error)
-    } finally
-    {
-        isBusy.value = false;
-    }
+  try {
+    isBusy.value = true;
+    let response = await filialService.getListByAuthenticatedUser();
+    filiais.value = response.data;
+  } catch (error) {
+    console.log("requisicao.getFiliaisByUser.error:", error.response);
+    handleErrors(error);
+  } finally {
+    isBusy.value = false;
+  }
 }
 
-async function getFornecedorToList(filial=[]) {
+async function getFornecedorToList(filial = []) {
   try {
-      if (filial.length == 0)
-          filial = filiais.value.map(p => {return p.value })
+    if (filial.length == 0)
+      filial = filiais.value.map((p) => {
+        return p.value;
+      });
 
-        let response = await fornecedorService.toList(filial);
-        fornecedores.value = response.data;
+    let response = await fornecedorService.toList(filial);
+    fornecedores.value = response.data;
   } catch (error) {
     console.log("getUsuarioToList.error:", error);
     handleErrors(error);
@@ -839,11 +1056,11 @@ async function getProdutosToList(fornecedorId) {
     let response = await fornecedorService.produtoListWithIcms(
       fornecedorId,
       requisicao.value.uf,
-      filter.value
+      filter.value,
     );
     produtos.value = response.data;
 
-    carregarConfiguracaoCliente()
+    carregarConfiguracaoCliente();
     for (
       let index = 0;
       index < requisicao.value.requisicaoItens.length;
@@ -867,23 +1084,29 @@ function getTipoFornecimentoNome(tipoId) {
   let tipo = tipoFornecimento.value.find((t) => t.value == tipoId);
   if (tipo) {
     return tipo.text;
-  } 
+  }
   return "";
 }
 
 function carregarConfiguracaoCliente() {
-  let configuracoes = cliente.value
-                    .clienteOrcamentoConfiguracao.filter((c) => c.ativo == true);
-    for (let idx = 0; idx < configuracoes.length; idx++) {
-      configuracoes[idx].nome = getTipoFornecimentoNome(configuracoes[idx].tipoFornecimentoId)
-      configuracoes[idx].valorTotal = 0;
-      configuracoes[idx].percentual = 0;
-    }
+  let configuracoes = cliente.value.clienteOrcamentoConfiguracao.filter(
+    (c) => c.ativo == true,
+  );
+  for (let idx = 0; idx < configuracoes.length; idx++) {
+    configuracoes[idx].nome = getTipoFornecimentoNome(
+      configuracoes[idx].tipoFornecimentoId,
+    );
+    configuracoes[idx].valorTotal = 0;
+    configuracoes[idx].percentual = 0;
+  }
 
-    let categorias = Array.from(new Set(produtos.value.map((item) => item.tipoFornecimentoId)))
+  let categorias = Array.from(
+    new Set(produtos.value.map((item) => item.tipoFornecimentoId)),
+  );
 
-    orcamento.value =  configuracoes.filter((item) => categorias.includes(item.tipoFornecimentoId))
-
+  orcamento.value = configuracoes.filter((item) =>
+    categorias.includes(item.tipoFornecimentoId),
+  );
 }
 
 async function getTipoFornecimentoToList() {
@@ -911,7 +1134,7 @@ function produtoRemoveFromList(item) {
 
 async function removeProdutoRequisicao(item) {
   let index = requisicao.value.requisicaoItens.findIndex(
-    (p) => p.id == item.id
+    (p) => p.id == item.id,
   );
   if (index != -1) {
     requisicao.value.requisicaoItens.splice(index, 1);
@@ -931,10 +1154,10 @@ async function salvar() {
     if (TaxaGestaoMenosFrete.value < 0) {
       valid = false;
       swal.fire({
-            icon: "error",
-            title: "Atenção",
-            text: "Pedido com taxa de gestão negativa, favor revisar o pedido!",
-          })
+        icon: "error",
+        title: "Atenção",
+        text: "Pedido com taxa de gestão negativa, favor revisar o pedido!",
+      });
     }
 
     if (valid && hasProduto.value) {
@@ -957,14 +1180,15 @@ async function salvar() {
       // verificar se ultrassou o limite estabelecido para o cliente
       if (
         cliente.value.naoUltrapassarLimitePorRequisicao &&
-        parseFloat(cliente.value.valorLimiteRequisicao) < parseFloat(valorTotalPedido.value)
+        parseFloat(cliente.value.valorLimiteRequisicao) <
+          parseFloat(valorTotalPedido.value)
       ) {
         data.requerAutorizacaoWCA = true;
       }
 
-      if (TaxaGestaoMenosFreteColor.value == 'orange')
-        data.requerAutorizacaoWCA = true; 
-      
+      if (TaxaGestaoMenosFreteColor.value == "orange")
+        data.requerAutorizacaoWCA = true;
+
       if (data.requerAutorizacaoWCA || data.requerAutorizacaoCliente) {
         if (!authStore.hasPermissao("aprova_requisicao")) {
           let result = await swal.fire({
@@ -1003,6 +1227,18 @@ async function salvar() {
   } finally {
     isBusy.value = false;
   }
+}
+
+function changeProductValue(item) {
+  item.valor = parseFloat(item.valor);
+  item.taxaGestao = parseFloat(item.taxaGestao);
+  item.percentualIPI = parseFloat(item.percentualIPI);
+
+  const index = requisicao.value.requisicaoItens.findIndex(p => p.id === item.id);
+  if (index !== -1) {
+      requisicao.value.requisicaoItens[index] = item;
+  }
+  closeDialog();
 }
 </script>
 
