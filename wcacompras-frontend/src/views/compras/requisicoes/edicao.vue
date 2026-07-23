@@ -1005,6 +1005,7 @@ const podeEditar = computed(
 const podeAlterarProduto = computed(
   () =>
     requisicao.value.status === 0 &&
+    requisicao.value.fornecedor.permiteAlterarValorProdutoNaRequisicao &&
     authStore.hasPermissao("requisicao-alterar-valor-produto"),
 );
 

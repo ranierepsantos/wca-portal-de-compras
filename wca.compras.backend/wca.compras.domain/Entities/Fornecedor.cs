@@ -60,6 +60,9 @@ namespace wca.compras.domain.Entities
         [Column("taxa_gestao_minima_percentual", TypeName = "decimal(4,2)")]
         public decimal TaxaGestaoMinimaPercentual { get; set; } = decimal.Zero;
 
+        [Column("permite_alterar_valorproduto")]
+        public bool PermiteAlterarValorProdutoNaRequisicao { get; set; } = false;
+
         public IList<Produto> Produtos { get; set; } = new List<Produto>();
 
         public IList<FornecedorContato> FornecedorContatos { get; set; } = new List<FornecedorContato>();

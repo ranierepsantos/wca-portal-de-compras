@@ -38,7 +38,7 @@
                                 </v-checkbox>
                             </v-col>
                             <v-col>
-                                <v-checkbox v-model="fornecedor.permiteAlterarValorProduto" color="primary" label="Permite alterar valor produto?" density="compact">
+                                <v-checkbox v-model="fornecedor.permiteAlterarValorProdutoNaRequisicao" color="primary" label="Altera valor produto na requisição?" density="compact">
                                 </v-checkbox>
                             </v-col>
                             
@@ -251,7 +251,9 @@ const fornecedor = ref({
     valorCompraMinimoSemFrete: 0,
     valorFrete: 0,
     taxaGestaoMinimaPercentual: 0,
-    fornecedorContatos: []
+    permiteAlterarValorProdutoNaRequisicao: false,
+    fornecedorContatos: [],
+    
 });
 const fornecedorContato = ref({
     id: 0,

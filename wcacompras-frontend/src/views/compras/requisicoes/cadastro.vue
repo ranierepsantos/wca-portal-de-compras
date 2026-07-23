@@ -331,9 +331,7 @@
               <th class="text-center text-grey">VL. PRODUTO</th>
               <th class="text-center text-grey">QUANT.</th>
               <th class="text-center text-grey">TOTAL</th>
-              <th class="text-center text-grey">
-                <v-icon icon="mdi-package-variant-minus"></v-icon>
-              </th>
+              <th class="text-center text-grey"></th>
             </tr>
           </thead>
           <tbody>
@@ -385,6 +383,7 @@
                   color="primary"
                   title="Editar Produto"
                   @click="editarProduto(item)"
+                  v-show="podeAlterarProduto"
                 ></v-btn>
                 <v-btn
                   icon="mdi-package-variant-minus"
@@ -924,6 +923,17 @@ const valorTotalPedidoSemTaxa = computed(() => {
 
   return valorTotal;
 });
+
+const podeAlterarProduto = computed(
+  () => {
+    const permiteAlterarValorProdutoNaRequisicao = fornecedores.value.find(q => q.value == requisicao.value.fornecedorId)?.permiteAlterarValorProdutoNaRequisicao ?? false
+
+    return permiteAlterarValorProdutoNaRequisicao &&
+           authStore.hasPermissao("requisicao-alterar-valor-produto");
+  }
+
+    
+);
 
 //METHODS
 

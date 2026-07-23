@@ -18,7 +18,8 @@ namespace wca.compras.domain.Dtos
         decimal ValorFrete,
         decimal ValorCompraMinimoSemFrete,
         decimal TaxaGestaoMinimaPercentual,
-        IList<FornecedorContatoDto> FornecedorContatos
+        IList<FornecedorContatoDto> FornecedorContatos,
+        bool PermiteAlterarValorProdutoNaRequisicao = false
     );
 
     public record CreateFornecedorDto(
@@ -39,7 +40,8 @@ namespace wca.compras.domain.Dtos
         decimal ValorFrete,
         decimal ValorCompraMinimoSemFrete,
         decimal TaxaGestaoMinimaPercentual,
-        IList<FornecedorContatoDto> FornecedorContatos
+        IList<FornecedorContatoDto> FornecedorContatos,
+        bool PermiteAlterarValorProdutoNaRequisicao = false
     );
 
     public record UpdateFornecedorDto(
@@ -62,7 +64,8 @@ namespace wca.compras.domain.Dtos
         decimal ValorFrete,
         decimal ValorCompraMinimoSemFrete,
         decimal TaxaGestaoMinimaPercentual,
-        IList<FornecedorContatoDto> FornecedorContatos
+        IList<FornecedorContatoDto> FornecedorContatos,
+        bool PermiteAlterarValorProdutoNaRequisicao = false
     );
 
     public record ProdutoDto (

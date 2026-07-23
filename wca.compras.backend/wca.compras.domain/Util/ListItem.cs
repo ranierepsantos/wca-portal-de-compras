@@ -19,6 +19,7 @@ namespace wca.compras.domain.Util
         public decimal ValorFrete { get; set; }
         public decimal ValorCompraMinimoSemFrete { get; set; }
         public decimal TaxaGestaoMinimaPercentual { get; set; }
+        public bool PermiteAlterarValorProdutoNaRequisicao { get; set; }
     }
 
 }
