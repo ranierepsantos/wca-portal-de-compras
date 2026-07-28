@@ -320,11 +320,11 @@ namespace wca.compras.services
             }
         }
 
-        public Pagination<RequisicaoDto> Paginate(int[] filials, int authUserId = 0, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId = 0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
+        public Pagination<RequisicaoDto> Paginate(RequisicaoPaginateFilters filters, int page = 1, int pageSize = 10)
         {
             try
             {
-                IQueryable<Requisicao> query = GetQuery(filials, authUserId, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
+                IQueryable<Requisicao> query = GetQuery(filters);
                 query = query.Include("Usuario")
                              .Include("Cliente")
                              .Include("Fornecedor");
@@ -645,13 +645,12 @@ namespace wca.compras.services
             }
         }
 
-        public async Task<Stream> ExportToExcel(int[] filials, int clienteId, int fornecedorId, int usuarioId, 
-                                                DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0, params int[] status)
+        public async Task<Stream> ExportToExcel(RequisicaoPaginateFilters filters)
         {
             Console.WriteLine("Exportando dados para excel...");
             try
             {
-                IQueryable<Requisicao> query = GetQuery(filials, authUserId, clienteId, usuarioId, fornecedorId, dataInicio,dataFim, status);
+                IQueryable<Requisicao> query = GetQuery(filters);
 
                 query = query.Include("Usuario")
                              .Include(c =>  c.Cliente)
@@ -771,12 +770,12 @@ namespace wca.compras.services
         }
 
 
-        public Pagination<RequisicaoDto> PaginateByContextUser(int[] filials, int logedUserId, int page = 1, int pageSize = 10, int clienteId = 0, int usuarioId =0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
+        public Pagination<RequisicaoDto> PaginateByContextUser(RequisicaoPaginateFilters filters, int page =1, int pageSize = 10)
         {
             Console.WriteLine("Retorna dados somente do usuário logado");
             try
             {
-                IQueryable<Requisicao> query = GetQuery(filials, logedUserId, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
+                IQueryable<Requisicao> query = GetQuery(filters);
                 query = query
                         .Include(q => q.Cliente)
                         .Include("Fornecedor")
@@ -1086,7 +1085,7 @@ namespace wca.compras.services
             return (dataCorteIni, dataCorteFim);
         }
 
-        private IQueryable<Requisicao> GetQuery(int[] filials, int logedUserId = 0, int clienteId = 0, int usuarioId = 0, int fornecedorId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, params int[] status)
+        private IQueryable<Requisicao> GetQuery(RequisicaoPaginateFilters filters)
         {
 
             string consulta = "select r.id, r.cep, r.cidade, r.cliente_id, r.data_criacao, r.data_entrega, r.destino, r.endereco, r.filial_id, r.fornecedor_id,"
@@ -1099,23 +1098,28 @@ namespace wca.compras.services
                         + "INNER join TipoFornecimentoUsuario tfu on tfu.TipoFornecimentoId  = ri.tipofornecimento_id and tfu.UsuarioId  = cu.UsuarioId ";
 
             string condicao = "";
-            if (logedUserId > 0)
-                condicao += $" cu.UsuarioId ={logedUserId} and ";
+            if (filters.AuthUserId > 0)
+                condicao += $" cu.UsuarioId ={filters.AuthUserId} and ";
 
-            if (filials != null && filials.Length > 0)
-                condicao += " r.filial_id in (" + string.Join(",", filials) + ") and ";
+            if (filters.Filials != null && filters.Filials.Length > 0)
+                condicao += " r.filial_id in (" + string.Join(",", filters.Filials) + ") and ";
                 
-            if (clienteId > 0)
-                condicao += $" r.cliente_id = {clienteId}  and ";
+            if (filters.CodigoRequisicao != null && filters.CodigoRequisicao > 0)
+            {
+                condicao += $" r.id = {filters.CodigoRequisicao} and ";
+            }
 
-            if (usuarioId > 0)
-                condicao += $" r.usuario_id = {usuarioId} and ";
+            if (filters.ClienteId > 0)
+                condicao += $" r.cliente_id = {filters.ClienteId}  and ";
 
-            if (fornecedorId > 0)
-                condicao += $" r.fornecedor_id = {fornecedorId} and ";
+            if (filters.UsuarioId > 0)
+                condicao += $" r.usuario_id = {filters.UsuarioId} and ";
 
-            if (status.Length > 0)
-                condicao += " r.status in (" + string.Join(",", status) + ")  and ";
+            if (filters.FornecedorId > 0)
+                condicao += $" r.fornecedor_id = {filters.FornecedorId} and ";
+
+            if (filters.Status != null && filters.Status.Length > 0)
+                condicao += " r.status in (" + string.Join(",", filters.Status) + ")  and ";
 
             if (!string.IsNullOrEmpty(condicao))
                 condicao = string.Concat("where ", condicao.AsSpan(1, condicao.Length - 5)); 
@@ -1126,10 +1130,10 @@ namespace wca.compras.services
             
             var query = _rm.GetDbSet<Requisicao>().FromSqlRaw(consulta);
             
-            if (dataInicio != null && dataFim != null)
+            if (filters.DataInicio != null && filters.DataFim != null)
             {
-                dataFim = dataFim.Value.AddDays(1);
-                query = query.Where(c => c.DataCriacao >= dataInicio && c.DataCriacao <= dataFim);
+                var dataFim = filters.DataFim.Value.AddDays(1);
+                query = query.Where(c => c.DataCriacao >= filters.DataInicio && c.DataCriacao <= dataFim);
             }
             return query;
 

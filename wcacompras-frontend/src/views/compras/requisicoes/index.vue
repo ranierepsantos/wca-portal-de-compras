@@ -63,7 +63,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="2">
         <v-select
           label="Status"
           v-model="filter.status"
@@ -92,6 +92,15 @@
           label="Data Fim"
           v-model="filter.dataFim"
           type="date"
+          variant="outlined"
+          color="primary"
+          density="compact"
+        ></v-text-field>
+      </v-col>
+       <v-col cols="2">
+        <v-text-field
+          label="Nº Pedido"
+          v-model="filter.codigoRequisicao"
           variant="outlined"
           color="primary"
           density="compact"
@@ -417,6 +426,7 @@ const filter = ref({
   status: null,
   dataInicio: null,
   dataFim: null,
+  codigoRequisicao: null,
   page: 1,
 });
 const fromMounted = ref(false);
@@ -519,6 +529,7 @@ function clearFilters() {
   filter.value.status = null;
   filter.value.dataInicio = null;
   filter.value.dataFim = null;
+  filter.value.codigoRequisicao = null;
   filter.value.page = 1;
   localStorage.removeItem("requisicao.index.filters");
   getItems();

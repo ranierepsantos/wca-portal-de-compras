@@ -193,16 +193,18 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("Paginate/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize = 10, int page = 1, [FromQuery] int[] filial = null, int authUserId = 0, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, [FromQuery] int[]? status = null)
+        public ActionResult<Pagination<RequisicaoDto>> Paginate(int pageSize, int page, [FromQuery] RequisicaoPaginateFilters filters)
         {
             try
             {
-                if (dataInicio > dataFim || (dataInicio != null && dataFim is null) || (dataFim != null && dataInicio is null))
+                if (filters.DataInicio > filters.DataFim || 
+                    (filters.DataInicio != null && filters.DataFim is null) || 
+                    (filters.DataFim != null && filters.DataInicio is null))
                 {
                     return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
                 
-                var items = service.Paginate(filial, authUserId, page, pageSize, clienteId, usuarioId, fornecedorId, dataInicio, dataFim, status);
+                var items = service.Paginate(filters, page, pageSize);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -219,16 +221,30 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("PaginateByUserContext/{pageSize}/{page}")]
         [Authorize("Bearer")]
-        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize = 10, int page = 1,[FromQuery] int[] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0, DateTime? dataInicio = null, DateTime? dataFim = null, [FromQuery] int[]? status = null)
+        public ActionResult<Pagination<RequisicaoDto>> PaginateByUserContext(int pageSize, int page,[FromQuery] RequisicaoPaginateFilters filters)
         {
             try
             {
-                if (dataInicio > dataFim || (dataInicio != null && dataFim is null) || (dataFim != null && dataInicio is null))
+                if (filters.DataInicio > filters.DataFim ||
+                    (filters.DataInicio != null && filters.DataFim is null) ||
+                    (filters.DataFim != null && filters.DataInicio is null))
                 {
                     return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
                 int logedUserId = int.Parse(User.FindFirst("CodigoUsuario").Value);
-                var items = service.Paginate(filial, logedUserId, page, pageSize, clienteId, usuarioId, fornecedorId,  dataInicio, dataFim, status);
+
+                var _filters = new RequisicaoPaginateFilters(
+                    Filials: filters.Filials,
+                    AuthUserId: logedUserId,
+                    ClienteId: filters.ClienteId,
+                    UsuarioId: filters.UsuarioId,
+                    FornecedorId: filters.FornecedorId,
+                    CodigoRequisicao: filters.CodigoRequisicao,
+                    DataInicio: filters.DataInicio,
+                    DataFim: filters.DataFim,
+                    Status: filters.Status
+                 );
+                var items = service.Paginate(_filters, page, pageSize);
                 return Ok(items);
             }
             catch (Exception ex)
@@ -242,17 +258,18 @@ namespace wca.compras.webapi.Controllers
         [HttpGet]
         [Route("GerarRelatorio")]
         [Authorize("Bearer")]
-        public async Task<ActionResult> ExportExcel([FromQuery] int [] filial = null, int clienteId = 0, int fornecedorId = 0, int usuarioId = 0,
-                                                    DateTime? dataInicio = null, DateTime? dataFim = null, int authUserId = 0, [FromQuery] params int[] status)
+        public async Task<ActionResult> ExportExcel([FromQuery] RequisicaoPaginateFilters filters)
         {
             try
             {
-                if (dataInicio > dataFim || (dataInicio != null && dataFim is null) || (dataFim != null && dataInicio is null))
+                if (filters.DataInicio > filters.DataFim ||
+                    (filters.DataInicio != null && filters.DataFim is null) ||
+                    (filters.DataFim != null && filters.DataInicio is null))
                 {
-                    return BadRequest(error: new { message = "Data início ou fim inválida!"});
+                    return BadRequest(error: new { message = "Data início ou fim inválida!" });
                 }
 
-                Stream st = await service.ExportToExcel(filial, clienteId, fornecedorId, usuarioId, dataInicio, dataFim, authUserId, status);
+                Stream st = await service.ExportToExcel(filters);
                 if (st == null)
                     return NoContent();
 
